@@ -1,67 +1,66 @@
-# ios-27 development handoff | phase 10 complete -> phase 11
+# ios-27 development handoff | phase 11 complete -> phase 12
 
-**Snapshot:** 2026-10-26  
-**Repository:** https://github.com/kallmek3nny/ios-27  
-**Last confirmed main:** `8263d7abaa71c7bbf3730fc79ed6ffeff24830d7`  
-**Phase 10 merges:** [#15](https://github.com/kallmek3nny/ios-27/pull/15) -> `f690f8129b60a1f0a4de699888f04f988f064f86`; [#16](https://github.com/kallmek3nny/ios-27/pull/16) -> `8263d7abaa71c7bbf3730fc79ed6ffeff24830d7`. Their exact frozen PR heads `3f1195a9a12c8cd36bb3f55cbe7129dd3893fbf3` and `d72c0256b753ad5d0b719f1179ab83d2f11b6de3` both passed Ubuntu 24.04 x86_64 AND ARM64 GitHub CI with strict warnings and tests, then were squash-merged with expected-head SHA. Reverify current main/PRs before more work.
+**updated:** october 26, 2026  
+**repo:** https://github.com/kallmek3nny/ios-27  
+**phase 11 merge:** [pr #18](https://github.com/kallmek3nny/ios-27/pull/18), main commit `62d5db1a381d447a4ceb280f40afaf64f94542fa`. frozen pr head `30528b9528bcba6b07b79d251ad11269cdcc1f58` passed both ubuntu 24.04 x86_64 and arm64 github actions jobs, including 12 ctest suites. safely merged using github's expected-head sha. check current main/open prs again before doing anything.
 
-## Goal
+## actual goal and critical honesty
 
-Run the **actual official Apple iOS 27 user interface**, genuine SpringBoard, Control Center, lockscreen, UIKit/SwiftUI/CoreAnimation and Liquid Glass, and iOS apps on a locked-bootloader Galaxy S25+ above the unchanged Android Linux kernel. No themed launcher or general CPU emulation. This is an **unproven research objective**, not a functioning Apple UI port. Generic ARM64 instruction execution doesn't supply arm64e/PAC semantics, dyld shared caches, proprietary frameworks, Apple's entitlements, XNU/Mach, Objective-C/Swift services, Apple GPU compositor or hardware integration.
+research native arm64 execution of the **official apple ios 27 springboard, uikit/swiftui/coreanimation liquid glass, control center, lock screen and real ios applications** above android on a locked samsung galaxy s25+, without a lookalike launcher or cpu emulation.
 
-## Hard recovery and root safety
+**none of those apple interfaces or apps run yet.** all proven executable examples are synthetic arm64 fixture programs or host-native tests. apple arm64e/pac, xnu mach services and pthread interfaces, code-signing/entitlements, dyld shared cache and apple binary licensing, objective-c/swift runtime, coreanimation/metal rendering and hardware service dependencies remain unresolved. native generic arm64 cpu compatibility is necessary but very far from sufficient. feasibility on a locked samsung remains unproven. `~1%` overall is purely a speculative order-of-magnitude estimate, not a measurable completion percentage.
 
-- NEVER flash or modify Samsung bootloader, boot, init_boot, vendor_boot, vbmeta, dtbo, recovery, firmware, partition layout, antirollback, verified boot or secure boot.
-- NEVER interfere with Odin/download mode or bypass D2 restrictions. Never weaken recovery or deploy exploits.
-- Never require root, DirtyFrag/KernelSU, custom modules, persistent SELinux changes, boot hooks or privileged writes. DirtyFrag soft root is optional and NOT used; a reboot does not reverse persistent changes previously written while rooted.
-- Run only reviewable, unprivileged userspace tests on trusted synthetic/local fixtures. Native execution primitives are **not sandboxed** and must not run untrusted Mach-O binaries.
-- Do not bundle or redistribute proprietary Apple binaries, firmware or unauthorized decrypted apps.
-- If revisiting device assumptions, recheck https://github.com/mitschud/DirtyFrag and its releases before any device-specific recommendation.
+## absolute samsung safety boundary
 
-## Proven merged phases
+- never touch, write or flash bootloader, boot, init_boot, vendor_boot, vbmeta, dtbo, recovery, partition layout, firmware, secure boot, verified boot or antirollback.
+- never bypass samsung odin/download-mode d2 restrictions, weaken recovery, install exploits or persistent privileged hooks.
+- root / dirtyfrag / kernelsu are **optional and never required**. do not change persistent root state, selinux policy, kernel modules, vendor driver or any phone system partition. reboot does not undo earlier persistent writes.
+- run only unprivileged userspace tests with reviewed, legally redistributable **synthetic fixtures**. the native mach-o loader is not a sandbox. never run untrusted mach-o through it.
+- never bundle/decrypt/distribute proprietary apple frameworks, ios firmware, unauthorized decrypted binaries or copyrighted system-ui assets.
+- if device-specific assumptions must be revisited, inspect https://github.com/mitschud/DirtyFrag and current upstream warnings first. no on-device tests have been completed.
 
-| Phase | PR | What was actually verified |
+## merged milestones
+
+| phase | merged pr | proven scope |
 | --- | --- | --- |
-| 1 | #1 | thin ARM64 Mach-O parser, freestanding native fixture runner |
-| 2 | #2 | bounded synthetic Darwin SVC probe |
-| 3 | #3 | FAT/FAT64 ARM64 inventory and dylib/framework import metadata |
-| 4 | #4 | guest-virtual dyld path token resolution |
-| 5 | #5 | bounded export trie parsing |
-| 6 | #6 | classic bind planning, native ARM64 synthetic cross-image call |
-| 7 | #8 | bounded dyld chained pointer format 6, 4KiB/16KiB page fixups and copy-only atomics |
-| 8 | #10 | explicit synthetic multi-image graph with W^X maps, classic/chained inter-image relocation, native ARM64 cross-image calls |
-| 9 | #12, #13 | bounded synthetic Mach-style message queues/owner rights, COPY_SEND/MOVE_SEND, quota and in-flight capacity |
-| 10 | [#15](https://github.com/kallmek3nny/ios-27/pull/15), [#16](https://github.com/kallmek3nny/ios-27/pull/16) | separate per-task port name spaces with collisions/stale-handle checks; atomic send-once request/reply and translated copy/move descriptors; checked offset-based guest byte-arena send/receive facade; 11 total CTest suites pass on x86_64 and ARM64 |
+| 1 | #1 | bounded thin arm64 mach-o and freestanding native fixture runner |
+| 2 | #2 | deny-by-default synthetic darwin svc probe |
+| 3 | #3 | fat/fat64 inventory and import metadata |
+| 4 | #4 | guest-virtual dyld path-token parsing |
+| 5 | #5 | bounded mach-o export trie |
+| 6 | #6 | classic bind planning; native synthetic arm64 cross-image call |
+| 7 | #8 | subset of dyld chained fixups with 4k/16k page declarations |
+| 8 | #10 | bounded native multi-image dependency graph, private w^x mapping, synthetic calls |
+| 9 | #12, #13 | synthetic mach-like fifo and transferable send rights, quotas and in-flight reservation |
+| 10 | #15, #16 | task-local port names, one-use reply rights, checked offset-based guest arena ipc |
+| 11 | [#18](https://github.com/kallmek3nny/ios-27/pull/18) | atomic synthetic task teardown and narrow fixture-only register selector api; malformed input and lifecycle tests |
 
-## Phase 10 code and true limits
+## phase 11 implementation and limits
 
-- `include/ios27/mach_v2.h`, `src/mach_v2.c`, `tests/test_mach_v2.c`: a **new versioned** synthetic API alongside the unchanged phase 9 global-name compatibility API. Up to 8 simulated task ids, 32 port objects and 64 names per task, bounded 4-message FIFOs, 256-byte messages. Each task's local names advance monotonically and resolve only within that task. Two tasks can have numeric port name 100 referring to entirely different objects.
-- Supports remote `MOVE_SEND_ONCE` (18), outgoing local `MAKE_SEND_ONCE` (21), one-port COPY_SEND/MOVE_SEND descriptors, task-local alias translation, reserved in-flight rights, checked send ownership and deterministic poll-only queue errors. A successful one-use reply consumes its capability; invalid/full-queue sends leave rights unchanged. Receive-short-buffer errors don't dequeue.
-- `include/ios27/mach_guest.h`, `src/mach_guest.c`, `tests/test_mach_guest.c`: narrow fixture-only arena adapter with bounds-checked uint64 offsets/lengths, isolated 256-byte staging and rejection of guest-arena/metadata aliasing. Tested end-to-end synthetic request/reply and malformed offsets.
-- Full test suite at latest Phase 10 head: 11 suites, including all earlier loader/native-call tests. CI tested ordinary x86_64 and ARM64 Linux only; **not** the Samsung or any Apple framework.
-- This is not XNU, actual Mach kernel traps, a sandbox, a process-isolated IPC namespace, real os task authentication, service bootstrap, trailers, notifications, OOL transfers, pthread workqueues, send-once descriptors, authentic blocking/timeouts or signed iOS app launch.
-- Nothing yet runs Apple's actual SpringBoard, Liquid Glass or iOS applications.
+- `include/ios27/mach_v2.h`, `src/mach_v2.c`: `ios27_mach_v2_task_teardown` preflights incoming queued grants for all names of a simulated task and all ports owned by that task. if outstanding in-flight rights exist, it fails **without mutation**. otherwise, it retires the task's receive queues, cancels credits queued on them, revokes all aliases held by other tasks for destroyed ports, and leaves the task-local name counter monotonic. this intentionally fails closed rather than implementing mach dead-name notifications.
+- `include/ios27/darwin_mach_abi.h`, `src/darwin_mach_abi.c`: accepts an **explicit, synthetic, private selector** and eight arm64-style 64-bit registers for port allocation, rights grant/drop/inspection, destroy/teardown, and send/receive through phase 10's bounded guest-memory adapter. **these are not real darwin trap numbers** and are never forwarded to linux, android or the host kernel. overlapping register/arena buffers, unknown selectors and too-wide arguments are denied. outputs remain unchanged on errors other than an intentionally reported too-small receive size.
+- `tests/test_darwin_mach_abi.c`, `docs/phase11-darwin-boundary.md`: exercise revoked aliases, pending descriptors, queued reply rights, one-time replies, task teardown, malformed offsets/selectors and a synthetic request/reply loop.
+- exact frozen head `30528b9528bcba6b07b79d251ad11269cdcc1f58` passed 12 suites on both ubuntu x86_64 and native arm64 ci. phase 10/earlier suites remained green.
+- the native tests do **not** establish actual xnu kernel, legal apple framework loading, ios api compatibility, or successful runtime behavior on samsung.
 
-## Phase 11: concrete next coding
+## phase 12: concrete new engineering work
 
-1. **Security and lifecycle hardening:** test task teardown, port death, queued rights cancellation, orphaned send-once reply rights, naming overflow, count saturation, cross-task descriptor exploits. Extend deterministic property/corpus tests without weakening -Werror.
-2. **Darwin-facing ABI boundary:** define an explicit, very narrow Mach trap vocabulary (with reference to public XNU headers where legal) that marshals registers and guest-memory offsets into the phase 10 fixture implementation. Reject every unsupported syscall; no arbitrary passthrough to Android/Linux or read/write host memory.
-3. **Native legally redistributable Darwin sample:** where toolchains permit, build a small arm64 Mach-O from source with an actual Darwin target (rather than hand-writing synthetic instruction bytes) and integrate it into the safe isolated loader. Never claim framework compatibility from that fixture.
-4. Keep native multi-image W^X mapping and image lifecycles robust; test real 16KiB-host constraints separately. Don't silently bypass PAC/arm64e requirements.
-5. Perform documented technical feasibility research on Apple ObjC/Swift runtime, private framework/decrypted binary availability, dyld shared cache and Metal/CoreAnimation compatibility before promising genuine iOS UI.
+1. **compiler-produced arm64-apple-darwin fixture:** compile a tiny freestanding c or assembly source with a real darwin target toolchain (possibly clang + ld64.lld if present). add deterministic inspection and tests for the actual emitted mach-o *without* proprietary sdk/frameworks or apple assets. explicit tooling checks and hard timeouts. do not equate a hand-built synthetic byte buffer with a real darwin binary.
+2. **harden the real fixture loader path:** support the smallest legal mach-o segment/load-command patterns actually emitted by the open-source toolchain. reject unsupported chaining, arm64e/pac, dyld closures, entitlements and code-signing conditions, rather than skipping them. keep executable mapping private and w^x.
+3. **task rights lifecycle fuzz/corpus:** bounded deterministic property tests for create/drop/transfer/teardown and saturation, ensuring no stale capability grants and failure-state atomicity.
+4. **darwin interface reality check:** use public apple open-source xnu and dyld documentation for narrowly scoped abi comparisons, including true trap arguments, mach descriptors, bootstrap ports and libsystem assumptions. keep private fixture selectors separate from real mach syscall ids.
+5. **official apple ui feasibility gate:** document the actual available arm64e framework/system-service dependencies and apple graphics-stack limitations *before* claiming genuine springboard or liquid glass can run.
 
-## Process
+## engineering workflow
 
-- Work exclusively in `kallmek3nny/ios-27`, inspect current main/open PRs and don't duplicate concurrent branches.
-- Every shell/build/configure/test/clone command has an **explicit hard timeout**. No indefinite polling loops.
-- Preserve `-Wall -Wextra -Werror -Wpedantic` for all code/tests. Add meaningful tests/docs to every PR.
-- Verify BOTH x86_64 and ARM64 CI on the exact frozen PR head; recheck if main moves and merge using expected-head SHA only.
-- Linux ARM64 runner success is not on-phone validation.
+- only modify `kallmek3nny/ios-27`; inspect main SHA and any open prs first, coordinate concurrent work.
+- every shell/clone/configure/build/test/install invocation uses an **explicit hard timeout**, no indefinite polling loops.
+- keep `-Wall -Wextra -Werror -Wpedantic`; never loosen tests to pass.
+- push meaningful implementation/tests/docs; create a focused pr; verify **both x86_64 and arm64 ci** on its exact frozen head. recheck main has not moved before merging with expected-head sha.
+- linux arm64 ci is not proof of galaxy s25+ compatibility.
 
-Trusted Linux verification:
+trusted linux:
 
-    timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+    timeout 120s cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
     timeout 120s cmake --build build --parallel 2
     timeout 120s ctest --test-dir build --timeout 30 --output-on-failure
-
-**Progress:** working genuine iOS UI on Android = 0%; overall goal about ~1% as a speculative order-of-magnitude estimate, not a measurable accomplishment rate.
