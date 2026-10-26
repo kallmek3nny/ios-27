@@ -47,11 +47,11 @@ not an iOS kernel, dyld replacement, official UI runtime or phone installer.
 
 ## Trusted developer verification
 
-\`\`\`sh
+```sh
 timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
 timeout 120s cmake --build build --parallel 2
 timeout 120s ctest --test-dir build --timeout 30 --output-on-failure
-\`\`\`
+```
 
 ## Next work
 
