@@ -12,6 +12,29 @@ This is a **userspace-only** experiment. On modern Samsung firmware, DirtyFrag d
 
 Phase 2 adds a tiny Darwin ARM64 syscall probe. It recognizes a handful of instructions and can interpret carefully constructed Mach-O fixtures that invoke getpid/getuid or virtual exit. It denies filesystem and Mach operations, has a strict instruction limit, and cannot run real iOS frameworks. This is a test harness, not an iOS 27 port.
 
+## Phase 6: classic dyld pointer bindings
+
+The `binds` command inventories regular classic dyld **pointer** binds in
+a thin or universal ARM64 Mach-O image without modifying it:
+
+```sh
+./build/ios27 binds /path/to/arm64-macho
+```
+
+A separate library API parses classic regular dyld bind opcodes, validates
+segment protection and file offsets, and resolves exports from an explicitly
+provided resolver. It only applies pointer fixes to a **caller-owned in-memory
+copy**, staging all writes to avoid partial updates.
+
+On ARM64 Linux CI, a **synthetic** Mach-O consumer branches through a
+resolved pointer to a **separate native ARM64 synthetic library function**,
+returning 42 without CPU emulation. This does not execute an actual iOS app.
+
+Not supported: dyld chained fixups, rebase streams, weak and lazy binding,
+dyld shared caches, ARM64e pointer authentication, Mach/XNU dependencies,
+UIKit, CoreAnimation, Liquid Glass or SpringBoard. The project neither reads
+nor flashes Android boot partitions.
+
 ## Phase 5: dyld export trie / symbol discovery
 
 New `symbols` support decodes the on-disk dyld export trie for thin or
