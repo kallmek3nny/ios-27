@@ -24,7 +24,7 @@ kernel, dyld or Apple graphics compatibility.
 | --- | --- | --- |
 | Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory, read-only |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
-| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | limited deny-by-default synthetic syscall probe |
+| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default syscall probe plus **synthetic in-process Mach-style bounded FIFO/rights transfers**; no true XNU or per-task namespaces |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
 | UIKit / SwiftUI | render genuine controls, view tree and Liquid Glass using Apple's own framework components | **not implemented** |
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
@@ -34,7 +34,7 @@ kernel, dyld or Apple graphics compatibility.
 
 ## Concrete next technical milestone
 
-**Phase 8 is merged:** [PR #10](https://github.com/kallmek3nny/ios-27/pull/10) implements an explicit synthetic Mach-O dependency graph, W^X private userspace mapping, and atomic cross-image classic/chained relocation. On ARM64 Linux, native tests call a fixture provider from a fixture consumer. No Apple frameworks or ordinary iOS apps run. **Phase 9:** develop a bounded Mach port/message compatibility ABI, then test against lawful real Darwin samples without overstating kernel support.
+**Phase 9 is merged:** [PR #12](https://github.com/kallmek3nny/ios-27/pull/12) and [PR #13](https://github.com/kallmek3nny/ios-27/pull/13) add a bounded, isolated in-process Mach-style message/port-rights model with transactional transfers and quotas. **Phase 8** already mapped multiple synthetic ARM64 Mach-O fixtures natively with W^X. Neither phase runs Apple's actual SpringBoard or frameworks. **Phase 10:** per-task port-name tables, send-once/reply rights, and a bounded Darwin-facing ABI facade with independently verified semantics.
 
 ### Longer-term audit task
 
