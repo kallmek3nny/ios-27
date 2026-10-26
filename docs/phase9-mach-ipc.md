@@ -24,6 +24,9 @@ darwin syscalls, and does not run apple frameworks or springboard.
   copy-send keeps the sender right, move-send atomically consumes it only
   after the queue can accept the whole validated message. rights remain
   in-flight until successful receiver dequeue.
+- send-right grants account for pending in-flight transfers, reserving
+  recipient capacity so a queued right cannot overflow on delivery.
+  full-queue MOVE_SEND failure preserves the sender's right atomically.
 - undersized receive buffers return required length without dequeueing
   or modifying rights. destroying a queue drops its in-flight transfers,
   and destroying an in-transit port is blocked until rights are delivered
