@@ -1,5 +1,6 @@
 #include "ios27/macho.h"
 #include "ios27/darwin_probe.h"
+#include "ios27/inventory.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -46,9 +47,11 @@ int main(int argc, char **argv) {
     int result;
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
                      strcmp(argv[1], "run-freestanding") != 0 &&
-                     strcmp(argv[1], "probe-darwin") != 0)) {
+                     strcmp(argv[1], "probe-darwin") != 0 &&
+                     strcmp(argv[1], "audit-ios") != 0)) {
         fprintf(stderr, "usage: ios27 inspect <macho>\n"
                         "       ios27 probe-darwin <synthetic-macho>\n"
+                        "       ios27 audit-ios <arm64-ios-macho>\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n");
         return 2;
     }
@@ -66,6 +69,32 @@ int main(int argc, char **argv) {
         fprintf(stderr, "could not read file or file exceeds %u bytes: %s\n",
                 MAX_INPUT_BYTES, argv[2]);
         return 1;
+    }
+    if (strcmp(argv[1], "audit-ios") == 0) {
+        ios27_inventory inventory;
+        if (ios27_inventory_parse(data, size, &inventory,
+                                  error, sizeof(error)) != 0) {
+            fprintf(stderr, "iOS inventory rejected image: %s\n", error);
+            free(data);
+            return 1;
+        }
+        printf("native ARM64 import inventory: %s\n",
+               inventory.is_fat ? "universal Mach-O" : "thin Mach-O");
+        printf("slice_offset=%zu size=%zu arm64e=%u platform=%u\n",
+               inventory.slice_offset, inventory.slice_size,
+               inventory.is_arm64e, inventory.platform);
+        printf("dependencies=%zu public_frameworks=%zu private_frameworks=%zu\n",
+               inventory.imports_count, inventory.frameworks_count,
+               inventory.private_frameworks_count);
+        for (size_t i = 0; i < inventory.imports_count; ++i)
+            printf("  %s\n", inventory.imports[i].path);
+        printf("dyld=%u fixups=%u encrypted=%u\n",
+               inventory.needs_dyld, inventory.has_fixups, inventory.encrypted);
+        puts("official SpringBoard / Liquid Glass runnable: NO");
+        puts("missing: Apple framework runtime, Mach/XNU services, dyld,");
+        puts("         native Metal/CoreAnimation graphics bridge, UI services");
+        free(data);
+        return 0;
     }
     if (ios27_macho_parse(data, size, &image, error, sizeof(error)) != 0) {
         fprintf(stderr, "mach-o rejected: %s\n", error);
