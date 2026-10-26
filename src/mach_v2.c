@@ -241,6 +241,60 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     }
     return IOS27_MACH_OK;
 }
+/*
+ * Transactional synthetic task cleanup. A queued cross-task grant must
+ * never lose its reserved destination credit. Refuse teardown of any task
+ * with outstanding inbound rights or any live grant targeting one of its
+ * receive ports. This conservative policy intentionally avoids XNU's
+ * dead-name/notification semantics rather than silently simulating them.
+ */
+int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
+    uint8_t owned[IOS27_MACH_PORT_MAX] = {0};
+    if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
+
+    for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
+        const local_right *r = &s->names[TASK_INDEX(task)][i];
+        if (r->object && (r->pending_sends || r->pending_once))
+            return IOS27_MACH_BAD_RIGHT;
+    }
+    for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+        const port_object *obj = &s->ports[i];
+        if (obj->alive && obj->owner == task) {
+            uint8_t index = (uint8_t)(i + 1u);
+            owned[i] = 1u;
+            for (uint32_t other = 1u; other <= IOS27_MACH_TASK_MAX; ++other) {
+                const local_right *r = by_object(s, other, index);
+                if (r && (r->pending_sends || r->pending_once))
+                    return IOS27_MACH_BAD_RIGHT;
+            }
+        }
+    }
+    /* From here on there is no possible failure: cancel queued grants
+     * to foreign ports, then revoke all rights to destroyed objects. */
+    for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+        port_object *obj = &s->ports[i];
+        if (!owned[i]) continue;
+        for (size_t j = 0u; j < obj->count; ++j) {
+            const queued_wire *m =
+                &obj->queue[(obj->head + j) % IOS27_MACH_QUEUE_MAX];
+            if (m->descriptor_object)
+                cancel_pending(s, task, m->descriptor_object, 0);
+            if (m->reply_object)
+                cancel_pending(s, task, m->reply_object, 1);
+        }
+        memset(obj, 0, sizeof(*obj));
+    }
+    for (uint32_t owner = 1u; owner <= IOS27_MACH_TASK_MAX; ++owner) {
+        for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
+            local_right *r = &s->names[TASK_INDEX(owner)][i];
+            if ((owner == task) ||
+                (r->object && owned[r->object - 1u]))
+                memset(r, 0, sizeof(*r));
+        }
+    }
+    return IOS27_MACH_OK;
+}
+
 int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
                        const void *wire, size_t size, uint32_t timeout_ms) {
     const uint8_t *p = wire;

@@ -34,6 +34,12 @@ int ios27_mach_v2_rights(const ios27_mach_v2 *space, uint32_t task,
 int ios27_mach_v2_destroy(ios27_mach_v2 *space, uint32_t owner,
                           uint32_t local_receive_name);
 
+/* Atomically retire a synthetic task's namespace and all its receive ports.
+ * Fail closed (without changes) if any task-owned port or local alias has
+ * an in-flight transfer. Names stay consumed to prevent stale-handle reuse.
+ * This is not OS task termination or an authentication boundary. */
+int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
+
 /*
  * Header bits: remote disposition COPY_SEND(19) or MOVE_SEND_ONCE(18).
  * Optional local disposition MAKE_SEND_ONCE(21) in bits 8..15 with
