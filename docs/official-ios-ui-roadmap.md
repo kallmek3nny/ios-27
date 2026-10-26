@@ -22,7 +22,7 @@ kernel, dyld or Apple graphics compatibility.
 
 | Area | Runtime contract | Actual implementation state |
 | --- | --- | --- |
-| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory; actual SDK-free clang-produced arm64 Darwin MH_OBJECT section/symbol validation and trusted native ARM64 no-relocation fixture execution; no linked iOS process |
+| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; genuine SDK-free Clang ARM64 Darwin MH_OBJECT validation, real external BRANCH26 relocation and trusted native ARM64 cross-object call returning 43; **no linked Darwin executable** |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
 | Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default probe plus **synthetic task-local Mach message queues, checked guest arena, transactional task teardown and register-selector facade**; no real XNU traps/services |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
@@ -34,7 +34,7 @@ kernel, dyld or Apple graphics compatibility.
 
 ## Concrete next technical milestone
 
-**Phase 12 is verified:** [PR #20](https://github.com/kallmek3nny/ios-27/pull/20) compiles a redistributable SDK-free C fixture into a genuine ARM64 Darwin **MH_OBJECT** on x86_64/ARM64 CI, validates its actual compiler-produced section/symbol data and calls its trusted relocation-free code on native Linux ARM64 under W^X. This is NOT a linked Mach-O executable or proof of any Apple app/framework running. **Phase 13:** validate a real open-source Darwin linker against an actual freestanding MH_EXECUTE, or fall back to compiler-produced relocation tests when linking is unsupported; perform arm64e, XNU/dyld and Apple graphics feasibility checks.
+**Phase 13 is verified:** [PR #22](https://github.com/kallmek3nny/ios-27/pull/22) validates a genuine Clang-emitted ARM64 Darwin BRANCH26 relocation between two independently compiled C objects and natively executes the patched function returning 43 with W^X on ARM64 Linux. This is **not a linked Mach-O process, iOS application, Apple framework or official UI**. The available ld64.lld rejects macOS platform linking. **Phase 14:** establish a reproducible open-source ARM64 Darwin linker or rigorously extend bounded object relocation handling; investigate XNU, arm64e, signing, dyld caches and graphics blockers.
 
 ### Longer-term audit task
 
