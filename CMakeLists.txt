@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -60,4 +60,9 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_mach_ipc PRIVATE ios27_core)
     target_compile_options(test_mach_ipc PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME synthetic-mach-ipc COMMAND test_mach_ipc)
+
+    add_executable(test_mach_v2 tests/test_mach_v2.c)
+    target_link_libraries(test_mach_v2 PRIVATE ios27_core)
+    target_compile_options(test_mach_v2 PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME task-local-mach-names COMMAND test_mach_v2)
 endif()
