@@ -253,11 +253,81 @@ static void quotas_and_stale_names(void) {
     ios27_mach_space_free(space);
 }
 
+
+static void reserved_delivery_capacity(void) {
+    ios27_mach_space *space = ios27_mach_space_new();
+    uint32_t inbox = 0u, item = 0u;
+    uint8_t msg[IOS27_MACH_MSG_MAX], received[IOS27_MACH_MSG_MAX];
+    size_t len, capacity;
+    assert(space);
+    assert(ios27_mach_port_allocate(space, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_port_allocate(space, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_port_make_send(space, 1u, inbox, 2u) == IOS27_MACH_OK);
+    assert(ios27_mach_port_make_send(space, 3u, item, 2u) == IOS27_MACH_OK);
+    len = make_complex(msg, inbox, item, IOS27_MACH_COPY_SEND);
+    assert(ios27_mach_send(space, 2u, msg, len, 0u) == IOS27_MACH_OK);
+    /* An in-flight copy must reserve one future send right for task 1. */
+    for (uint32_t i = 0u; i < IOS27_MACH_RIGHT_MAX - 1u; ++i)
+        assert(ios27_mach_port_make_send(space, 3u, item, 1u) ==
+               IOS27_MACH_OK);
+    assert(refs(space, 1u, item) == IOS27_MACH_RIGHT_MAX - 1u);
+    assert(ios27_mach_port_make_send(space, 3u, item, 1u) ==
+           IOS27_MACH_LIMIT);
+    capacity = sizeof(received);
+    assert(ios27_mach_receive(space, 1u, inbox, received, &capacity, 0u) ==
+           IOS27_MACH_OK);
+    assert(refs(space, 1u, item) == IOS27_MACH_RIGHT_MAX);
+    assert(ios27_mach_port_make_send(space, 3u, item, 1u) ==
+           IOS27_MACH_LIMIT);
+    assert(ios27_mach_port_destroy(space, 1u, inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_port_destroy(space, 3u, item) == IOS27_MACH_OK);
+    ios27_mach_space_free(space);
+}
+static void full_queue_preserves_move_right(void) {
+    ios27_mach_space *space = ios27_mach_space_new();
+    uint32_t inbox = 0u, item = 0u;
+    uint8_t msg[IOS27_MACH_MSG_MAX], received[IOS27_MACH_MSG_MAX];
+    size_t len, capacity;
+    assert(space);
+    assert(ios27_mach_port_allocate(space, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_port_allocate(space, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_port_make_send(space, 1u, inbox, 2u) == IOS27_MACH_OK);
+    assert(ios27_mach_port_make_send(space, 3u, item, 2u) == IOS27_MACH_OK);
+    len = make_simple(msg, inbox, 1, 0u);
+    for (uint32_t i = 0u; i < IOS27_MACH_QUEUE_MAX; ++i)
+        assert(ios27_mach_send(space, 2u, msg, len, 0u) == IOS27_MACH_OK);
+    len = make_complex(msg, inbox, item, IOS27_MACH_MOVE_SEND);
+    assert(ios27_mach_send(space, 2u, msg, len, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    assert(refs(space, 2u, item) == 1u);
+    capacity = sizeof(received);
+    assert(ios27_mach_receive(space, 1u, inbox, received, &capacity, 0u) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_send(space, 2u, msg, len, 0u) == IOS27_MACH_OK);
+    assert(refs(space, 2u, item) == 0u);
+    for (uint32_t i = 0u; i < IOS27_MACH_QUEUE_MAX - 1u; ++i) {
+        capacity = sizeof(received);
+        assert(ios27_mach_receive(space, 1u, inbox, received, &capacity, 0u) ==
+               IOS27_MACH_OK);
+        assert(rd32(received + 20u) == 1u);
+    }
+    capacity = sizeof(received);
+    assert(ios27_mach_receive(space, 1u, inbox, received, &capacity, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(received + 20u) == 2027u);
+    assert(refs(space, 1u, item) == 1u);
+    assert(ios27_mach_port_destroy(space, 1u, inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_port_destroy(space, 3u, item) == IOS27_MACH_OK);
+    ios27_mach_space_free(space);
+}
+
 int main(void) {
     basics();
     queue_and_validation();
     transfer_test();
     quotas_and_stale_names();
+    reserved_delivery_capacity();
+    full_queue_preserves_move_right();
     puts("synthetic Mach port rights and bounded message tests passed");
     return 0;
 }

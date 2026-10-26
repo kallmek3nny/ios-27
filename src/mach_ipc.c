@@ -103,7 +103,10 @@ int ios27_mach_port_make_send(ios27_mach_space *space, uint32_t owner,
     port = lookup(space, name);
     if (!port || port->receive_owner != owner)
         return IOS27_MACH_BAD_RIGHT;
-    if (port->send_refs[recipient - 1u] == IOS27_MACH_RIGHT_MAX)
+    /* In-flight messages reserve future receiver send-right capacity.
+     * Count all reservations conservatively: no delivery can overfill. */
+    if ((uint32_t)port->send_refs[recipient - 1u] +
+        port->in_flight >= IOS27_MACH_RIGHT_MAX)
         return IOS27_MACH_LIMIT;
     ++port->send_refs[recipient - 1u];
     return IOS27_MACH_OK;
