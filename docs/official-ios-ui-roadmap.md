@@ -23,7 +23,7 @@ kernel, dyld or Apple graphics compatibility.
 | Area | Runtime contract | Actual implementation state |
 | --- | --- | --- |
 | Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory, read-only |
-| dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **not implemented** |
+| dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic binds, export trie, guest paths and one modern chained pointer format; no image graph/real dyld |
 | Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | limited deny-by-default synthetic syscall probe |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
 | UIKit / SwiftUI | render genuine controls, view tree and Liquid Glass using Apple's own framework components | **not implemented** |
@@ -33,6 +33,10 @@ kernel, dyld or Apple graphics compatibility.
 | Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | userspace inspection only; no full guest isolation |
 
 ## Concrete next technical milestone
+
+**Phase 7 is merged:** [PR #8](https://github.com/kallmek3nny/ios-27/pull/8) implements bounded fixture-only modern dyld chained fixups with atomic file-copy rebases/binds, 4 KiB/16 KiB page tests, and a synthetic native ARM64 cross-image call. No real Apple framework has been loaded. **Phase 8** is an isolated, W^X synthetic multi-image mapper with dependency graph/lifecycle tests, followed by separately validated Darwin Mach message boundaries.
+
+### Longer-term audit task
 
 Use `ios27 audit-ios <file>` on a **legitimately obtained**, unencrypted
 ARM64 Mach-O to list the direct dylib imports and identify actual constraints.
