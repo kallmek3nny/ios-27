@@ -1,4 +1,4 @@
-# ios-27
+# ios-27\n\n**Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
 Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.
 
@@ -11,6 +11,21 @@ This is a **userspace-only** experiment. On modern Samsung firmware, DirtyFrag d
 ## Milestones
 
 Phase 2 adds a tiny Darwin ARM64 syscall probe. It recognizes a handful of instructions and can interpret carefully constructed Mach-O fixtures that invoke getpid/getuid or virtual exit. It denies filesystem and Mach operations, has a strict instruction limit, and cannot run real iOS frameworks. This is a test harness, not an iOS 27 port.
+
+## Phase 3: audit real framework dependencies
+
+The new `audit-ios` command accepts thin ARM64 and universal FAT/FAT64
+Mach-O files and lists direct dynamic-library imports such as UIKit and
+private frameworks. It is read-only and runs without root. It does **not**
+execute Apple binaries or make their libraries available.
+
+```sh
+./build/ios27 audit-ios /path/to/legitimately-obtained-unencrypted-Mach-O
+```
+
+The official iOS system UI needs a real dyld, Mach/XNU services, runtime
+frameworks, CoreAnimation/Metal graphics bridging and SpringBoard services.
+See [the official UI roadmap](docs/official-ios-ui-roadmap.md).
 
 ## First milestone
 
@@ -27,7 +42,7 @@ cmake -S . -B build -DIOS27_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ./build/ios27 inspect path/to/arm64-binary
-./build/ios27 probe-darwin path/to/synthetic-test-macho
+./build/ios27 probe-darwin path/to/synthetic-test-macho\n./build/ios27 audit-ios path/to/arm64-or-fat-macho
 ```
 
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.
