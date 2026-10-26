@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define FILE_BYTES 256u
-#define DATA_OFF 64u
+#define DATA_OFF 128u
 
 static void put32(uint8_t *p, uint32_t v) {
     for (unsigned i = 0; i < 4u; ++i) p[i] = (uint8_t)(v >> (8u * i));
@@ -76,7 +76,7 @@ int main(void) {
     assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) != 0);
 
     fixture(b, 0x80000033u);
-    b[DATA_OFF + 17u] = 0x00u; /* clobbered terminal, children parsing differs */
+    b[DATA_OFF + 18u] = 0x80u; /* invalid flags uleb */
     assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) != 0);
 
     fixture(b, 0x80000033u);
