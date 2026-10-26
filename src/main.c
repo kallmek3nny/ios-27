@@ -1,6 +1,7 @@
 #include "ios27/macho.h"
 #include "ios27/darwin_probe.h"
 #include "ios27/inventory.h"
+#include "ios27/dyld_paths.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -45,6 +46,25 @@ int main(int argc, char **argv) {
     char error[192] = {0};
     ios27_macho_info image;
     int result;
+    if (argc >= 2 && strcmp(argv[1], "resolve-dyld") == 0) {
+        const char *paths[IOS27_DYLD_MAX_CANDIDATES] = {0};
+        ios27_dyld_candidates candidates;
+        size_t count;
+        if (argc < 5 || argc > 5 + (int)IOS27_DYLD_MAX_CANDIDATES) {
+            fprintf(stderr, "usage: ios27 resolve-dyld <install-name> <guest-loader-image> <guest-main-image> [rpath ...]\n");
+            return 2;
+        }
+        count = (size_t)(argc - 5);
+        for (size_t i = 0; i < count; i++) paths[i] = argv[5 + i];
+        if (ios27_dyld_paths(argv[2], argv[3], argv[4], paths, count,
+                             &candidates, error, sizeof(error)) != 0) {
+            fprintf(stderr, "invalid virtual dyld paths: %s\n", error);
+            return 1;
+        }
+        for (size_t i = 0; i < candidates.count; i++)
+            printf("%s\n", candidates.paths[i]);
+        return 0;
+    }
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
                      strcmp(argv[1], "run-freestanding") != 0 &&
                      strcmp(argv[1], "probe-darwin") != 0 &&
@@ -52,6 +72,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "usage: ios27 inspect <macho>\n"
                         "       ios27 probe-darwin <synthetic-macho>\n"
                         "       ios27 audit-ios <arm64-ios-macho>\n"
+                        "       ios27 resolve-dyld <name> <loader> <main> [rpath ...]\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n");
         return 2;
     }
