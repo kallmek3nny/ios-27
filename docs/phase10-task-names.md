@@ -30,6 +30,20 @@ run ios services, authenticate real processes, or establish guest isolation.
   flow, one-use consumption, copy/move descriptors, malformed wire input,
   quotas and transactional full-queue failure on x86_64 and arm64 linux.
 
+## bounded guest memory adapter
+
+`include/ios27/mach_guest.h` and `src/mach_guest.c` add a separate
+experimental fixture-oriented C ABI boundary: `ios27_mach_guest_call`.
+The caller supplies an explicit guest byte arena and a 64-bit offset/length,
+not an arbitrary host pointer. Before any Mach-style send or receive the
+adapter checks addition-free bounds, maximum message sizes, operation type
+and aliasing between the result pointer and the guest arena. A private
+256-byte staging buffer isolates the queue from guest bytes. Short receives
+return the required length while leaving the queue and guest arena intact.
+
+This is **not** an Apple Mach trap, Darwin syscall number, process
+sandbox, Linux syscall translation, or proof that native iOS services run.
+
 ## non-support
 
 this is a deliberately narrow independent `mach_v2` API alongside the
