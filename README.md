@@ -1,4 +1,8 @@
-# ios-27\n\n**Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
+# ios-27
+
+**Next development agent:** see [HANDOFF.md](HANDOFF.md) for phase 6 status, safety constraints, phase 7 priorities, and PR/CI rules.
+
+**Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
 Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.
 
@@ -98,7 +102,8 @@ cmake -S . -B build -DIOS27_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ./build/ios27 inspect path/to/arm64-binary
-./build/ios27 probe-darwin path/to/synthetic-test-macho\n./build/ios27 audit-ios path/to/arm64-or-fat-macho
+./build/ios27 probe-darwin path/to/synthetic-test-macho
+./build/ios27 audit-ios path/to/arm64-or-fat-macho
 ```
 
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.
