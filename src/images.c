@@ -236,11 +236,11 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
 #else
     long os_page = -1;
 #endif
+    if (out) *out = NULL;
     if (!out || !specs || count == 0u || count > IOS27_IMAGES_MAX ||
         os_page < 4096 || os_page > 65536 ||
         (((unsigned long)os_page & ((unsigned long)os_page - 1u)) != 0u))
         return fail(error, cap, "unsupported host or image graph");
-    *out = NULL;
     images = calloc(1u, sizeof(*images));
     if (!images) return fail(error, cap, "graph allocation failed");
     images->count = count;
