@@ -1,58 +1,66 @@
-# ios-27 development handoff | phase 8 complete -> phase 9
+# ios-27 development handoff | phase 9 complete -> phase 10
 
 **Updated:** 2026-10-26  
-**Repo:** https://github.com/kallmek3nny/ios-27  
-**Verified phase 8:** [PR #10](https://github.com/kallmek3nny/ios-27/pull/10) merged into main as fadbaf2bfb3313edac0bbc330d5cd28348090198. Exact PR head 50bf52e413e25f0e098cf6b3880f73016b8619ce passed Ubuntu 24.04 x86_64 and arm64 CI with strict warnings and bounded commands. Check latest main and PRs before continuing.
+**Repository:** https://github.com/kallmek3nny/ios-27  
+**Verified main after phase 9:** f0a5353ffdbbccb4904739c4aa0ee7a71553c724
 
-## Goal and current reality
+**Merged development:** [#12](https://github.com/kallmek3nny/ios-27/pull/12) phase 9 synthetic Mach IPC merged as ea1a4edfb1ef00690a1b24f41c5ff96f970cb3e2. [#13](https://github.com/kallmek3nny/ios-27/pull/13) phase 9 rights-capacity hardening merged as f0a5353ffdbbccb4904739c4aa0ee7a71553c724. Both PR heads passed strict GitHub Actions tests on Ubuntu x86_64 and ARM64. Recheck current main, open PRs and CI when resuming; do not assume nothing moved.
 
-Research native ARM64 execution of **actual official iOS 27 SpringBoard, UIKit/SwiftUI/CoreAnimation, Liquid Glass, and iOS apps** above Android on a locked-bootloader Galaxy S25+. No imitation launcher and no general CPU emulation. The real Apple UI is **not** running and feasibility is unproven. iOS proprietary frameworks, XNU/Mach interfaces, arm64e/PAC, entitlements, Apple GPU and system services remain unsolved. A synthetic native test returning 42 does NOT mean an iOS app runs. Treat overall roughly ~1% as speculative order-of-magnitude, not a validated percentage.
+## Non-negotiable goal
 
-## Safety: hard boundaries
+Research **Apple's actual official iOS 27 UI, genuine SpringBoard, UIKit/SwiftUI/CoreAnimation Liquid Glass, Control Center, lockscreen and real iOS apps** running above Android on Galaxy S25+ with a locked bootloader. No launcher imitation and no general CPU emulation. This remains an *unproven research goal*; none of the tested fixtures is an actual Apple app. ARM64 CPU instruction compatibility does not supply arm64e/PAC, XNU/Mach semantics, dyld shared cache, Apple frameworks, entitlements or graphics services.
 
-- Never change/flash bootloader, boot, init_boot, vendor_boot, vbmeta, dtbo, recovery, partitions, firmware, secure boot, antirollback or recovery paths.
-- Never bypass Odin/D2 restrictions, weaken verified boot or persistently modify root/SELinux/kernel state.
-- DirtyFrag, KernelSU and temporary root are optional, NOT used in baseline; root can create non-revertible changes. No root/privileged writes or exploit deployment.
-- Use isolated ordinary Android/Linux userspace, trusted synthetic non-Apple fixtures, and legally redistributable source only. The native test loader is **not sandboxed**, so do NOT execute untrusted Mach-O binaries.
-- Never distribute Apple proprietary framework binaries or decrypted firmware/app payloads.
-- If reviewing device safety details, check https://github.com/mitschud/DirtyFrag and its releases for updated warnings.
+## Hard phone safety
 
-## Proven merged work
+- Never flash or modify bootloader, boot, init_boot, vendor_boot, vbmeta, dtbo, recovery, firmware, partitions, antirollback, secure boot or verified boot.
+- Never alter Odin/download mode or bypass Samsung D2 restrictions. Do not weaken recovery or exploit the phone.
+- Never require persistent root, SELinux policy changes, kernel modules, boot-time hooks or privileged writes. DirtyFrag/KernelSU are optional **and not used**. A reboot does not undo any previous persistent writes made while rooted.
+- Do everything on unprivileged ordinary Linux/Android userspace first; no privileged device state changes. Review https://github.com/mitschud/DirtyFrag for any new Samsung-specific risk.
+- Use only controlled, redistributable test fixtures. Do not distribute proprietary Apple frameworks, Apple firmware or unauthorized decrypted app payloads. Native code execution tests are **not sandboxed**: never run untrusted Mach-O code.
 
-| Phase | PR | Actual result |
+## Proven merged phases
+
+| Phase | PR | Verified implementation |
 | --- | --- | --- |
-| 1 | #1 | thin ARM64 Mach-O validation and restricted native fixture runner |
-| 2 | #2 | bounded synthetic Darwin SVC instruction probe |
-| 3 | #3 | FAT/FAT64 slice selection and imported framework inventory |
+| 1 | #1 | thin ARM64 Mach-O parser and freestanding native fixture runner |
+| 2 | #2 | bounded synthetic Darwin SVC probe |
+| 3 | #3 | FAT/FAT64 and import inventory |
 | 4 | #4 | guest-virtual dyld path tokens |
-| 5 | #5 | bounded export trie decoding |
-| 6 | #6 | classic dyld binds, synthetic native ARM64 cross-image call |
-| 7 | #8 | subset of dyld chained fixups, PTR_64_OFFSET, bounded 4K/16K page fixups and atomic copy-only relocation |
-| 8 | [#10](https://github.com/kallmek3nny/ios-27/pull/10) | explicit 8-image dependency DAG, deterministic cross-image import resolution, private anonymous VM mappings, staged classic/chained fixups, W^X code/data protections, rollback, native ARM64 multi-image calls; x86_64+arm64 CI passed |
+| 5 | #5 | dyld export trie metadata |
+| 6 | #6 | classic pointer binds and synthetic ARM64 native inter-image call |
+| 7 | #8 | bounded dyld chained fixups, PTR_64_OFFSET subset, 4K/16K pages |
+| 8 | #10 | explicit 8-image Mach-O DAG with cross-image relocation, private mappings, W^X and native synthetic calls |
+| 9 | [#12](https://github.com/kallmek3nny/ios-27/pull/12), [#13](https://github.com/kallmek3nny/ios-27/pull/13) | userspace Mach-style 24-byte headers and 12-byte port descriptors, 8 synthetic task IDs, 32 ports, 4-message queues, 256-byte bounded messages, send-right isolation, atomic COPY_SEND/MOVE_SEND transfers, rights reservation and deterministic error tests |
 
-**Phase 8 files:** include/ios27/images.h, src/images.c, tests/test_images.c, docs/phase8-native-images.md. The loader accepts only caller-supplied thin ARM64 buffers and exact LC_LOAD_DYLIB dependency names. It validates cycles, duplicates, mapped segment bounds, page alignment, exported regular executable symbols and classic/chained relocation formats. All images reserve VM before symbol resolution; copy-only staging completes before segment data is committed. No RWX mappings; gaps inaccessible; failures unmap everything. The ARM64 Linux CI test exercises both classic/chained synthetic consumer→provider native calls returning 42. 4K/16K **dyld chain** page cases are tested, not a physical Samsung 16K kernel mapping.
+## Phase 9 source and proof
 
-**Not yet validated:** actual iOS 27 binaries, dyld shared cache, PAC/arm64e ABI, load from real dylib path caches, objc/swift, Mach message system, real Darwin libsystem/pthreads, Metal/CoreAnimation, SpringBoard, Liquid Glass, Galaxy S25+ userspace execution. Host 16K shared-page layout conflicts intentionally fail closed.
+- `include/ios27/mach_ipc.h`, `src/mach_ipc.c`, `tests/test_mach_ipc.c`, `docs/phase9-mach-ipc.md`.
+- A **private, single-process** synthetic Mach message space. Receive rights are owned by simulated task IDs; grants and transfers are checked. Duplicate, stale, unauthorized rights and unsupported complex descriptors are rejected. A one-descriptor COPY_SEND keeps sender rights; MOVE_SEND consumes them **only after successful enqueue**. Pending rights reserve recipient capacity. Short buffers do not dequeue. Queues are bounded and message delivery order tested.
+- Header/descriptor sizes and selected dispositions follow public XNU definitions, but this is **not actual Darwin Mach IPC**. No guest trap forwarding, kernel ports, global service registry, task isolation, send-once, OOL memory, trailers, reply ports, voucher ports, authentic Mach timeouts, or Apple framework behavior.
+- On Ubuntu ARM64 CI, this is compiled and tested as native host C; it is not an iOS application or an on-phone test. Phase 8 synthetic cross-image ARM64 native calls remain in the test suite.
+- Exact frozen PR head #12 `1a0a121fb14f0ccf89ecc7cbeb88d882e247f85e` and #13 `ba7c21a5dd8b40e19c28bf9c34893b996fd4a3d9` passed both Ubuntu CI jobs before expected-head squash merges.
 
-## Phase 9 substantive engineering tasks
+## Phase 10: next concrete coding
 
-1. Design **scoped, testable Darwin/Mach message ABI contract** in ordinary userspace using declared message headers/descriptors and bounded buffers. Match open Darwin headers where licensing permits; keep own implementation. Do not claim XNU.
-2. Add a port-rights model with correct owner isolation, send/receive references, checked transfer/deallocation and explicit limits. Include intentionally invalid/destructive message tests and cleanup.
-3. Implement bounded synchronous message exchange through a fixture-local queue (not global host ports), with deterministic timeout/error semantics; no host privilege or IPC service takeover.
-4. Write strict x86_64 and ARM64 tests including native ARM64 synthetic code calling through a stable compatibility C ABI boundary where feasible.
-5. Tighten image loader with more malformed-segment/fuzz corpus and host 16K-alignment testing where accessible. Independent lifecycle, reexports/weak bindings and dyld shared caches must remain unsupported until real tests exist.
-6. Evaluate a legitimately compiled, redistributable Darwin test executable if one can be obtained legally; do not substitute synthetic Mach messages for proof of real Apple compatibility.
+1. Replace global port IDs with *per-task port-name tables* that translate scoped names into underlying objects. Test ownership, stale handles, naming collisions, and proper send-right moves/copies across namespaces.
+2. Implement bounded send-once rights and reply-port semantics with explicit handoff, one-time consumption and teardown tests. Preserve transactional queueing and receiver capacity.
+3. Add a **separate** narrow Darwin-facing C ABI facade that can marshal/unmarshal tested message headers, with deny-by-default unsupported syscalls and no arbitrary Linux syscall forwarding. Do not claim real XNU/Mach compatibility.
+4. Add malformed message corpus tests, limits, ownership and rollback invariants for both x86_64 and native ARM64. Reproduce 4K/16K host/dyld assumptions, respecting W^X and no RWX windows.
+5. Evaluate a *legally compiled, redistributable* real Darwin sample binary only once execution contracts are explicit. Do not assume arm64e/Apple system frameworks can work just because synthetic fixtures pass.
+6. Prioritize a reality check for actual Apple framework runtime/Metal/graphics feasibility before promising SpringBoard or Liquid Glass.
 
-## Exact workflow
+## Process and reproducibility
 
-- Work only on kallmek3nny/ios-27. Confirm newest main/PRs and avoid duplicating concurrent work.
-- Every shell/configure/build/test/clone command has an explicit hard timeout. No indefinite polling loops.
-- Maintain -Wall -Wextra -Werror -Wpedantic. Include meaningful implementation, regression tests, documentation.
-- Branch from inspected main; push, PR; verify x86_64 and ARM64 CI on **exact frozen PR head**; recheck main and merge using expected_head_sha only if both pass.
-- Do not claim on-phone tests from Linux ARM CI.
+- Work exclusively on `kallmek3nny/ios-27`; avoid duplicate branches and PRs and check main for concurrent changes.
+- Explicit hard timeout on **every** shell/configure/build/test/clone command; no indefinite waiting/polling loops.
+- Keep `-Wall -Wextra -Werror -Wpedantic`; never suppress failures or loosen tests.
+- Push meaningful code/tests/docs; open PR; require exact frozen head x86_64 and ARM64 success, recheck main, merge with expected PR head SHA only.
+- Linux ARM64 CI is not proof of Galaxy S25+ or official iOS compatibility.
 
-## Reproduce on trusted Linux
+Trusted Linux commands:
 
-    timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+    timeout 120s cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
     timeout 120s cmake --build build --parallel 2
     timeout 120s ctest --test-dir build --timeout 30 --output-on-failure
+
+**Progress:** full official iOS UI running on Android remains at 0%. Overall project ~1% *speculative order of magnitude*, not measured completion.
