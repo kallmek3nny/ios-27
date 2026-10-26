@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -98,4 +98,24 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_compiled_darwin_object PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_dependencies(test_compiled_darwin_object ios27_compiled_darwin_fixture)
     add_test(NAME compiled-darwin-object COMMAND test_compiled_darwin_object "${IOS27_DARWIN_FIXTURE}")
+    # Phase 13: an independently compiled Darwin object whose external C
+    # call forces an actual ARM64_RELOC_BRANCH26 entry in __TEXT,__text.
+    set(IOS27_DARWIN_CONSUMER "${CMAKE_CURRENT_BINARY_DIR}/arm64_darwin_consumer.o")
+    add_custom_command(
+        OUTPUT "${IOS27_DARWIN_CONSUMER}"
+        COMMAND timeout 30s "${IOS27_DARWIN_CLANG}" --target=arm64-apple-darwin
+                -ffreestanding -fno-builtin -fno-stack-protector
+                -fno-unwind-tables -fno-asynchronous-unwind-tables -O2
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/arm64_darwin_consumer.c"
+                -o "${IOS27_DARWIN_CONSUMER}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/arm64_darwin_consumer.c"
+        VERBATIM
+        COMMENT "Compile external BRANCH26 relocation in SDK-free ARM64 Darwin object")
+    add_custom_target(ios27_compiled_darwin_consumer ALL DEPENDS "${IOS27_DARWIN_CONSUMER}")
+    add_executable(test_compiled_darwin_reloc tests/test_compiled_darwin_reloc.c)
+    target_link_libraries(test_compiled_darwin_reloc PRIVATE ios27_core)
+    target_compile_options(test_compiled_darwin_reloc PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_dependencies(test_compiled_darwin_reloc ios27_compiled_darwin_fixture ios27_compiled_darwin_consumer)
+    add_test(NAME compiled-darwin-branch26 COMMAND test_compiled_darwin_reloc
+             "${IOS27_DARWIN_FIXTURE}" "${IOS27_DARWIN_CONSUMER}")
 endif()
