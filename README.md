@@ -12,6 +12,23 @@ This is a **userspace-only** experiment. On modern Samsung firmware, DirtyFrag d
 
 Phase 2 adds a tiny Darwin ARM64 syscall probe. It recognizes a handful of instructions and can interpret carefully constructed Mach-O fixtures that invoke getpid/getuid or virtual exit. It denies filesystem and Mach operations, has a strict instruction limit, and cannot run real iOS frameworks. This is a test harness, not an iOS 27 port.
 
+## Phase 4: native dyld path groundwork
+
+A new dependency-free resolver maps Apple's `@loader_path`,
+`@executable_path`, and `@rpath` install-name expressions into guest-virtual
+candidate paths. This is pure string processing: it never accesses host
+filesystems or interprets/emulates CPU instructions.
+
+```sh
+./build/ios27 resolve-dyld '@rpath/UIKit.framework/UIKit' \
+  '/Applications/Demo.app/Demo' '/Applications/Demo.app/Demo' \
+  '/System/Library/Frameworks'
+```
+
+Only path resolution is implemented, not dyld loading, rebases, chained binds,
+imports, exports, shared-cache mapping, code-signature validation, or actual
+iOS framework execution.
+
 ## Phase 3: audit real framework dependencies
 
 The new `audit-ios` command accepts thin ARM64 and universal FAT/FAT64
