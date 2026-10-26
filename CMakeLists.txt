@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -70,4 +70,9 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_mach_guest PRIVATE ios27_core)
     target_compile_options(test_mach_guest PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME bounded-mach-guest-memory COMMAND test_mach_guest)
+
+    add_executable(test_darwin_mach_abi tests/test_darwin_mach_abi.c)
+    target_link_libraries(test_darwin_mach_abi PRIVATE ios27_core)
+    target_compile_options(test_darwin_mach_abi PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME darwin-fixture-abi-lifecycle COMMAND test_darwin_mach_abi)
 endif()
