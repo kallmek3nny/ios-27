@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -30,4 +30,9 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_inventory PRIVATE ios27_core)
     target_compile_options(test_inventory PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME macho-inventory COMMAND test_inventory)
+
+    add_executable(test_dyld_paths tests/test_dyld_paths.c)
+    target_link_libraries(test_dyld_paths PRIVATE ios27_core)
+    target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME dyld-virtual-paths COMMAND test_dyld_paths)
 endif()
