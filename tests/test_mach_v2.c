@@ -68,8 +68,9 @@ static void local_names_and_reply(void) {
            IOS27_MACH_TOO_LARGE);
     assert(capacity == n && received[0] == 0xa5u);
     capacity = sizeof(received);
+    /* Number 100 belongs to task 2's different, currently empty port. */
     assert(ios27_mach_v2_receive(s, 2u, server, received, &capacity, 0u) ==
-           IOS27_MACH_BAD_RIGHT);
+           IOS27_MACH_TIMEOUT);
     assert(ios27_mach_v2_receive(s, 1u, server, received, &capacity, 0u) ==
            IOS27_MACH_OK);
     server_once = rd32(received + 8u);
