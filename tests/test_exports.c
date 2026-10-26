@@ -79,6 +79,28 @@ int main(void) {
     b[DATA_OFF + 18u] = 0x80u; /* invalid flags uleb */
     assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) != 0);
 
+    /* Stub and resolver export: two image-relative ULEB addresses. */
+    fixture(b, 0x80000033u);
+    memset(b + DATA_OFF, 0, sizeof(b) - DATA_OFF);
+    {
+        static const uint8_t stub_trie[] = {
+            0x00, 0x01, '_', 's', 't', 'u', 'b', 0x00, 0x09,
+            0x03, 0x10, 0x11, 0x22, 0x00
+        };
+        memcpy(b + DATA_OFF, stub_trie, sizeof(stub_trie));
+        put32(b + 44u, (uint32_t)sizeof(stub_trie));
+    }
+    assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) == 0);
+    sym = ios27_exports_find(&table, "_stub");
+    assert(sym != NULL && sym->address == 0x11u && sym->resolver == 0x22u);
+    assert((sym->flags & IOS27_EXPORT_STUB_RESOLVER) != 0u);
+
+    /* Oversized ULEB and unrecognized flags are both rejected. */
+    b[DATA_OFF + 10u] = 0xffu;
+    assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) != 0);
+    b[DATA_OFF + 10u] = 0x20u;
+    assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) != 0);
+
     fixture(b, 0x80000033u);
     put32(b + 44u, 0u);
     assert(ios27_exports_parse(b, sizeof(b), &table, err, sizeof(err)) == 0);
