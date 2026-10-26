@@ -1,5 +1,6 @@
 #include "ios27/mach_guest.h"
 
+#include <stdint.h>
 #include <string.h>
 
 int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
@@ -9,8 +10,18 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
                           uint32_t timeout_ms, uint32_t *actual) {
     uint8_t staging[IOS27_MACH_MSG_MAX];
     size_t n;
+    uintptr_t arena_start, result_start;
     int result;
-    if (!space || !guest || !actual ||
+    if (!space || !guest || !actual) return IOS27_MACH_BAD_ARGUMENT;
+    arena_start = (uintptr_t)guest;
+    result_start = (uintptr_t)actual;
+    /* A result pointer within the arena could violate failure atomicity. */
+    if (guest_size > UINTPTR_MAX - arena_start ||
+        result_start > UINTPTR_MAX - sizeof(*actual) ||
+        (result_start < arena_start + guest_size &&
+         arena_start < result_start + sizeof(*actual)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (
         guest_offset > (uint64_t)guest_size ||
         length > (uint64_t)guest_size - guest_offset ||
         length > IOS27_MACH_MSG_MAX ||
