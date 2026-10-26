@@ -1,0 +1,22 @@
+# ios-27
+
+Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.
+
+## First milestone
+
+Build a native, dependency-free **Mach-O 64-bit ARM64 inspector** with strict bounds checks, then a deliberately restricted **freestanding execution proof of concept** for hand-written ARM64 test images with no iOS frameworks, dyld, system calls, or runtime dependencies.
+
+A functioning iOS 27 SpringBoard, Apple services, App Store apps, and graphics framework are **not** implemented. Root is not needed for inspection and should not be assumed to make iOS binaries compatible.
+
+## Build
+
+Requires CMake 3.16+ and a C11 compiler. On Android, use an ARM64 native toolchain (such as Termux clang); on other platforms, inspection and parser tests work, but execution is ARM64-only.
+
+```sh
+cmake -S . -B build -DIOS27_BUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+./build/ios27 inspect path/to/arm64-binary
+```
+
+See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.
