@@ -58,7 +58,7 @@ static void dylib(uint8_t *p, const char *name) {
     memcpy(p + 24u, name, strlen(name) + 1u);
 }
 static void export_trie(uint8_t *buffer, const char *name) {
-    size_t len = strlen(name), offset = 3u + len;
+    size_t len = strlen(name), offset = 4u + len;
     assert(len <= 20u);
     buffer[0] = 0u;
     buffer[1] = 1u;
@@ -71,7 +71,7 @@ static void export_trie(uint8_t *buffer, const char *name) {
     buffer[offset + 4u] = 0u;
 }
 static size_t trie_len(const char *name) {
-    return strlen(name) + 8u;
+    return strlen(name) + 9u;
 }
 static void provider(uint8_t file[IMAGE_SIZE], const char *depends_on) {
     memset(file, 0, IMAGE_SIZE);
