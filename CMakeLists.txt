@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -35,4 +35,9 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_dyld_paths PRIVATE ios27_core)
     target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-virtual-paths COMMAND test_dyld_paths)
+
+    add_executable(test_exports tests/test_exports.c)
+    target_link_libraries(test_exports PRIVATE ios27_core)
+    target_compile_options(test_exports PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME dyld-export-trie COMMAND test_exports)
 endif()
