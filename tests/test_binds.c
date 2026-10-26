@@ -167,6 +167,29 @@ int main(void) {
     assert(memcmp(importer, original, sizeof(importer)) == 0);
     plan.entries[0].addend = 0;
 
+    /* File-backed __DATA binds can be repeated with spacing constraints. */
+    consumer(importer);
+    importer[STREAM_OFF + 13u] = 0xc0u;
+    importer[STREAM_OFF + 14u] = 2u;
+    importer[STREAM_OFF + 15u] = 0u;
+    importer[STREAM_OFF + 16u] = 0u;
+    le32(importer + 196u, 17u);
+    ctx.base = 0x123450000ull;
+    assert(ios27_binds_parse(importer, sizeof(importer), &import_info,
+                             &plan, error, sizeof(error)) == 0);
+    assert(plan.count == 2u);
+    assert(ios27_binds_apply(importer, sizeof(importer), &import_info,
+                             &plan, resolve, &ctx, error, sizeof(error)) == 0);
+    assert(rd64(importer + CONSUMER_DATA_OFF) == ctx.base);
+    assert(rd64(importer + CONSUMER_DATA_OFF + 8u) == ctx.base);
+    plan.entries[1].segment_offset = 0u;
+    assert(ios27_binds_apply(importer, sizeof(importer), &import_info,
+                             &plan, resolve, &ctx, error, sizeof(error)) != 0);
+
+    consumer(importer);
+    assert(ios27_binds_parse(importer, sizeof(importer), &import_info,
+                             &plan, error, sizeof(error)) == 0);
+
     /* Reject relocation into the read-only executable text segment. */
     plan.entries[0].segment_index = 0u;
     assert(ios27_binds_apply(importer, sizeof(importer), &import_info,
@@ -212,6 +235,13 @@ int main(void) {
                                  &plan, resolve, &ctx,
                                  error, sizeof(error)) == 0);
         memcpy(caller_pages, importer + CONSUMER_TEXT_OFF, 12u);
+        /* ADRP uses 4K address pages even if Android's VM page is 16K. */
+        assert((ps % 4096) == 0 && (ps / 4096) < 1048576);
+        {
+            uint32_t delta = (uint32_t)((size_t)ps / 4096u);
+            le32((uint8_t *)caller_pages, 0x90000010u |
+                 ((delta & 3u) << 29u) | ((delta >> 2u) << 5u));
+        }
         memcpy((uint8_t *)caller_pages + (size_t)ps,
                importer + CONSUMER_DATA_OFF, 8u);
         __builtin___clear_cache((char *)caller_pages,
