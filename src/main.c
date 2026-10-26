@@ -2,6 +2,7 @@
 #include "ios27/darwin_probe.h"
 #include "ios27/inventory.h"
 #include "ios27/dyld_paths.h"
+#include "ios27/exports.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -68,10 +69,12 @@ int main(int argc, char **argv) {
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
                      strcmp(argv[1], "run-freestanding") != 0 &&
                      strcmp(argv[1], "probe-darwin") != 0 &&
-                     strcmp(argv[1], "audit-ios") != 0)) {
+                     strcmp(argv[1], "audit-ios") != 0 &&
+                     strcmp(argv[1], "symbols") != 0)) {
         fprintf(stderr, "usage: ios27 inspect <macho>\n"
                         "       ios27 probe-darwin <synthetic-macho>\n"
                         "       ios27 audit-ios <arm64-ios-macho>\n"
+                        "       ios27 symbols <thin-or-fat-arm64-macho>\n"
                         "       ios27 resolve-dyld <name> <loader> <main> [rpath ...]\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n");
         return 2;
@@ -90,6 +93,34 @@ int main(int argc, char **argv) {
         fprintf(stderr, "could not read file or file exceeds %u bytes: %s\n",
                 MAX_INPUT_BYTES, argv[2]);
         return 1;
+    }
+    if (strcmp(argv[1], "symbols") == 0) {
+        ios27_inventory inventory;
+        ios27_exports exports;
+        if (ios27_inventory_parse(data, size, &inventory,
+                                  error, sizeof(error)) != 0 ||
+            ios27_exports_parse(data + inventory.slice_offset,
+                                 inventory.slice_size, &exports,
+                                 error, sizeof(error)) != 0) {
+            fprintf(stderr, "symbol inventory rejected: %s\n", error);
+            free(data);
+            return 1;
+        }
+        printf("dyld exports: %zu, trie=%u, selected-slice=%zu\n",
+               exports.count, exports.has_trie, inventory.slice_offset);
+        for (size_t i = 0; i < exports.count; ++i) {
+            const ios27_export *e = &exports.entries[i];
+            if (e->flags & IOS27_EXPORT_REEXPORT)
+                printf("  %s: reexport library=%llu name=%s\n",
+                       e->name, (unsigned long long)e->ordinal,
+                       e->imported_name[0] ? e->imported_name : e->name);
+            else
+                printf("  %s: offset=0x%llx flags=0x%llx\n",
+                       e->name, (unsigned long long)e->address,
+                       (unsigned long long)e->flags);
+        }
+        free(data);
+        return 0;
     }
     if (strcmp(argv[1], "audit-ios") == 0) {
         ios27_inventory inventory;
