@@ -24,7 +24,7 @@ kernel, dyld or Apple graphics compatibility.
 | --- | --- | --- |
 | Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory, read-only |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
-| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default syscall probe plus **synthetic in-process Mach-style bounded FIFO/rights transfers**; no true XNU or per-task namespaces |
+| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default syscall probe plus **synthetic task-local Mach-style port names, send-once request/reply rights and checked guest-memory message adapter**; no real XNU traps/services |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
 | UIKit / SwiftUI | render genuine controls, view tree and Liquid Glass using Apple's own framework components | **not implemented** |
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
@@ -34,7 +34,7 @@ kernel, dyld or Apple graphics compatibility.
 
 ## Concrete next technical milestone
 
-**Phase 9 is merged:** [PR #12](https://github.com/kallmek3nny/ios-27/pull/12) and [PR #13](https://github.com/kallmek3nny/ios-27/pull/13) add a bounded, isolated in-process Mach-style message/port-rights model with transactional transfers and quotas. **Phase 8** already mapped multiple synthetic ARM64 Mach-O fixtures natively with W^X. Neither phase runs Apple's actual SpringBoard or frameworks. **Phase 10:** per-task port-name tables, send-once/reply rights, and a bounded Darwin-facing ABI facade with independently verified semantics.
+**Phase 10 is merged:** [PR #15](https://github.com/kallmek3nny/ios-27/pull/15) adds task-local Mach-style port names, send-once request/reply rights and translated descriptor aliases; [PR #16](https://github.com/kallmek3nny/ios-27/pull/16) adds a checked guest-memory byte-arena IPC adapter. These are **synthetic, in-process compatibility fixtures**, not XNU traps or Apple framework execution. **Phase 11** should harden lifecycle/right ownership and test a genuine compiler-produced redistributable ARM64 Darwin Mach-O sample.
 
 ### Longer-term audit task
 
