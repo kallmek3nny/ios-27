@@ -1,0 +1,35 @@
+name: native tests
+
+on:
+  push:
+    branches: [main, phase1-macho-foundation]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
+      - name: build
+        run: cmake --build build --parallel 2
+      - name: unit tests
+        run: ctest --test-dir build --output-on-failure
+      - name: cli usage check
+        run: |
+          set +e
+          ./build/ios27 > /tmp/ios27-usage.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 2
+          grep -q "usage: ios27" /tmp/ios27-usage.log
