@@ -149,7 +149,7 @@ int ios27_exports_parse(const uint8_t *image, size_t size,
                         ios27_exports *out,
                         char *error, size_t error_capacity) {
     ios27_macho_info info;
-    size_t cursor, end;
+    size_t cursor;
     uint32_t count;
     uint32_t legacy_off = 0u, legacy_len = 0u;
     uint32_t modern_off = 0u, modern_len = 0u;
@@ -162,7 +162,6 @@ int ios27_exports_parse(const uint8_t *image, size_t size,
         return -1;
     count = rd32(image + 16u);
     cursor = 32u;
-    end = cursor + (size_t)rd32(image + 20u);
     for (uint32_t i = 0; i < count; ++i) {
         uint32_t cmd = rd32(image + cursor);
         uint32_t cmdsize = rd32(image + cursor + 4u);
