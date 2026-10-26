@@ -40,7 +40,8 @@ static void check(const ios27_mach_v2 *s, uint32_t task, uint32_t name,
 }
 static void local_names_and_reply(void) {
     ios27_mach_v2 *s = ios27_mach_v2_new();
-    uint32_t server, reply, caller_send, server_once, other;
+    uint32_t server, reply, caller_send, server_once, a, b;
+    unsigned can_receive;
     uint8_t bytes[IOS27_MACH_MSG_MAX], received[IOS27_MACH_MSG_MAX];
     size_t n, capacity;
     assert(s);
@@ -79,7 +80,7 @@ static void local_names_and_reply(void) {
     n = message(bytes, server_once, IOS27_MACH_MOVE_SEND_ONCE, 0u, 99u);
     assert(ios27_mach_v2_send(s, 1u, bytes, n, 0u) == IOS27_MACH_OK);
     assert(ios27_mach_v2_rights(s, 1u, server_once,
-                                 &other, &other, (unsigned *)&other) ==
+                                 &a, &b, &can_receive) ==
            IOS27_MACH_BAD_RIGHT);
     assert(ios27_mach_v2_send(s, 1u, bytes, n, 0u) ==
            IOS27_MACH_BAD_RIGHT);
@@ -118,16 +119,19 @@ static void descriptor_and_collision(void) {
     descriptor(p, remote_item, IOS27_MACH_MOVE_SEND);
     len = 40u;
     assert(ios27_mach_v2_send(s, 2u, p, len, 0u) == IOS27_MACH_OK);
-    assert(ios27_mach_v2_rights(s, 2u, remote_item,
-                                 (uint32_t *)&cap, (uint32_t *)&cap,
-                                 (unsigned *)&cap) == IOS27_MACH_BAD_RIGHT);
+    {
+        uint32_t a, b;
+        unsigned c;
+        assert(ios27_mach_v2_rights(s, 2u, remote_item,
+                                     &a, &b, &c) == IOS27_MACH_BAD_RIGHT);
+    }
     assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_BAD_RIGHT);
     cap = sizeof(out);
     assert(ios27_mach_v2_receive(s, 1u, service, out, &cap, 0u) ==
            IOS27_MACH_OK);
     assert(rd32(out) == IOS27_MACH_COMPLEX);
     received_item = rd32(out + 28u);
-    assert(received_item != service && received_item != remote_item);
+    assert(received_item != service); /* its number can coincide with a name in another task */
     check(s, 1u, received_item, 1u, 0u, 0u);
     assert(ios27_mach_v2_drop_send(s, 1u, received_item) == IOS27_MACH_OK);
     assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_OK);
