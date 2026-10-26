@@ -22,7 +22,7 @@ kernel, dyld or Apple graphics compatibility.
 
 | Area | Runtime contract | Actual implementation state |
 | --- | --- | --- |
-| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory, read-only |
+| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64 inventory; actual SDK-free clang-produced arm64 Darwin MH_OBJECT section/symbol validation and trusted native ARM64 no-relocation fixture execution; no linked iOS process |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
 | Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default probe plus **synthetic task-local Mach message queues, checked guest arena, transactional task teardown and register-selector facade**; no real XNU traps/services |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
@@ -34,7 +34,7 @@ kernel, dyld or Apple graphics compatibility.
 
 ## Concrete next technical milestone
 
-**Phase 11 is merged:** [PR #18](https://github.com/kallmek3nny/ios-27/pull/18) adds fail-closed synthetic task teardown and a narrow register-selector facade. All supported selector numbers are **private fixture values**, not real Darwin traps, and no Apple frameworks run. **Phase 12:** validate a legally compiler-produced ARM64 Darwin Mach-O with an open toolchain, improve safe loader conformance, and evaluate real XNU/dyld/arm64e/Apple graphics feasibility.
+**Phase 12 is verified:** [PR #20](https://github.com/kallmek3nny/ios-27/pull/20) compiles a redistributable SDK-free C fixture into a genuine ARM64 Darwin **MH_OBJECT** on x86_64/ARM64 CI, validates its actual compiler-produced section/symbol data and calls its trusted relocation-free code on native Linux ARM64 under W^X. This is NOT a linked Mach-O executable or proof of any Apple app/framework running. **Phase 13:** validate a real open-source Darwin linker against an actual freestanding MH_EXECUTE, or fall back to compiler-produced relocation tests when linking is unsupported; perform arm64e, XNU/dyld and Apple graphics feasibility checks.
 
 ### Longer-term audit task
 
