@@ -3,6 +3,7 @@
 #include "ios27/inventory.h"
 #include "ios27/dyld_paths.h"
 #include "ios27/exports.h"
+#include "ios27/binds.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -70,11 +71,13 @@ int main(int argc, char **argv) {
                      strcmp(argv[1], "run-freestanding") != 0 &&
                      strcmp(argv[1], "probe-darwin") != 0 &&
                      strcmp(argv[1], "audit-ios") != 0 &&
-                     strcmp(argv[1], "symbols") != 0)) {
+                     strcmp(argv[1], "symbols") != 0 &&
+                     strcmp(argv[1], "binds") != 0)) {
         fprintf(stderr, "usage: ios27 inspect <macho>\n"
                         "       ios27 probe-darwin <synthetic-macho>\n"
                         "       ios27 audit-ios <arm64-ios-macho>\n"
                         "       ios27 symbols <thin-or-fat-arm64-macho>\n"
+                        "       ios27 binds <thin-or-fat-arm64-macho>\n"
                         "       ios27 resolve-dyld <name> <loader> <main> [rpath ...]\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n");
         return 2;
@@ -93,6 +96,36 @@ int main(int argc, char **argv) {
         fprintf(stderr, "could not read file or file exceeds %u bytes: %s\n",
                 MAX_INPUT_BYTES, argv[2]);
         return 1;
+    }
+    if (strcmp(argv[1], "binds") == 0) {
+        ios27_inventory inventory;
+        ios27_macho_info selected;
+        ios27_bind_plan binds;
+        if (ios27_inventory_parse(data, size, &inventory, error,
+                                  sizeof(error)) != 0 ||
+            ios27_macho_parse(data + inventory.slice_offset,
+                              inventory.slice_size, &selected,
+                              error, sizeof(error)) != 0 ||
+            ios27_binds_parse(data + inventory.slice_offset,
+                              inventory.slice_size, &selected, &binds,
+                              error, sizeof(error)) != 0) {
+            fprintf(stderr, "dyld bind audit rejected: %s\n", error);
+            free(data);
+            return 1;
+        }
+        printf("classic dyld pointer binds=%zu selected_slice=%zu\n",
+               binds.count, inventory.slice_offset);
+        for (size_t i = 0; i < binds.count; ++i) {
+            const ios27_bind *b = &binds.entries[i];
+            printf("  %s ordinal=%d target=%s+0x%llx addend=%lld\n",
+                   b->symbol, b->ordinal,
+                   selected.segments[b->segment_index].name,
+                   (unsigned long long)b->segment_offset,
+                   (long long)b->addend);
+        }
+        puts("read-only audit only: no libraries mapped or relocations applied");
+        free(data);
+        return 0;
     }
     if (strcmp(argv[1], "symbols") == 0) {
         ios27_inventory inventory;
