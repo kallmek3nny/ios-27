@@ -1,4 +1,5 @@
 #include "ios27/macho.h"
+#include "ios27/darwin_probe.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -44,9 +45,15 @@ int main(int argc, char **argv) {
     ios27_macho_info image;
     int result;
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
-                     strcmp(argv[1], "run-freestanding") != 0)) {
+                     strcmp(argv[1], "run-freestanding") != 0 &&
+                     strcmp(argv[1], "probe-darwin") != 0)) {
         fprintf(stderr, "usage: ios27 inspect <macho>\n"
+                        "       ios27 probe-darwin <synthetic-macho>\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n");
+        return 2;
+    }
+    if (strcmp(argv[1], "run-freestanding") != 0 && argc != 3) {
+        fprintf(stderr, "expected exactly one image path\n");
         return 2;
     }
     if (strcmp(argv[1], "run-freestanding") == 0 &&
@@ -93,6 +100,21 @@ int main(int argc, char **argv) {
                    (unsigned long long)s->fileoff,
                    (unsigned long long)s->filesize, s->initprot);
         }
+        free(data);
+        return 0;
+    }
+    if (strcmp(argv[1], "probe-darwin") == 0) {
+        ios27_darwin_probe_result probe;
+        if (ios27_darwin_probe(data, size, &image, &probe,
+                               error, sizeof(error)) != 0) {
+            fprintf(stderr, "Darwin probe rejected image: %s\n", error);
+            free(data);
+            return 1;
+        }
+        printf("Darwin probe: x0=%llu x16=0x%llx carry=%u exited=%u steps=%zu traps=%zu\n",
+               (unsigned long long)probe.x0,
+               (unsigned long long)probe.x16, probe.carry, probe.exited,
+               probe.instructions, probe.syscalls);
         free(data);
         return 0;
     }
