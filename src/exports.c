@@ -35,6 +35,7 @@ static int read_uleb(const uint8_t *data, size_t end,
         if (shift > 63u) return -1;
         output |= part << shift;
         if ((byte & 0x80u) == 0u) {
+            if (i != 0u && byte == 0u) return -1; /* nonminimal ULEB */
             *value = output;
             return 0;
         }
@@ -78,6 +79,9 @@ static int walk(walker *ctx, size_t offset,
             return -1;
         /* Reject unknown reserved flag bits and mutually exclusive forms. */
         if ((flags & ~UINT64_C(0x1f)) != 0u ||
+            (flags & IOS27_EXPORT_KIND_MASK) == 3u ||
+            ((flags & (IOS27_EXPORT_REEXPORT | IOS27_EXPORT_STUB_RESOLVER)) &&
+             (flags & IOS27_EXPORT_KIND_MASK) != IOS27_EXPORT_KIND_REGULAR) ||
             ((flags & IOS27_EXPORT_REEXPORT) &&
              (flags & IOS27_EXPORT_STUB_RESOLVER)))
             return -1;
@@ -89,7 +93,8 @@ static int walk(walker *ctx, size_t offset,
         exp->flags = flags;
         if ((flags & IOS27_EXPORT_REEXPORT) != 0u) {
             size_t start, length;
-            if (read_uleb(ctx->trie, terminal_end, &pos, &exp->ordinal))
+            if (read_uleb(ctx->trie, terminal_end, &pos, &exp->ordinal) ||
+                exp->ordinal == 0u)
                 return -1;
             start = pos;
             while (pos < terminal_end && ctx->trie[pos] != 0u) ++pos;
@@ -138,10 +143,14 @@ static int walk(walker *ctx, size_t offset,
 
 const ios27_export *ios27_exports_find(const ios27_exports *exports,
                                        const char *symbol_name) {
-    if (!exports || !symbol_name) return NULL;
-    for (size_t i = 0; i < exports->count; ++i)
+    if (!exports || !symbol_name || exports->count > IOS27_MAX_EXPORTS ||
+        !memchr(symbol_name, '\0', IOS27_EXPORT_NAME_MAX)) return NULL;
+    for (size_t i = 0; i < exports->count; ++i) {
+        if (!memchr(exports->entries[i].name, '\0', IOS27_EXPORT_NAME_MAX))
+            return NULL;
         if (strcmp(exports->entries[i].name, symbol_name) == 0)
             return &exports->entries[i];
+    }
     return NULL;
 }
 
@@ -201,4 +210,68 @@ int ios27_exports_parse(const uint8_t *image, size_t size,
     out->has_trie = 1u;
     if (error && error_capacity) error[0] = '\0';
     return 0;
+}
+
+
+/* Color-marked DFS rejects cyclic and out-of-range dependency graphs before
+ * any symbol lookup. At most 32 nodes bound the recursion and stack. */
+static int check_graph(const ios27_export_library *libs, size_t count,
+                       size_t node, uint8_t colors[IOS27_EXPORT_MAX_LIBRARIES]) {
+    const ios27_export_library *lib = &libs[node];
+    if (colors[node] == 1u) return -1;
+    if (colors[node] == 2u) return 0;
+    if (!lib->exports || lib->exports->count > IOS27_MAX_EXPORTS ||
+        lib->dependency_count > IOS27_EXPORT_MAX_LIBRARIES ||
+        (lib->dependency_count && !lib->dependencies))
+        return -1;
+    colors[node] = 1u;
+    for (size_t i = 0; i < lib->dependency_count; ++i) {
+        size_t child = lib->dependencies[i];
+        if (child >= count || check_graph(libs, count, child, colors))
+            return -1;
+    }
+    colors[node] = 2u;
+    return 0;
+}
+
+int ios27_exports_resolve(const ios27_export_library *libraries,
+                          size_t library_count, size_t library_index,
+                          const char *symbol_name,
+                          ios27_export_resolution *out,
+                          char *error, size_t error_capacity) {
+    uint8_t colors[IOS27_EXPORT_MAX_LIBRARIES] = {0};
+    const char *name = symbol_name;
+    size_t current = library_index;
+    if (!out) return fail(error, error_capacity, "null resolution output");
+    memset(out, 0, sizeof(*out));
+    if (!libraries || library_count == 0u ||
+        library_count > IOS27_EXPORT_MAX_LIBRARIES ||
+        library_index >= library_count || !name ||
+        !memchr(name, '\0', IOS27_EXPORT_NAME_MAX) || !name[0])
+        return fail(error, error_capacity, "invalid export resolution input");
+    for (size_t i = 0; i < library_count; ++i) {
+        if (check_graph(libraries, library_count, i, colors))
+            return fail(error, error_capacity, "invalid or cyclic dependency graph");
+    }
+    /* Each reexport follows one DAG edge, so hops cannot exceed node count. */
+    for (size_t hop = 0; hop < library_count; ++hop) {
+        const ios27_export_library *lib = &libraries[current];
+        const ios27_export *entry = ios27_exports_find(lib->exports, name);
+        if (!entry) {
+            if (error && error_capacity) error[0] = '\0';
+            return 1; /* exported symbol is absent */
+        }
+        if (!(entry->flags & IOS27_EXPORT_REEXPORT)) {
+            out->symbol = entry;
+            out->library_index = current;
+            if (error && error_capacity) error[0] = '\0';
+            return 0;
+        }
+        if (!entry->ordinal || entry->ordinal > lib->dependency_count ||
+            !memchr(entry->imported_name, '\0', IOS27_EXPORT_NAME_MAX))
+            return fail(error, error_capacity, "invalid reexport ordinal or alias");
+        current = lib->dependencies[(size_t)entry->ordinal - 1u];
+        if (entry->imported_name[0]) name = entry->imported_name;
+    }
+    return fail(error, error_capacity, "reexport hop limit exceeded");
 }
