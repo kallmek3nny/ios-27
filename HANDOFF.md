@@ -1,8 +1,8 @@
-# ios-27 development handoff | phase 13 complete -> phase 14
+# ios-27 development handoff | phase 14 native GOT relocation tests verified
 
-**Updated:** 2026-10-26
+**Updated:** 2026-10-27
 **Repo:** https://github.com/kallmek3nny/ios-27
-**Last verified main:** 3f3a12d2b15903d085076a5649cd27cdd9f43b6b
+**Last verified main at phase 14 start:** 5a8bc66433c7396356d259061944d21ffe0d12cf
 **Phase 13:** [PR #22](https://github.com/kallmek3nny/ios-27/pull/22), merged as 3f3a12d2b15903d085076a5649cd27cdd9f43b6b.
 Exact frozen PR head aa14543c0f06675c87cf45dd0dc50f9a6d5043f3 passed **both Ubuntu 24.04 x86_64 and ARM64 CI** run 40390271857, with 14 CTest suites. Recheck current main and open PRs before coding.
 
@@ -47,6 +47,14 @@ Research running Apple's **actual official iOS 27 SpringBoard, UIKit/SwiftUI/Cor
 - Patch routine validates alignment and signed BL branch range and updates only staged writable bytes after checks. Negative tests verify rollback and malformed metadata rejection.
 - On ARM64 Linux, tests copy the **trusted** separately compiled code sections into a private mapping, patch external call, switch RW to RX (no RWX) and execute the consumer returning 43 without CPU emulation. On x86_64, only validation and displacement tests run. All 14 CTest suites passed on both CI architectures.
 - **Not a real linked Darwin executable or iOS app.** A local attempt with installed Clang 17 / ld64.lld rejected macOS linkage with 'This version of lld does not support linking for platform macOS'. Do not claim a Mach-O MH_EXECUTE, a Darwin process, or Apple framework execution.
+
+## Phase 14 implementation status (verify PR CI before claiming completion)
+
+- Branch `phase14-compiler-darwin-got-relocations`: real SDK-free Clang-produced `ARM64_RELOC_GOT_LOAD_PAGE21` and `GOT_LOAD_PAGEOFF12` external relocations across separate Darwin MH_OBJECT files.
+- A narrow fail-closed validator handles instruction/relocation/symbol bounds and rejects arbitrary imports, arm64e, unexpected data/relocations and out-of-range ADRP targets. The patcher modifies only a caller-owned writable text copy, with no partial changes on failure.
+- A new x86_64 parsing/corruption test and ARM64 native execution test reads a separate `__TEXT,__const` value through a GOT slot. ARM64 maps text RW -> RX and the GOT/data RW -> R with host-page-sized independent protections.
+- `ld64.lld` 17 in local Linux toolchain still rejects `-platform_version macos` and other platform variants. This is **not** an MH_EXECUTE, linker, iOS application or Apple SpringBoard.
+- **CI evidence:** [GitHub Actions run 40491186357](https://github.com/kallmek3nny/ios-27/actions/runs/40491186357) passed **15/15 CTest suites on each runner**, Ubuntu 24.04 x86_64 and ARM64, on frozen code head \`4ea54b6d5835eaba1a9e8d97b35324ad25139bc3\`. The ARM64 runner actually executed the native cross-object GOT fixture. The PR head including this documentation update must also pass both CI jobs before merging.
 
 ## Phase 14 substantive next steps
 
