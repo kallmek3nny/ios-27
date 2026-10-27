@@ -318,6 +318,7 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     if (rd32(p + 4u) != size || rd32(p + 16u) != 0u ||
         bits & ~(IOS27_MACH_COMPLEX | UINT32_C(0xffff)) ||
         (remote_disposition != IOS27_MACH_COPY_SEND &&
+         remote_disposition != IOS27_MACH_MOVE_SEND &&
          remote_disposition != IOS27_MACH_MOVE_SEND_ONCE) ||
         (local_disposition != 0u &&
          local_disposition != IOS27_MACH_MAKE_SEND_ONCE) ||
@@ -325,7 +326,8 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
         return IOS27_MACH_UNSUPPORTED;
     dest_right = by_name(s, task, dest_name);
     dest = object_for(s, dest_right);
-    if (!dest || (remote_disposition == IOS27_MACH_COPY_SEND &&
+    if (!dest || ((remote_disposition == IOS27_MACH_COPY_SEND ||
+                   remote_disposition == IOS27_MACH_MOVE_SEND) &&
                   !dest_right->sends) ||
         (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE &&
          !dest_right->once))
@@ -355,6 +357,14 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
         if (!may_arrive(s, receiver, desc_obj, 0))
             return IOS27_MACH_LIMIT;
     }
+    /*
+     * Both the destination and its descriptor can MOVE_SEND the *same*
+     * task-local name. A single uref cannot satisfy two moves; check the
+     * combined debit before touching the queue, pending credit or sender.
+     */
+    if (desc_move && remote_disposition == IOS27_MACH_MOVE_SEND &&
+        descriptor_right == dest_right && dest_right->sends < 2u)
+        return IOS27_MACH_BAD_RIGHT;
     if (dest->count == IOS27_MACH_QUEUE_MAX)
         return IOS27_MACH_TIMEOUT;
     /* Preflight capacity for up to two distinct *new* local aliases. */
@@ -375,7 +385,10 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
         --descriptor_right->sends;
         prune(descriptor_right);
     }
-    if (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE) {
+    if (remote_disposition == IOS27_MACH_MOVE_SEND) {
+        --dest_right->sends;
+        prune(dest_right);
+    } else if (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE) {
         --dest_right->once;
         prune(dest_right);
     }
@@ -417,7 +430,9 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
         (msg->descriptor_object && (!descriptor || !descriptor->pending_sends)))
         return IOS27_MACH_BAD_RIGHT;
     memcpy(output, msg->bytes, msg->length);
-    wr32(output, rd32(output) & IOS27_MACH_COMPLEX);
+    /* The received remote name carries the granted send-once disposition. */
+    wr32(output, (rd32(output) & IOS27_MACH_COMPLEX) |
+                 (reply ? IOS27_MACH_MOVE_SEND_ONCE : 0u));
     wr32(output + 8u, reply ? reply->name : 0u);
     wr32(output + 12u, receive_name);
     if (descriptor) {
