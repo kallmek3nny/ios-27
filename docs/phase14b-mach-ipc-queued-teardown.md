@@ -8,7 +8,7 @@ this phase remains a **single-process synthetic mach fixture**. it does not impl
 
 originally, `ios27_mach_v2_destroy` and `ios27_mach_v2_task_teardown` rejected *all* outstanding pending credits, including send and send-once credits reserved by messages sitting **inside the receive queue being destroyed**. this could make an otherwise valid task or port impossible to retire. a queued message may also carry both a port descriptor and a reply send-once transfer, potentially to the same object.
 
-retirement now precomputes the exact per-object credits represented in queues that will be discarded. the implementation then verifies **before mutating anything** that every pending local credit affected by the retirement has an owned queued message to cancel it. a pending grant in a *different live queue*, including another task's queue, still prevents retirement. once the preflight passes, the existing queue cancellation and rights revocation commits without further failure paths.
+retirement now precomputes the exact per-object credits represented in queues that will be discarded. for whole-task teardown, **only credits for ports owned by the retiring task** can be canceled, preserving the existing phase-11 contract that blocks teardown while the task has an incoming foreign-port transfer. single-port destruction may cancel credits in its own queue, but external live-queue grants still prevent destruction. the implementation verifies these conditions **before mutating anything**. once the preflight passes, the existing queue cancellation and rights revocation commits without further failure paths.
 
 ## regression coverage
 
