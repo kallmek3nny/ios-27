@@ -129,6 +129,86 @@ static void test_load_command_inspection(void) {
                                    error, sizeof(error)) == -1);
 }
 
+
+static void test_guest_catalog(void) {
+    uint8_t image[IMAGE_BYTES];
+    ios27_dyld_image_metadata meta;
+    ios27_dyld_catalog_match match;
+    char error[128];
+    const char *catalog[] = {
+        "/App/Frameworks/Z.framework/Z",
+        "/System/Library/Frameworks/Z.framework/Z",
+        "/App/Frameworks/Other.framework/Other"
+    };
+    const char *second[] = { "/System/Library/Frameworks/Z.framework/Z" };
+    const char *dup[] = {
+        "/App/Frameworks/Z.framework/Z",
+        "/App//Frameworks/./Z.framework/Z"
+    };
+    const char *bad[] = { "/App/Frameworks/Z.framework/Z", "/../../unsafe" };
+    size_t p;
+    create_image(image);
+    p = append_name_command(image, 32u, IOS27_DYLD_LC_RPATH,
+                            "@executable_path/Frameworks");
+    p = append_name_command(image, p, IOS27_DYLD_LC_RPATH,
+                            "/System/Library/Frameworks");
+    p = append_name_command(image, p, IOS27_DYLD_LC_LOAD_WEAK_DYLIB,
+                            "@rpath/Z.framework/Z");
+    finish_image(image, p, 3u);
+    assert(ios27_dyld_inspect_image(image, sizeof(image), &meta,
+                                   error, sizeof(error)) == 0);
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, 3u, &match, error,
+                                       sizeof(error)) == 0);
+    assert(match.image_index == 0u && match.candidate_index == 0u);
+    assert(strcmp(match.guest_path, catalog[0]) == 0);
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       second, 1u, &match, error,
+                                       sizeof(error)) == 0);
+    assert(match.image_index == 0u && match.candidate_index == 1u);
+    assert(strcmp(match.guest_path, second[0]) == 0);
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       NULL, 0u, &match, error,
+                                       sizeof(error)) == 1);
+    assert(match.guest_path[0] == '\0' && error[0] == '\0');
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       dup, 2u, &match, error,
+                                       sizeof(error)) == -1);
+    assert(match.guest_path[0] == '\0');
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       bad, 2u, &match, error,
+                                       sizeof(error)) == -1);
+    assert(match.guest_path[0] == '\0');
+
+    /* Invalid late runpath rolls back even after a first candidate matched. */
+    strcpy(meta.rpaths[1], "@rpath/nested");
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, 3u, &match, error,
+                                       sizeof(error)) == -1);
+    assert(match.guest_path[0] == '\0');
+    strcpy(meta.rpaths[1], "/System/Library/Frameworks");
+
+    assert(ios27_dyld_match_dependency(&meta, 1u, "/App/Z", "/App/Main",
+                                       catalog, 3u, &match, error,
+                                       sizeof(error)) == -1);
+    meta.dependency_count = IOS27_DYLD_MAX_DEPENDENCIES + 1u;
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, 3u, &match, error,
+                                       sizeof(error)) == -1);
+    meta.dependency_count = 1u;
+    meta.rpath_count = IOS27_DYLD_MAX_CANDIDATES + 1u;
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, 3u, &match, error,
+                                       sizeof(error)) == -1);
+    meta.rpath_count = 2u;
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, IOS27_DYLD_MAX_DEPENDENCIES + 1u,
+                                       &match, error, sizeof(error)) == -1);
+    assert(ios27_dyld_match_dependency(&meta, 0u, "/App/Z", "/App/Main",
+                                       catalog, 3u, NULL, error,
+                                       sizeof(error)) == -1);
+}
+
 int main(void) {
     ios27_dyld_candidates out;
     char error[128];
@@ -223,6 +303,7 @@ int main(void) {
     assert(ios27_dyld_paths("/ok", loader, exe,
                             NULL, 0u, &out, NULL, 0u) == 0);
     test_load_command_inspection();
+    test_guest_catalog();
     puts("dyld path tests passed");
     return 0;
 }

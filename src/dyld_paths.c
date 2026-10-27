@@ -233,3 +233,55 @@ int ios27_dyld_inspect_image(const uint8_t *image, size_t size,
     if (error && error_size) error[0] = '\0';
     return 0;
 }
+
+
+int ios27_dyld_match_dependency(const ios27_dyld_image_metadata *metadata,
+                                 size_t dependency_index,
+                                 const char *loader_image,
+                                 const char *main_executable,
+                                 const char *const *guest_image_paths,
+                                 size_t image_count,
+                                 ios27_dyld_catalog_match *out,
+                                 char *error, size_t error_size) {
+    ios27_dyld_candidates candidates;
+    const char *rpaths[IOS27_DYLD_MAX_CANDIDATES];
+    char normalized[IOS27_DYLD_MAX_DEPENDENCIES][IOS27_DYLD_PATH_MAX];
+    if (!out) return fail(error, error_size, "null catalog match output");
+    memset(out, 0, sizeof(*out));
+    if (!metadata ||
+        metadata->rpath_count > IOS27_DYLD_MAX_CANDIDATES ||
+        metadata->dependency_count > IOS27_DYLD_MAX_DEPENDENCIES ||
+        dependency_index >= metadata->dependency_count ||
+        !dependency_command(metadata->dependencies[dependency_index].command) ||
+        image_count > IOS27_DYLD_MAX_DEPENDENCIES ||
+        (image_count && !guest_image_paths))
+        return fail(error, error_size, "invalid dyld catalog input");
+    for (size_t i = 0; i < metadata->rpath_count; ++i)
+        rpaths[i] = metadata->rpaths[i];
+    if (ios27_dyld_paths(metadata->dependencies[dependency_index].install_name,
+                         loader_image, main_executable, rpaths,
+                         metadata->rpath_count, &candidates, error, error_size))
+        return -1;
+    /* Validate entire catalog first, not just entries near a match. */
+    for (size_t i = 0; i < image_count; ++i) {
+        if (absolute_normalize(guest_image_paths[i], normalized[i]))
+            return fail(error, error_size, "unsafe guest image catalog path");
+        for (size_t j = 0; j < i; ++j)
+            if (strcmp(normalized[i], normalized[j]) == 0)
+                return fail(error, error_size, "duplicate guest image catalog path");
+    }
+    for (size_t candidate = 0; candidate < candidates.count; ++candidate) {
+        for (size_t image = 0; image < image_count; ++image) {
+            if (strcmp(candidates.paths[candidate], normalized[image]) == 0) {
+                out->image_index = image;
+                out->candidate_index = candidate;
+                (void)snprintf(out->guest_path, sizeof(out->guest_path),
+                               "%s", candidates.paths[candidate]);
+                if (error && error_size) error[0] = '\0';
+                return 0;
+            }
+        }
+    }
+    if (error && error_size) error[0] = '\0';
+    return 1; /* not available in guest catalog */
+}
