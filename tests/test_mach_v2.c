@@ -242,11 +242,165 @@ static void name_and_right_limits(void) {
            IOS27_MACH_BAD_RIGHT);
     ios27_mach_v2_free(s);
 }
+
+/* In-flight credits in the port being destroyed are canceled, not treated
+ * as foreign grants. Cover simultaneous reply and send descriptor credits. */
+static void destroy_queued_self_grants(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port, send_name, remote, fresh;
+    uint8_t p[IOS27_MACH_MSG_MAX];
+    size_t n;
+    uint32_t sends, once;
+    unsigned receive;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 1u, &send_name) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &remote) ==
+           IOS27_MACH_OK);
+    n = message(p, send_name, IOS27_MACH_COPY_SEND |
+                (IOS27_MACH_MAKE_SEND_ONCE << 8u), port, 111u);
+    descriptor(p, send_name, IOS27_MACH_COPY_SEND);
+    wr32(p, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND |
+         (IOS27_MACH_MAKE_SEND_ONCE << 8u));
+    n = 40u;
+    assert(ios27_mach_v2_send(s, 1u, p, n, 0u) == IOS27_MACH_OK);
+    /* Previously this was rejected by a pending credit in its own queue. */
+    assert(ios27_mach_v2_destroy(s, 1u, port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_rights(s, 1u, port, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_rights(s, 1u, send_name, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_rights(s, 2u, remote, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_allocate(s, 1u, &fresh) == IOS27_MACH_OK);
+    assert(fresh != port && fresh != send_name);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &remote) ==
+           IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
+static void teardown_queued_multiport_grants(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t inbox, target, send_inbox, send_target, other_name;
+    uint8_t p[IOS27_MACH_MSG_MAX];
+    uint32_t sends, once;
+    unsigned receive;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 1u, &target) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, inbox, 1u, &send_inbox) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, target, 1u, &send_target) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, target, 2u, &other_name) ==
+           IOS27_MACH_OK);
+    (void)message(p, send_inbox, IOS27_MACH_COPY_SEND |
+                  (IOS27_MACH_MAKE_SEND_ONCE << 8u), target, 222u);
+    descriptor(p, send_target, IOS27_MACH_MOVE_SEND);
+    wr32(p, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND |
+         (IOS27_MACH_MAKE_SEND_ONCE << 8u));
+    assert(ios27_mach_v2_send(s, 1u, p, 40u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_rights(s, 2u, other_name,
+                                 &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+/* The destination task must never cancel credits reserved in a foreign
+ * live queue. Failed teardown must preserve all rights and queued data. */
+static void teardown_foreign_queue_is_atomic(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t target, inbox, target_in_task2, send_inbox, received;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &target) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 2u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, target, 2u,
+                                   &target_in_task2) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 2u, inbox, 2u, &send_inbox) ==
+           IOS27_MACH_OK);
+    (void)message(p, send_inbox, IOS27_MACH_COPY_SEND, 0u, 333u);
+    descriptor(p, target_in_task2, IOS27_MACH_MOVE_SEND);
+    assert(ios27_mach_v2_send(s, 2u, p, 40u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_destroy(s, 1u, target) == IOS27_MACH_BAD_RIGHT);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, inbox, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(cap == 40u && rd32(out + 20u) == 333u);
+    received = rd32(out + 28u);
+    check(s, 2u, received, 1u, 0u, 0u);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_drop_send(s, 2u, received) ==
+           IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
+static void deterministic_port_exhaustion(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t names[IOS27_MACH_PORT_MAX], owners[IOS27_MACH_PORT_MAX];
+    uint32_t replacement = 0u;
+    assert(s);
+    for (uint32_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+        owners[i] = 1u + i % IOS27_MACH_TASK_MAX;
+        assert(ios27_mach_v2_allocate(s, owners[i], &names[i]) ==
+               IOS27_MACH_OK);
+    }
+    assert(ios27_mach_v2_allocate(s, 1u, &replacement) == IOS27_MACH_LIMIT);
+    assert(ios27_mach_v2_destroy(s, owners[0], names[0]) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, owners[0], &replacement) ==
+           IOS27_MACH_OK);
+    assert(replacement != names[0]);
+    assert(ios27_mach_v2_destroy(s, owners[0], names[0]) ==
+           IOS27_MACH_BAD_RIGHT);
+    for (uint32_t i = 1u; i < IOS27_MACH_PORT_MAX; ++i)
+        assert(ios27_mach_v2_destroy(s, owners[i], names[i]) ==
+               IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, owners[0], replacement) ==
+           IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+static void malformed_wire_stress(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port, sender;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &sender) ==
+           IOS27_MACH_OK);
+    for (uint32_t i = 0u; i < 512u; ++i) {
+        size_t n = message(p, sender, IOS27_MACH_COPY_SEND, 0u, i);
+        switch (i % 4u) {
+            case 0u: wr32(p + 16u, i + 1u); break;
+            case 1u: wr32(p + 4u, 28u); break;
+            case 2u: wr32(p, IOS27_MACH_COPY_SEND | UINT32_C(0x10000)); break;
+            default: wr32(p + 8u, sender + 10000u); break;
+        }
+        assert(ios27_mach_v2_send(s, 2u, p, n, 0u) != IOS27_MACH_OK);
+        check(s, 2u, sender, 1u, 0u, 0u);
+        cap = sizeof(out);
+        assert(ios27_mach_v2_receive(s, 1u, port, out, &cap, 0u) ==
+               IOS27_MACH_TIMEOUT);
+    }
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
     local_names_and_reply();
     descriptor_and_collision();
     atomic_full_queue_and_validation();
     name_and_right_limits();
+    destroy_queued_self_grants();
+    teardown_queued_multiport_grants();
+    teardown_foreign_queue_is_atomic();
+    deterministic_port_exhaustion();
+    malformed_wire_stress();
     puts("phase 10 task-local Mach namespaces/reply tests passed");
     return 0;
 }
