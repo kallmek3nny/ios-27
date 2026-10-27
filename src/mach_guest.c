@@ -51,3 +51,37 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
     *actual = (uint32_t)n;
     return IOS27_MACH_OK;
 }
+
+
+/*
+ * Keep the length result inside the same validated guest-virtual arena.
+ * A disjoint four-byte slot is reserved before the Mach fixture is called,
+ * so a successful dequeue can never be followed by a failed guest write.
+ */
+int ios27_mach_guest_call_offset(ios27_mach_v2 *space, uint32_t task,
+                                 uint32_t operation, uint32_t receive_name,
+                                 uint8_t *guest, size_t guest_size,
+                                 uint64_t guest_offset, uint64_t length,
+                                 uint32_t timeout_ms, uint64_t actual_offset) {
+    uint32_t actual = 0u;
+    int result;
+    if (!guest || actual_offset > (uint64_t)guest_size ||
+        (uint64_t)guest_size - actual_offset < sizeof(actual) ||
+        guest_offset > (uint64_t)guest_size ||
+        length > (uint64_t)guest_size - guest_offset ||
+        length > IOS27_MACH_MSG_MAX)
+        return IOS27_MACH_BAD_ARGUMENT;
+    /* No guest result store may overwrite the wire input or output span. */
+    if (guest_offset < actual_offset + sizeof(actual) &&
+        actual_offset < guest_offset + length)
+        return IOS27_MACH_BAD_ARGUMENT;
+
+    result = ios27_mach_guest_call(space, task, operation, receive_name,
+                                   guest, guest_size, guest_offset, length,
+                                   timeout_ms, &actual);
+    if (result == IOS27_MACH_OK || result == IOS27_MACH_TOO_LARGE) {
+        for (unsigned i = 0u; i < sizeof(actual); ++i)
+            guest[(size_t)actual_offset + i] = (uint8_t)(actual >> (8u * i));
+    }
+    return result;
+}
