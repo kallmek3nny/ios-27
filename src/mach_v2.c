@@ -199,6 +199,19 @@ int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
     *receive = r->receive;
     return IOS27_MACH_OK;
 }
+/* Compute the exact pending credits that discarding these messages will
+ * cancel. Credits may be canceled only when their destination queue itself
+ * is being retired; grants waiting in a different live queue are immutable. */
+static void discarded_credits(const port_object *port,
+                              uint16_t sends[IOS27_MACH_PORT_MAX],
+                              uint16_t once[IOS27_MACH_PORT_MAX]) {
+    for (size_t i = 0u; i < port->count; ++i) {
+        const queued_wire *m =
+            &port->queue[(port->head + i) % IOS27_MACH_QUEUE_MAX];
+        if (m->descriptor_object) ++sends[m->descriptor_object - 1u];
+        if (m->reply_object) ++once[m->reply_object - 1u];
+    }
+}
 static void cancel_pending(ios27_mach_v2 *s, uint32_t task, uint8_t obj,
                            int once) {
     local_right *r = by_object(s, task, obj);
@@ -221,10 +234,17 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     index = right->object;
     obj = object_for(s, right);
     if (!obj) return IOS27_MACH_BAD_RIGHT;
-    /* Do not invalidate a port that another queued message will grant. */
+    /* Pending grants from this port's own queue are discarded with it.
+     * Grants from any other live queue must still block destruction. */
+    uint16_t canceled_sends[IOS27_MACH_PORT_MAX] = {0};
+    uint16_t canceled_once[IOS27_MACH_PORT_MAX] = {0};
+    discarded_credits(obj, canceled_sends, canceled_once);
     for (uint32_t task = 1u; task <= IOS27_MACH_TASK_MAX; ++task) {
-        local_right *r = by_object(s, task, index);
-        if (r && (r->pending_sends || r->pending_once))
+        const local_right *r = by_object(s, task, index);
+        if (r && (r->pending_sends !=
+                  (task == owner ? canceled_sends[index - 1u] : 0u) ||
+                  r->pending_once !=
+                  (task == owner ? canceled_once[index - 1u] : 0u)))
             return IOS27_MACH_BAD_RIGHT;
     }
     for (size_t i = 0u; i < obj->count; ++i) {
@@ -242,31 +262,45 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     return IOS27_MACH_OK;
 }
 /*
- * Transactional synthetic task cleanup. A queued cross-task grant must
- * never lose its reserved destination credit. Refuse teardown of any task
- * with outstanding inbound rights or any live grant targeting one of its
- * receive ports. This conservative policy intentionally avoids XNU's
- * dead-name/notification semantics rather than silently simulating them.
+ * Transactional synthetic task cleanup. Cancel only grants in queues
+ * owned by the retiring task; any grant waiting in a foreign live queue
+ * must keep teardown from silently invalidating its destination credit.
+ * This does not model XNU dead-name/notification behavior.
  */
 int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
     uint8_t owned[IOS27_MACH_PORT_MAX] = {0};
+    uint16_t canceled_sends[IOS27_MACH_PORT_MAX] = {0};
+    uint16_t canceled_once[IOS27_MACH_PORT_MAX] = {0};
     if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
 
-    for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
-        const local_right *r = &s->names[TASK_INDEX(task)][i];
-        if (r->object && (r->pending_sends || r->pending_once))
-            return IOS27_MACH_BAD_RIGHT;
-    }
     for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
         const port_object *obj = &s->ports[i];
         if (obj->alive && obj->owner == task) {
-            uint8_t index = (uint8_t)(i + 1u);
             owned[i] = 1u;
-            for (uint32_t other = 1u; other <= IOS27_MACH_TASK_MAX; ++other) {
-                const local_right *r = by_object(s, other, index);
-                if (r && (r->pending_sends || r->pending_once))
-                    return IOS27_MACH_BAD_RIGHT;
-            }
+            discarded_credits(obj, canceled_sends, canceled_once);
+        }
+    }
+    /* Only credits for ports this task owns may be canceled by tearing
+     * down its queues. Transfers of foreign-owned rights stay guarded by
+     * the phase-11 ABI contract, even if their message is queued locally. */
+    for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
+        const local_right *r = &s->names[TASK_INDEX(task)][i];
+        if (!r->object) continue;
+        if (!owned[r->object - 1u]) {
+            if (r->pending_sends || r->pending_once)
+                return IOS27_MACH_BAD_RIGHT;
+        } else if (r->pending_sends != canceled_sends[r->object - 1u] ||
+                   r->pending_once != canceled_once[r->object - 1u]) {
+            return IOS27_MACH_BAD_RIGHT;
+        }
+    }
+    for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+        if (!owned[i]) continue;
+        for (uint32_t other = 1u; other <= IOS27_MACH_TASK_MAX; ++other) {
+            const local_right *r = by_object(s, other, (uint8_t)(i + 1u));
+            if (other != task && r &&
+                (r->pending_sends || r->pending_once))
+                return IOS27_MACH_BAD_RIGHT;
         }
     }
     /* From here on there is no possible failure: cancel queued grants
