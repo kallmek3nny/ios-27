@@ -280,14 +280,19 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
             discarded_credits(obj, canceled_sends, canceled_once);
         }
     }
-    /* Every incoming credit to this task must be consumed by discarding
-     * its own queues; otherwise another task owns the queued transfer. */
+    /* Only credits for ports this task owns may be canceled by tearing
+     * down its queues. Transfers of foreign-owned rights stay guarded by
+     * the phase-11 ABI contract, even if their message is queued locally. */
     for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
         const local_right *r = &s->names[TASK_INDEX(task)][i];
-        if (r->object &&
-            (r->pending_sends != canceled_sends[r->object - 1u] ||
-             r->pending_once != canceled_once[r->object - 1u]))
+        if (!r->object) continue;
+        if (!owned[r->object - 1u]) {
+            if (r->pending_sends || r->pending_once)
+                return IOS27_MACH_BAD_RIGHT;
+        } else if (r->pending_sends != canceled_sends[r->object - 1u] ||
+                   r->pending_once != canceled_once[r->object - 1u]) {
             return IOS27_MACH_BAD_RIGHT;
+        }
     }
     for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
         if (!owned[i]) continue;
