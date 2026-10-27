@@ -41,10 +41,13 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *space, uint32_t owner,
 int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
 
 /*
- * Header bits: remote disposition COPY_SEND(19) or MOVE_SEND_ONCE(18).
+ * Header bits: remote disposition MOVE_SEND(17), MOVE_SEND_ONCE(18),
+ * or COPY_SEND(19). MOVE_SEND consumes one local send uref only after
+ * successful enqueue; a combined destination+descriptor move needs two.
  * Optional local disposition MAKE_SEND_ONCE(21) in bits 8..15 with
  * a sender-owned receive name in header.local_port; receiver obtains a
- * task-local reply send-once name in received header.remote_port.
+ * task-local reply send-once name in received header.remote_port, with
+ * MOVE_SEND_ONCE in the received remote disposition bits.
  * Optionally one port descriptor carries COPY_SEND or MOVE_SEND.
  *
  * No OOL, trailers, port sets, vouchers, send-once descriptor, kernel RPC,
