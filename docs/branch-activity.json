@@ -3,9 +3,40 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "4c4667700fdb5d716c934f0d577c858caaf042b2",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 4,
-  "candidate_count": 4,
+  "candidates_checked": 5,
+  "candidate_count": 5,
   "candidates": [
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "f0103e9f210614b6f7a5be516783013ab5dfaf19",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "pr_number": 69,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 869,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_destroy",
+            "ios27_21a_validate"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-arm64-darwin.c",
+            "tests/phase21a-boundaries.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase21e-tls-cancel-20261028",
       "sha": "396e20c32030754aa91ae82dde8103315293b9f0",
@@ -46,37 +77,6 @@
       ]
     },
     {
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "5aee76bb3f7e9dc36f00207fa144672a20d75863",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "pr_number": 69,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 767,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21a_call",
-            "ios27_21a_create",
-            "ios27_21a_destroy",
-            "ios27_21a_validate"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21a_abi.h",
-            "src/libsystem21a_abi.c",
-            "tests/phase21a-arm64-darwin.c",
-            "tests/phase21a-boundaries.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase21c-pthread-sync-20261028",
       "sha": "a8da7a3a183a4a4c323ed5911682f09f6a0fe4dc",
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
@@ -111,6 +111,37 @@
             "src/libsystem21c_sync.c",
             "tests/phase21c-darwin-abi.c",
             "tests/phase21c-native.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "914b2400989901440d3403719dc715bdbefe7a74",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 869,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_destroy",
+            "ios27_21a_validate"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-arm64-darwin.c",
+            "tests/phase21a-boundaries.c"
           ]
         }
       ]
@@ -157,15 +188,15 @@
   "groups": {
     "libsystem-host-model": [
       {
-        "branch": "phase21e-tls-cancel-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/72",
+        "branch": "phase21a/darwin-pthread-abi-bridge",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 4,
         "ci": "running"
       },
       {
-        "branch": "phase21a/darwin-pthread-abi-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+        "branch": "phase21e-tls-cancel-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/72",
         "source_files": 2,
         "fixture_files": 4,
         "ci": "running"
@@ -176,6 +207,13 @@
         "source_files": 2,
         "fixture_files": 4,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21a/darwin-pthread-abi-bridge",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
+        "source_files": 2,
+        "fixture_files": 4,
+        "ci": "not_checked"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -474,5 +512,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:54:23Z"
+  "observed_at": "2026-10-28T19:54:53Z"
 }

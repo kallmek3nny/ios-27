@@ -4,7 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **4** · audited base: `4c4667700fdb`
+candidate branches with mapped changes: **5** · audited base: `4c4667700fdb`
+
+### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
+
+head: `f0103e9f2106` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +869/-0 lines
+  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
 
 ### [phase21e-tls-cancel-20261028](https://github.com/kallmek3nny/ios-27/pull/72)
 
@@ -13,19 +20,19 @@ head: `396e20c32030` · ci: **running** · unmerged, not credited.
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +975/-0 lines
   - candidate declarations: `ios27_21e_attach`, `ios27_21e_cancel_checkpoint`, `ios27_21e_cancel_register`, `ios27_21e_cancel_request`, `ios27_21e_cancel_setstate`, `ios27_21e_cancel_unregister`, `ios27_21e_cleanup_pop`, `ios27_21e_cleanup_push`, `ios27_21e_cleanup_unwind`, `ios27_21e_create`, `ios27_21e_destroy`, `ios27_21e_getspecific`
 
-### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
-
-head: `5aee76bb3f7e` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +767/-0 lines
-  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
-
 ### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
 
 head: `a8da7a3a183a` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +794/-0 lines
   - candidate declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
+
+### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge)
+
+head: `914b24009899` · ci: **not_checked** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +869/-0 lines
+  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once)
 
