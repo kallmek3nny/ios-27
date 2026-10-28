@@ -165,7 +165,11 @@ int ios27_21i_verify(ios27_21i_runtime *rt, uint64_t addr,
     (void)pthread_mutex_unlock(&rt->guard);
     return rc;
 }
-struct operation { ios27_21i_runtime *rt; struct entry *a, *b; };
+struct operation {
+    ios27_21i_runtime *rt;
+    struct entry *a, *b;
+    ios27_21c_handle primary, mutex;
+};
 static void release_operation(void *arg) {
     struct operation *op = arg;
     (void)pthread_mutex_lock(&op->rt->guard);
@@ -215,7 +219,6 @@ int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
     struct entry *e, *m = NULL;
     struct operation op;
     struct timespec deadline;
-    ios27_21c_handle primary, mutex = {0, 0};
     int kind, rc;
     if (!rt || !symbol) return EINVAL;
     for (size_t i = 0; i < sizeof(symbols)/sizeof(symbols[0]); ++i)
@@ -243,21 +246,21 @@ int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
         return EINVAL;
     }
     ++e->refs;
-    primary = e->backend;
-    if (m) { ++m->refs; mutex = m->backend; }
+    if (m) ++m->refs;
     (void)pthread_mutex_unlock(&rt->guard);
-    op = (struct operation){rt, e, m};
+    op = (struct operation){rt, e, m, e->backend, m ? m->backend :
+                                       (ios27_21c_handle){0, 0}};
     pthread_cleanup_push(release_operation, &op);
     switch (action) {
-    case LOCK: rc = ios27_21c_mutex_lock(rt->sync, primary); break;
-    case TRYLOCK: rc = ios27_21c_mutex_trylock(rt->sync, primary); break;
-    case UNLOCK: rc = ios27_21c_mutex_unlock(rt->sync, primary); break;
-    case WAIT: rc = ios27_21c_cond_wait(rt->sync, primary, mutex); break;
+    case LOCK: rc = ios27_21c_mutex_lock(rt->sync, op.primary); break;
+    case TRYLOCK: rc = ios27_21c_mutex_trylock(rt->sync, op.primary); break;
+    case UNLOCK: rc = ios27_21c_mutex_unlock(rt->sync, op.primary); break;
+    case WAIT: rc = ios27_21c_cond_wait(rt->sync, op.primary, op.mutex); break;
     case TIMEDWAIT:
-        rc = ios27_21c_cond_timedwait(rt->sync, primary, mutex,
+        rc = ios27_21c_cond_timedwait(rt->sync, op.primary, op.mutex,
                                      IOS27_21C_REALTIME, &deadline); break;
-    case SIGNAL: rc = ios27_21c_cond_signal(rt->sync, primary); break;
-    case BROADCAST: rc = ios27_21c_cond_broadcast(rt->sync, primary); break;
+    case SIGNAL: rc = ios27_21c_cond_signal(rt->sync, op.primary); break;
+    case BROADCAST: rc = ios27_21c_cond_broadcast(rt->sync, op.primary); break;
     default: rc = ENOSYS; break;
     }
     pthread_cleanup_pop(1);
