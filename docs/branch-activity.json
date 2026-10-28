@@ -3,8 +3,8 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "dd39b31675943da242866870fa133461c8bade3b",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 6,
-  "candidate_count": 6,
+  "candidates_checked": 7,
+  "candidate_count": 7,
   "candidates": [
     {
       "branch": "phase21j-deterministic-sync-diagnostics",
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 4,
           "fixture_files": 4,
-          "additions": 1138,
+          "additions": 1140,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21j_acquire",
@@ -50,7 +50,7 @@
       "sha": "fc54d597e0aeab19b7f7f33bcb4383ca2b8c054c",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "pr_number": 80,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 8,
       "possibly_truncated": false,
@@ -237,6 +237,45 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "6409023242bb6212ba2e8f1e376b5fc79983f9f6",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
+      "pr_number": null,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 10,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 4,
+          "fixture_files": 4,
+          "additions": 1140,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21j_acquire",
+            "ios27_21j_acquire_injected",
+            "ios27_21j_create",
+            "ios27_21j_destroy",
+            "ios27_21j_note_contention",
+            "ios27_21j_probe",
+            "ios27_21j_read",
+            "ios27_21j_record",
+            "ios27_21j_release",
+            "ios27_21j_schedule_create",
+            "ios27_21j_schedule_destroy",
+            "ios27_21j_schedule_snapshot"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21j_diagnostics.h",
+            "include/ios27/libsystem21j_schedule.h",
+            "src/libsystem21j_diagnostics.c",
+            "src/libsystem21j_schedule.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -253,7 +292,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/80",
         "source_files": 2,
         "fixture_files": 4,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21f-fifo-mutex-20261028",
@@ -282,6 +321,13 @@
         "source_files": 1,
         "fixture_files": 4,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21j-deterministic-sync-diagnostics",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
+        "source_files": 4,
+        "fixture_files": 4,
+        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -610,5 +656,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:22:59Z"
+  "observed_at": "2026-10-28T21:23:25Z"
 }
