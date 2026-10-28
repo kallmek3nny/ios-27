@@ -28,13 +28,13 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21a-") as d:
         out = Path(d)
         for optimization in ("-O0", "-O2"):
-            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c"):
+            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c"):
                 executable = out / (name + optimization)
                 run([cc, *flags, optimization, str(SRC), str(ROOT / "tests" / name),
                      "-o", str(executable)])
                 run([str(executable)])
         if os.environ.get("PHASE21A_SANITIZE") == "1":
-            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c"):
+            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c"):
                 executable = out / (name + "-sanitized")
                 run([cc, *flags, "-O1", "-g", "-fno-omit-frame-pointer",
                      "-fsanitize=address,undefined", str(SRC),
