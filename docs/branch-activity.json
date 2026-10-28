@@ -11,7 +11,7 @@
       "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/76",
       "pr_number": 76,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -48,7 +48,7 @@
       "sha": "7486c41b38e9bfa8e285c6576caf4707f44733f0",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 20,
       "possibly_truncated": false,
@@ -138,14 +138,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/76",
         "source_files": 1,
         "fixture_files": 4,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21a/darwin-pthread-abi-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 16,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -161,7 +161,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/76",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ],
     "objc-host-model": [
@@ -486,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:19:13Z"
+  "observed_at": "2026-10-28T20:19:42Z"
 }
