@@ -27,6 +27,8 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
     int status = IOS27_MACH_UNSUPPORTED;
 
     if (!space || !input || !output || !task ||
+        (uintptr_t)input % _Alignof(ios27_darwin_guest_registers) != 0u ||
+        (uintptr_t)output % _Alignof(ios27_darwin_guest_registers) != 0u ||
         task > IOS27_MACH_TASK_MAX ||
         (!arena && arena_size) ||
         overlap(input, sizeof(*input), output, sizeof(*output)) ||

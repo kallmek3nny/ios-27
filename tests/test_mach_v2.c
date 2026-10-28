@@ -556,6 +556,114 @@ static void rejected_wire_fuzz_is_side_effect_free(void) {
     ios27_mach_v2_free(s);
 }
 
+/* Phase 16C: forward a real pending reply capability across an intermediate
+ * synthetic task; queue exhaustion and malformed headers never spend it. */
+static void forward_send_once_three_tasks(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t service, relay, reply, to_service, to_relay, once, forwarded;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 2u, &relay) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &reply) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, service, 3u, &to_service) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 2u, relay, 1u, &to_relay) ==
+           IOS27_MACH_OK);
+    message(p, to_service, IOS27_MACH_COPY_SEND |
+            (IOS27_MACH_MAKE_SEND_ONCE << 8u), reply, 101u);
+    assert(ios27_mach_v2_send(s, 3u, p, 24u, 0u) == IOS27_MACH_OK);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, service, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    once = rd32(out + 8u);
+    check(s, 1u, once, 0u, 1u, 0u);
+
+    for (uint32_t i = 0u; i < IOS27_MACH_QUEUE_MAX; ++i) {
+        message(p, to_relay, IOS27_MACH_COPY_SEND, 0u, i + 10u);
+        assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) == IOS27_MACH_OK);
+    }
+    message(p, to_relay, IOS27_MACH_COPY_SEND |
+            (IOS27_MACH_MOVE_SEND_ONCE << 8u), once, 202u);
+    wr32(p + 16u, 1u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) ==
+           IOS27_MACH_UNSUPPORTED);
+    wr32(p + 16u, 0u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    check(s, 1u, once, 0u, 1u, 0u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, relay, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 10u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) == IOS27_MACH_OK);
+    /* The pending foreign-queue transfer blocks owner teardown. */
+    assert(ios27_mach_v2_task_teardown(s, 3u) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_drop_send_once(s, 1u, once) ==
+           IOS27_MACH_BAD_RIGHT);
+    for (uint32_t i = 1u; i < IOS27_MACH_QUEUE_MAX; ++i) {
+        cap = sizeof(out);
+        assert(ios27_mach_v2_receive(s, 2u, relay, out, &cap, 0u) ==
+               IOS27_MACH_OK);
+        assert(rd32(out + 20u) == i + 10u);
+    }
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, relay, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 202u);
+    forwarded = rd32(out + 8u);
+    check(s, 2u, forwarded, 0u, 1u, 0u);
+    message(p, forwarded, IOS27_MACH_MOVE_SEND_ONCE, 0u, 303u);
+    assert(ios27_mach_v2_send(s, 2u, p, 24u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_send(s, 2u, p, 24u, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 3u, reply, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 303u && rd32(out + 12u) == reply);
+    assert(ios27_mach_v2_destroy(s, 1u, service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 2u, relay) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 3u, reply) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+/* A single once right cannot be used both as destination and transferred
+ * local right. Rejection must not enqueue or consume that right. */
+static void once_double_debit_is_atomic(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t service, reply, to_service, once;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 2u, &reply) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, service, 2u, &to_service) ==
+           IOS27_MACH_OK);
+    message(p, to_service, IOS27_MACH_COPY_SEND |
+            (IOS27_MACH_MAKE_SEND_ONCE << 8u), reply, 404u);
+    assert(ios27_mach_v2_send(s, 2u, p, 24u, 0u) == IOS27_MACH_OK);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, service, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    once = rd32(out + 8u);
+    message(p, once, IOS27_MACH_MOVE_SEND_ONCE |
+            (IOS27_MACH_MOVE_SEND_ONCE << 8u), once, 405u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    check(s, 1u, once, 0u, 1u, 0u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, reply, out, &cap, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    message(p, once, IOS27_MACH_MOVE_SEND_ONCE, 0u, 406u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) == IOS27_MACH_OK);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, reply, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 406u);
+    ios27_mach_v2_free(s);
+}
+
 /* Phase 16C: COPY_SEND transfers a send uref, so the descriptor returned
  * to the receiver must carry MOVE_SEND, not the sender's disposition.
  * Failed validation and TOO_LARGE leave the rights and queue intact. */
@@ -660,6 +768,8 @@ int main(void) {
     rejected_wire_fuzz_is_side_effect_free();
     descriptor_normalization_with_send_once_reply();
     host_alias_rejection_preserves_queued_message();
-    puts("phase 14b task-local mach rights/teardown/atomicity tests passed");
+    forward_send_once_three_tasks();
+    once_double_debit_is_atomic();
+    puts("phase 16c mach send-once forwarding/atomicity tests passed");
     return 0;
 }

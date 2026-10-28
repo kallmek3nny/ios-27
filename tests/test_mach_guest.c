@@ -230,7 +230,24 @@ static void offset_result_rollback(void) {
     ios27_mach_v2_free(s);
 }
 
+static void reject_unaligned_host_result(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    _Alignas(8) uint8_t arena[64];
+    uint32_t port;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    memset(arena, 0x7a, sizeof(arena));
+    assert(ios27_mach_guest_call(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                 port, arena, 32u, 0u, 24u, 0u,
+                                 (uint32_t *)(void *)(arena + 33u)) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    for (size_t i = 0u; i < sizeof(arena); ++i)
+        assert(arena[i] == 0x7au);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    reject_unaligned_host_result();
     round_trip();
     invalid_arena_offsets();
     offset_result_round_trip();

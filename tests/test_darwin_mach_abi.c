@@ -220,6 +220,108 @@ static void fixture_abi(void) {
     ios27_mach_v2_free(space);
 }
 
+/* Phase 16C: guest-register ABI relay of an existing once right, without
+ * revealing native pointers or losing it on rejected arguments. */
+static void forwarded_reply_via_darwin_fixture(void) {
+    ios27_mach_v2 *space = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}}, previous;
+    _Alignas(8) uint8_t arena[512], snapshot[512];
+    uint32_t service, relay, reply, to_service, to_relay, once, forwarded;
+    assert(space);
+    assert(ios27_mach_v2_allocate(space, 1u, &service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(space, 2u, &relay) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(space, 3u, &reply) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(space, 1u, service, 3u,
+                                   &to_service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(space, 2u, relay, 1u,
+                                   &to_relay) == IOS27_MACH_OK);
+    memset(arena, 0xa7, sizeof(arena));
+    message(arena + 16u, to_service, IOS27_MACH_COPY_SEND |
+            (IOS27_MACH_MAKE_SEND_ONCE << 8u), reply, 700u);
+    memcpy(snapshot, arena, sizeof(arena));
+    in.x[0] = 16u;
+    in.x[1] = 24u;
+    assert(ios27_darwin_fixture_call(space, 3u,
+            IOS27_DARWIN_FIXTURE_SEND, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    assert(out.x[0] == 24u && !memcmp(arena, snapshot, sizeof(arena)));
+    memset(&in, 0, sizeof(in));
+    in.x[0] = service;
+    in.x[1] = 64u;
+    in.x[2] = 24u;
+    assert(ios27_darwin_fixture_call(space, 1u,
+            IOS27_DARWIN_FIXTURE_RECEIVE, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    once = rd32(arena + 64u + 8u);
+    assert(rd32(arena + 64u + 20u) == 700u && once != 0u);
+
+    message(arena + 128u, to_relay, IOS27_MACH_COPY_SEND |
+            (IOS27_MACH_MOVE_SEND_ONCE << 8u), once, 701u);
+    memset(&in, 0, sizeof(in));
+    in.x[0] = 128u;
+    in.x[1] = 24u;
+    in.x[2] = UINT64_MAX;
+    previous = out;
+    memcpy(snapshot, arena, sizeof(arena));
+    assert(ios27_darwin_fixture_call(space, 1u,
+            IOS27_DARWIN_FIXTURE_SEND, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_BAD_ARGUMENT);
+    assert(!memcmp(&out, &previous, sizeof(out)) &&
+           !memcmp(arena, snapshot, sizeof(arena)));
+    in.x[2] = 0u;
+    assert(ios27_darwin_fixture_call(space, 1u,
+            IOS27_DARWIN_FIXTURE_SEND, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_drop_send_once(space, 1u, once) ==
+           IOS27_MACH_BAD_RIGHT);
+
+    memset(&in, 0, sizeof(in));
+    in.x[0] = relay;
+    in.x[1] = 192u;
+    in.x[2] = 24u;
+    assert(ios27_darwin_fixture_call(space, 2u,
+            IOS27_DARWIN_FIXTURE_RECEIVE, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    forwarded = rd32(arena + 192u + 8u);
+    assert(rd32(arena + 192u + 20u) == 701u && forwarded != 0u);
+    message(arena + 256u, forwarded, IOS27_MACH_MOVE_SEND_ONCE,
+            0u, 702u);
+    memset(&in, 0, sizeof(in));
+    in.x[0] = 256u;
+    in.x[1] = 24u;
+    assert(ios27_darwin_fixture_call(space, 2u,
+            IOS27_DARWIN_FIXTURE_SEND, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    memset(&in, 0, sizeof(in));
+    in.x[0] = reply;
+    in.x[1] = 320u;
+    in.x[2] = 24u;
+    assert(ios27_darwin_fixture_call(space, 3u,
+            IOS27_DARWIN_FIXTURE_RECEIVE, &in, &out,
+            arena, sizeof(arena)) == IOS27_MACH_OK);
+    assert(rd32(arena + 320u + 20u) == 702u);
+    ios27_mach_v2_free(space);
+}
+
+static void reject_unaligned_darwin_regs(void) {
+    ios27_mach_v2 *space = ios27_mach_v2_new();
+    _Alignas(8) uint8_t buffer[sizeof(ios27_darwin_guest_registers) + 8u];
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    assert(space);
+    memset(buffer, 0x4f, sizeof(buffer));
+    assert(ios27_darwin_fixture_call(space, 1u,
+            IOS27_DARWIN_FIXTURE_ALLOCATE,
+            (ios27_darwin_guest_registers *)(void *)(buffer + 1u), &out,
+            NULL, 0u) == IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_darwin_fixture_call(space, 1u,
+            IOS27_DARWIN_FIXTURE_ALLOCATE, &in,
+            (ios27_darwin_guest_registers *)(void *)(buffer + 1u),
+            NULL, 0u) == IOS27_MACH_BAD_ARGUMENT);
+    for (size_t i = 0u; i < sizeof(buffer); ++i)
+        assert(buffer[i] == 0x4fu);
+    ios27_mach_v2_free(space);
+}
+
 /* Exercise the same descriptor translation through the bounded guest arena
  * and AArch64 register facade, not only through the raw Mach fixture. */
 static void abi_complex_descriptor_round_trip(void) {
@@ -269,11 +371,13 @@ static void abi_complex_descriptor_round_trip(void) {
 }
 
 int main(void) {
+    abi_complex_descriptor_round_trip();
+    reject_unaligned_darwin_regs();
+    forwarded_reply_via_darwin_fixture();
     teardown_inflight();
     teardown_queued_reply();
     teardown_drops_messages();
     fixture_abi();
-    abi_complex_descriptor_round_trip();
     puts("phase11 task teardown and bounded Darwin register facade passed");
     return 0;
 }

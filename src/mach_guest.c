@@ -15,6 +15,9 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
     if (!space || !guest || !actual) return IOS27_MACH_BAD_ARGUMENT;
     arena_start = (uintptr_t)guest;
     result_start = (uintptr_t)actual;
+    /* Never dereference an unaligned host result pointer on ARM64. */
+    if (result_start % _Alignof(uint32_t) != 0u)
+        return IOS27_MACH_BAD_ARGUMENT;
     /* A result pointer within the arena could violate failure atomicity. */
     if (guest_size > UINTPTR_MAX - arena_start ||
         result_start > UINTPTR_MAX - sizeof(*actual) ||

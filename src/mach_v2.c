@@ -347,7 +347,7 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     local_right *dest_right, *reply_right = NULL, *descriptor_right = NULL;
     local_right *pending_reply, *pending_descriptor;
     port_object *dest;
-    uint8_t reply_obj = 0u, desc_obj = 0u, desc_move = 0u;
+    uint8_t reply_obj = 0u, reply_move = 0u, desc_obj = 0u, desc_move = 0u;
     uint32_t receiver;
     size_t tail;
     unsigned additional = 0u;
@@ -367,7 +367,8 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
          remote_disposition != IOS27_MACH_MOVE_SEND &&
          remote_disposition != IOS27_MACH_MOVE_SEND_ONCE) ||
         (local_disposition != 0u &&
-         local_disposition != IOS27_MACH_MAKE_SEND_ONCE) ||
+         local_disposition != IOS27_MACH_MAKE_SEND_ONCE &&
+         local_disposition != IOS27_MACH_MOVE_SEND_ONCE) ||
         ((local_disposition == 0u) != (reply_name == 0u)))
         return IOS27_MACH_UNSUPPORTED;
     dest_right = by_name(s, task, dest_name);
@@ -380,8 +381,12 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
         return IOS27_MACH_BAD_RIGHT;
     receiver = dest->owner;
     if (local_disposition) {
-        reply_right = receive_right(s, task, reply_name);
-        if (!reply_right) return IOS27_MACH_BAD_RIGHT;
+        reply_move = (uint8_t)(local_disposition == IOS27_MACH_MOVE_SEND_ONCE);
+        reply_right = reply_move ? by_name(s, task, reply_name) :
+                                   receive_right(s, task, reply_name);
+        if (!reply_right || !object_for(s, reply_right) ||
+            (reply_move && !reply_right->once))
+            return IOS27_MACH_BAD_RIGHT;
         reply_obj = reply_right->object;
         if (!may_arrive(s, receiver, reply_obj, 1))
             return IOS27_MACH_LIMIT;
@@ -411,6 +416,11 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     if (desc_move && remote_disposition == IOS27_MACH_MOVE_SEND &&
         descriptor_right == dest_right && dest_right->sends < 2u)
         return IOS27_MACH_BAD_RIGHT;
+    /* The reply's MOVE_SEND_ONCE and the remote MOVE_SEND_ONCE can debit
+     * the same uref. Preflight both debits before reserving a grant. */
+    if (reply_move && remote_disposition == IOS27_MACH_MOVE_SEND_ONCE &&
+        reply_right == dest_right && dest_right->once < 2u)
+        return IOS27_MACH_BAD_RIGHT;
     if (dest->count == IOS27_MACH_QUEUE_MAX)
         return IOS27_MACH_TIMEOUT;
     /* Preflight capacity for up to two distinct *new* local aliases. */
@@ -427,6 +437,10 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     pending_descriptor = desc_obj ? reserve_name(s, receiver, desc_obj) : NULL;
     if (pending_reply) ++pending_reply->pending_once;
     if (pending_descriptor) ++pending_descriptor->pending_sends;
+    if (reply_move) {
+        --reply_right->once;
+        prune(reply_right);
+    }
     if (desc_move) {
         --descriptor_right->sends;
         prune(descriptor_right);

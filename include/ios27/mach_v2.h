@@ -45,9 +45,12 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
  * or COPY_SEND(19). MOVE_SEND consumes one local send uref only after
  * successful enqueue; a combined destination+descriptor move needs two.
  * Optional local disposition MAKE_SEND_ONCE(21) in bits 8..15 with
- * a sender-owned receive name in header.local_port; receiver obtains a
- * task-local reply send-once name in received header.remote_port, with
- * MOVE_SEND_ONCE in the received remote disposition bits.
+ * a sender-owned receive name in header.local_port, or MOVE_SEND_ONCE(18)
+ * with an existing send-once name. Both deliver a task-local reply
+ * send-once name in received header.remote_port, with MOVE_SEND_ONCE
+ * in the received remote disposition bits. MOVE_SEND_ONCE transfers its
+ * existing right only after successful enqueue, including when it is
+ * also the destination right (which requires two send-once urefs).
  * Optionally one port descriptor carries COPY_SEND or MOVE_SEND.
  * On receive, both are normalized to MOVE_SEND, describing the delivered
  * send right rather than the sender's transfer instruction.
