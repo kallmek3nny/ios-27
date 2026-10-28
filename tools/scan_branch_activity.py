@@ -258,7 +258,7 @@ def self_test():
           "additions": 15, "deletions": 0},
          {"filename": "tests/phase20d-edge.c",
           "additions": 12, "deletions": 0}],
-        "not_checked", {"libsystem-pthread"})
+        "not_checked", {"libsystem-pthread", "unclassified"})
     assert len(phase20d["groups"]) == 1
     assert phase20d["groups"][0]["group_id"] == "libsystem-pthread"
     assert phase20d["groups"][0]["fixture_files"] == 2
