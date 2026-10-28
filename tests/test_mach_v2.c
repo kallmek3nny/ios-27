@@ -2,7 +2,9 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include <stdio.h>
+#include <threads.h>
 #include <string.h>
 
 static void wr32(uint8_t *p, uint32_t n) {
@@ -1219,7 +1221,104 @@ static void phase19c_thread_exhaustion_and_rollback(void) {
     ios27_mach_v2_free(s);
 }
 
+typedef struct {
+    ios27_mach_v2 *space;
+    uint32_t task;
+    int failure;
+} phase19c_worker;
+
+static int phase19c_message_worker(void *argument) {
+    phase19c_worker *worker = argument;
+    uint8_t wire[IOS27_MACH_MSG_MAX], output[IOS27_MACH_MSG_MAX];
+    for (uint32_t i = 0u; i < 128u; ++i) {
+        uint32_t inbox = 0u, send = 0u;
+        size_t cap = sizeof(output);
+        if (ios27_mach_v2_allocate(worker->space, worker->task,
+                                    &inbox) != IOS27_MACH_OK ||
+            ios27_mach_v2_make_send(worker->space, worker->task, inbox,
+                                    1u, &send) != IOS27_MACH_OK) {
+            worker->failure = 1;
+            return -1;
+        }
+        message(wire, send, IOS27_MACH_COPY_SEND, 0u, i);
+        if (ios27_mach_v2_send(worker->space, 1u, wire, 24u, 0u) !=
+                IOS27_MACH_OK ||
+            ios27_mach_v2_receive(worker->space, worker->task, inbox,
+                                   output, &cap, 0u) != IOS27_MACH_OK ||
+            cap != 24u || rd32(output + 20u) != i ||
+            ios27_mach_v2_drop_send(worker->space, 1u, send) !=
+                IOS27_MACH_OK ||
+            ios27_mach_v2_destroy(worker->space, worker->task, inbox) !=
+                IOS27_MACH_OK) {
+            worker->failure = 1;
+            return -1;
+        }
+    }
+    return 0;
+}
+
+typedef struct {
+    ios27_mach_v2 *space;
+    uint32_t remote;
+    atomic_int started;
+    int failure;
+} phase19c_teardown_worker;
+
+static int phase19c_teardown_sender(void *argument) {
+    phase19c_teardown_worker *worker = argument;
+    uint8_t wire[IOS27_MACH_MSG_MAX];
+    message(wire, worker->remote, IOS27_MACH_COPY_SEND, 0u, 19u);
+    atomic_store(&worker->started, 1);
+    for (uint32_t i = 0u; i < 4096u; ++i) {
+        int result = ios27_mach_v2_send(worker->space, 2u, wire, 24u, 0u);
+        if (result == IOS27_MACH_BAD_RIGHT) return 0;
+        if (result != IOS27_MACH_OK && result != IOS27_MACH_TIMEOUT) {
+            worker->failure = 1;
+            return -1;
+        }
+    }
+    return 0;
+}
+
+static void phase19c_concurrent_ipc_and_teardown(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    thrd_t threads[IOS27_MACH_TASK_MAX], retiring;
+    phase19c_worker workers[IOS27_MACH_TASK_MAX] = {{0}};
+    phase19c_teardown_worker race = {0};
+    uint32_t port = 0u, sender = 0u, refs = 0u, once = 0u;
+    unsigned receive = 0u;
+    int result = 0;
+    assert(s);
+    for (uint32_t i = 0u; i < IOS27_MACH_TASK_MAX; ++i) {
+        workers[i].space = s;
+        workers[i].task = i + 1u;
+        assert(thrd_create(&threads[i], phase19c_message_worker,
+                           &workers[i]) == thrd_success);
+    }
+    for (uint32_t i = 0u; i < IOS27_MACH_TASK_MAX; ++i) {
+        assert(thrd_join(threads[i], &result) == thrd_success);
+        assert(result == 0 && workers[i].failure == 0);
+    }
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &sender) ==
+           IOS27_MACH_OK);
+    race.space = s;
+    race.remote = sender;
+    atomic_init(&race.started, 0);
+    assert(thrd_create(&retiring, phase19c_teardown_sender,
+                       &race) == thrd_success);
+    while (!atomic_load(&race.started)) thrd_yield();
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(thrd_join(retiring, &result) == thrd_success);
+    assert(result == 0 && race.failure == 0);
+    assert(ios27_mach_v2_rights(s, 2u, sender,
+                                &refs, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase19c_concurrent_ipc_and_teardown();
     phase19c_thread_exhaustion_and_rollback();
     phase19c_thread_identity_exception_queue();
     phase18c_host_alias_isolation();
