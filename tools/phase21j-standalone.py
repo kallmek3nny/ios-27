@@ -50,7 +50,7 @@ def main():
         architecture, sanitize), flush=True)
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration"):
+            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -69,7 +69,7 @@ def main():
                 sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
                 run([str(output)], 150)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order and deadlock prevention passed".format(
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots passed".format(
         "ASan/UBSan" if sanitize else "O0/O2"), flush=True)
 
 if __name__ == "__main__":
