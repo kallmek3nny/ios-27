@@ -52,7 +52,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else
                          ("-O2",) if stress else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff"):
+            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -73,6 +73,8 @@ def main():
                         ROOT / "src/libsystem21c_sync.c",
                         ROOT / "src/libsystem21j_schedule.c",
                     ])
+                if test == "broadcast":
+                    sources.append(ROOT / "src/libsystem21c_sync.c")
                 sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
                 for attempt in range(8 if stress else 1):
@@ -83,7 +85,7 @@ def main():
                         print("phase21j stress seed:", env["PHASE21J_SEED_BASE"],
                               flush=True)
                     run([str(output)], 150, env)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs passed".format(
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts passed".format(
         "ASan/UBSan" if sanitize else
         "8x native O2 stress" if stress else "O0/O2"), flush=True)
 
