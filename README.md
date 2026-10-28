@@ -2,6 +2,10 @@
 
 [capability progress and realistic ceiling](docs/PROGRESS.md)
 
+![system library and runtime capability blocks](docs/blocks.svg)
+
+[api block explorer and technical ceilings](docs/BLOCKS.md) · [interactive detailed breakdown](docs/blocks.html)
+
 ![evidence-backed subsystem progress](docs/progress.svg)
 
 **Next development agent:** see [HANDOFF.md](HANDOFF.md) for phase 6 status, safety constraints, phase 7 priorities, and PR/CI rules.
