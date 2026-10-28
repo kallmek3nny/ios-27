@@ -36,6 +36,12 @@ def main():
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
         for opt in ("-O0", "-O2"):
+            exe = tmp / ("wait-faults" + opt)
+            run([cc, *flags, opt, str(ROOT / "src/libsystem21f_mutex.c"),
+                 str(ROOT / "tests/phase21f-wait-faults.c"),
+                 "-Wl,--wrap=pthread_cond_wait", "-o", str(exe)], 120)
+            run([str(exe)], 120)
+        for opt in ("-O0", "-O2"):
             exe = tmp / ("fault-injection" + opt)
             run([cc, *flags, opt, str(ROOT / "src/libsystem21f_mutex.c"),
                  str(ROOT / "tests/phase21f-fault-injection.c"),
