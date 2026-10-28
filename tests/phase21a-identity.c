@@ -38,6 +38,8 @@ static void *worker(void *argument) {
         assert(abi_equal(self, addresses[i], &eq) == 0);
         assert(eq == (uint64_t)(i == id));
     }
+    e = pthread_barrier_wait(&barrier);
+    assert(e == 0 || e == PTHREAD_BARRIER_SERIAL_THREAD);
     assert(ios27_21a_detach_thread(rt) == 0);
     assert(ios27_21a_detach_thread(rt) == ESRCH);
     assert(abi_self(&self) == ESRCH && self == 0u);
