@@ -66,6 +66,20 @@ int ios27_21j_snapshot(ios27_21j_diagnostics *diag,
 /* ERANGE means an event was overwritten in the fixed-size ring. */
 int ios27_21j_read(ios27_21j_diagnostics *diag, uint64_t sequence,
                     ios27_21j_event *out);
+/* Internal consistency check made atomically under the same guard as
+   mutating operations. The report is valid even when the runtime is busy.
+   EPROTO indicates an invariant violation and provides violation bits. */
+#define IOS27_21J_AUDIT_LEASE_COUNTS 1u
+#define IOS27_21J_AUDIT_SLOTS 2u
+#define IOS27_21J_AUDIT_TRACE 4u
+#define IOS27_21J_AUDIT_CONTENTION 8u
+typedef struct {
+    size_t occupied, retired, resident;
+    uint64_t first, last;
+    unsigned violations;
+} ios27_21j_audit_data;
+int ios27_21j_audit(ios27_21j_diagnostics *diag,
+                    ios27_21j_audit_data *out);
 /* Copy an ordered, internally coherent journal snapshot under one lock.
    ENOSPC returns the needed count without a partial copy. A zero-event
    snapshot reports first/last as zero. */
