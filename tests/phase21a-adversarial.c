@@ -56,7 +56,11 @@ static uint64_t run(void) {
         if (scenario == 2u) addr = BASE - 8u; /* guest underflow */
         if (scenario == 3u) addr = UINT64_MAX - 7u;
         if (scenario == 4u) addr = BASE + sizeof(memory) - 8u;
-        if (scenario == 5u && op % 3u) addr = BASE + 256u;
+        /* Mis-typed operations may target another object, but init must not
+         * successfully create an untracked object after its old owner dies. */
+        if (scenario == 5u && op % 3u &&
+            op != 2u && op != 6u && op != 11u && op != 15u)
+            addr = BASE + 256u;
         if (op == 13u) arg = BASE + 4096u;
         if (op == 14u) arg = (sample >> 24u) % 4u;
         e = call(rt, names[op], addr, arg);
