@@ -13,7 +13,8 @@ enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
-    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_UNSUPPORTED
+    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
+    OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
@@ -36,12 +37,18 @@ typedef struct {
     ios27_21a_once_callback callback;
     void *context;
 } once_binding;
+typedef struct {
+    pthread_t native_id;
+    uint64_t guest_address;
+    unsigned occupied, active;
+} bound_thread;
 struct ios27_21a_runtime {
     ios27_21a_region regions[IOS27_21A_MAX_REGIONS];
     size_t region_count;
     uint64_t next_token;
     size_t callback_count;
     once_binding callbacks[IOS27_21A_MAX_ONCE_CALLBACKS];
+    bound_thread threads[IOS27_21A_MAX_BOUND_THREADS];
     pthread_mutex_t guard;
     object_slot objects[IOS27_21A_MAX_OBJECTS];
 };
@@ -73,8 +80,8 @@ static const entry symbols[] = {
     {"pthread_create", OP_UNSUPPORTED},
     {"pthread_join", OP_UNSUPPORTED},
     {"pthread_detach", OP_UNSUPPORTED},
-    {"pthread_self", OP_UNSUPPORTED},
-    {"pthread_equal", OP_UNSUPPORTED},
+    {"pthread_self", OP_SELF},
+    {"pthread_equal", OP_EQUAL},
     {"pthread_key_create", OP_UNSUPPORTED},
     {"pthread_key_delete", OP_UNSUPPORTED},
     {"pthread_getspecific", OP_UNSUPPORTED},
@@ -398,6 +405,12 @@ int ios27_21a_destroy(ios27_21a_runtime *rt) {
             return EBUSY;
         }
     }
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        if (rt->threads[i].active) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EBUSY;
+        }
+    }
     (void)pthread_mutex_unlock(&rt->guard);
     (void)pthread_mutex_destroy(&rt->guard);
     free(rt);
@@ -602,6 +615,92 @@ cleanup:
     slot_unpin(rt, cond);
     return e;
 }
+int ios27_21a_attach_thread(ios27_21a_runtime *rt,
+                             uint64_t guest_thread_addr) {
+    unsigned char *p = NULL;
+    pthread_t self = pthread_self();
+    size_t i, empty = IOS27_21A_MAX_BOUND_THREADS;
+    int e = guest_view(rt, guest_thread_addr, sizeof(uint64_t), 8u, &p);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        bound_thread *b = &rt->threads[i];
+        if (b->occupied && b->guest_address == guest_thread_addr) {
+            e = EEXIST; goto done;
+        }
+        if (b->active && pthread_equal(b->native_id, self)) {
+            e = EALREADY; goto done;
+        }
+        if (!b->occupied && empty == IOS27_21A_MAX_BOUND_THREADS) empty = i;
+    }
+    for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
+        const object_slot *s = &rt->objects[i];
+        if (s->kind &&
+            guest_thread_addr < s->addr + object_size(s->kind) &&
+            s->addr < guest_thread_addr + sizeof(uint64_t)) {
+            e = EBUSY; goto done;
+        }
+    }
+    if (empty == IOS27_21A_MAX_BOUND_THREADS) {
+        e = EAGAIN; goto done;
+    }
+    rt->threads[empty] = (bound_thread){
+        self, guest_thread_addr, 1u, 1u
+    };
+    e = 0;
+done:
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
+int ios27_21a_detach_thread(ios27_21a_runtime *rt) {
+    pthread_t self = pthread_self();
+    size_t i;
+    if (!rt) return EINVAL;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        bound_thread *b = &rt->threads[i];
+        if (b->active && pthread_equal(b->native_id, self)) {
+            b->active = 0u; /* Keep occupied to reject stale pointer reuse. */
+            (void)pthread_mutex_unlock(&rt->guard);
+            return 0;
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return ESRCH;
+}
+static int thread_self_guest(ios27_21a_runtime *rt, uint64_t *out) {
+    pthread_t self = pthread_self();
+    size_t i;
+    *out = 0u;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *b = &rt->threads[i];
+        if (b->active && pthread_equal(b->native_id, self)) {
+            *out = b->guest_address;
+            (void)pthread_mutex_unlock(&rt->guard);
+            return 0;
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return ESRCH;
+}
+static int thread_equal_guest(ios27_21a_runtime *rt,
+                               uint64_t a, uint64_t b, uint64_t *out) {
+    size_t i;
+    int found_a = 0, found_b = 0;
+    *out = 0u;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *entry = &rt->threads[i];
+        if (!entry->active) continue;
+        if (entry->guest_address == a) found_a = 1;
+        if (entry->guest_address == b) found_b = 1;
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    if (!found_a || !found_b) return ESRCH;
+    *out = a == b ? 1u : 0u;
+    return 0;
+}
 int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
                             ios27_21a_once_callback callback, void *context) {
     size_t i;
@@ -700,6 +799,12 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
     if (op == OP_UNSUPPORTED) { *x0 = ENOTSUP; return ENOTSUP; }
     if (op == OP_ONCE) {
         e = once_native(rt, args[0], args[1]);
+    } else if (op == OP_SELF || op == OP_EQUAL) {
+        uint64_t result = 0u;
+        e = op == OP_SELF ? thread_self_guest(rt, &result) :
+                            thread_equal_guest(rt, args[0], args[1], &result);
+        *x0 = result;
+        return e;
     } else if (op == OP_MAI) {
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
