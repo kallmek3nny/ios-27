@@ -25,6 +25,10 @@ typedef struct {
     ios27_21e_handle token;
     ios27_21j_lease lease;
 } worker_args;
+typedef struct {
+    worker_args *worker;
+    uint64_t canary;
+} tls_payload;
 struct run_state {
     ios27_21b_runtime *threads;
     ios27_21c_runtime *sync;
@@ -39,14 +43,19 @@ struct run_state {
     pthread_cond_t gate_changed;
     unsigned ready;
     int release;
-    atomic_uint cleanups, destructors;
+    atomic_uint cleanups, destructors, allocations, frees;
     worker_args args[WORKERS];
     ios27_21b_thread ids[WORKERS];
 };
 static void tls_destructor(void *value) {
-    worker_args *a = value;
+    tls_payload *payload = value;
+    CHECK(payload && payload->canary == UINT64_C(0x21facedebaa));
+    worker_args *a = payload->worker;
     CHECK(a && a->run);
+    payload->canary = 0;
     atomic_fetch_add_explicit(&a->run->destructors, 1u, memory_order_relaxed);
+    atomic_fetch_add_explicit(&a->run->frees, 1u, memory_order_relaxed);
+    free(payload);
 }
 static void cleanup(void *value) {
     worker_args *a = value;
@@ -155,7 +164,21 @@ static void *worker(void *value) {
     }
     CHECK(acquired);
     OK(ios27_21e_cancel_register(r->tls, &a->token));
-    OK(ios27_21e_setspecific(r->tls, r->key, a));
+    /* Independently inject allocation failures and verify zero ownership
+       until one fault decision authorizes the actual heap acquisition. */
+    int permitted = 0;
+    for (unsigned attempt = 0; attempt < 128u; ++attempt) {
+        int rc = ios27_21j_probe(r->diag, 79, a->actor, attempt);
+        CHECK(rc == 0 || rc == ENOMEM);
+        if (!rc) { permitted = 1; break; }
+    }
+    CHECK(permitted);
+    tls_payload *payload = malloc(sizeof(*payload));
+    CHECK(payload != NULL);
+    payload->worker = a;
+    payload->canary = UINT64_C(0x21facedebaa);
+    atomic_fetch_add_explicit(&r->allocations, 1u, memory_order_relaxed);
+    OK(ios27_21e_setspecific(r->tls, r->key, payload));
     OK(ios27_21e_cleanup_push(r->tls, cleanup, a, &scope));
     if (a->actor < PRODUCERS) produce(a);
     else consume(a);
@@ -223,8 +246,8 @@ static void run_once(unsigned round, uint64_t seed_base) {
     CHECK(active == WORKERS && keys == 1 && tokens == WORKERS);
     OK(ios27_21j_snapshot(r.diag, &info));
     CHECK(info.active == WORKERS && info.peak == WORKERS);
-    CHECK(info.probes >= total * 2u + WORKERS &&
-          info.probes <= total * 2u + WORKERS * 128u && info.injections != 0);
+    CHECK(info.probes >= total * 2u + WORKERS * 2u &&
+          info.probes <= total * 2u + WORKERS * 256u && info.injections != 0);
     /* Recompute the exact same set of keyed fault decisions on a fresh
        runtime. Thread scheduling may reorder events but cannot change this
        probe count or which item ids produce ENOMEM. */
@@ -239,6 +262,13 @@ static void run_once(unsigned round, uint64_t seed_base) {
             if (!rc) { acquired = 1; break; }
         }
         CHECK(acquired);
+        int permitted = 0;
+        for (unsigned attempt = 0; attempt < 128u; ++attempt) {
+            int rc = ios27_21j_probe(replay, 79, actor, attempt);
+            CHECK(rc == 0 || rc == ENOMEM);
+            if (!rc) { permitted = 1; break; }
+        }
+        CHECK(permitted);
     }
     for (unsigned actor = 0; actor < PRODUCERS; ++actor) {
         for (unsigned i = 0; i < ITEMS; ++i) {
@@ -275,6 +305,8 @@ static void run_once(unsigned round, uint64_t seed_base) {
     CHECK(cleanups == WORKERS && destructors == WORKERS);
     CHECK(atomic_load(&r.cleanups) == WORKERS);
     CHECK(atomic_load(&r.destructors) == WORKERS);
+    CHECK(atomic_load(&r.allocations) == WORKERS);
+    CHECK(atomic_load(&r.frees) == WORKERS);
     OK(ios27_21j_snapshot(r.diag, &info));
     CHECK(info.active == 0 && info.leases_created == WORKERS);
     CHECK(info.leases_released == WORKERS && info.timeouts >= 1);
