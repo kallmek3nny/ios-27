@@ -80,6 +80,10 @@ interleaves contention/cancellation/queue-lifetime suites. Each child program
 has a hard 60s limit; compilation has a hard 120s limit. No artificial waits
 or idle padding are used. This is independent of the normal quick CI gate.
 
+A full-capacity audit repeats 100 complete 128-mutex allocations, exercises
+all three mutex policies, verifies generation invalidation, and requires an
+`EAGAIN` failure with a fully zeroed output handle on the 129th allocation.
+
 GNU linker fault injection exercises 128 host condition-variable initialization
 failures and verifies that waiter registration never leaks and normal FIFO
 progress resumes after the failure injection ends.
