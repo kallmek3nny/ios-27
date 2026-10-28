@@ -111,30 +111,44 @@ static void release_guest_stack(ios27_guest_stack *stack) {
 
 /* All argument checks precede stack allocation and executable mappings. No
  * host environment is automatically passed to the Darwin image. */
-static int prepare_guest_stack(int argc, const char *const argv[],
-                               const char *const envp[], uint64_t requested,
-                               size_t page_size, ios27_guest_stack *stack,
+/* Validate every vector and size before making any guest mappings. */
+static int prepare_guest_stack(const ios27_startup_context *context,
+                               uint64_t requested, size_t page_size,
+                               ios27_guest_stack *stack,
                                char *error, size_t error_size) {
-    size_t env_count = 0u, payload = 0u, capacity;
+    size_t env_count = 0u, apple_count = 0u, payload = 0u, capacity;
     size_t count, vector_bytes;
     char *args[IOS27_GUEST_MAX_ARGS];
     char *env[IOS27_GUEST_MAX_ARGS];
+    char *apple[IOS27_GUEST_MAX_ARGS];
     uintptr_t cursor, base;
     uint8_t *mapped;
     memset(stack, 0, sizeof(*stack));
-    if (argc < 0 || argc > (int)IOS27_GUEST_MAX_ARGS ||
-        (argc != 0 && !argv))
+    if (!context || context->argc < 0 ||
+        context->argc > (int)IOS27_GUEST_MAX_ARGS ||
+        (context->argc != 0 && !context->argv))
         return fail(error, error_size, "invalid guest argc/argv");
-    if (envp) {
-        while (env_count <= IOS27_GUEST_MAX_ARGS && envp[env_count])
+    if (context->envp) {
+        while (env_count <= IOS27_GUEST_MAX_ARGS &&
+               context->envp[env_count])
             ++env_count;
         if (env_count > IOS27_GUEST_MAX_ARGS)
             return fail(error, error_size, "too many guest environment variables");
     }
-    count = (size_t)argc;
-    vector_bytes = (count + env_count + 3u) * sizeof(char *);
-    for (size_t i = 0u; i < count + env_count; ++i) {
-        const char *value = i < count ? argv[i] : envp[i - count];
+    if (context->apple) {
+        while (apple_count <= IOS27_GUEST_MAX_ARGS &&
+               context->apple[apple_count])
+            ++apple_count;
+        if (apple_count > IOS27_GUEST_MAX_ARGS)
+            return fail(error, error_size, "too many guest apple arguments");
+    }
+    count = (size_t)context->argc;
+    vector_bytes = (count + env_count + apple_count + 3u) * sizeof(char *);
+    for (size_t i = 0u; i < count + env_count + apple_count; ++i) {
+        const char *value = i < count ? context->argv[i] :
+                            i < count + env_count ?
+                            context->envp[i - count] :
+                            context->apple[i - count - env_count];
         const char *end;
         size_t n;
         if (!value)
@@ -171,16 +185,22 @@ static int prepare_guest_stack(int argc, const char *const argv[],
     base = (uintptr_t)(mapped + page_size);
     cursor = base + capacity;
     for (size_t i = count; i > 0u; --i) {
-        size_t n = strlen(argv[i - 1u]) + 1u;
+        size_t n = strlen(context->argv[i - 1u]) + 1u;
         cursor -= n;
-        memcpy((void *)cursor, argv[i - 1u], n);
+        memcpy((void *)cursor, context->argv[i - 1u], n);
         args[i - 1u] = (char *)cursor;
     }
     for (size_t i = env_count; i > 0u; --i) {
-        size_t n = strlen(envp[i - 1u]) + 1u;
+        size_t n = strlen(context->envp[i - 1u]) + 1u;
         cursor -= n;
-        memcpy((void *)cursor, envp[i - 1u], n);
+        memcpy((void *)cursor, context->envp[i - 1u], n);
         env[i - 1u] = (char *)cursor;
+    }
+    for (size_t i = apple_count; i > 0u; --i) {
+        size_t n = strlen(context->apple[i - 1u]) + 1u;
+        cursor -= n;
+        memcpy((void *)cursor, context->apple[i - 1u], n);
+        apple[i - 1u] = (char *)cursor;
     }
     cursor &= ~(uintptr_t)15u;
     cursor -= vector_bytes;
@@ -197,7 +217,9 @@ static int prepare_guest_stack(int argc, const char *const argv[],
     for (size_t i = 0u; i < env_count; ++i)
         stack->envp[i] = env[i];
     stack->envp[env_count] = NULL;
-    stack->apple[0] = NULL;
+    for (size_t i = 0u; i < apple_count; ++i)
+        stack->apple[i] = apple[i];
+    stack->apple[apple_count] = NULL;
     return 0;
 failed:
     release_guest_stack(stack);
@@ -205,28 +227,28 @@ failed:
 }
 #endif
 
-int ios27_run_executable_argv(const uint8_t *data, size_t size,
-                             const ios27_macho_info *info,
-                             int argc, const char *const argv[],
-                             const char *const envp[],
-                             int *exit_code, char *error, size_t error_size) {
+int ios27_run_executable_context(const uint8_t *data, size_t size,
+                                 const ios27_macho_info *info,
+                                 const ios27_startup_context *context,
+                                 int *exit_code, char *error,
+                                 size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)argc; (void)argv; (void)envp;
+    (void)context;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
-    if (!data || !info || !exit_code || os_page <= 0)
+    if (!data || !info || !context || !exit_code || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
     /* Fail closed on unsupported host pages, stale metadata or W^X ambiguity.
      * All checks complete before any executable memory becomes accessible. */
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
         return -1;
-    if (prepare_guest_stack(argc, argv, envp, info->stacksize,
+    if (prepare_guest_stack(context, info->stacksize,
                             layout.page_size, &guest, error, error_size))
         return -1;
     mapping = mmap(NULL, layout.span, PROT_NONE,
@@ -285,12 +307,15 @@ int ios27_run_executable_argv(const uint8_t *data, size_t size,
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
         /* Only ordinary returns are supported, not Darwin process exit,
          * dyld, ObjC, syscalls or exception unwinding. */
-        int result = ios27_arm64_enter_main(entry, guest.sp, argc, guest.argv,
+        int result = ios27_arm64_enter_main(entry, guest.sp, context->argc, guest.argv,
                                              guest.envp, guest.apple);
+        /* Publish the result only after both guest reservations are gone. */
+        int image_unmapped = munmap(mapping, layout.span);
+        int stack_unmapped = munmap(guest.reservation, guest.size);
+        if (image_unmapped || stack_unmapped)
+            return fail(error, error_size, "native process cleanup failed");
         *exit_code = result;
     }
-    (void)munmap(mapping, layout.span);
-    release_guest_stack(&guest);
     if (error && error_size) error[0] = '\0';
     return 0;
 
@@ -299,6 +324,17 @@ mapping_failed:
     release_guest_stack(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");
 #endif
+}
+
+/* Older callers use an empty apple vector; no host information is leaked. */
+int ios27_run_executable_argv(const uint8_t *data, size_t size,
+                             const ios27_macho_info *info,
+                             int argc, const char *const argv[],
+                             const char *const envp[],
+                             int *exit_code, char *error, size_t error_size) {
+    ios27_startup_context context = {argc, argv, envp, NULL};
+    return ios27_run_executable_context(data, size, info, &context,
+                                        exit_code, error, error_size);
 }
 
 /* Preserve the no-argument API for existing compiler-produced fixtures. */
