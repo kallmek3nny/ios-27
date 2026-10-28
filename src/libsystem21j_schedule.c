@@ -93,7 +93,9 @@ static void waiting_cleanup(void *value) {
 int ios27_21j_turn_acquire(ios27_21j_schedule *s, uint32_t actor,
                             size_t step, uint64_t timeout_ms) {
     struct timespec deadline;
-    int err, result = 0;
+    int err;
+    /* pthread_cleanup_push may use setjmp; keep the wait result stable at O2. */
+    volatile int result = 0;
     if (!s || step >= s->total || actor >= s->actors ||
         s->plan[step] != actor) return EINVAL;
     err = deadline_after(timeout_ms, &deadline);
