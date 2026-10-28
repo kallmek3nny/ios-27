@@ -6,6 +6,14 @@
 
 candidate branches with mapped changes: **4** · audited base: `e7deb774da6d`
 
+### [phase20d-darwin-threading](https://github.com/kallmek3nny/ios-27/pull/64)
+
+head: `3252d111e12d` · ci: **running** · unmerged, not credited.
+
+- **libsystem_pthread**: 2 source files, 0 test/fixture files, +553/-0 lines
+  - candidate declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
+- **unclassified**: 0 source files, 4 test/fixture files, +430/-0 lines
+
 ### [phase20b-native-objc-dispatch-20261028](https://github.com/kallmek3nny/ios-27/pull/63)
 
 head: `809381d1f0e3` · ci: **running** · unmerged, not credited.
@@ -29,14 +37,6 @@ head: `b9fa9469596c` · ci: **passing_checks** · unmerged, not credited.
 - **libSystem guest model (not dylib)**: 2 source files, 0 test/fixture files, +360/-0 lines
   - candidate declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
 - **unclassified**: 0 source files, 3 test/fixture files, +198/-0 lines
-
-### [phase20d-darwin-threading](https://github.com/kallmek3nny/ios-27/pull/64)
-
-head: `7a0fc43cf6eb` · ci: **passing_checks** · unmerged, not credited.
-
-- **libsystem_pthread**: 2 source files, 0 test/fixture files, +553/-0 lines
-  - candidate declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
-- **unclassified**: 0 source files, 4 test/fixture files, +430/-0 lines
 
 ## verification policy
 

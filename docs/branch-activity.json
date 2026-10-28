@@ -7,6 +7,57 @@
   "candidate_count": 4,
   "candidates": [
     {
+      "branch": "phase20d-darwin-threading",
+      "sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "pr_number": 64,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 553,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20d_cancel_point",
+            "ios27_20d_cancel_request",
+            "ios27_20d_cond_signal",
+            "ios27_20d_cond_wait",
+            "ios27_20d_create",
+            "ios27_20d_destroy",
+            "ios27_20d_getspecific",
+            "ios27_20d_key_create",
+            "ios27_20d_key_delete",
+            "ios27_20d_mutex_lock",
+            "ios27_20d_mutex_trylock",
+            "ios27_20d_mutex_unlock"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20d_threads.h",
+            "src/libsystem20d_threads.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 4,
+          "additions": 430,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase20d-arm64-abi.c",
+            "tests/phase20d-edge.c",
+            "tests/phase20d-native.c",
+            "tools/phase20d-standalone.py"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase20b-native-objc-dispatch-20261028",
       "sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/63",
@@ -153,57 +204,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase20d-darwin-threading",
-      "sha": "7a0fc43cf6ebad828fcddb47dc6c0ce9e9fc4ab0",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
-      "pr_number": 64,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-pthread",
-          "source_files": 2,
-          "fixture_files": 0,
-          "additions": 553,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_20d_cancel_point",
-            "ios27_20d_cancel_request",
-            "ios27_20d_cond_signal",
-            "ios27_20d_cond_wait",
-            "ios27_20d_create",
-            "ios27_20d_destroy",
-            "ios27_20d_getspecific",
-            "ios27_20d_key_create",
-            "ios27_20d_key_delete",
-            "ios27_20d_mutex_lock",
-            "ios27_20d_mutex_trylock",
-            "ios27_20d_mutex_unlock"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem20d_threads.h",
-            "src/libsystem20d_threads.c"
-          ]
-        },
-        {
-          "group_id": "unclassified",
-          "source_files": 0,
-          "fixture_files": 4,
-          "additions": 430,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/phase20d-arm64-abi.c",
-            "tests/phase20d-edge.c",
-            "tests/phase20d-native.c",
-            "tools/phase20d-standalone.py"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -222,7 +222,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/64",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ],
     "objc-host-model": [
@@ -243,6 +243,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase20d-darwin-threading",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+        "source_files": 0,
+        "fixture_files": 4,
+        "ci": "running"
+      },
+      {
         "branch": "phase20b-native-objc-dispatch-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/63",
         "source_files": 0,
@@ -262,15 +269,8 @@
         "source_files": 0,
         "fixture_files": 3,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase20d-darwin-threading",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
-        "source_files": 0,
-        "fixture_files": 4,
-        "ci": "passing_checks"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:19:47Z"
+  "observed_at": "2026-10-28T19:20:09Z"
 }
