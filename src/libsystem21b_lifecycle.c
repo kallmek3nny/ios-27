@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
@@ -20,6 +21,7 @@ struct ios27_21b_runtime {
     pthread_cond_t changed;
     pthread_t reaper;
     size_t quota, live;
+    uint64_t owner;
     int shutdown;
     worker_slot slots[IOS27_21B_MAX_THREADS];
 };
@@ -30,12 +32,14 @@ typedef struct {
     void *argument;
     void *result;
 } worker_args;
+static _Atomic uint64_t next_owner = 1;
 static _Thread_local ios27_21b_runtime *self_runtime;
 static _Thread_local ios27_21b_thread self_id;
 
 static worker_slot *lookup(ios27_21b_runtime *rt, ios27_21b_thread id) {
     worker_slot *s;
-    if (!id.slot || !id.generation || id.slot > rt->quota) return NULL;
+    if (!id.slot || !id.generation || id.owner != rt->owner ||
+        id.slot > rt->quota) return NULL;
     s = &rt->slots[id.slot - 1u];
     if (s->state == UNUSED || s->state == RETIRED || s->generation != id.generation)
         return NULL;
@@ -87,7 +91,7 @@ static void completed(void *context) {
     (void)pthread_cond_broadcast(&rt->changed);
     (void)pthread_mutex_unlock(&rt->lock);
     self_runtime = NULL;
-    self_id = (ios27_21b_thread){0, 0};
+    self_id = (ios27_21b_thread){0};
     free(a);
 }
 static void *worker(void *context) {
@@ -95,6 +99,9 @@ static void *worker(void *context) {
     void *result = NULL;
     self_runtime = a->rt;
     self_id = a->id;
+    /* Wait for pthread_create to publish native identity under the guard. */
+    (void)pthread_mutex_lock(&a->rt->lock);
+    (void)pthread_mutex_unlock(&a->rt->lock);
     pthread_cleanup_push(completed, a);
     result = a->entry(a->argument);
     pthread_cleanup_pop(1);
@@ -137,6 +144,12 @@ int ios27_21b_runtime_create(ios27_21b_runtime **out, size_t quota) {
     rt = calloc(1, sizeof(*rt));
     if (!rt) return ENOMEM;
     rt->quota = quota;
+    uint64_t current = atomic_load_explicit(&next_owner, memory_order_relaxed);
+    do {
+        if (current == UINT64_MAX) { free(rt); return EAGAIN; }
+    } while (!atomic_compare_exchange_weak_explicit(&next_owner, &current,
+        current + 1u, memory_order_relaxed, memory_order_relaxed));
+    rt->owner = current;
     err = pthread_mutex_init(&rt->lock, NULL);
     if (err) { free(rt); return err; }
     err = pthread_cond_init(&rt->changed, NULL);
@@ -177,7 +190,7 @@ int ios27_21b_thread_create(ios27_21b_runtime *rt, ios27_21b_thread *out,
     size_t i;
     int err;
     if (!rt || !out || !entry) return EINVAL;
-    *out = (ios27_21b_thread){0, 0};
+    *out = (ios27_21b_thread){0};
     if (!attr) { (void)ios27_21b_attr_init(&defaults); attr = &defaults; }
     err = ios27_21b_attr_validate(attr);
     if (err) return err;
@@ -203,7 +216,7 @@ int ios27_21b_thread_create(ios27_21b_runtime *rt, ios27_21b_thread *out,
     s->state = attr->detached ? DETACHED : JOINABLE;
     s->finished = 0;
     args->rt = rt;
-    id = (ios27_21b_thread){(uint32_t)i + 1u, s->generation};
+    id = (ios27_21b_thread){(uint32_t)i + 1u, s->generation, rt->owner};
     args->id = id;
     args->entry = entry;
     args->argument = argument;
@@ -277,11 +290,12 @@ int ios27_21b_thread_info(ios27_21b_runtime *rt, ios27_21b_thread id,
 }
 ios27_21b_thread ios27_21b_thread_self(ios27_21b_runtime *rt) {
     if (rt && self_runtime == rt) return self_id;
-    return (ios27_21b_thread){0, 0};
+    return (ios27_21b_thread){0};
 }
 int ios27_21b_thread_equal(ios27_21b_thread a, ios27_21b_thread b) {
     return a.slot && b.slot && a.slot == b.slot &&
-        a.generation && a.generation == b.generation;
+        a.generation && a.generation == b.generation &&
+        a.owner && a.owner == b.owner;
 }
 int ios27_21b_runtime_usage(ios27_21b_runtime *rt, size_t *out) {
     if (!rt || !out) return EINVAL;
