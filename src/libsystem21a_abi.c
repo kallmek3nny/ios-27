@@ -14,7 +14,7 @@ enum operation {
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
-    OP_UNSUPPORTED
+    OP_KC, OP_KD, OP_KS, OP_KG, OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
@@ -41,7 +41,12 @@ typedef struct {
     pthread_t native_id;
     uint64_t guest_address;
     unsigned occupied, active;
+    uint64_t tls[IOS27_21A_MAX_KEYS];
 } bound_thread;
+typedef struct {
+    uint64_t guest_key;
+    unsigned active;
+} key_slot;
 struct ios27_21a_runtime {
     ios27_21a_region regions[IOS27_21A_MAX_REGIONS];
     size_t region_count;
@@ -49,6 +54,8 @@ struct ios27_21a_runtime {
     size_t callback_count;
     once_binding callbacks[IOS27_21A_MAX_ONCE_CALLBACKS];
     bound_thread threads[IOS27_21A_MAX_BOUND_THREADS];
+    key_slot keys[IOS27_21A_MAX_KEYS];
+    uint64_t next_key_token;
     pthread_mutex_t guard;
     object_slot objects[IOS27_21A_MAX_OBJECTS];
 };
@@ -82,10 +89,10 @@ static const entry symbols[] = {
     {"pthread_detach", OP_UNSUPPORTED},
     {"pthread_self", OP_SELF},
     {"pthread_equal", OP_EQUAL},
-    {"pthread_key_create", OP_UNSUPPORTED},
-    {"pthread_key_delete", OP_UNSUPPORTED},
-    {"pthread_getspecific", OP_UNSUPPORTED},
-    {"pthread_setspecific", OP_UNSUPPORTED},
+    {"pthread_key_create", OP_KC},
+    {"pthread_key_delete", OP_KD},
+    {"pthread_getspecific", OP_KG},
+    {"pthread_setspecific", OP_KS},
     {"pthread_cond_timedwait_relative_np", OP_UNSUPPORTED}
 };
 static size_t object_size(unsigned kind) {
@@ -185,6 +192,7 @@ int ios27_21a_create_regions(ios27_21a_runtime **out,
     memcpy(rt->regions, regions, count * sizeof(regions[0]));
     rt->region_count = count;
     rt->next_token = 1u;
+    rt->next_key_token = 1u;
     error = pthread_mutex_init(&rt->guard, NULL);
     if (error) { free(rt); return error; }
     *out = rt;
@@ -407,6 +415,12 @@ int ios27_21a_destroy(ios27_21a_runtime *rt) {
     }
     for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
         if (rt->threads[i].active) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EBUSY;
+        }
+    }
+    for (i = 0; i < IOS27_21A_MAX_KEYS; ++i) {
+        if (rt->keys[i].active) {
             (void)pthread_mutex_unlock(&rt->guard);
             return EBUSY;
         }
@@ -660,6 +674,7 @@ int ios27_21a_detach_thread(ios27_21a_runtime *rt) {
     for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
         bound_thread *b = &rt->threads[i];
         if (b->active && pthread_equal(b->native_id, self)) {
+            memset(b->tls, 0, sizeof(b->tls));
             b->active = 0u; /* Keep occupied to reject stale pointer reuse. */
             (void)pthread_mutex_unlock(&rt->guard);
             return 0;
@@ -700,6 +715,100 @@ static int thread_equal_guest(ios27_21a_runtime *rt,
     if (!found_a || !found_b) return ESRCH;
     *out = a == b ? 1u : 0u;
     return 0;
+}
+/* All key values are bridge-owned monotonically generated tokens. The lower
+ * byte encodes the slot+1, so deletion/reuse never revives an old key. */
+static int tls_slot(ios27_21a_runtime *rt, uint64_t key, size_t *index) {
+    size_t slot;
+    if (!key || !(key & UINT64_C(0xff)) ||
+        (key & UINT64_C(0xff)) > IOS27_21A_MAX_KEYS) return EINVAL;
+    slot = (size_t)((key & UINT64_C(0xff)) - 1u);
+    if (!rt->keys[slot].active || rt->keys[slot].guest_key != key)
+        return EINVAL;
+    *index = slot;
+    return 0;
+}
+static bound_thread *thread_current_locked(ios27_21a_runtime *rt) {
+    pthread_t self = pthread_self();
+    size_t i;
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        bound_thread *b = &rt->threads[i];
+        if (b->active && pthread_equal(b->native_id, self)) return b;
+    }
+    return NULL;
+}
+static int key_create_guest(ios27_21a_runtime *rt,
+                            uint64_t address, uint64_t destructor) {
+    unsigned char *p = NULL;
+    size_t i, slot = IOS27_21A_MAX_KEYS;
+    uint64_t token, key;
+    int e;
+    if (destructor) return ENOTSUP;
+    e = guest_view(rt, address, sizeof(uint64_t), 8u, &p);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
+        const object_slot *s = &rt->objects[i];
+        if (s->kind && address < s->addr + object_size(s->kind) &&
+            s->addr < address + sizeof(uint64_t)) {
+            e = EINVAL; goto done;
+        }
+    }
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *b = &rt->threads[i];
+        if (b->occupied &&
+            address < b->guest_address + sizeof(uint64_t) &&
+            b->guest_address < address + sizeof(uint64_t)) {
+            e = EINVAL; goto done;
+        }
+    }
+    for (i = 0; i < IOS27_21A_MAX_KEYS; ++i)
+        if (!rt->keys[i].active) { slot = i; break; }
+    if (slot == IOS27_21A_MAX_KEYS ||
+        rt->next_key_token > UINT64_MAX >> 8u) {
+        e = EAGAIN; goto done;
+    }
+    token = rt->next_key_token++;
+    key = (token << 8u) | (uint64_t)(slot + 1u);
+    guest_store64(p, key);
+    rt->keys[slot] = (key_slot){key, 1u};
+    e = 0;
+done:
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
+static int key_delete_guest(ios27_21a_runtime *rt, uint64_t key) {
+    size_t i, slot;
+    int e;
+    (void)pthread_mutex_lock(&rt->guard);
+    e = tls_slot(rt, key, &slot);
+    if (!e) {
+        rt->keys[slot].active = 0u;
+        for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i)
+            rt->threads[i].tls[slot] = 0u;
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
+static int key_specific_guest(ios27_21a_runtime *rt, uint64_t key,
+                              uint64_t *value, int setter) {
+    size_t slot;
+    bound_thread *thread;
+    int e;
+    if (setter && *value) {
+        e = ios27_21a_validate_access(rt, *value, 1u, 1u, IOS27_21A_READ);
+        if (e) return e;
+    }
+    (void)pthread_mutex_lock(&rt->guard);
+    e = tls_slot(rt, key, &slot);
+    if (e) goto done;
+    thread = thread_current_locked(rt);
+    if (!thread) { e = ESRCH; goto done; }
+    if (setter) thread->tls[slot] = *value;
+    else *value = thread->tls[slot];
+done:
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
 }
 int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
                             ios27_21a_once_callback callback, void *context) {
@@ -805,6 +914,17 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                             thread_equal_guest(rt, args[0], args[1], &result);
         *x0 = result;
         return e;
+    } else if (op == OP_KC) {
+        e = key_create_guest(rt, args[0], args[1]);
+    } else if (op == OP_KD) {
+        e = key_delete_guest(rt, args[0]);
+    } else if (op == OP_KS || op == OP_KG) {
+        uint64_t value = op == OP_KS ? args[1] : 0u;
+        e = key_specific_guest(rt, args[0], &value, op == OP_KS);
+        if (op == OP_KG) {
+            *x0 = e ? 0u : value;
+            return e;
+        }
     } else if (op == OP_MAI) {
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
