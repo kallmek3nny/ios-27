@@ -46,14 +46,8 @@ def main():
              "-Wall", "-Wextra", "-Werror", "-O2",
              "-I" + str(ROOT / "include"), "-c",
              str(ROOT / "tests/phase21a-arm64-darwin.c"), "-o", str(object_file)])
-        content = object_file.read_bytes()
-        if content[:4] != bytes.fromhex("cffaedfe"):
-            raise RuntimeError("Clang did not produce Mach-O arm64 object")
-        for sym in (b"_pthread_mutex_lock", b"_pthread_mutex_init",
-                    b"_pthread_rwlock_wrlock", b"_pthread_cond_signal",
-                    b"_pthread_once"):
-            if sym not in content:
-                raise RuntimeError("missing real Mach-O external symbol " + sym.decode())
+        run([sys.executable, str(ROOT / "tools/phase21a-macho-verify.py"),
+             str(object_file)])
     print("phase21a: all native and compiler-produced Darwin checks passed")
 
 if __name__ == "__main__":
