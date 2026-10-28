@@ -2,7 +2,7 @@ name: capability progress
 on:
   push:
     branches: [main]
-    paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, .github/workflows/progress.yml]
+    paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, .github/workflows/progress.yml]
   pull_request:
     branches: [main]
     paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, .github/workflows/progress.yml]
@@ -15,4 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: validate documented milestone gates and generated dashboard
-        run: timeout 15s python3 tools/progress.py --check
+        run: |
+          timeout 15s python3 tools/progress.py --check
+          timeout 15s node --check tools/compat_blocks.cjs
+          timeout 15s node tools/compat_blocks.cjs --check

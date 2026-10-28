@@ -1,0 +1,1959 @@
+{
+  "schema": 1,
+  "as_of": "2026-10-28",
+  "scope": "tracked representative APIs and milestone contracts; not full Apple iOS 27 API or firmware inventory",
+  "source_references": [
+    {
+      "name": "XNU BSD syscall master",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/syscalls.master"
+    },
+    {
+      "name": "Apple ObjC runtime source",
+      "url": "https://github.com/apple-oss-distributions/objc4"
+    },
+    {
+      "name": "Swift runtime source",
+      "url": "https://github.com/swiftlang/swift"
+    },
+    {
+      "name": "ios-27 architecture and limitations",
+      "url": "../docs/official-ios-ui-roadmap.md"
+    }
+  ],
+  "status_definitions": {
+    "native-fixture": "real ARM64 machine code, compiler-produced or reviewed synthetic fixture with native execution; NOT Apple app compatibility",
+    "synthetic": "host-side parsing/model or synthetic probe tested in repo; NOT a shipped Apple framework export",
+    "missing": "no demonstrated end-to-end implementation",
+    "excluded": "outside project safety/architecture scope, never counted implemented"
+  },
+  "ceiling_definitions": {
+    "plausible": "feasible for a limited userspace subset, not guaranteed generally",
+    "conditional": "likely requires a new trustworthy subsystem and on-device validation",
+    "unknown": "feasibility of official Apple behavior has not been established",
+    "excluded": "explicitly prohibited by project scope"
+  },
+  "panels": [
+    {
+      "id": "libraries",
+      "title": "system libraries / api targets",
+      "subtitle": "representative abi/function contracts, NOT an exhaustive apple export database"
+    },
+    {
+      "id": "runtime",
+      "title": "darwin runtime / native compatibility",
+      "subtitle": "narrow tests, parser contracts and mach models; NOT general ios execution"
+    },
+    {
+      "id": "ui",
+      "title": "apple ui / android integration",
+      "subtitle": "official framework and system ui dependencies; feasibility mostly unproven"
+    }
+  ],
+  "groups": [
+    {
+      "panel": "libraries",
+      "id": "libsystem-kernel",
+      "label": "libsystem_kernel / bsd",
+      "ceiling": "conditional",
+      "note": "selected xnu bsd calls can be translated, but guest ownership, cancellation, darwin errno, rights and file isolation need proof. only seven syscall probe selectors currently work in a tiny interpreter, not as linked libsystem exports.",
+      "evidence": "src/darwin_probe.c",
+      "test": "darwin-svc-probe",
+      "targets": [
+        {
+          "name": "exit",
+          "status": "synthetic"
+        },
+        {
+          "name": "getpid",
+          "status": "synthetic"
+        },
+        {
+          "name": "getppid",
+          "status": "synthetic"
+        },
+        {
+          "name": "getuid",
+          "status": "synthetic"
+        },
+        {
+          "name": "geteuid",
+          "status": "synthetic"
+        },
+        {
+          "name": "getgid",
+          "status": "synthetic"
+        },
+        {
+          "name": "getegid",
+          "status": "synthetic"
+        },
+        {
+          "name": "open",
+          "status": "missing"
+        },
+        {
+          "name": "openat",
+          "status": "missing"
+        },
+        {
+          "name": "close",
+          "status": "missing"
+        },
+        {
+          "name": "read",
+          "status": "missing"
+        },
+        {
+          "name": "write",
+          "status": "missing"
+        },
+        {
+          "name": "pread",
+          "status": "missing"
+        },
+        {
+          "name": "pwrite",
+          "status": "missing"
+        },
+        {
+          "name": "lseek",
+          "status": "missing"
+        },
+        {
+          "name": "stat",
+          "status": "missing"
+        },
+        {
+          "name": "fstat",
+          "status": "missing"
+        },
+        {
+          "name": "lstat",
+          "status": "missing"
+        },
+        {
+          "name": "fcntl",
+          "status": "missing"
+        },
+        {
+          "name": "ioctl",
+          "status": "missing"
+        },
+        {
+          "name": "mmap",
+          "status": "missing"
+        },
+        {
+          "name": "munmap",
+          "status": "missing"
+        },
+        {
+          "name": "mprotect",
+          "status": "missing"
+        },
+        {
+          "name": "sysctl",
+          "status": "missing"
+        },
+        {
+          "name": "gettimeofday",
+          "status": "missing"
+        },
+        {
+          "name": "kqueue",
+          "status": "missing"
+        },
+        {
+          "name": "kevent",
+          "status": "missing"
+        },
+        {
+          "name": "poll",
+          "status": "missing"
+        },
+        {
+          "name": "select",
+          "status": "missing"
+        },
+        {
+          "name": "socket",
+          "status": "missing"
+        },
+        {
+          "name": "connect",
+          "status": "missing"
+        },
+        {
+          "name": "bind",
+          "status": "missing"
+        },
+        {
+          "name": "listen",
+          "status": "missing"
+        },
+        {
+          "name": "accept",
+          "status": "missing"
+        },
+        {
+          "name": "sendto",
+          "status": "missing"
+        },
+        {
+          "name": "recvfrom",
+          "status": "missing"
+        },
+        {
+          "name": "sigaction",
+          "status": "missing"
+        },
+        {
+          "name": "kill",
+          "status": "missing"
+        },
+        {
+          "name": "posix_spawn",
+          "status": "missing"
+        },
+        {
+          "name": "execve",
+          "status": "missing"
+        },
+        {
+          "name": "fork",
+          "status": "missing"
+        },
+        {
+          "name": "wait4",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "libsystem-c",
+      "label": "libsystem_c / libc",
+      "ceiling": "plausible",
+      "note": "portable c functions could be implemented or safely forwarded after abi and guest address-space isolation; these are representative targets, not extracted iphone exports.",
+      "targets": [
+        {
+          "name": "malloc",
+          "status": "missing"
+        },
+        {
+          "name": "calloc",
+          "status": "missing"
+        },
+        {
+          "name": "realloc",
+          "status": "missing"
+        },
+        {
+          "name": "free",
+          "status": "missing"
+        },
+        {
+          "name": "memcpy",
+          "status": "missing"
+        },
+        {
+          "name": "memmove",
+          "status": "missing"
+        },
+        {
+          "name": "memset",
+          "status": "missing"
+        },
+        {
+          "name": "memcmp",
+          "status": "missing"
+        },
+        {
+          "name": "strlen",
+          "status": "missing"
+        },
+        {
+          "name": "strnlen",
+          "status": "missing"
+        },
+        {
+          "name": "strcmp",
+          "status": "missing"
+        },
+        {
+          "name": "strncmp",
+          "status": "missing"
+        },
+        {
+          "name": "strcpy",
+          "status": "missing"
+        },
+        {
+          "name": "strncpy",
+          "status": "missing"
+        },
+        {
+          "name": "strdup",
+          "status": "missing"
+        },
+        {
+          "name": "snprintf",
+          "status": "missing"
+        },
+        {
+          "name": "printf",
+          "status": "missing"
+        },
+        {
+          "name": "fprintf",
+          "status": "missing"
+        },
+        {
+          "name": "sscanf",
+          "status": "missing"
+        },
+        {
+          "name": "strtol",
+          "status": "missing"
+        },
+        {
+          "name": "strtod",
+          "status": "missing"
+        },
+        {
+          "name": "fopen",
+          "status": "missing"
+        },
+        {
+          "name": "fclose",
+          "status": "missing"
+        },
+        {
+          "name": "fread",
+          "status": "missing"
+        },
+        {
+          "name": "fwrite",
+          "status": "missing"
+        },
+        {
+          "name": "fseek",
+          "status": "missing"
+        },
+        {
+          "name": "fflush",
+          "status": "missing"
+        },
+        {
+          "name": "setenv",
+          "status": "missing"
+        },
+        {
+          "name": "getenv",
+          "status": "missing"
+        },
+        {
+          "name": "unsetenv",
+          "status": "missing"
+        },
+        {
+          "name": "strerror",
+          "status": "missing"
+        },
+        {
+          "name": "qsort",
+          "status": "missing"
+        },
+        {
+          "name": "bsearch",
+          "status": "missing"
+        },
+        {
+          "name": "atexit",
+          "status": "missing"
+        },
+        {
+          "name": "abort",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "libsystem-pthread",
+      "label": "libsystem_pthread",
+      "ceiling": "conditional",
+      "note": "darwin thread startup, tls, signals, cancellation and workqueues require more than linux pthread wrappers.",
+      "targets": [
+        {
+          "name": "pthread_create",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_join",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_detach",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_self",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_equal",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_once",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_key_create",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_setspecific",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_getspecific",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_mutex_init",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_mutex_lock",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_mutex_unlock",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_cond_init",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_cond_wait",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_cond_signal",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_cond_broadcast",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_rwlock_rdlock",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_rwlock_wrlock",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_set_qos_class_self_np",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_threadid_np",
+          "status": "missing"
+        },
+        {
+          "name": "pthread_getname_np",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "libdispatch",
+      "label": "libdispatch / gdc",
+      "ceiling": "conditional",
+      "note": "dispatch object ownership and queues may be portable, but apple qos, workqueue and runloop integration need dedicated tests.",
+      "targets": [
+        {
+          "name": "dispatch_async",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_sync",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_after",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_once",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_group_create",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_group_async",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_group_wait",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_semaphore_create",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_semaphore_wait",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_semaphore_signal",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_queue_create",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_get_main_queue",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_get_global_queue",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_source_create",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_source_set_event_handler",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_activate",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_retain",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_release",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_block_create",
+          "status": "missing"
+        },
+        {
+          "name": "dispatch_apply",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "libdyld",
+      "label": "libdyld / dynamic loading",
+      "ceiling": "conditional",
+      "note": "mapped native fixtures do not export a compatible libdyld ABI to unmodified apple programs.",
+      "targets": [
+        {
+          "name": "dlopen",
+          "status": "missing"
+        },
+        {
+          "name": "dlsym",
+          "status": "missing"
+        },
+        {
+          "name": "dlclose",
+          "status": "missing"
+        },
+        {
+          "name": "dlerror",
+          "status": "missing"
+        },
+        {
+          "name": "dladdr",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_image_count",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_get_image_name",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_get_image_header",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_get_image_vmaddr_slide",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_register_func_for_add_image",
+          "status": "missing"
+        },
+        {
+          "name": "_dyld_register_func_for_remove_image",
+          "status": "missing"
+        },
+        {
+          "name": "dyld_dynamic_interpose",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "libobjc",
+      "label": "libobjc / objc runtime",
+      "ceiling": "conditional",
+      "note": "open objc runtimes provide a possible research starting point; apple objc abi and arm64e dispatch are not validated here.",
+      "targets": [
+        {
+          "name": "objc_msgSend",
+          "status": "missing"
+        },
+        {
+          "name": "objc_msgSendSuper2",
+          "status": "missing"
+        },
+        {
+          "name": "objc_getClass",
+          "status": "missing"
+        },
+        {
+          "name": "objc_lookUpClass",
+          "status": "missing"
+        },
+        {
+          "name": "objc_allocateClassPair",
+          "status": "missing"
+        },
+        {
+          "name": "objc_registerClassPair",
+          "status": "missing"
+        },
+        {
+          "name": "objc_disposeClassPair",
+          "status": "missing"
+        },
+        {
+          "name": "class_getName",
+          "status": "missing"
+        },
+        {
+          "name": "class_getSuperclass",
+          "status": "missing"
+        },
+        {
+          "name": "class_getInstanceMethod",
+          "status": "missing"
+        },
+        {
+          "name": "class_addMethod",
+          "status": "missing"
+        },
+        {
+          "name": "class_replaceMethod",
+          "status": "missing"
+        },
+        {
+          "name": "object_getClass",
+          "status": "missing"
+        },
+        {
+          "name": "object_setClass",
+          "status": "missing"
+        },
+        {
+          "name": "sel_registerName",
+          "status": "missing"
+        },
+        {
+          "name": "sel_getName",
+          "status": "missing"
+        },
+        {
+          "name": "method_getImplementation",
+          "status": "missing"
+        },
+        {
+          "name": "objc_retain",
+          "status": "missing"
+        },
+        {
+          "name": "objc_release",
+          "status": "missing"
+        },
+        {
+          "name": "objc_autorelease",
+          "status": "missing"
+        },
+        {
+          "name": "objc_autoreleasePoolPush",
+          "status": "missing"
+        },
+        {
+          "name": "objc_autoreleasePoolPop",
+          "status": "missing"
+        },
+        {
+          "name": "objc_storeWeak",
+          "status": "missing"
+        },
+        {
+          "name": "objc_loadWeakRetained",
+          "status": "missing"
+        },
+        {
+          "name": "objc_initWeak",
+          "status": "missing"
+        },
+        {
+          "name": "objc_destroyWeak",
+          "status": "missing"
+        },
+        {
+          "name": "objc_exception_throw",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "swift",
+      "label": "Swift runtime / ABI",
+      "ceiling": "conditional",
+      "note": "these are selected swift runtime contract families rather than exact mangled exports; true swift abi interoperability is absent.",
+      "targets": [
+        {
+          "name": "swift class metadata",
+          "status": "missing"
+        },
+        {
+          "name": "value witness tables",
+          "status": "missing"
+        },
+        {
+          "name": "protocol conformance lookup",
+          "status": "missing"
+        },
+        {
+          "name": "existential containers",
+          "status": "missing"
+        },
+        {
+          "name": "generic specialization metadata",
+          "status": "missing"
+        },
+        {
+          "name": "swift dynamic casting",
+          "status": "missing"
+        },
+        {
+          "name": "swift retain/release",
+          "status": "missing"
+        },
+        {
+          "name": "swift heap allocation",
+          "status": "missing"
+        },
+        {
+          "name": "swift error propagation",
+          "status": "missing"
+        },
+        {
+          "name": "swift async tasks",
+          "status": "missing"
+        },
+        {
+          "name": "swift continuations",
+          "status": "missing"
+        },
+        {
+          "name": "swift actor isolation",
+          "status": "missing"
+        },
+        {
+          "name": "swift concurrency executor",
+          "status": "missing"
+        },
+        {
+          "name": "swift reflection metadata",
+          "status": "missing"
+        },
+        {
+          "name": "swift strings bridge",
+          "status": "missing"
+        },
+        {
+          "name": "swift objc interoperability",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "corefoundation",
+      "label": "CoreFoundation",
+      "ceiling": "unknown",
+      "note": "apple corefoundation binaries and exact cf ownership/event-loop behavior have not run; targets are representative public functions.",
+      "targets": [
+        {
+          "name": "CFGetTypeID",
+          "status": "missing"
+        },
+        {
+          "name": "CFRetain",
+          "status": "missing"
+        },
+        {
+          "name": "CFRelease",
+          "status": "missing"
+        },
+        {
+          "name": "CFStringCreateWithCString",
+          "status": "missing"
+        },
+        {
+          "name": "CFStringGetLength",
+          "status": "missing"
+        },
+        {
+          "name": "CFStringGetCString",
+          "status": "missing"
+        },
+        {
+          "name": "CFArrayCreate",
+          "status": "missing"
+        },
+        {
+          "name": "CFArrayGetCount",
+          "status": "missing"
+        },
+        {
+          "name": "CFArrayGetValueAtIndex",
+          "status": "missing"
+        },
+        {
+          "name": "CFDictionaryCreate",
+          "status": "missing"
+        },
+        {
+          "name": "CFDictionaryGetValue",
+          "status": "missing"
+        },
+        {
+          "name": "CFDataCreate",
+          "status": "missing"
+        },
+        {
+          "name": "CFDataGetLength",
+          "status": "missing"
+        },
+        {
+          "name": "CFURLCreateWithFileSystemPath",
+          "status": "missing"
+        },
+        {
+          "name": "CFRunLoopGetCurrent",
+          "status": "missing"
+        },
+        {
+          "name": "CFRunLoopRun",
+          "status": "missing"
+        },
+        {
+          "name": "CFRunLoopStop",
+          "status": "missing"
+        },
+        {
+          "name": "CFBundleGetMainBundle",
+          "status": "missing"
+        },
+        {
+          "name": "CFErrorCreate",
+          "status": "missing"
+        },
+        {
+          "name": "CFPreferencesCopyAppValue",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "foundation",
+      "label": "Foundation / classes",
+      "ceiling": "unknown",
+      "note": "selected class contracts, not every foundation method or real symbols. apple foundation loading has not been demonstrated.",
+      "targets": [
+        {
+          "name": "NSObject lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "NSString text operations",
+          "status": "missing"
+        },
+        {
+          "name": "NSNumber boxing",
+          "status": "missing"
+        },
+        {
+          "name": "NSArray collections",
+          "status": "missing"
+        },
+        {
+          "name": "NSDictionary collections",
+          "status": "missing"
+        },
+        {
+          "name": "NSData buffers",
+          "status": "missing"
+        },
+        {
+          "name": "NSError propagation",
+          "status": "missing"
+        },
+        {
+          "name": "NSURL parsing",
+          "status": "missing"
+        },
+        {
+          "name": "NSFileManager operations",
+          "status": "missing"
+        },
+        {
+          "name": "NSBundle lookup",
+          "status": "missing"
+        },
+        {
+          "name": "NSNotificationCenter notifications",
+          "status": "missing"
+        },
+        {
+          "name": "NSOperationQueue scheduling",
+          "status": "missing"
+        },
+        {
+          "name": "NSRunLoop integration",
+          "status": "missing"
+        },
+        {
+          "name": "NSDate and timers",
+          "status": "missing"
+        },
+        {
+          "name": "NSKeyedArchiver",
+          "status": "missing"
+        },
+        {
+          "name": "NSLocale handling",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "security",
+      "label": "Security / keychain",
+      "ceiling": "unknown",
+      "note": "keychain, signing, attestation and entitlements rely on an apple-specific trust model that the android host does not provide.",
+      "targets": [
+        {
+          "name": "SecItemAdd",
+          "status": "missing"
+        },
+        {
+          "name": "SecItemCopyMatching",
+          "status": "missing"
+        },
+        {
+          "name": "SecItemUpdate",
+          "status": "missing"
+        },
+        {
+          "name": "SecItemDelete",
+          "status": "missing"
+        },
+        {
+          "name": "SecRandomCopyBytes",
+          "status": "missing"
+        },
+        {
+          "name": "SecKeyCreateRandomKey",
+          "status": "missing"
+        },
+        {
+          "name": "SecKeyCreateSignature",
+          "status": "missing"
+        },
+        {
+          "name": "SecKeyVerifySignature",
+          "status": "missing"
+        },
+        {
+          "name": "SecTrustEvaluateWithError",
+          "status": "missing"
+        },
+        {
+          "name": "SecCertificateCreateWithData",
+          "status": "missing"
+        },
+        {
+          "name": "SecPolicyCreateBasicX509",
+          "status": "missing"
+        },
+        {
+          "name": "SecAccessControlCreateWithFlags",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "libraries",
+      "id": "network",
+      "label": "CFNetwork / Network.framework",
+      "ceiling": "conditional",
+      "note": "the network path may use android transports through an isolated proxy; authentic apple policy and entitlement behavior is unproven.",
+      "targets": [
+        {
+          "name": "CFHTTPMessageCreateRequest",
+          "status": "missing"
+        },
+        {
+          "name": "CFReadStreamOpen",
+          "status": "missing"
+        },
+        {
+          "name": "CFWriteStreamOpen",
+          "status": "missing"
+        },
+        {
+          "name": "NSURLSession request",
+          "status": "missing"
+        },
+        {
+          "name": "NSURLSession background task",
+          "status": "missing"
+        },
+        {
+          "name": "NWConnection start",
+          "status": "missing"
+        },
+        {
+          "name": "NWConnection send",
+          "status": "missing"
+        },
+        {
+          "name": "NWConnection receive",
+          "status": "missing"
+        },
+        {
+          "name": "NWListener start",
+          "status": "missing"
+        },
+        {
+          "name": "Network path monitor",
+          "status": "missing"
+        },
+        {
+          "name": "TLS trust bridge",
+          "status": "missing"
+        },
+        {
+          "name": "Network sandbox policy",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "mach-o",
+      "label": "mach-o parser and native loader",
+      "ceiling": "plausible",
+      "note": "source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.",
+      "evidence": "docs/phase17a-native-multisegment-execution.md",
+      "test": "compiled-darwin-real-mh-execute",
+      "targets": [
+        {
+          "name": "thin arm64 parsing",
+          "status": "synthetic"
+        },
+        {
+          "name": "universal arm64 inventory",
+          "status": "synthetic"
+        },
+        {
+          "name": "compiler mh_object validation",
+          "status": "synthetic"
+        },
+        {
+          "name": "linked mh_execute entry",
+          "status": "native-fixture"
+        },
+        {
+          "name": "multi-segment native entry",
+          "status": "native-fixture"
+        },
+        {
+          "name": "16k-compatible fixture mapping",
+          "status": "synthetic"
+        },
+        {
+          "name": "w-x sealing and rollback",
+          "status": "synthetic"
+        },
+        {
+          "name": "darwin user stack",
+          "status": "missing"
+        },
+        {
+          "name": "full process startup",
+          "status": "missing"
+        },
+        {
+          "name": "tls and thread initialization",
+          "status": "missing"
+        },
+        {
+          "name": "untrusted binary isolation",
+          "status": "missing"
+        },
+        {
+          "name": "real apple app entry",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "dyld-engine",
+      "label": "dyld / image graph",
+      "ceiling": "conditional",
+      "note": "linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.",
+      "evidence": "docs/phase17b-linked-multiimage.md",
+      "test": "native-multi-image-wx",
+      "targets": [
+        {
+          "name": "virtual @rpath resolution",
+          "status": "synthetic"
+        },
+        {
+          "name": "export trie parse",
+          "status": "synthetic"
+        },
+        {
+          "name": "classic pointer binds",
+          "status": "synthetic"
+        },
+        {
+          "name": "unauthenticated chained binds",
+          "status": "synthetic"
+        },
+        {
+          "name": "rebase validation",
+          "status": "synthetic"
+        },
+        {
+          "name": "cross-image native call",
+          "status": "native-fixture"
+        },
+        {
+          "name": "linked dylib graph fixture",
+          "status": "synthetic"
+        },
+        {
+          "name": "weak import policy",
+          "status": "synthetic"
+        },
+        {
+          "name": "re-export handling",
+          "status": "synthetic"
+        },
+        {
+          "name": "dependency-cycle rejection",
+          "status": "synthetic"
+        },
+        {
+          "name": "full dlopen lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "lazy binding",
+          "status": "missing"
+        },
+        {
+          "name": "dyld shared cache",
+          "status": "missing"
+        },
+        {
+          "name": "launch closure support",
+          "status": "missing"
+        },
+        {
+          "name": "authenticated arm64e fixups",
+          "status": "missing"
+        },
+        {
+          "name": "swift tls fixups",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "mach-ipc",
+      "label": "mach ipc model",
+      "ceiling": "conditional",
+      "note": "task-local messages are a tested synchronous model, not actual mach trap delivery or an xnu service provider.",
+      "evidence": "docs/phase17c-mach-lifecycle.md",
+      "test": "task-local-mach-names",
+      "targets": [
+        {
+          "name": "task-local names",
+          "status": "synthetic"
+        },
+        {
+          "name": "send and receive rights",
+          "status": "synthetic"
+        },
+        {
+          "name": "send-once replies",
+          "status": "synthetic"
+        },
+        {
+          "name": "port descriptor copies",
+          "status": "synthetic"
+        },
+        {
+          "name": "multi-descriptor messages",
+          "status": "synthetic"
+        },
+        {
+          "name": "transactional queue commit",
+          "status": "synthetic"
+        },
+        {
+          "name": "port destruction cleanup",
+          "status": "synthetic"
+        },
+        {
+          "name": "synthetic dead-name watcher",
+          "status": "synthetic"
+        },
+        {
+          "name": "bounded guest arena",
+          "status": "synthetic"
+        },
+        {
+          "name": "register fixture dispatch",
+          "status": "synthetic"
+        },
+        {
+          "name": "out-of-line descriptors",
+          "status": "missing"
+        },
+        {
+          "name": "mach message trailers",
+          "status": "missing"
+        },
+        {
+          "name": "voucher support",
+          "status": "missing"
+        },
+        {
+          "name": "real mig protocol servers",
+          "status": "missing"
+        },
+        {
+          "name": "host process mach ipc",
+          "status": "missing"
+        },
+        {
+          "name": "concurrency and races",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "bsd-calls",
+      "label": "bsd syscall boundary",
+      "ceiling": "conditional",
+      "note": "a narrow interpreter responds to six identity calls plus a virtual exit, not general darwin syscalls from native processes.",
+      "evidence": "src/darwin_probe.c",
+      "test": "darwin-svc-probe",
+      "targets": [
+        {
+          "name": "guest exit",
+          "status": "synthetic"
+        },
+        {
+          "name": "getpid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "getppid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "getuid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "geteuid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "getgid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "getegid selector",
+          "status": "synthetic"
+        },
+        {
+          "name": "fd table and isolation",
+          "status": "missing"
+        },
+        {
+          "name": "open/read/write path",
+          "status": "missing"
+        },
+        {
+          "name": "virtual filesystem policy",
+          "status": "missing"
+        },
+        {
+          "name": "socket boundary",
+          "status": "missing"
+        },
+        {
+          "name": "memory map syscall abi",
+          "status": "missing"
+        },
+        {
+          "name": "process spawn semantics",
+          "status": "missing"
+        },
+        {
+          "name": "signal frames",
+          "status": "missing"
+        },
+        {
+          "name": "darwin error/carry abi",
+          "status": "missing"
+        },
+        {
+          "name": "thread syscall abi",
+          "status": "missing"
+        },
+        {
+          "name": "host syscall trapping",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "arm64e",
+      "label": "arm64e and abi compatibility",
+      "ceiling": "unknown",
+      "note": "native aarch64 is not proof of arm64e abi; authenticated pointer formats are deliberately rejected rather than bypassed.",
+      "targets": [
+        {
+          "name": "arm64e mach-o decode",
+          "status": "missing"
+        },
+        {
+          "name": "authenticated pointer rebases",
+          "status": "missing"
+        },
+        {
+          "name": "authenticated symbol bindings",
+          "status": "missing"
+        },
+        {
+          "name": "ptrauth key policy",
+          "status": "missing"
+        },
+        {
+          "name": "objc arm64e dispatch",
+          "status": "missing"
+        },
+        {
+          "name": "swift arm64e metadata",
+          "status": "missing"
+        },
+        {
+          "name": "branch target signing",
+          "status": "missing"
+        },
+        {
+          "name": "guest signal and unwind",
+          "status": "missing"
+        },
+        {
+          "name": "apple-specific tls registers",
+          "status": "missing"
+        },
+        {
+          "name": "arm64e native execution",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "runtime",
+      "id": "sandbox",
+      "label": "guest security / isolation",
+      "ceiling": "conditional",
+      "note": "the current reviewed fixture runner executes in-process. boot chain writes and weakening selinux are explicitly excluded.",
+      "evidence": "docs/phase17a-native-multisegment-execution.md",
+      "test": "macho-parser",
+      "targets": [
+        {
+          "name": "bounded input validation",
+          "status": "synthetic"
+        },
+        {
+          "name": "mapping rollback",
+          "status": "synthetic"
+        },
+        {
+          "name": "w-x validation",
+          "status": "synthetic"
+        },
+        {
+          "name": "separate guest process",
+          "status": "missing"
+        },
+        {
+          "name": "guest memory isolation",
+          "status": "missing"
+        },
+        {
+          "name": "file descriptor policy",
+          "status": "missing"
+        },
+        {
+          "name": "network policy",
+          "status": "missing"
+        },
+        {
+          "name": "device permissions",
+          "status": "missing"
+        },
+        {
+          "name": "entitlement emulation",
+          "status": "missing"
+        },
+        {
+          "name": "signature trust design",
+          "status": "missing"
+        },
+        {
+          "name": "safe process teardown",
+          "status": "missing"
+        },
+        {
+          "name": "fuzz harness coverage",
+          "status": "missing"
+        },
+        {
+          "name": "host selinux weakening",
+          "status": "excluded"
+        },
+        {
+          "name": "boot or recovery modification",
+          "status": "excluded"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "uikit",
+      "label": "UIKit / controls",
+      "ceiling": "unknown",
+      "note": "official apple framework code, event dispatch and rendering are not working. all entries are target contracts, not sdk export enumeration.",
+      "targets": [
+        {
+          "name": "UIApplication bootstrap",
+          "status": "missing"
+        },
+        {
+          "name": "UIWindow composition",
+          "status": "missing"
+        },
+        {
+          "name": "UIView lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "UIViewController lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "UILabel text",
+          "status": "missing"
+        },
+        {
+          "name": "UIButton event handling",
+          "status": "missing"
+        },
+        {
+          "name": "UITextField input",
+          "status": "missing"
+        },
+        {
+          "name": "UIScrollView gestures",
+          "status": "missing"
+        },
+        {
+          "name": "UITableView data source",
+          "status": "missing"
+        },
+        {
+          "name": "UICollectionView layout",
+          "status": "missing"
+        },
+        {
+          "name": "UINavigationController",
+          "status": "missing"
+        },
+        {
+          "name": "UITabBarController",
+          "status": "missing"
+        },
+        {
+          "name": "UIAccessibility",
+          "status": "missing"
+        },
+        {
+          "name": "trait collection propagation",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "swiftui",
+      "label": "SwiftUI / view graph",
+      "ceiling": "unknown",
+      "note": "genuine swiftui binaries and dynamic view graph machinery have not run.",
+      "targets": [
+        {
+          "name": "body computation",
+          "status": "missing"
+        },
+        {
+          "name": "View identity and diffing",
+          "status": "missing"
+        },
+        {
+          "name": "State storage",
+          "status": "missing"
+        },
+        {
+          "name": "Binding propagation",
+          "status": "missing"
+        },
+        {
+          "name": "Observable model",
+          "status": "missing"
+        },
+        {
+          "name": "Environment values",
+          "status": "missing"
+        },
+        {
+          "name": "Layout protocol",
+          "status": "missing"
+        },
+        {
+          "name": "drawing effects",
+          "status": "missing"
+        },
+        {
+          "name": "navigation stack",
+          "status": "missing"
+        },
+        {
+          "name": "animation transactions",
+          "status": "missing"
+        },
+        {
+          "name": "gesture recognition",
+          "status": "missing"
+        },
+        {
+          "name": "app scene lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "async view updates",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "coreanimation",
+      "label": "CoreAnimation / compositor",
+      "ceiling": "unknown",
+      "note": "renderer compatibility requires apple semantics converted into isolated android-compatible surfaces.",
+      "targets": [
+        {
+          "name": "CALayer tree",
+          "status": "missing"
+        },
+        {
+          "name": "CATransaction commit",
+          "status": "missing"
+        },
+        {
+          "name": "CAAnimation timeline",
+          "status": "missing"
+        },
+        {
+          "name": "compositor scheduling",
+          "status": "missing"
+        },
+        {
+          "name": "render server ipc",
+          "status": "missing"
+        },
+        {
+          "name": "backing store ownership",
+          "status": "missing"
+        },
+        {
+          "name": "text rendering",
+          "status": "missing"
+        },
+        {
+          "name": "blur and material layers",
+          "status": "missing"
+        },
+        {
+          "name": "color space translation",
+          "status": "missing"
+        },
+        {
+          "name": "HDR pipeline",
+          "status": "missing"
+        },
+        {
+          "name": "synchronized display",
+          "status": "missing"
+        },
+        {
+          "name": "vsync integration",
+          "status": "missing"
+        },
+        {
+          "name": "glass material rendering",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "metal",
+      "label": "Metal / IOSurface / gpu",
+      "ceiling": "unknown",
+      "note": "apple metal command and resource semantics are not a one-to-one vulkan translation; apple iosurface ownership is not present.",
+      "targets": [
+        {
+          "name": "MTLDevice discovery",
+          "status": "missing"
+        },
+        {
+          "name": "MTLCommandQueue",
+          "status": "missing"
+        },
+        {
+          "name": "MTLCommandBuffer",
+          "status": "missing"
+        },
+        {
+          "name": "MTLBuffer lifetime",
+          "status": "missing"
+        },
+        {
+          "name": "MTLTexture lifetime",
+          "status": "missing"
+        },
+        {
+          "name": "MTLRenderPipelineState",
+          "status": "missing"
+        },
+        {
+          "name": "MTLComputePipelineState",
+          "status": "missing"
+        },
+        {
+          "name": "metal shader translation",
+          "status": "missing"
+        },
+        {
+          "name": "synchronization fences",
+          "status": "missing"
+        },
+        {
+          "name": "iosurface allocation",
+          "status": "missing"
+        },
+        {
+          "name": "iosurface cross-process sharing",
+          "status": "missing"
+        },
+        {
+          "name": "android graphics buffer bridge",
+          "status": "missing"
+        },
+        {
+          "name": "vulkan submission",
+          "status": "missing"
+        },
+        {
+          "name": "hardware gpu validation",
+          "status": "missing"
+        },
+        {
+          "name": "display surface present",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "springboard",
+      "label": "SpringBoard / apple services",
+      "ceiling": "unknown",
+      "note": "genuine apple private processes, entitlements and dependencies are untested on this phone.",
+      "targets": [
+        {
+          "name": "launchd bootstrap",
+          "status": "missing"
+        },
+        {
+          "name": "backboardd service",
+          "status": "missing"
+        },
+        {
+          "name": "frontboard app orchestration",
+          "status": "missing"
+        },
+        {
+          "name": "springboard launch",
+          "status": "missing"
+        },
+        {
+          "name": "springboard scenes",
+          "status": "missing"
+        },
+        {
+          "name": "lock screen",
+          "status": "missing"
+        },
+        {
+          "name": "control center",
+          "status": "missing"
+        },
+        {
+          "name": "notification presentation",
+          "status": "missing"
+        },
+        {
+          "name": "home screen icons",
+          "status": "missing"
+        },
+        {
+          "name": "multitasking scene",
+          "status": "missing"
+        },
+        {
+          "name": "wallpaper service",
+          "status": "missing"
+        },
+        {
+          "name": "system gestures",
+          "status": "missing"
+        },
+        {
+          "name": "privacy indicator",
+          "status": "missing"
+        },
+        {
+          "name": "battery/signal status",
+          "status": "missing"
+        },
+        {
+          "name": "system alert management",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "apps",
+      "label": "iOS apps / app services",
+      "ceiling": "unknown",
+      "note": "legitimate ios binaries still depend on dyld, frameworks, entitlements and security. no unrestricted app execution is demonstrated.",
+      "targets": [
+        {
+          "name": "bundle launch",
+          "status": "missing"
+        },
+        {
+          "name": "Info.plist resolution",
+          "status": "missing"
+        },
+        {
+          "name": "ObjC app bootstrap",
+          "status": "missing"
+        },
+        {
+          "name": "Swift app bootstrap",
+          "status": "missing"
+        },
+        {
+          "name": "UIKit app lifecycle",
+          "status": "missing"
+        },
+        {
+          "name": "document sandbox",
+          "status": "missing"
+        },
+        {
+          "name": "app preferences",
+          "status": "missing"
+        },
+        {
+          "name": "app extensions",
+          "status": "missing"
+        },
+        {
+          "name": "push notifications",
+          "status": "missing"
+        },
+        {
+          "name": "background task scheduling",
+          "status": "missing"
+        },
+        {
+          "name": "app network services",
+          "status": "missing"
+        },
+        {
+          "name": "legitimate app runtime smoke test",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "android",
+      "label": "Android host integration",
+      "ceiling": "conditional",
+      "note": "any bridge should remain voluntary, non-root and not alter android recovery or verified boot.",
+      "targets": [
+        {
+          "name": "galaxy s25+ native test",
+          "status": "missing"
+        },
+        {
+          "name": "termux launcher",
+          "status": "missing"
+        },
+        {
+          "name": "guest process container",
+          "status": "missing"
+        },
+        {
+          "name": "android input bridge",
+          "status": "missing"
+        },
+        {
+          "name": "android accessibility bridge",
+          "status": "missing"
+        },
+        {
+          "name": "android audio output",
+          "status": "missing"
+        },
+        {
+          "name": "android camera service",
+          "status": "missing"
+        },
+        {
+          "name": "android notifications",
+          "status": "missing"
+        },
+        {
+          "name": "android storage permission",
+          "status": "missing"
+        },
+        {
+          "name": "android graphics surface",
+          "status": "missing"
+        },
+        {
+          "name": "android lifecycle teardown",
+          "status": "missing"
+        },
+        {
+          "name": "battery/perf profiling",
+          "status": "missing"
+        },
+        {
+          "name": "host crash containment",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "panel": "ui",
+      "id": "system",
+      "label": "device boot and kernel ownership",
+      "ceiling": "excluded",
+      "note": "full ios kernel or flash-based ios replacement is not a deliverable under the hard no-boot-chain-change constraints; excluded blocks are never counted as working.",
+      "targets": [
+        {
+          "name": "replace android kernel",
+          "status": "excluded"
+        },
+        {
+          "name": "write boot partitions",
+          "status": "excluded"
+        },
+        {
+          "name": "disable verified boot",
+          "status": "excluded"
+        },
+        {
+          "name": "alter bootloader",
+          "status": "excluded"
+        }
+      ]
+    }
+  ]
+}

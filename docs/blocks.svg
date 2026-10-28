@@ -1,0 +1,1376 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1477" height="866" viewBox="0 0 1477 866" role="img" aria-label="ios-27 compatibility blocks for system libraries, Darwin and Apple UI">
+<rect width="100%" height="100%" fill="#0e1726"/>
+<text x="15" y="31" font-family="sans-serif" font-size="26" font-weight="bold" fill="#f3f7fd">ios-27 / system compatibility blocks</text>
+<text x="15" y="53" font-family="sans-serif" font-size="14" fill="#adc1d8">each square = 1 declared representative function or contract, NOT the whole Apple API surface</text>
+<rect x="0" y="67" width="485" height="749" rx="8" fill="#17263b" stroke="#48617b" stroke-width="1"/>
+<text x="11" y="88" font-family="sans-serif" font-size="16" font-weight="bold" fill="#fafafa">system libraries / api targets</text>
+<text x="11" y="104" font-family="sans-serif" font-size="12" fill="#aac8d9">0 native / 7 synthetic / 233 tracked</text>
+<g><title>libsystem_kernel / bsd; 42 targets; ceiling: conditional; selected xnu bsd calls can be translated, but guest ownership, cancellation, darwin errno, rights and file isolation need proof. only seven syscall probe selectors currently work in a tiny interpreter, not as linked libsystem exports.</title>
+<rect x="8.00" y="111.00" width="229.00" height="266.76" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="13.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">libsystem_kernel / bsd</text>
+<g><title>libsystem_kernel / bsd / exit: synthetic parser/model/probe</title>
+<rect x="10.45" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / getpid: synthetic parser/model/probe</title>
+<rect x="42.59" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / getppid: synthetic parser/model/probe</title>
+<rect x="74.74" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / getuid: synthetic parser/model/probe</title>
+<rect x="106.88" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / geteuid: synthetic parser/model/probe</title>
+<rect x="139.02" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / getgid: synthetic parser/model/probe</title>
+<rect x="171.16" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / getegid: synthetic parser/model/probe</title>
+<rect x="203.31" y="132.45" width="31.24" height="39.56" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / open: unimplemented</title>
+<rect x="10.45" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / openat: unimplemented</title>
+<rect x="42.59" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / close: unimplemented</title>
+<rect x="74.74" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / read: unimplemented</title>
+<rect x="106.88" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / write: unimplemented</title>
+<rect x="139.02" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / pread: unimplemented</title>
+<rect x="171.16" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / pwrite: unimplemented</title>
+<rect x="203.31" y="172.91" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / lseek: unimplemented</title>
+<rect x="10.45" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / stat: unimplemented</title>
+<rect x="42.59" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / fstat: unimplemented</title>
+<rect x="74.74" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / lstat: unimplemented</title>
+<rect x="106.88" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / fcntl: unimplemented</title>
+<rect x="139.02" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / ioctl: unimplemented</title>
+<rect x="171.16" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / mmap: unimplemented</title>
+<rect x="203.31" y="213.37" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / munmap: unimplemented</title>
+<rect x="10.45" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / mprotect: unimplemented</title>
+<rect x="42.59" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / sysctl: unimplemented</title>
+<rect x="74.74" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / gettimeofday: unimplemented</title>
+<rect x="106.88" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / kqueue: unimplemented</title>
+<rect x="139.02" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / kevent: unimplemented</title>
+<rect x="171.16" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / poll: unimplemented</title>
+<rect x="203.31" y="253.83" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / select: unimplemented</title>
+<rect x="10.45" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / socket: unimplemented</title>
+<rect x="42.59" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / connect: unimplemented</title>
+<rect x="74.74" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / bind: unimplemented</title>
+<rect x="106.88" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / listen: unimplemented</title>
+<rect x="139.02" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / accept: unimplemented</title>
+<rect x="171.16" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / sendto: unimplemented</title>
+<rect x="203.31" y="294.29" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / recvfrom: unimplemented</title>
+<rect x="10.45" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / sigaction: unimplemented</title>
+<rect x="42.59" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / kill: unimplemented</title>
+<rect x="74.74" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / posix_spawn: unimplemented</title>
+<rect x="106.88" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / execve: unimplemented</title>
+<rect x="139.02" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / fork: unimplemented</title>
+<rect x="171.16" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_kernel / bsd / wait4: unimplemented</title>
+<rect x="203.31" y="334.75" width="31.24" height="39.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>libsystem_pthread; 21 targets; ceiling: conditional; darwin thread startup, tls, signals, cancellation and workqueues require more than linux pthread wrappers.</title>
+<rect x="8.00" y="377.76" width="229.00" height="133.38" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="13.00" y="391.76" font-family="sans-serif" font-size="12" fill="#f4f6fc">libsystem_pthread</text>
+<g><title>libsystem_pthread / pthread_create: unimplemented</title>
+<rect x="10.45" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_join: unimplemented</title>
+<rect x="42.59" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_detach: unimplemented</title>
+<rect x="74.74" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_self: unimplemented</title>
+<rect x="106.88" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_equal: unimplemented</title>
+<rect x="139.02" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_once: unimplemented</title>
+<rect x="171.16" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_key_create: unimplemented</title>
+<rect x="203.31" y="399.21" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_setspecific: unimplemented</title>
+<rect x="10.45" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_getspecific: unimplemented</title>
+<rect x="42.59" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_mutex_init: unimplemented</title>
+<rect x="74.74" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_mutex_lock: unimplemented</title>
+<rect x="106.88" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_mutex_unlock: unimplemented</title>
+<rect x="139.02" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_cond_init: unimplemented</title>
+<rect x="171.16" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_cond_wait: unimplemented</title>
+<rect x="203.31" y="435.67" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_cond_signal: unimplemented</title>
+<rect x="10.45" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_cond_broadcast: unimplemented</title>
+<rect x="42.59" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_rwlock_rdlock: unimplemented</title>
+<rect x="74.74" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_rwlock_wrlock: unimplemented</title>
+<rect x="106.88" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_set_qos_class_self_np: unimplemented</title>
+<rect x="139.02" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_threadid_np: unimplemented</title>
+<rect x="171.16" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_pthread / pthread_getname_np: unimplemented</title>
+<rect x="203.31" y="472.13" width="31.24" height="35.56" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>libdispatch / gdc; 20 targets; ceiling: conditional; dispatch object ownership and queues may be portable, but apple qos, workqueue and runloop integration need dedicated tests.</title>
+<rect x="8.00" y="511.14" width="229.00" height="127.03" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="13.00" y="525.14" font-family="sans-serif" font-size="12" fill="#f4f6fc">libdispatch / gdc</text>
+<g><title>libdispatch / gdc / dispatch_async: unimplemented</title>
+<rect x="10.45" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_sync: unimplemented</title>
+<rect x="42.59" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_after: unimplemented</title>
+<rect x="74.74" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_once: unimplemented</title>
+<rect x="106.88" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_group_create: unimplemented</title>
+<rect x="139.02" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_group_async: unimplemented</title>
+<rect x="171.16" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_group_wait: unimplemented</title>
+<rect x="203.31" y="532.59" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_semaphore_create: unimplemented</title>
+<rect x="10.45" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_semaphore_wait: unimplemented</title>
+<rect x="42.59" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_semaphore_signal: unimplemented</title>
+<rect x="74.74" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_queue_create: unimplemented</title>
+<rect x="106.88" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_get_main_queue: unimplemented</title>
+<rect x="139.02" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_get_global_queue: unimplemented</title>
+<rect x="171.16" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_source_create: unimplemented</title>
+<rect x="203.31" y="566.93" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_source_set_event_handler: unimplemented</title>
+<rect x="10.45" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_activate: unimplemented</title>
+<rect x="42.59" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_retain: unimplemented</title>
+<rect x="74.74" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_release: unimplemented</title>
+<rect x="106.88" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_block_create: unimplemented</title>
+<rect x="139.02" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdispatch / gdc / dispatch_apply: unimplemented</title>
+<rect x="171.16" y="601.27" width="31.24" height="33.44" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>Swift runtime / ABI; 16 targets; ceiling: conditional; these are selected swift runtime contract families rather than exact mangled exports; true swift abi interoperability is absent.</title>
+<rect x="8.00" y="638.16" width="229.00" height="101.62" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="13.00" y="652.16" font-family="sans-serif" font-size="12" fill="#f4f6fc">Swift runtime / ABI</text>
+<g><title>Swift runtime / ABI / swift class metadata: unimplemented</title>
+<rect x="10.45" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / value witness tables: unimplemented</title>
+<rect x="42.59" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / protocol conformance lookup: unimplemented</title>
+<rect x="74.74" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / existential containers: unimplemented</title>
+<rect x="106.88" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / generic specialization metadata: unimplemented</title>
+<rect x="139.02" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift dynamic casting: unimplemented</title>
+<rect x="171.16" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift retain/release: unimplemented</title>
+<rect x="203.31" y="659.61" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift heap allocation: unimplemented</title>
+<rect x="10.45" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift error propagation: unimplemented</title>
+<rect x="42.59" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift async tasks: unimplemented</title>
+<rect x="74.74" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift continuations: unimplemented</title>
+<rect x="106.88" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift actor isolation: unimplemented</title>
+<rect x="139.02" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift concurrency executor: unimplemented</title>
+<rect x="171.16" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift reflection metadata: unimplemented</title>
+<rect x="203.31" y="685.49" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift strings bridge: unimplemented</title>
+<rect x="10.45" y="711.36" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Swift runtime / ABI / swift objc interoperability: unimplemented</title>
+<rect x="42.59" y="711.36" width="31.24" height="24.97" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>CFNetwork / Network.framework; 12 targets; ceiling: conditional; the network path may use android transports through an isolated proxy; authentic apple policy and entitlement behavior is unproven.</title>
+<rect x="8.00" y="739.78" width="229.00" height="76.22" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="13.00" y="753.78" font-family="sans-serif" font-size="12" fill="#f4f6fc">CFNetwork / Network.framework</text>
+<g><title>CFNetwork / Network.framework / CFHTTPMessageCreateRequest: unimplemented</title>
+<rect x="10.45" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / CFReadStreamOpen: unimplemented</title>
+<rect x="38.58" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / CFWriteStreamOpen: unimplemented</title>
+<rect x="66.70" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NSURLSession request: unimplemented</title>
+<rect x="94.83" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NSURLSession background task: unimplemented</title>
+<rect x="122.95" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NWConnection start: unimplemented</title>
+<rect x="151.07" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NWConnection send: unimplemented</title>
+<rect x="179.20" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NWConnection receive: unimplemented</title>
+<rect x="207.32" y="761.23" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / NWListener start: unimplemented</title>
+<rect x="10.45" y="787.34" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / Network path monitor: unimplemented</title>
+<rect x="38.58" y="787.34" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / TLS trust bridge: unimplemented</title>
+<rect x="66.70" y="787.34" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CFNetwork / Network.framework / Network sandbox policy: unimplemented</title>
+<rect x="94.83" y="787.34" width="27.23" height="25.21" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>libsystem_c / libc; 35 targets; ceiling: plausible; portable c functions could be implemented or safely forwarded after abi and guest address-space isolation; these are representative targets, not extracted iphone exports.</title>
+<rect x="247.00" y="111.00" width="229.00" height="202.25" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">libsystem_c / libc</text>
+<g><title>libsystem_c / libc / malloc: unimplemented</title>
+<rect x="249.45" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / calloc: unimplemented</title>
+<rect x="281.59" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / realloc: unimplemented</title>
+<rect x="313.74" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / free: unimplemented</title>
+<rect x="345.88" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / memcpy: unimplemented</title>
+<rect x="378.02" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / memmove: unimplemented</title>
+<rect x="410.16" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / memset: unimplemented</title>
+<rect x="442.31" y="132.45" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / memcmp: unimplemented</title>
+<rect x="249.45" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strlen: unimplemented</title>
+<rect x="281.59" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strnlen: unimplemented</title>
+<rect x="313.74" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strcmp: unimplemented</title>
+<rect x="345.88" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strncmp: unimplemented</title>
+<rect x="378.02" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strcpy: unimplemented</title>
+<rect x="410.16" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strncpy: unimplemented</title>
+<rect x="442.31" y="168.10" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strdup: unimplemented</title>
+<rect x="249.45" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / snprintf: unimplemented</title>
+<rect x="281.59" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / printf: unimplemented</title>
+<rect x="313.74" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fprintf: unimplemented</title>
+<rect x="345.88" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / sscanf: unimplemented</title>
+<rect x="378.02" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strtol: unimplemented</title>
+<rect x="410.16" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strtod: unimplemented</title>
+<rect x="442.31" y="203.75" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fopen: unimplemented</title>
+<rect x="249.45" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fclose: unimplemented</title>
+<rect x="281.59" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fread: unimplemented</title>
+<rect x="313.74" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fwrite: unimplemented</title>
+<rect x="345.88" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fseek: unimplemented</title>
+<rect x="378.02" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / fflush: unimplemented</title>
+<rect x="410.16" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / setenv: unimplemented</title>
+<rect x="442.31" y="239.40" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / getenv: unimplemented</title>
+<rect x="249.45" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / unsetenv: unimplemented</title>
+<rect x="281.59" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / strerror: unimplemented</title>
+<rect x="313.74" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / qsort: unimplemented</title>
+<rect x="345.88" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / bsearch: unimplemented</title>
+<rect x="378.02" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / atexit: unimplemented</title>
+<rect x="410.16" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libsystem_c / libc / abort: unimplemented</title>
+<rect x="442.31" y="275.05" width="31.24" height="34.75" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>libobjc / objc runtime; 27 targets; ceiling: conditional; open objc runtimes provide a possible research starting point; apple objc abi and arm64e dispatch are not validated here.</title>
+<rect x="247.00" y="313.25" width="229.00" height="156.02" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="327.25" font-family="sans-serif" font-size="12" fill="#f4f6fc">libobjc / objc runtime</text>
+<g><title>libobjc / objc runtime / objc_msgSend: unimplemented</title>
+<rect x="249.45" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_msgSendSuper2: unimplemented</title>
+<rect x="281.59" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_getClass: unimplemented</title>
+<rect x="313.74" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_lookUpClass: unimplemented</title>
+<rect x="345.88" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_allocateClassPair: unimplemented</title>
+<rect x="378.02" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_registerClassPair: unimplemented</title>
+<rect x="410.16" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_disposeClassPair: unimplemented</title>
+<rect x="442.31" y="334.70" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / class_getName: unimplemented</title>
+<rect x="249.45" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / class_getSuperclass: unimplemented</title>
+<rect x="281.59" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / class_getInstanceMethod: unimplemented</title>
+<rect x="313.74" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / class_addMethod: unimplemented</title>
+<rect x="345.88" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / class_replaceMethod: unimplemented</title>
+<rect x="378.02" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / object_getClass: unimplemented</title>
+<rect x="410.16" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / object_setClass: unimplemented</title>
+<rect x="442.31" y="367.71" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / sel_registerName: unimplemented</title>
+<rect x="249.45" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / sel_getName: unimplemented</title>
+<rect x="281.59" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / method_getImplementation: unimplemented</title>
+<rect x="313.74" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_retain: unimplemented</title>
+<rect x="345.88" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_release: unimplemented</title>
+<rect x="378.02" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_autorelease: unimplemented</title>
+<rect x="410.16" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_autoreleasePoolPush: unimplemented</title>
+<rect x="442.31" y="400.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_autoreleasePoolPop: unimplemented</title>
+<rect x="249.45" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_storeWeak: unimplemented</title>
+<rect x="281.59" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_loadWeakRetained: unimplemented</title>
+<rect x="313.74" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_initWeak: unimplemented</title>
+<rect x="345.88" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_destroyWeak: unimplemented</title>
+<rect x="378.02" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libobjc / objc runtime / objc_exception_throw: unimplemented</title>
+<rect x="410.16" y="433.72" width="31.24" height="32.11" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>CoreFoundation; 20 targets; ceiling: unknown; apple corefoundation binaries and exact cf ownership/event-loop behavior have not run; targets are representative public functions.</title>
+<rect x="247.00" y="469.28" width="229.00" height="115.57" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="483.28" font-family="sans-serif" font-size="12" fill="#f4f6fc">CoreFoundation</text>
+<g><title>CoreFoundation / CFGetTypeID: unimplemented</title>
+<rect x="249.45" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFRetain: unimplemented</title>
+<rect x="277.57" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFRelease: unimplemented</title>
+<rect x="305.70" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFStringCreateWithCString: unimplemented</title>
+<rect x="333.82" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFStringGetLength: unimplemented</title>
+<rect x="361.95" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFStringGetCString: unimplemented</title>
+<rect x="390.07" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFArrayCreate: unimplemented</title>
+<rect x="418.20" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFArrayGetCount: unimplemented</title>
+<rect x="446.32" y="490.73" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFArrayGetValueAtIndex: unimplemented</title>
+<rect x="249.45" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFDictionaryCreate: unimplemented</title>
+<rect x="277.57" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFDictionaryGetValue: unimplemented</title>
+<rect x="305.70" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFDataCreate: unimplemented</title>
+<rect x="333.82" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFDataGetLength: unimplemented</title>
+<rect x="361.95" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFURLCreateWithFileSystemPath: unimplemented</title>
+<rect x="390.07" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFRunLoopGetCurrent: unimplemented</title>
+<rect x="418.20" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFRunLoopRun: unimplemented</title>
+<rect x="446.32" y="521.25" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFRunLoopStop: unimplemented</title>
+<rect x="249.45" y="551.78" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFBundleGetMainBundle: unimplemented</title>
+<rect x="277.57" y="551.78" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFErrorCreate: unimplemented</title>
+<rect x="305.70" y="551.78" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreFoundation / CFPreferencesCopyAppValue: unimplemented</title>
+<rect x="333.82" y="551.78" width="27.23" height="29.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>Foundation / classes; 16 targets; ceiling: unknown; selected class contracts, not every foundation method or real symbols. apple foundation loading has not been demonstrated.</title>
+<rect x="247.00" y="584.85" width="229.00" height="92.46" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="598.85" font-family="sans-serif" font-size="12" fill="#f4f6fc">Foundation / classes</text>
+<g><title>Foundation / classes / NSObject lifecycle: unimplemented</title>
+<rect x="249.45" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSString text operations: unimplemented</title>
+<rect x="277.57" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSNumber boxing: unimplemented</title>
+<rect x="305.70" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSArray collections: unimplemented</title>
+<rect x="333.82" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSDictionary collections: unimplemented</title>
+<rect x="361.95" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSData buffers: unimplemented</title>
+<rect x="390.07" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSError propagation: unimplemented</title>
+<rect x="418.20" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSURL parsing: unimplemented</title>
+<rect x="446.32" y="606.30" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSFileManager operations: unimplemented</title>
+<rect x="249.45" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSBundle lookup: unimplemented</title>
+<rect x="277.57" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSNotificationCenter notifications: unimplemented</title>
+<rect x="305.70" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSOperationQueue scheduling: unimplemented</title>
+<rect x="333.82" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSRunLoop integration: unimplemented</title>
+<rect x="361.95" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSDate and timers: unimplemented</title>
+<rect x="390.07" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSKeyedArchiver: unimplemented</title>
+<rect x="418.20" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Foundation / classes / NSLocale handling: unimplemented</title>
+<rect x="446.32" y="640.53" width="27.23" height="33.33" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>libdyld / dynamic loading; 12 targets; ceiling: conditional; mapped native fixtures do not export a compatible libdyld ABI to unmodified apple programs.</title>
+<rect x="247.00" y="677.31" width="229.00" height="69.34" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="691.31" font-family="sans-serif" font-size="12" fill="#f4f6fc">libdyld / dynamic loading</text>
+<g><title>libdyld / dynamic loading / dlopen: unimplemented</title>
+<rect x="249.45" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / dlsym: unimplemented</title>
+<rect x="277.57" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / dlclose: unimplemented</title>
+<rect x="305.70" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / dlerror: unimplemented</title>
+<rect x="333.82" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / dladdr: unimplemented</title>
+<rect x="361.95" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_image_count: unimplemented</title>
+<rect x="390.07" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_get_image_name: unimplemented</title>
+<rect x="418.20" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_get_image_header: unimplemented</title>
+<rect x="446.32" y="698.76" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_get_image_vmaddr_slide: unimplemented</title>
+<rect x="249.45" y="721.43" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_register_func_for_add_image: unimplemented</title>
+<rect x="277.57" y="721.43" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / _dyld_register_func_for_remove_image: unimplemented</title>
+<rect x="305.70" y="721.43" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>libdyld / dynamic loading / dyld_dynamic_interpose: unimplemented</title>
+<rect x="333.82" y="721.43" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>Security / keychain; 12 targets; ceiling: unknown; keychain, signing, attestation and entitlements rely on an apple-specific trust model that the android host does not provide.</title>
+<rect x="247.00" y="746.66" width="229.00" height="69.34" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="252.00" y="760.66" font-family="sans-serif" font-size="12" fill="#f4f6fc">Security / keychain</text>
+<g><title>Security / keychain / SecItemAdd: unimplemented</title>
+<rect x="249.45" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecItemCopyMatching: unimplemented</title>
+<rect x="277.57" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecItemUpdate: unimplemented</title>
+<rect x="305.70" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecItemDelete: unimplemented</title>
+<rect x="333.82" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecRandomCopyBytes: unimplemented</title>
+<rect x="361.95" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecKeyCreateRandomKey: unimplemented</title>
+<rect x="390.07" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecKeyCreateSignature: unimplemented</title>
+<rect x="418.20" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecKeyVerifySignature: unimplemented</title>
+<rect x="446.32" y="768.11" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecTrustEvaluateWithError: unimplemented</title>
+<rect x="249.45" y="790.78" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecCertificateCreateWithData: unimplemented</title>
+<rect x="277.57" y="790.78" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecPolicyCreateBasicX509: unimplemented</title>
+<rect x="305.70" y="790.78" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Security / keychain / SecAccessControlCreateWithFlags: unimplemented</title>
+<rect x="333.82" y="790.78" width="27.23" height="21.77" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<text x="11" y="840" font-family="sans-serif" font-size="13" fill="#b4c5d8">11 groups · ceiling categories in docs/BLOCKS.md</text>
+<rect x="496" y="67" width="485" height="749" rx="8" fill="#17263b" stroke="#48617b" stroke-width="1"/>
+<text x="507" y="88" font-family="sans-serif" font-size="16" font-weight="bold" fill="#fafafa">darwin runtime / native compatibility</text>
+<text x="507" y="104" font-family="sans-serif" font-size="12" fill="#aac8d9">3 native / 34 synthetic / 85 tracked</text>
+<g><title>bsd syscall boundary; 17 targets; ceiling: conditional; a narrow interpreter responds to six identity calls plus a virtual exit, not general darwin syscalls from native processes.</title>
+<rect x="504.00" y="111.00" width="229.00" height="278.72" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="509.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">bsd syscall boundary</text>
+<g><title>bsd syscall boundary / guest exit: synthetic parser/model/probe</title>
+<rect x="506.45" y="132.45" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / getpid selector: synthetic parser/model/probe</title>
+<rect x="562.70" y="132.45" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / getppid selector: synthetic parser/model/probe</title>
+<rect x="618.95" y="132.45" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / getuid selector: synthetic parser/model/probe</title>
+<rect x="675.20" y="132.45" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / geteuid selector: synthetic parser/model/probe</title>
+<rect x="506.45" y="183.39" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / getgid selector: synthetic parser/model/probe</title>
+<rect x="562.70" y="183.39" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / getegid selector: synthetic parser/model/probe</title>
+<rect x="618.95" y="183.39" width="55.35" height="50.04" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / fd table and isolation: unimplemented</title>
+<rect x="675.20" y="183.39" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / open/read/write path: unimplemented</title>
+<rect x="506.45" y="234.34" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / virtual filesystem policy: unimplemented</title>
+<rect x="562.70" y="234.34" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / socket boundary: unimplemented</title>
+<rect x="618.95" y="234.34" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / memory map syscall abi: unimplemented</title>
+<rect x="675.20" y="234.34" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / process spawn semantics: unimplemented</title>
+<rect x="506.45" y="285.28" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / signal frames: unimplemented</title>
+<rect x="562.70" y="285.28" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / darwin error/carry abi: unimplemented</title>
+<rect x="618.95" y="285.28" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / thread syscall abi: unimplemented</title>
+<rect x="675.20" y="285.28" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>bsd syscall boundary / host syscall trapping: unimplemented</title>
+<rect x="506.45" y="336.23" width="55.35" height="50.04" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>guest security / isolation; 14 targets; ceiling: conditional; the current reviewed fixture runner executes in-process. boot chain writes and weakening selinux are explicitly excluded.</title>
+<rect x="504.00" y="389.72" width="229.00" height="229.53" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="509.00" y="403.72" font-family="sans-serif" font-size="12" fill="#f4f6fc">guest security / isolation</text>
+<g><title>guest security / isolation / bounded input validation: synthetic parser/model/probe</title>
+<rect x="506.45" y="411.17" width="55.35" height="50.48" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / mapping rollback: synthetic parser/model/probe</title>
+<rect x="562.70" y="411.17" width="55.35" height="50.48" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / w-x validation: synthetic parser/model/probe</title>
+<rect x="618.95" y="411.17" width="55.35" height="50.48" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / separate guest process: unimplemented</title>
+<rect x="675.20" y="411.17" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / guest memory isolation: unimplemented</title>
+<rect x="506.45" y="462.55" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / file descriptor policy: unimplemented</title>
+<rect x="562.70" y="462.55" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / network policy: unimplemented</title>
+<rect x="618.95" y="462.55" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / device permissions: unimplemented</title>
+<rect x="675.20" y="462.55" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / entitlement emulation: unimplemented</title>
+<rect x="506.45" y="513.94" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / signature trust design: unimplemented</title>
+<rect x="562.70" y="513.94" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / safe process teardown: unimplemented</title>
+<rect x="618.95" y="513.94" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / fuzz harness coverage: unimplemented</title>
+<rect x="675.20" y="513.94" width="55.35" height="50.48" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / host selinux weakening: outside userspace-only scope</title>
+<rect x="506.45" y="565.32" width="55.35" height="50.48" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>guest security / isolation / boot or recovery modification: outside userspace-only scope</title>
+<rect x="562.70" y="565.32" width="55.35" height="50.48" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>mach-o parser and native loader; 12 targets; ceiling: plausible; source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.</title>
+<rect x="504.00" y="619.26" width="229.00" height="196.74" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="509.00" y="633.26" font-family="sans-serif" font-size="12" fill="#f4f6fc">mach-o parser and native loader</text>
+<g><title>mach-o parser and native loader / thin arm64 parsing: synthetic parser/model/probe</title>
+<rect x="506.45" y="640.71" width="55.35" height="56.68" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / universal arm64 inventory: synthetic parser/model/probe</title>
+<rect x="562.70" y="640.71" width="55.35" height="56.68" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / compiler mh_object validation: synthetic parser/model/probe</title>
+<rect x="618.95" y="640.71" width="55.35" height="56.68" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / linked mh_execute entry: native arm64 fixture</title>
+<rect x="675.20" y="640.71" width="55.35" height="56.68" fill="#32d5ad" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / multi-segment native entry: native arm64 fixture</title>
+<rect x="506.45" y="698.29" width="55.35" height="56.68" fill="#32d5ad" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / 16k-compatible fixture mapping: synthetic parser/model/probe</title>
+<rect x="562.70" y="698.29" width="55.35" height="56.68" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / w-x sealing and rollback: synthetic parser/model/probe</title>
+<rect x="618.95" y="698.29" width="55.35" height="56.68" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / darwin user stack: unimplemented</title>
+<rect x="675.20" y="698.29" width="55.35" height="56.68" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / full process startup: unimplemented</title>
+<rect x="506.45" y="755.87" width="55.35" height="56.68" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / tls and thread initialization: unimplemented</title>
+<rect x="562.70" y="755.87" width="55.35" height="56.68" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / untrusted binary isolation: unimplemented</title>
+<rect x="618.95" y="755.87" width="55.35" height="56.68" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach-o parser and native loader / real apple app entry: unimplemented</title>
+<rect x="675.20" y="755.87" width="55.35" height="56.68" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>dyld / image graph; 16 targets; ceiling: conditional; linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.</title>
+<rect x="743.00" y="111.00" width="229.00" height="268.57" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="748.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">dyld / image graph</text>
+<g><title>dyld / image graph / virtual @rpath resolution: synthetic parser/model/probe</title>
+<rect x="745.45" y="132.45" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / export trie parse: synthetic parser/model/probe</title>
+<rect x="801.70" y="132.45" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / classic pointer binds: synthetic parser/model/probe</title>
+<rect x="857.95" y="132.45" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / unauthenticated chained binds: synthetic parser/model/probe</title>
+<rect x="914.20" y="132.45" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / rebase validation: synthetic parser/model/probe</title>
+<rect x="745.45" y="193.59" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / cross-image native call: native arm64 fixture</title>
+<rect x="801.70" y="193.59" width="55.35" height="60.24" fill="#32d5ad" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / linked dylib graph fixture: synthetic parser/model/probe</title>
+<rect x="857.95" y="193.59" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / weak import policy: synthetic parser/model/probe</title>
+<rect x="914.20" y="193.59" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / re-export handling: synthetic parser/model/probe</title>
+<rect x="745.45" y="254.74" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / dependency-cycle rejection: synthetic parser/model/probe</title>
+<rect x="801.70" y="254.74" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / full dlopen lifecycle: unimplemented</title>
+<rect x="857.95" y="254.74" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / lazy binding: unimplemented</title>
+<rect x="914.20" y="254.74" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / dyld shared cache: unimplemented</title>
+<rect x="745.45" y="315.88" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / launch closure support: unimplemented</title>
+<rect x="801.70" y="315.88" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / authenticated arm64e fixups: unimplemented</title>
+<rect x="857.95" y="315.88" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>dyld / image graph / swift tls fixups: unimplemented</title>
+<rect x="914.20" y="315.88" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>mach ipc model; 16 targets; ceiling: conditional; task-local messages are a tested synchronous model, not actual mach trap delivery or an xnu service provider.</title>
+<rect x="743.00" y="379.57" width="229.00" height="268.57" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="748.00" y="393.57" font-family="sans-serif" font-size="12" fill="#f4f6fc">mach ipc model</text>
+<g><title>mach ipc model / task-local names: synthetic parser/model/probe</title>
+<rect x="745.45" y="401.02" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / send and receive rights: synthetic parser/model/probe</title>
+<rect x="801.70" y="401.02" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / send-once replies: synthetic parser/model/probe</title>
+<rect x="857.95" y="401.02" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / port descriptor copies: synthetic parser/model/probe</title>
+<rect x="914.20" y="401.02" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / multi-descriptor messages: synthetic parser/model/probe</title>
+<rect x="745.45" y="462.16" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / transactional queue commit: synthetic parser/model/probe</title>
+<rect x="801.70" y="462.16" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / port destruction cleanup: synthetic parser/model/probe</title>
+<rect x="857.95" y="462.16" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / synthetic dead-name watcher: synthetic parser/model/probe</title>
+<rect x="914.20" y="462.16" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / bounded guest arena: synthetic parser/model/probe</title>
+<rect x="745.45" y="523.31" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / register fixture dispatch: synthetic parser/model/probe</title>
+<rect x="801.70" y="523.31" width="55.35" height="60.24" fill="#edbc59" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / out-of-line descriptors: unimplemented</title>
+<rect x="857.95" y="523.31" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / mach message trailers: unimplemented</title>
+<rect x="914.20" y="523.31" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / voucher support: unimplemented</title>
+<rect x="745.45" y="584.45" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / real mig protocol servers: unimplemented</title>
+<rect x="801.70" y="584.45" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / host process mach ipc: unimplemented</title>
+<rect x="857.95" y="584.45" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>mach ipc model / concurrency and races: unimplemented</title>
+<rect x="914.20" y="584.45" width="55.35" height="60.24" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>arm64e and abi compatibility; 10 targets; ceiling: unknown; native aarch64 is not proof of arm64e abi; authenticated pointer formats are deliberately rejected rather than bypassed.</title>
+<rect x="743.00" y="648.14" width="229.00" height="167.86" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="748.00" y="662.14" font-family="sans-serif" font-size="12" fill="#f4f6fc">arm64e and abi compatibility</text>
+<g><title>arm64e and abi compatibility / arm64e mach-o decode: unimplemented</title>
+<rect x="745.45" y="669.59" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / authenticated pointer rebases: unimplemented</title>
+<rect x="801.70" y="669.59" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / authenticated symbol bindings: unimplemented</title>
+<rect x="857.95" y="669.59" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / ptrauth key policy: unimplemented</title>
+<rect x="914.20" y="669.59" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / objc arm64e dispatch: unimplemented</title>
+<rect x="745.45" y="717.55" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / swift arm64e metadata: unimplemented</title>
+<rect x="801.70" y="717.55" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / branch target signing: unimplemented</title>
+<rect x="857.95" y="717.55" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / guest signal and unwind: unimplemented</title>
+<rect x="914.20" y="717.55" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / apple-specific tls registers: unimplemented</title>
+<rect x="745.45" y="765.50" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>arm64e and abi compatibility / arm64e native execution: unimplemented</title>
+<rect x="801.70" y="765.50" width="55.35" height="47.05" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<text x="507" y="840" font-family="sans-serif" font-size="13" fill="#b4c5d8">6 groups · ceiling categories in docs/BLOCKS.md</text>
+<rect x="992" y="67" width="485" height="749" rx="8" fill="#17263b" stroke="#48617b" stroke-width="1"/>
+<text x="1003" y="88" font-family="sans-serif" font-size="16" font-weight="bold" fill="#fafafa">apple ui / android integration</text>
+<text x="1003" y="104" font-family="sans-serif" font-size="12" fill="#aac8d9">0 native / 0 synthetic / 99 tracked</text>
+<g><title>Metal / IOSurface / gpu; 15 targets; ceiling: unknown; apple metal command and resource semantics are not a one-to-one vulkan translation; apple iosurface ownership is not present.</title>
+<rect x="1000.00" y="111.00" width="229.00" height="229.89" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1005.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">Metal / IOSurface / gpu</text>
+<g><title>Metal / IOSurface / gpu / MTLDevice discovery: unimplemented</title>
+<rect x="1002.45" y="132.45" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLCommandQueue: unimplemented</title>
+<rect x="1047.45" y="132.45" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLCommandBuffer: unimplemented</title>
+<rect x="1092.45" y="132.45" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLBuffer lifetime: unimplemented</title>
+<rect x="1137.45" y="132.45" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLTexture lifetime: unimplemented</title>
+<rect x="1182.45" y="132.45" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLRenderPipelineState: unimplemented</title>
+<rect x="1002.45" y="201.08" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / MTLComputePipelineState: unimplemented</title>
+<rect x="1047.45" y="201.08" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / metal shader translation: unimplemented</title>
+<rect x="1092.45" y="201.08" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / synchronization fences: unimplemented</title>
+<rect x="1137.45" y="201.08" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / iosurface allocation: unimplemented</title>
+<rect x="1182.45" y="201.08" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / iosurface cross-process sharing: unimplemented</title>
+<rect x="1002.45" y="269.71" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / android graphics buffer bridge: unimplemented</title>
+<rect x="1047.45" y="269.71" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / vulkan submission: unimplemented</title>
+<rect x="1092.45" y="269.71" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / hardware gpu validation: unimplemented</title>
+<rect x="1137.45" y="269.71" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Metal / IOSurface / gpu / display surface present: unimplemented</title>
+<rect x="1182.45" y="269.71" width="44.10" height="67.73" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>UIKit / controls; 14 targets; ceiling: unknown; official apple framework code, event dispatch and rendering are not working. all entries are target contracts, not sdk export enumeration.</title>
+<rect x="1000.00" y="340.89" width="229.00" height="214.57" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1005.00" y="354.89" font-family="sans-serif" font-size="12" fill="#f4f6fc">UIKit / controls</text>
+<g><title>UIKit / controls / UIApplication bootstrap: unimplemented</title>
+<rect x="1002.45" y="362.34" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIWindow composition: unimplemented</title>
+<rect x="1047.45" y="362.34" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIView lifecycle: unimplemented</title>
+<rect x="1092.45" y="362.34" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIViewController lifecycle: unimplemented</title>
+<rect x="1137.45" y="362.34" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UILabel text: unimplemented</title>
+<rect x="1182.45" y="362.34" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIButton event handling: unimplemented</title>
+<rect x="1002.45" y="425.86" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UITextField input: unimplemented</title>
+<rect x="1047.45" y="425.86" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIScrollView gestures: unimplemented</title>
+<rect x="1092.45" y="425.86" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UITableView data source: unimplemented</title>
+<rect x="1137.45" y="425.86" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UICollectionView layout: unimplemented</title>
+<rect x="1182.45" y="425.86" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UINavigationController: unimplemented</title>
+<rect x="1002.45" y="489.38" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UITabBarController: unimplemented</title>
+<rect x="1047.45" y="489.38" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / UIAccessibility: unimplemented</title>
+<rect x="1092.45" y="489.38" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>UIKit / controls / trait collection propagation: unimplemented</title>
+<rect x="1137.45" y="489.38" width="44.10" height="62.62" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>SwiftUI / view graph; 13 targets; ceiling: unknown; genuine swiftui binaries and dynamic view graph machinery have not run.</title>
+<rect x="1000.00" y="555.46" width="229.00" height="199.24" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1005.00" y="569.46" font-family="sans-serif" font-size="12" fill="#f4f6fc">SwiftUI / view graph</text>
+<g><title>SwiftUI / view graph / body computation: unimplemented</title>
+<rect x="1002.45" y="576.91" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / View identity and diffing: unimplemented</title>
+<rect x="1047.45" y="576.91" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / State storage: unimplemented</title>
+<rect x="1092.45" y="576.91" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / Binding propagation: unimplemented</title>
+<rect x="1137.45" y="576.91" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / Observable model: unimplemented</title>
+<rect x="1182.45" y="576.91" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / Environment values: unimplemented</title>
+<rect x="1002.45" y="635.32" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / Layout protocol: unimplemented</title>
+<rect x="1047.45" y="635.32" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / drawing effects: unimplemented</title>
+<rect x="1092.45" y="635.32" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / navigation stack: unimplemented</title>
+<rect x="1137.45" y="635.32" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / animation transactions: unimplemented</title>
+<rect x="1182.45" y="635.32" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / gesture recognition: unimplemented</title>
+<rect x="1002.45" y="693.73" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / app scene lifecycle: unimplemented</title>
+<rect x="1047.45" y="693.73" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SwiftUI / view graph / async view updates: unimplemented</title>
+<rect x="1092.45" y="693.73" width="44.10" height="57.51" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>device boot and kernel ownership; 4 targets; ceiling: excluded; full ios kernel or flash-based ios replacement is not a deliverable under the hard no-boot-chain-change constraints; excluded blocks are never counted as working.</title>
+<rect x="1000.00" y="754.70" width="229.00" height="61.30" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1005.00" y="768.70" font-family="sans-serif" font-size="12" fill="#f4f6fc">device boot and kernel ownershi</text>
+<g><title>device boot and kernel ownership / replace android kernel: outside userspace-only scope</title>
+<rect x="1002.45" y="776.15" width="55.35" height="36.40" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>device boot and kernel ownership / write boot partitions: outside userspace-only scope</title>
+<rect x="1058.70" y="776.15" width="55.35" height="36.40" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>device boot and kernel ownership / disable verified boot: outside userspace-only scope</title>
+<rect x="1114.95" y="776.15" width="55.35" height="36.40" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>device boot and kernel ownership / alter bootloader: outside userspace-only scope</title>
+<rect x="1171.20" y="776.15" width="55.35" height="36.40" fill="#ac4b58" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>SpringBoard / apple services; 15 targets; ceiling: unknown; genuine apple private processes, entitlements and dependencies are untested on this phone.</title>
+<rect x="1239.00" y="111.00" width="229.00" height="199.53" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1244.00" y="125.00" font-family="sans-serif" font-size="12" fill="#f4f6fc">SpringBoard / apple services</text>
+<g><title>SpringBoard / apple services / launchd bootstrap: unimplemented</title>
+<rect x="1241.45" y="132.45" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / backboardd service: unimplemented</title>
+<rect x="1286.45" y="132.45" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / frontboard app orchestration: unimplemented</title>
+<rect x="1331.45" y="132.45" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / springboard launch: unimplemented</title>
+<rect x="1376.45" y="132.45" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / springboard scenes: unimplemented</title>
+<rect x="1421.45" y="132.45" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / lock screen: unimplemented</title>
+<rect x="1241.45" y="190.96" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / control center: unimplemented</title>
+<rect x="1286.45" y="190.96" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / notification presentation: unimplemented</title>
+<rect x="1331.45" y="190.96" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / home screen icons: unimplemented</title>
+<rect x="1376.45" y="190.96" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / multitasking scene: unimplemented</title>
+<rect x="1421.45" y="190.96" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / wallpaper service: unimplemented</title>
+<rect x="1241.45" y="249.47" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / system gestures: unimplemented</title>
+<rect x="1286.45" y="249.47" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / privacy indicator: unimplemented</title>
+<rect x="1331.45" y="249.47" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / battery/signal status: unimplemented</title>
+<rect x="1376.45" y="249.47" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>SpringBoard / apple services / system alert management: unimplemented</title>
+<rect x="1421.45" y="249.47" width="44.10" height="57.61" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>Android host integration; 13 targets; ceiling: conditional; any bridge should remain voluntary, non-root and not alter android recovery or verified boot.</title>
+<rect x="1239.00" y="310.53" width="229.00" height="172.92" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1244.00" y="324.53" font-family="sans-serif" font-size="12" fill="#f4f6fc">Android host integration</text>
+<g><title>Android host integration / galaxy s25+ native test: unimplemented</title>
+<rect x="1241.45" y="331.98" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / termux launcher: unimplemented</title>
+<rect x="1286.45" y="331.98" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / guest process container: unimplemented</title>
+<rect x="1331.45" y="331.98" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android input bridge: unimplemented</title>
+<rect x="1376.45" y="331.98" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android accessibility bridge: unimplemented</title>
+<rect x="1421.45" y="331.98" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android audio output: unimplemented</title>
+<rect x="1241.45" y="381.62" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android camera service: unimplemented</title>
+<rect x="1286.45" y="381.62" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android notifications: unimplemented</title>
+<rect x="1331.45" y="381.62" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android storage permission: unimplemented</title>
+<rect x="1376.45" y="381.62" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android graphics surface: unimplemented</title>
+<rect x="1421.45" y="381.62" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / android lifecycle teardown: unimplemented</title>
+<rect x="1241.45" y="431.26" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / battery/perf profiling: unimplemented</title>
+<rect x="1286.45" y="431.26" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>Android host integration / host crash containment: unimplemented</title>
+<rect x="1331.45" y="431.26" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>CoreAnimation / compositor; 13 targets; ceiling: unknown; renderer compatibility requires apple semantics converted into isolated android-compatible surfaces.</title>
+<rect x="1239.00" y="483.45" width="229.00" height="172.92" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1244.00" y="497.45" font-family="sans-serif" font-size="12" fill="#f4f6fc">CoreAnimation / compositor</text>
+<g><title>CoreAnimation / compositor / CALayer tree: unimplemented</title>
+<rect x="1241.45" y="504.90" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / CATransaction commit: unimplemented</title>
+<rect x="1286.45" y="504.90" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / CAAnimation timeline: unimplemented</title>
+<rect x="1331.45" y="504.90" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / compositor scheduling: unimplemented</title>
+<rect x="1376.45" y="504.90" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / render server ipc: unimplemented</title>
+<rect x="1421.45" y="504.90" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / backing store ownership: unimplemented</title>
+<rect x="1241.45" y="554.54" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / text rendering: unimplemented</title>
+<rect x="1286.45" y="554.54" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / blur and material layers: unimplemented</title>
+<rect x="1331.45" y="554.54" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / color space translation: unimplemented</title>
+<rect x="1376.45" y="554.54" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / HDR pipeline: unimplemented</title>
+<rect x="1421.45" y="554.54" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / synchronized display: unimplemented</title>
+<rect x="1241.45" y="604.19" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / vsync integration: unimplemented</title>
+<rect x="1286.45" y="604.19" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>CoreAnimation / compositor / glass material rendering: unimplemented</title>
+<rect x="1331.45" y="604.19" width="44.10" height="48.74" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<g><title>iOS apps / app services; 12 targets; ceiling: unknown; legitimate ios binaries still depend on dyld, frameworks, entitlements and security. no unrestricted app execution is demonstrated.</title>
+<rect x="1239.00" y="656.38" width="229.00" height="159.62" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>
+<text x="1244.00" y="670.38" font-family="sans-serif" font-size="12" fill="#f4f6fc">iOS apps / app services</text>
+<g><title>iOS apps / app services / bundle launch: unimplemented</title>
+<rect x="1241.45" y="677.83" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / Info.plist resolution: unimplemented</title>
+<rect x="1286.45" y="677.83" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / ObjC app bootstrap: unimplemented</title>
+<rect x="1331.45" y="677.83" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / Swift app bootstrap: unimplemented</title>
+<rect x="1376.45" y="677.83" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / UIKit app lifecycle: unimplemented</title>
+<rect x="1421.45" y="677.83" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / document sandbox: unimplemented</title>
+<rect x="1241.45" y="723.03" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / app preferences: unimplemented</title>
+<rect x="1286.45" y="723.03" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / app extensions: unimplemented</title>
+<rect x="1331.45" y="723.03" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / push notifications: unimplemented</title>
+<rect x="1376.45" y="723.03" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / background task scheduling: unimplemented</title>
+<rect x="1421.45" y="723.03" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / app network services: unimplemented</title>
+<rect x="1241.45" y="768.24" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+<g><title>iOS apps / app services / legitimate app runtime smoke test: unimplemented</title>
+<rect x="1286.45" y="768.24" width="44.10" height="44.31" fill="#526175" stroke="#1c2a40" stroke-width=".45"/>
+</g>
+</g>
+<text x="1003" y="840" font-family="sans-serif" font-size="13" fill="#b4c5d8">8 groups · ceiling categories in docs/BLOCKS.md</text>
+<rect x="15" y="850" width="10" height="10" fill="#32d5ad"/>
+<text x="31" y="860" font-family="sans-serif" font-size="12" fill="#dde6f3">native arm64 fixture</text>
+<rect x="193" y="850" width="10" height="10" fill="#edbc59"/>
+<text x="209" y="860" font-family="sans-serif" font-size="12" fill="#dde6f3">synthetic parser/model/probe</text>
+<rect x="429" y="850" width="10" height="10" fill="#526175"/>
+<text x="445" y="860" font-family="sans-serif" font-size="12" fill="#dde6f3">unimplemented</text>
+<rect x="572" y="850" width="10" height="10" fill="#ac4b58"/>
+<text x="588" y="860" font-family="sans-serif" font-size="12" fill="#dde6f3">outside userspace-only scope</text>
+</svg>

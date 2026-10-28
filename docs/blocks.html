@@ -1,0 +1,541 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ios-27 / compatibility block explorer</title>
+<style>body{margin:0 auto;max-width:1540px;padding:24px;background:#0f1828;color:#e6edf7;font:15px system-ui,sans-serif}a{color:#91c5ff}p{line-height:1.55}.lead{color:#b4c4d8;max-width:100ch}.map{width:100%;height:auto;display:block;border-radius:10px}.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,365px),1fr));gap:15px}.panel{background:#1a293c;border:1px solid #455570;border-radius:10px;padding:12px}.group{border:1px solid #496078;border-radius:7px;margin:9px 0}.group summary{padding:10px;cursor:pointer}.group p{padding:0 10px;color:#b7c9db;font-size:13px}.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:6px;padding:10px}.chip{background:#283a51;border-radius:4px;display:flex;gap:6px;align-items:flex-start;padding:5px;font-size:12px;overflow-wrap:anywhere}.sq{display:inline-block;width:10px;height:10px;min-width:10px;border-radius:2px;margin-top:2px}.stats{font-size:12px;color:#b7c9db}.tag{font-size:11px;border:1px solid #7589a0;padding:2px 5px;border-radius:99px;color:#d1e0f1}</style>
+</head><body><h1>ios-27 / block compatibility explorer</h1>
+<p class="lead">anyps5-style visualization for deliberately enumerated target api functions and contracts. representative target sample, not all iOS exports. native means a restricted ARM64 test fixture; synthetic means a limited parser/probe/model. neither proves a working Apple app. no exact completion ceiling can be derived for Apple framework layers.</p>
+<img class="map" src="blocks.svg" alt="system libraries and iOS runtime target block map">
+<p class="lead">expand any library or subsystem to inspect every tracked function, its current status and the qualitative feasibility ceiling. <a href="BLOCKS.md">counting rules and roadmap</a></p>
+<div class="panels">
+<section class="panel"><h2>system libraries / api targets</h2><p class="lead">representative abi/function contracts, NOT an exhaustive apple export database</p>
+<p class="stats">233 targets · 0 native · 7 synthetic · 226 missing · 0 excluded</p>
+<details class="group"><summary><strong>libsystem_kernel / bsd</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 42 targets</span></summary>
+<p>selected xnu bsd calls can be translated, but guest ownership, cancellation, darwin errno, rights and file isolation need proof. only seven syscall probe selectors currently work in a tiny interpreter, not as linked libsystem exports.</p>
+<p>evidence: <a href="../src/darwin_probe.c">src/darwin_probe.c</a> · test: darwin-svc-probe</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>exit</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getpid</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getppid</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getuid</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>geteuid</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getgid</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getegid</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>open</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>openat</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>close</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>read</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>write</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pread</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pwrite</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>lseek</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>stat</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fstat</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>lstat</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fcntl</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>ioctl</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>mmap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>munmap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>mprotect</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sysctl</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>gettimeofday</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>kqueue</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>kevent</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>poll</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>select</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>socket</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>connect</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>bind</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>listen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>accept</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sendto</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>recvfrom</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sigaction</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>kill</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>posix_spawn</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>execve</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fork</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>wait4</span></div>
+</div></details>
+<details class="group"><summary><strong>libsystem_c / libc</strong> <span class="tag">plausible ceiling</span> <span class="stats">0 native, 0 synthetic, 35 targets</span></summary>
+<p>portable c functions could be implemented or safely forwarded after abi and guest address-space isolation; these are representative targets, not extracted iphone exports.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>malloc</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>calloc</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>realloc</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>free</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>memcpy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>memmove</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>memset</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>memcmp</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strlen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strnlen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strcmp</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strncmp</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strcpy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strncpy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strdup</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>snprintf</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>printf</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fprintf</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sscanf</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strtol</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strtod</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fopen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fclose</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fread</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fwrite</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fseek</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fflush</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>setenv</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>getenv</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>unsetenv</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>strerror</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>qsort</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>bsearch</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>atexit</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>abort</span></div>
+</div></details>
+<details class="group"><summary><strong>libsystem_pthread</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 21 targets</span></summary>
+<p>darwin thread startup, tls, signals, cancellation and workqueues require more than linux pthread wrappers.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_join</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_detach</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_self</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_equal</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_once</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_key_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_setspecific</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_getspecific</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_mutex_init</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_mutex_lock</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_mutex_unlock</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_cond_init</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_cond_wait</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_cond_signal</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_cond_broadcast</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_rwlock_rdlock</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_rwlock_wrlock</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_set_qos_class_self_np</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_threadid_np</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>pthread_getname_np</span></div>
+</div></details>
+<details class="group"><summary><strong>libdispatch / gdc</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 20 targets</span></summary>
+<p>dispatch object ownership and queues may be portable, but apple qos, workqueue and runloop integration need dedicated tests.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_async</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_sync</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_after</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_once</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_group_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_group_async</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_group_wait</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_semaphore_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_semaphore_wait</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_semaphore_signal</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_queue_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_get_main_queue</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_get_global_queue</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_source_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_source_set_event_handler</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_activate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_retain</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_release</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_block_create</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dispatch_apply</span></div>
+</div></details>
+<details class="group"><summary><strong>libdyld / dynamic loading</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 12 targets</span></summary>
+<p>mapped native fixtures do not export a compatible libdyld ABI to unmodified apple programs.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dlopen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dlsym</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dlclose</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dlerror</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dladdr</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_image_count</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_get_image_name</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_get_image_header</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_get_image_vmaddr_slide</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_register_func_for_add_image</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>_dyld_register_func_for_remove_image</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dyld_dynamic_interpose</span></div>
+</div></details>
+<details class="group"><summary><strong>libobjc / objc runtime</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 27 targets</span></summary>
+<p>open objc runtimes provide a possible research starting point; apple objc abi and arm64e dispatch are not validated here.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_msgSend</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_msgSendSuper2</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_getClass</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_lookUpClass</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_allocateClassPair</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_registerClassPair</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_disposeClassPair</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>class_getName</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>class_getSuperclass</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>class_getInstanceMethod</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>class_addMethod</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>class_replaceMethod</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>object_getClass</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>object_setClass</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sel_registerName</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>sel_getName</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>method_getImplementation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_retain</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_release</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_autorelease</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_autoreleasePoolPush</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_autoreleasePoolPop</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_storeWeak</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_loadWeakRetained</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_initWeak</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_destroyWeak</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc_exception_throw</span></div>
+</div></details>
+<details class="group"><summary><strong>Swift runtime / ABI</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 16 targets</span></summary>
+<p>these are selected swift runtime contract families rather than exact mangled exports; true swift abi interoperability is absent.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift class metadata</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>value witness tables</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>protocol conformance lookup</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>existential containers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>generic specialization metadata</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift dynamic casting</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift retain/release</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift heap allocation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift error propagation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift async tasks</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift continuations</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift actor isolation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift concurrency executor</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift reflection metadata</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift strings bridge</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift objc interoperability</span></div>
+</div></details>
+<details class="group"><summary><strong>CoreFoundation</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 20 targets</span></summary>
+<p>apple corefoundation binaries and exact cf ownership/event-loop behavior have not run; targets are representative public functions.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFGetTypeID</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFRetain</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFRelease</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFStringCreateWithCString</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFStringGetLength</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFStringGetCString</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFArrayCreate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFArrayGetCount</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFArrayGetValueAtIndex</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFDictionaryCreate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFDictionaryGetValue</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFDataCreate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFDataGetLength</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFURLCreateWithFileSystemPath</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFRunLoopGetCurrent</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFRunLoopRun</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFRunLoopStop</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFBundleGetMainBundle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFErrorCreate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFPreferencesCopyAppValue</span></div>
+</div></details>
+<details class="group"><summary><strong>Foundation / classes</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 16 targets</span></summary>
+<p>selected class contracts, not every foundation method or real symbols. apple foundation loading has not been demonstrated.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSObject lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSString text operations</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSNumber boxing</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSArray collections</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSDictionary collections</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSData buffers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSError propagation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSURL parsing</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSFileManager operations</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSBundle lookup</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSNotificationCenter notifications</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSOperationQueue scheduling</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSRunLoop integration</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSDate and timers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSKeyedArchiver</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSLocale handling</span></div>
+</div></details>
+<details class="group"><summary><strong>Security / keychain</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 12 targets</span></summary>
+<p>keychain, signing, attestation and entitlements rely on an apple-specific trust model that the android host does not provide.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecItemAdd</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecItemCopyMatching</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecItemUpdate</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecItemDelete</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecRandomCopyBytes</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecKeyCreateRandomKey</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecKeyCreateSignature</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecKeyVerifySignature</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecTrustEvaluateWithError</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecCertificateCreateWithData</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecPolicyCreateBasicX509</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>SecAccessControlCreateWithFlags</span></div>
+</div></details>
+<details class="group"><summary><strong>CFNetwork / Network.framework</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 12 targets</span></summary>
+<p>the network path may use android transports through an isolated proxy; authentic apple policy and entitlement behavior is unproven.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFHTTPMessageCreateRequest</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFReadStreamOpen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CFWriteStreamOpen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSURLSession request</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NSURLSession background task</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NWConnection start</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NWConnection send</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NWConnection receive</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>NWListener start</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Network path monitor</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>TLS trust bridge</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Network sandbox policy</span></div>
+</div></details>
+</section>
+<section class="panel"><h2>darwin runtime / native compatibility</h2><p class="lead">narrow tests, parser contracts and mach models; NOT general ios execution</p>
+<p class="stats">85 targets · 3 native · 34 synthetic · 46 missing · 2 excluded</p>
+<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">2 native, 5 synthetic, 12 targets</span></summary>
+<p>source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.</p>
+<p>evidence: <a href="../docs/phase17a-native-multisegment-execution.md">docs/phase17a-native-multisegment-execution.md</a> · test: compiled-darwin-real-mh-execute</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>thin arm64 parsing</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>universal arm64 inventory</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>compiler mh_object validation</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#32d5ad"></span><span>linked mh_execute entry</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#32d5ad"></span><span>multi-segment native entry</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>16k-compatible fixture mapping</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>w-x sealing and rollback</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>darwin user stack</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>full process startup</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>tls and thread initialization</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>untrusted binary isolation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>real apple app entry</span></div>
+</div></details>
+<details class="group"><summary><strong>dyld / image graph</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 9 synthetic, 16 targets</span></summary>
+<p>linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.</p>
+<p>evidence: <a href="../docs/phase17b-linked-multiimage.md">docs/phase17b-linked-multiimage.md</a> · test: native-multi-image-wx</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>virtual @rpath resolution</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>export trie parse</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>classic pointer binds</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>unauthenticated chained binds</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>rebase validation</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#32d5ad"></span><span>cross-image native call</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>linked dylib graph fixture</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>weak import policy</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>re-export handling</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>dependency-cycle rejection</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>full dlopen lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>lazy binding</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>dyld shared cache</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>launch closure support</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>authenticated arm64e fixups</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift tls fixups</span></div>
+</div></details>
+<details class="group"><summary><strong>mach ipc model</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 10 synthetic, 16 targets</span></summary>
+<p>task-local messages are a tested synchronous model, not actual mach trap delivery or an xnu service provider.</p>
+<p>evidence: <a href="../docs/phase17c-mach-lifecycle.md">docs/phase17c-mach-lifecycle.md</a> · test: task-local-mach-names</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>task-local names</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>send and receive rights</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>send-once replies</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>port descriptor copies</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>multi-descriptor messages</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>transactional queue commit</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>port destruction cleanup</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>synthetic dead-name watcher</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>bounded guest arena</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>register fixture dispatch</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>out-of-line descriptors</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>mach message trailers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>voucher support</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>real mig protocol servers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>host process mach ipc</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>concurrency and races</span></div>
+</div></details>
+<details class="group"><summary><strong>bsd syscall boundary</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 17 targets</span></summary>
+<p>a narrow interpreter responds to six identity calls plus a virtual exit, not general darwin syscalls from native processes.</p>
+<p>evidence: <a href="../src/darwin_probe.c">src/darwin_probe.c</a> · test: darwin-svc-probe</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>guest exit</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getpid selector</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getppid selector</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getuid selector</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>geteuid selector</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getgid selector</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>getegid selector</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fd table and isolation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>open/read/write path</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>virtual filesystem policy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>socket boundary</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>memory map syscall abi</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>process spawn semantics</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>signal frames</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>darwin error/carry abi</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>thread syscall abi</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>host syscall trapping</span></div>
+</div></details>
+<details class="group"><summary><strong>arm64e and abi compatibility</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 10 targets</span></summary>
+<p>native aarch64 is not proof of arm64e abi; authenticated pointer formats are deliberately rejected rather than bypassed.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>arm64e mach-o decode</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>authenticated pointer rebases</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>authenticated symbol bindings</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>ptrauth key policy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>objc arm64e dispatch</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>swift arm64e metadata</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>branch target signing</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>guest signal and unwind</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>apple-specific tls registers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>arm64e native execution</span></div>
+</div></details>
+<details class="group"><summary><strong>guest security / isolation</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 3 synthetic, 14 targets</span></summary>
+<p>the current reviewed fixture runner executes in-process. boot chain writes and weakening selinux are explicitly excluded.</p>
+<p>evidence: <a href="../docs/phase17a-native-multisegment-execution.md">docs/phase17a-native-multisegment-execution.md</a> · test: macho-parser</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>bounded input validation</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>mapping rollback</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#edbc59"></span><span>w-x validation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>separate guest process</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>guest memory isolation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>file descriptor policy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>network policy</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>device permissions</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>entitlement emulation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>signature trust design</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>safe process teardown</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>fuzz harness coverage</span></div>
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>host selinux weakening</span></div>
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>boot or recovery modification</span></div>
+</div></details>
+</section>
+<section class="panel"><h2>apple ui / android integration</h2><p class="lead">official framework and system ui dependencies; feasibility mostly unproven</p>
+<p class="stats">99 targets · 0 native · 0 synthetic · 95 missing · 4 excluded</p>
+<details class="group"><summary><strong>UIKit / controls</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 14 targets</span></summary>
+<p>official apple framework code, event dispatch and rendering are not working. all entries are target contracts, not sdk export enumeration.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIApplication bootstrap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIWindow composition</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIView lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIViewController lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UILabel text</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIButton event handling</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UITextField input</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIScrollView gestures</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UITableView data source</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UICollectionView layout</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UINavigationController</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UITabBarController</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIAccessibility</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>trait collection propagation</span></div>
+</div></details>
+<details class="group"><summary><strong>SwiftUI / view graph</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span></summary>
+<p>genuine swiftui binaries and dynamic view graph machinery have not run.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>body computation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>View identity and diffing</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>State storage</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Binding propagation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Observable model</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Environment values</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Layout protocol</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>drawing effects</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>navigation stack</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>animation transactions</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>gesture recognition</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>app scene lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>async view updates</span></div>
+</div></details>
+<details class="group"><summary><strong>CoreAnimation / compositor</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span></summary>
+<p>renderer compatibility requires apple semantics converted into isolated android-compatible surfaces.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CALayer tree</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CATransaction commit</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>CAAnimation timeline</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>compositor scheduling</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>render server ipc</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>backing store ownership</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>text rendering</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>blur and material layers</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>color space translation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>HDR pipeline</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>synchronized display</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>vsync integration</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>glass material rendering</span></div>
+</div></details>
+<details class="group"><summary><strong>Metal / IOSurface / gpu</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 15 targets</span></summary>
+<p>apple metal command and resource semantics are not a one-to-one vulkan translation; apple iosurface ownership is not present.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLDevice discovery</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLCommandQueue</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLCommandBuffer</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLBuffer lifetime</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLTexture lifetime</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLRenderPipelineState</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>MTLComputePipelineState</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>metal shader translation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>synchronization fences</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>iosurface allocation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>iosurface cross-process sharing</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android graphics buffer bridge</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>vulkan submission</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>hardware gpu validation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>display surface present</span></div>
+</div></details>
+<details class="group"><summary><strong>SpringBoard / apple services</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 15 targets</span></summary>
+<p>genuine apple private processes, entitlements and dependencies are untested on this phone.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>launchd bootstrap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>backboardd service</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>frontboard app orchestration</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>springboard launch</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>springboard scenes</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>lock screen</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>control center</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>notification presentation</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>home screen icons</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>multitasking scene</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>wallpaper service</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>system gestures</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>privacy indicator</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>battery/signal status</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>system alert management</span></div>
+</div></details>
+<details class="group"><summary><strong>iOS apps / app services</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 12 targets</span></summary>
+<p>legitimate ios binaries still depend on dyld, frameworks, entitlements and security. no unrestricted app execution is demonstrated.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>bundle launch</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Info.plist resolution</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>ObjC app bootstrap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>Swift app bootstrap</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>UIKit app lifecycle</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>document sandbox</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>app preferences</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>app extensions</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>push notifications</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>background task scheduling</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>app network services</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>legitimate app runtime smoke test</span></div>
+</div></details>
+<details class="group"><summary><strong>Android host integration</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span></summary>
+<p>any bridge should remain voluntary, non-root and not alter android recovery or verified boot.</p>
+<div class="chips">
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>galaxy s25+ native test</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>termux launcher</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>guest process container</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android input bridge</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android accessibility bridge</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android audio output</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android camera service</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android notifications</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android storage permission</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android graphics surface</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>android lifecycle teardown</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>battery/perf profiling</span></div>
+<div class="chip" title="unimplemented"><span class="sq" style="background:#526175"></span><span>host crash containment</span></div>
+</div></details>
+<details class="group"><summary><strong>device boot and kernel ownership</strong> <span class="tag">excluded ceiling</span> <span class="stats">0 native, 0 synthetic, 4 targets</span></summary>
+<p>full ios kernel or flash-based ios replacement is not a deliverable under the hard no-boot-chain-change constraints; excluded blocks are never counted as working.</p>
+<div class="chips">
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>replace android kernel</span></div>
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>write boot partitions</span></div>
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>disable verified boot</span></div>
+<div class="chip" title="outside userspace-only scope"><span class="sq" style="background:#ac4b58"></span><span>alter bootloader</span></div>
+</div></details>
+</section>
+</div><p class="lead">snapshot 2026-10-28. no real Apple frameworks, SpringBoard, or UI demonstrated. <a href="PROGRESS.md">research milestone progress</a>.</p></body></html>
