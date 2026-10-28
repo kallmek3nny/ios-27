@@ -91,8 +91,9 @@ def check_dylib(path):
             raise ValueError("invalid linked command length")
         commands.append(command)
         cursor += length
-    if cursor != 32 + size or 0x80000034 not in commands or 0x80000033 not in commands:
-        raise ValueError("linked dylib missing real chained fixups or exports")
+    if cursor != 32 + size or 0x80000033 not in commands:
+        raise ValueError("linked dylib missing exports: " + str(path) +
+                         " commands=" + repr(commands))
     return commands
 
 
@@ -137,13 +138,16 @@ def main():
              str(root / "tests/fixtures" / ("phase19b-" + stem + ".c")),
              "-o", str(obj)])
         dylib = output / ("phase19b-" + stem + ".dylib")
-        options = ["-dylib", "-install_name", names[stem],
+        options = ["-dylib", "-fixup_chains", "-install_name", names[stem],
                    "-o", str(dylib)]
         if stem == "root":
             options += ["-rpath", "@loader_path/Plugins",
                         "-rpath", "@loader_path/Frameworks"]
         link(args.linker, options, obj, *(stubs[x] for x in dependencies[stem]))
         commands = check_dylib(dylib)
+        if dependencies[stem] and 0x80000034 not in commands:
+            raise ValueError("linked dependency lacks chained fixups: " +
+                             str(dylib) + " commands=" + repr(commands))
         if dependencies[stem] and 0x0c not in commands:
             raise ValueError("missing linked LC_LOAD_DYLIB for " + stem)
         paths[stem] = dylib
