@@ -16,6 +16,7 @@ typedef struct {
     uint16_t pending_once;
     uint8_t object; /* port index + 1, zero is an unused slot */
     uint8_t receive;
+    uint8_t watch_dead;
 } local_right;
 
 typedef struct {
@@ -38,6 +39,9 @@ struct ios27_mach_v2 {
     uint32_t next_name[IOS27_MACH_TASK_MAX];
     local_right names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
     port_object ports[IOS27_MACH_PORT_MAX];
+    uint32_t dead_events[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
+    uint8_t dead_head[IOS27_MACH_TASK_MAX];
+    uint8_t dead_count[IOS27_MACH_TASK_MAX];
 };
 
 _Static_assert(sizeof(ios27_mach_header) == 24u, "Mach wire header");
@@ -198,6 +202,40 @@ int ios27_mach_v2_drop_send_once(ios27_mach_v2 *s, uint32_t task,
     prune(r);
     return IOS27_MACH_OK;
 }
+/* A bounded fixture event queue, not a kernel notification message. */
+int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t local_name) {
+    local_right *r;
+    if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
+    r = by_name(s, task, local_name);
+    if (!r || (!r->sends && !r->once) || !object_for(s, r))
+        return IOS27_MACH_BAD_RIGHT;
+    r->watch_dead = 1u;
+    return IOS27_MACH_OK;
+}
+int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t *local_name) {
+    size_t t;
+    if (!s || !valid_task(task) || !local_name ||
+        ranges_overlap(local_name, sizeof(*local_name), s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    t = TASK_INDEX(task);
+    if (!s->dead_count[t]) return IOS27_MACH_TIMEOUT;
+    *local_name = s->dead_events[t][s->dead_head[t]];
+    s->dead_events[t][s->dead_head[t]] = 0u;
+    s->dead_head[t] =
+        (uint8_t)((s->dead_head[t] + 1u) % IOS27_MACH_V2_NAMES);
+    --s->dead_count[t];
+    return IOS27_MACH_OK;
+}
+static void enqueue_dead_name(ios27_mach_v2 *s, uint32_t task,
+                              uint32_t name) {
+    size_t t = TASK_INDEX(task);
+    size_t tail = (s->dead_head[t] + s->dead_count[t]) %
+                  IOS27_MACH_V2_NAMES;
+    s->dead_events[t][tail] = name;
+    ++s->dead_count[t];
+}
 int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
                          uint32_t name, uint32_t *send, uint32_t *send_once,
                          unsigned *receive) {
@@ -253,6 +291,9 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     discarded_credits(obj, canceled_sends, canceled_once);
     for (uint32_t task = 1u; task <= IOS27_MACH_TASK_MAX; ++task) {
         const local_right *r = by_object(s, task, index);
+        if (r && r->watch_dead &&
+            s->dead_count[TASK_INDEX(task)] == IOS27_MACH_V2_NAMES)
+            return IOS27_MACH_LIMIT;
         if (r && (r->pending_sends !=
                   (task == owner ? canceled_sends[index - 1u] : 0u) ||
                   r->pending_once !=
@@ -269,7 +310,10 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     memset(obj, 0, sizeof(*obj));
     for (uint32_t task = 1u; task <= IOS27_MACH_TASK_MAX; ++task) {
         local_right *r = by_object(s, task, index);
-        if (r) memset(r, 0, sizeof(*r));
+        if (r) {
+            if (r->watch_dead) enqueue_dead_name(s, task, r->name);
+            memset(r, 0, sizeof(*r));
+        }
     }
     return IOS27_MACH_OK;
 }
@@ -315,6 +359,18 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
                 return IOS27_MACH_BAD_RIGHT;
         }
     }
+    /* Preflight event capacity across all affected namespaces. */
+    for (uint32_t other = 1u; other <= IOS27_MACH_TASK_MAX; ++other) {
+        uint32_t needed = 0u;
+        if (other == task) continue;
+        for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+            const local_right *r = by_object(s, other, (uint8_t)(i + 1u));
+            if (owned[i] && r && r->watch_dead) ++needed;
+        }
+        if ((uint32_t)s->dead_count[TASK_INDEX(other)] + needed >
+            IOS27_MACH_V2_NAMES)
+            return IOS27_MACH_LIMIT;
+    }
     /* From here on there is no possible failure: cancel queued grants
      * to foreign ports, then revoke all rights to destroyed objects. */
     for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
@@ -333,11 +389,18 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
     for (uint32_t owner = 1u; owner <= IOS27_MACH_TASK_MAX; ++owner) {
         for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
             local_right *r = &s->names[TASK_INDEX(owner)][i];
+            if (owner != task && r->object && owned[r->object - 1u] &&
+                r->watch_dead)
+                enqueue_dead_name(s, owner, r->name);
             if ((owner == task) ||
                 (r->object && owned[r->object - 1u]))
                 memset(r, 0, sizeof(*r));
         }
     }
+    memset(s->dead_events[TASK_INDEX(task)], 0,
+           sizeof(s->dead_events[TASK_INDEX(task)]));
+    s->dead_head[TASK_INDEX(task)] = 0u;
+    s->dead_count[TASK_INDEX(task)] = 0u;
     return IOS27_MACH_OK;
 }
 
