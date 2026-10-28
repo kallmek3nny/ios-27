@@ -33,6 +33,7 @@ typedef struct {
     char dependencies[IOS27_IMAGES_MAX][IOS27_IMAGE_NAME_MAX];
     size_t dep_count;
     size_t dep_index[IOS27_IMAGES_MAX];
+    unsigned char dep_weak[IOS27_IMAGES_MAX];
     const uint8_t *source;
     size_t source_size;
     ios27_macho_info info;
@@ -87,19 +88,21 @@ static int visit(const ios27_images *images, size_t i,
     if (color[i] == 2u) return 0;
     color[i] = 1u;
     for (size_t d = 0u; d < node->dep_count; ++d)
-        if (visit(images, node->dep_index[d], color))
+        if (node->dep_index[d] != SIZE_MAX &&
+            visit(images, node->dep_index[d], color))
             return -1;
     color[i] = 2u;
     return 0;
 }
-static int dependency_commands(const image_node *node, char *error, size_t cap) {
+static int dependency_commands(image_node *node, char *error, size_t cap) {
     const uint8_t *file = node->source;
     size_t cursor = 32u, found = 0u;
     unsigned chained = 0u, legacy = 0u;
     for (uint32_t i = 0u; i < rd32(file + 16u); ++i) {
         uint32_t cmd = rd32(file + cursor);
         uint32_t cmdsize = rd32(file + cursor + 4u);
-        if (cmd == LC_LOAD_DYLIB) {
+        if (cmd == LC_LOAD_DYLIB || cmd == LC_LOAD_WEAK_DYLIB ||
+            cmd == LC_REEXPORT_DYLIB) {
             uint32_t start;
             if (cmdsize < 24u || found >= node->dep_count)
                 return fail(error, cap, "dylib load commands exceed explicit dependencies");
@@ -109,10 +112,10 @@ static int dependency_commands(const image_node *node, char *error, size_t cap) 
                 strcmp((const char *)(file + cursor + start),
                        node->dependencies[found]) != 0)
                 return fail(error, cap, "dylib load order/name does not match explicit graph");
+            node->dep_weak[found] = (unsigned char)(cmd == LC_LOAD_WEAK_DYLIB);
             ++found;
-        } else if (cmd == LC_LOAD_WEAK_DYLIB || cmd == LC_REEXPORT_DYLIB ||
-                   cmd == LC_LOAD_UPWARD_DYLIB || cmd == LC_LAZY_LOAD_DYLIB) {
-            return fail(error, cap, "weak/reexport/upward/lazy dependencies unsupported");
+        } else if (cmd == LC_LOAD_UPWARD_DYLIB || cmd == LC_LAZY_LOAD_DYLIB) {
+            return fail(error, cap, "upward/lazy dependencies unsupported");
         } else if (cmd == LC_DYLD_CHAINED_FIXUPS) {
             if (chained++) return fail(error, cap, "duplicate chained command");
         } else if (cmd == LC_DYLD_INFO || cmd == LC_DYLD_INFO_ONLY) {
@@ -141,7 +144,8 @@ static int valid_layout(image_node *node, size_t page,
                 return fail(error, cap, "invalid __PAGEZERO permissions");
             continue;
         }
-        if (!s->vmsize || s->vmaddr % page || s->vmsize % page ||
+        /* Linked dylibs commonly have a partial final __LINKEDIT page. */
+        if (!s->vmsize || s->vmaddr % page ||
             (s->maxprot & ~7u) != 0u ||
             (s->initprot & ~s->maxprot) != 0u ||
             (s->initprot != 1u && s->initprot != 3u &&
@@ -171,10 +175,10 @@ static int valid_layout(image_node *node, size_t page,
             node->info.segments[i].vmsize > min_vm)
             return fail(error, cap, "__PAGEZERO overlaps loadable VM");
     if (!executable || max_vm <= min_vm ||
-        max_vm - min_vm > IOS27_IMAGE_MAX_BYTES)
+        max_vm - min_vm > IOS27_IMAGE_MAX_BYTES - (page - 1u))
         return fail(error, cap, "missing executable code or oversized image span");
     node->min_vm = min_vm;
-    node->span = (size_t)(max_vm - min_vm);
+    node->span = ((size_t)(max_vm - min_vm) + page - 1u) & ~(page - 1u);
     return 0;
 }
 static int find_symbol(const image_node *node, const char *symbol,
@@ -182,7 +186,8 @@ static int find_symbol(const image_node *node, const char *symbol,
     const ios27_export *entry;
     if (!node || !node->mapping || !node->exports) return -1;
     entry = ios27_exports_find(node->exports, symbol);
-    if (!entry || entry->flags != 0u || entry->address >= node->span)
+    if (!entry || (entry->flags & ~((uint64_t)IOS27_EXPORT_WEAK_DEFINITION)) != 0u ||
+        entry->address >= node->span)
         return -1;
     for (size_t i = 0u; i < node->info.segment_count; ++i) {
         const ios27_segment *s = &node->info.segments[i];
@@ -201,6 +206,28 @@ static int find_symbol(const image_node *node, const char *symbol,
     }
     return -1;
 }
+/* Follow reexport aliases only across the caller-supplied acyclic image graph.
+ * Never perform implicit filesystem lookups or search host libraries. */
+static int resolve_export(const ios27_images *images, size_t provider,
+                          const char *symbol, uintptr_t *address) {
+    for (size_t hop = 0u; hop < images->count; ++hop) {
+        const image_node *node;
+        const ios27_export *entry;
+        if (provider >= images->count) return -1;
+        node = &images->nodes[provider];
+        entry = ios27_exports_find(node->exports, symbol);
+        if (!entry) return -1;
+        if (!(entry->flags & IOS27_EXPORT_REEXPORT))
+            return find_symbol(node, symbol, address);
+        if (entry->flags & ~(uint64_t)(IOS27_EXPORT_REEXPORT |
+                                      IOS27_EXPORT_WEAK_DEFINITION) ||
+            entry->ordinal == 0u || entry->ordinal > node->dep_count)
+            return -1;
+        if (entry->imported_name[0]) symbol = entry->imported_name;
+        provider = node->dep_index[(size_t)entry->ordinal - 1u];
+    }
+    return -1;
+}
 typedef struct {
     ios27_images *images;
     size_t importing_index;
@@ -211,8 +238,9 @@ static int resolve(void *opaque, const char *symbol,
     const image_node *importer = &ctx->images->nodes[ctx->importing_index];
     uintptr_t location;
     if (ordinal <= 0 || (size_t)ordinal > importer->dep_count ||
-        find_symbol(&ctx->images->nodes[importer->dep_index[(size_t)ordinal - 1u]],
-                    symbol, &location))
+        resolve_export(ctx->images,
+                       importer->dep_index[(size_t)ordinal - 1u],
+                       symbol, &location))
         return -1;
     *address = (uint64_t)location;
     return 0;
@@ -251,7 +279,7 @@ int ios27_images_symbol(const ios27_images *images, const char *name,
     index = index_of(images, name);
     if (index < 0 || images->nodes[(size_t)index].state != IOS27_IMAGE_READY)
         return -1;
-    return find_symbol(&images->nodes[(size_t)index], symbol, address);
+    return resolve_export(images, (size_t)index, symbol, address);
 }
 int ios27_images_entrypoint(const ios27_images *images, const char *name,
                             uintptr_t *address) {
@@ -357,7 +385,8 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
                                 node->exports, error, cap))
             goto rollback;
         for (size_t e = 0u; e < node->exports->count; ++e)
-            if (node->exports->entries[e].flags != 0u) {
+            if (node->exports->entries[e].flags &
+                ~(uint64_t)(IOS27_EXPORT_WEAK_DEFINITION | IOS27_EXPORT_REEXPORT)) {
                 (void)fail(error, cap, "unsupported export flags");
                 goto rollback;
             }
@@ -366,16 +395,17 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
     for (size_t i = 0u; i < count; ++i) {
         image_node *node = &images->nodes[i];
         int fixup_type;
-        for (size_t d = 0u; d < node->dep_count; ++d) {
-            int index = index_of(images, node->dependencies[d]);
-            if (index < 0 || (size_t)index == i) {
-                (void)fail(error, cap, "missing/self dependency");
-                goto rollback;
-            }
-            node->dep_index[d] = (size_t)index;
-        }
         fixup_type = dependency_commands(node, error, cap);
         if (fixup_type < 0) goto rollback;
+        for (size_t d = 0u; d < node->dep_count; ++d) {
+            int index = index_of(images, node->dependencies[d]);
+            if ((index < 0 && !node->dep_weak[d]) ||
+                (index >= 0 && (size_t)index == i)) {
+                (void)fail(error, cap, "missing mandatory/self dependency");
+                goto rollback;
+            }
+            node->dep_index[d] = index < 0 ? SIZE_MAX : (size_t)index;
+        }
         if (fixup_type == 1) {
             node->classic = calloc(1u, sizeof(*node->classic));
             if (!node->classic) {
@@ -394,6 +424,13 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
             if (ios27_chained_parse(node->source, node->source_size, &node->info,
                                     node->chained, error, cap))
                 goto rollback;
+            for (size_t imported = 0u; imported < node->chained->import_count; ++imported) {
+                int32_t ordinal = node->chained->imports[imported].ordinal;
+                if (ordinal <= 0 || (size_t)ordinal > node->dep_count) {
+                    (void)fail(error, cap, "invalid chained dependency ordinal");
+                    goto rollback;
+                }
+            }
         }
     }
     for (size_t i = 0u; i < count; ++i)
