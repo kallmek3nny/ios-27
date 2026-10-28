@@ -65,11 +65,36 @@ def source_commit(commits):
     raise ValueError("no non-dashboard main commit in history")
 
 
-def snapshot(repo, get):
+def latest_source(repo_base, get, previous=None):
+    """Page through bot commits, without treating generated docs as source work.
+
+    GitHub often has dozens of dashboard-only commits between real merges.
+    The old 30-commit lookup broke all refreshes after enough bot pushes.
+    """
+    for page in range(1, 9):
+        commits = get(repo_base + "/commits?sha=main&per_page=100&page=" + str(page))
+        if not isinstance(commits, list):
+            raise ValueError("invalid commit history response")
+        for item in commits:
+            if not item.get("commit", {}).get("message", "").startswith(BOT_PREFIX):
+                return source_commit([item])
+        if len(commits) < 100:
+            break
+    if (isinstance(previous, dict) and
+            SHA_RE.fullmatch(previous.get("sha", "")) and
+            isinstance(previous.get("committed_at"), str) and
+            isinstance(previous.get("url"), str)):
+        # Clearly mark that the source audit is older, rather than misreporting
+        # a bot-generated dashboard commit as new implementation code.
+        return dict(previous, provenance_stale=True)
+    raise ValueError("no non-dashboard commit in bounded main history")
+
+
+def snapshot(repo, get, previous=None):
     if not REPO_RE.fullmatch(repo):
         raise ValueError("invalid repo")
     base = "/repos/" + repo
-    source = source_commit(get(base + "/commits?sha=main&per_page=30"))
+    source = latest_source(base, get, previous.get("main_source") if previous else None)
     open_prs = get(base + "/pulls?state=open&sort=updated&direction=desc&per_page=25")
     closed = get(base + "/pulls?state=closed&sort=updated&direction=desc&per_page=40")
     branches = get(base + "/branches?per_page=100")
@@ -150,6 +175,19 @@ def self_test():
             "commit": {"message": "phase18", "committer": {"date": "2026-10-28"}}}
     bot = {"sha": "b" * 40, "commit": {"message": BOT_PREFIX + " refresh"}}
     assert source_commit([bot, real])["sha"] == "a" * 40
+    calls = []
+    def page_request(url):
+        calls.append(url)
+        if "&page=1" in url:
+            return [bot] * 100
+        if "&page=2" in url:
+            return [bot, real]
+        raise AssertionError(url)
+    assert latest_source("/repos/test/repo", page_request)["sha"] == "a" * 40
+    assert len(calls) == 2
+    assert latest_source("/repos/test/repo", lambda url: [bot],
+                         {"sha": "a" * 40, "url": "https://example.com/a",
+                          "committed_at": "2026-10-28"})["provenance_stale"]
     sample = {"schema": 1, "main_source": {"sha": "a" * 40}}
     assert unchanged(dict(sample, observed_at="2026-10-28"), sample)
     assert not unchanged(dict(sample, main_source={"sha": "b" * 40}), sample)
@@ -174,7 +212,7 @@ def main():
     output = Path(args.output)
     previous = json.loads(output.read_text(encoding="utf-8")) if output.is_file() else None
     token = os.environ.get("GITHUB_TOKEN", "")
-    fresh = snapshot(args.repo, lambda path: request_json(path, token))
+    fresh = snapshot(args.repo, lambda path: request_json(path, token), previous)
     if unchanged(previous, fresh):
         print("no new source or candidate branches")
         return

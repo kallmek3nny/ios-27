@@ -2,6 +2,14 @@
 
 [capability progress and realistic ceiling](docs/PROGRESS.md) · [audited technical ceilings](docs/CEILINGS.md) · [live main/branch status](docs/repo-status.json)
 
+## recent development
+
+![live engineering progress from merged and active agent code](docs/engineering.svg)
+
+<sub>the activity chart reads real merged PR source diffs and unmerged branches. these are engineering changes, not verified Apple API coverage. [source details](docs/BRANCHES.md).</sub>
+
+## sampled compatibility blocks
+
 ![system library and runtime capability blocks](docs/blocks.svg)
 
 [api block explorer and technical ceilings](docs/BLOCKS.md) · [live agent branch diffs](docs/BRANCHES.md) · [interactive detailed breakdown](docs/blocks.html)
