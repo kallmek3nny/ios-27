@@ -422,6 +422,26 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
     slot_unpin(rt, s);
     return e;
 }
+/* Guest out-parameters cannot alias any active opaque object. Check and
+ * write under the registry guard to avoid racing bridge metadata updates. */
+static int guest_store_u32(ios27_21a_runtime *rt, uint64_t address, uint32_t value) {
+    unsigned char *p;
+    size_t i;
+    int e = guest_view(rt, address, sizeof(value), 4u, &p);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
+        object_slot *s = &rt->objects[i];
+        if (s->kind && address < s->addr + object_size(s->kind) &&
+            s->addr < address + sizeof(value)) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EINVAL;
+        }
+    }
+    memcpy(p, &value, sizeof(value));
+    (void)pthread_mutex_unlock(&rt->guard);
+    return 0;
+}
 static int attr_value(ios27_21a_runtime *rt, uint64_t address,
                       int setter, unsigned *value) {
     object_slot *s = NULL;
@@ -458,15 +478,8 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
         unsigned type = (unsigned)args[1];
         if (op == OP_MAS && args[1] > 2u) e = EINVAL;
         else if (op == OP_MAG) {
-            unsigned char *output = NULL;
-            e = guest_view(rt, args[1], sizeof(uint32_t), 4u, &output);
-            if (!e) {
-                e = attr_value(rt, args[0], 0, &type);
-                if (!e) {
-                    uint32_t result = (uint32_t)type;
-                    memcpy(output, &result, sizeof(result));
-                }
-            }
+            e = attr_value(rt, args[0], 0, &type);
+            if (!e) e = guest_store_u32(rt, args[1], (uint32_t)type);
         } else e = attr_value(rt, args[0], 1, &type);
     } else {
         kind = (op <= OP_MU) ? KIND_MUTEX :
