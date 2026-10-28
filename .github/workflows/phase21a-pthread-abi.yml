@@ -1,0 +1,28 @@
+name: phase21a darwin pthread abi bridge
+on:
+  pull_request:
+    paths:
+      - 'src/libsystem21a_*'
+      - 'include/ios27/libsystem21a_*'
+      - 'tests/phase21a-*'
+      - 'tools/phase21a-*'
+      - 'docs/phase21a-*'
+      - '.github/workflows/phase21a-pthread-abi.yml'
+  push:
+    branches:
+      - 'phase21a/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  abi-bridge:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: native pthread stress and clang-produced Darwin arm64 object
+        run: timeout 180s python3 tools/phase21a-standalone.py
