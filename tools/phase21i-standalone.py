@@ -52,6 +52,14 @@ def main():
                  "-o", str(target)], 60)
             run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
                  str(target)], 30)
+            threaded = dest / ("arm64-darwin-threads" + optimize + ".o")
+            run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
+                 "-fno-builtin", "-fno-stack-protector", "-Werror", "-Wall",
+                 "-Wextra", "-Wpedantic", optimize, "-c",
+                 str(ROOT / "tests/phase21i-darwin-threads.c"),
+                 "-o", str(threaded)], 60)
+            run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
+                 "--threads", str(threaded)], 30)
     print("phase21i: standalone checks passed", flush=True)
 
 if __name__ == "__main__":
