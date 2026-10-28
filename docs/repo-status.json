@@ -7,8 +7,55 @@
     "committed_at": "2026-10-28T19:33:52Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
-  "ahead_branches": [],
+  "open_pull_requests": [
+    {
+      "number": 70,
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "0fcbef956e51efcebabba3423d048fb2db2fa7d6",
+      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "updated_at": "2026-10-28T19:50:09Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "04c798a78d68837ea5610186b94ef260847595b6",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T19:50:04Z",
+      "status": "unmerged: not counted"
+    }
+  ],
+  "ahead_branches": [
+    {
+      "branch": "feat/phase21b-native-lifecycle-20261028",
+      "sha": "b7a126770d24f763f527156641ea4a33e105ae38",
+      "ahead_by": 4,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:50:35Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21b-native-lifecycle-20261028",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase21e-tls-cancel-20261028",
+      "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:34:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-tls-cancel-20261028",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:34:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 68,
@@ -69,9 +116,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 28,
+    "branches_scanned": 31,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:34:25Z"
+  "observed_at": "2026-10-28T19:50:40Z"
 }
