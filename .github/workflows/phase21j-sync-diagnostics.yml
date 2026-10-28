@@ -23,6 +23,9 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - name: verify host architecture and bounded native tests
         run: timeout 360s python3 tools/phase21j-standalone.py
         env:
@@ -57,6 +60,9 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - name: bounded address/undefined behavior and leak checks
         run: |
           timeout 360s env ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 UBSAN_OPTIONS=halt_on_error=1 python3 tools/phase21j-standalone.py --sanitize
@@ -92,6 +98,9 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - name: eight-pass bounded high-contention campaigns
         run: timeout 360s python3 tools/phase21j-standalone.py --stress
         env:
@@ -126,6 +135,9 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - name: native Clang compiler -Werror O0/O2 integration
         run: timeout 360s env CC=clang python3 tools/phase21j-standalone.py
         env:
