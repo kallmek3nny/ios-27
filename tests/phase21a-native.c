@@ -62,6 +62,23 @@ int main(void) {
     for (i = 0; i < 8; ++i)
         assert(pthread_join(threads[i], NULL) == 0);
     assert(shared == 12000);
+    /* Real Darwin-style static initializer plus 8 concurrent first users. */
+    {
+        uint64_t static_mutex = BASE + 1024u;
+        uint64_t static_cond = BASE + 1280u;
+        uint64_t signature = IOS27_21A_MUTEX_STATIC_SIG;
+        memcpy(memory + 1024u, &signature, sizeof(signature));
+        for (i = 0; i < 8; ++i)
+            assert(pthread_create(&threads[i], NULL, mutex_worker, &static_mutex) == 0);
+        for (i = 0; i < 8; ++i)
+            assert(pthread_join(threads[i], NULL) == 0);
+        assert(shared == 24000);
+        assert(call("pthread_mutex_destroy", static_mutex, 0) == 0);
+        signature = IOS27_21A_COND_STATIC_SIG;
+        memcpy(memory + 1280u, &signature, sizeof(signature));
+        assert(call("pthread_cond_broadcast", static_cond, 0) == 0);
+        assert(call("pthread_cond_destroy", static_cond, 0) == 0);
+    }
     assert(call("pthread_cond_init", cond, 0) == 0);
     assert(call("pthread_cond_signal", cond, 0) == 0);
     assert(call("pthread_cond_broadcast", cond, 0) == 0);
