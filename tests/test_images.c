@@ -92,6 +92,20 @@ static void provider(uint8_t file[IMAGE_SIZE], const char *depends_on) {
     le32(file + CODE_OFF, 0x52800540u); /* mov w0,#42 */
     le32(file + CODE_OFF + 4u, 0xd65f03c0u); /* ret */
 }
+static void data_provider(uint8_t file[IMAGE_SIZE]) {
+    size_t terminal;
+    provider(file, NULL);
+    /* A regular, explicitly mapped RW __DATA export, not a code address. */
+    header(file, 3u, 160u, 6u);
+    segment(file + 120u, "__DATA", UINT64_C(0x100001000), 4096u,
+            DATA_OFF, 4096u, 3u);
+    export_trie(file + EXPORTS_OFF, "_counter");
+    le32(file + 116u, (uint32_t)trie_len("_counter"));
+    terminal = 4u + strlen("_counter");
+    file[EXPORTS_OFF + terminal + 2u] = 0x80u;
+    file[EXPORTS_OFF + terminal + 3u] = 0x20u; /* offset 4096 */
+    le64(file + DATA_OFF, UINT64_C(0x1122334455667788));
+}
 static void consumer(uint8_t file[IMAGE_SIZE], uint16_t page_size) {
     uint8_t *p;
     memset(file, 0, IMAGE_SIZE);
@@ -160,6 +174,24 @@ static void classic_consumer(uint8_t file[IMAGE_SIZE]) {
     le32(file + CODE_OFF, 0xb0000010u);
     le32(file + CODE_OFF + 4u, 0xf9400210u);
     le32(file + CODE_OFF + 8u, 0xd61f0200u);
+}
+static void check_data_binding(uint8_t provider_bytes[IMAGE_SIZE],
+                               uint8_t consumer_bytes[IMAGE_SIZE]) {
+    const char *deps[] = {"provider.dylib"};
+    ios27_image_spec specs[] = {
+        {"consumer.dylib", consumer_bytes, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    uintptr_t global, caller;
+    char error[128];
+    assert(ios27_images_load(specs, 2u, &images, error, sizeof(error)) == 0);
+    assert(images != NULL);
+    assert(ios27_images_symbol(images, "provider.dylib", "_counter", &global) == 0);
+    assert(rd64((const uint8_t *)global) == UINT64_C(0x1122334455667788));
+    assert(ios27_images_symbol(images, "consumer.dylib", "_call", &caller) == 0);
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + 4096u)) == global);
+    ios27_images_unload(images);
 }
 static void expect_failure(const ios27_image_spec *specs, size_t count) {
     ios27_images *images = NULL;
@@ -235,6 +267,17 @@ int main(void) {
     check_graph(provider_bytes, consumer_bytes, 1);
     classic_consumer(consumer_bytes);
     check_graph(provider_bytes, consumer_bytes, 1);
+
+    /* A chained bind can resolve a data export, not just an RX function. */
+    data_provider(provider_bytes);
+    consumer(consumer_bytes, 4096u);
+    memcpy(consumer_bytes + FIXUPS_OFF + 68u, "_counter", 9u);
+    check_data_binding(provider_bytes, consumer_bytes);
+
+    /* The entire graph is rolled back for an unresolved data symbol. */
+    memcpy(consumer_bytes + FIXUPS_OFF + 68u, "_missing", 9u);
+    expect_failure(specs, 2u);
+    provider(provider_bytes, NULL);
 
     specs[1].name = "consumer.dylib";
     expect_failure(specs, 2u); /* duplicate image */

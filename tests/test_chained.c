@@ -157,6 +157,12 @@ int main(void) {
                                    error, sizeof(error)) != 0);
         assert(memcmp(image, original, IMAGE_SIZE) == 0);
         plan.patches[1].rebase_target = 0x70u;
+        plan.patches[1].rebase_target = 0x300000u; /* outside mapped image */
+        assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                                   UINT64_C(0x500000000), resolve, &ctx,
+                                   error, sizeof(error)) != 0);
+        assert(memcmp(image, original, IMAGE_SIZE) == 0);
+        plan.patches[1].rebase_target = 0x70u;
         plan.patches[1].segment_offset = 0u; /* overlapping patch */
         assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
                                    UINT64_C(0x500000000), resolve, &ctx,
@@ -169,11 +175,44 @@ int main(void) {
                                    error, sizeof(error)) != 0);
     }
 
+    /* Signed 32-bit import addends must be applied without overflow. */
+    fixture(image, 4096u);
+    le32(image + 188u, 84u);
+    le32(image + FIXUPS_OFF + 20u, 2u);
+    le32(image + FIXUPS_OFF + 12u, 72u);
+    le32(image + FIXUPS_OFF + 68u, 13u);
+    memcpy(image + FIXUPS_OFF + 72u, "_answer", 8u);
+    parse_ok(image, &info, &plan);
+    assert(plan.imports[0].addend == 13);
+    assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                               UINT64_C(0x500000000), resolve, &ctx,
+                               error, sizeof(error)) == 0);
+    assert(rd64(image + DATA_OFF) == ctx.value + 13u);
+    fixture(image, 4096u);
+    le32(image + 188u, 84u);
+    le32(image + FIXUPS_OFF + 20u, 2u);
+    le32(image + FIXUPS_OFF + 12u, 72u);
+    le32(image + FIXUPS_OFF + 68u, UINT32_MAX - 16u);
+    memcpy(image + FIXUPS_OFF + 72u, "_answer", 8u);
+    parse_ok(image, &info, &plan);
+    assert(plan.imports[0].addend == -17);
+    assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                               UINT64_C(0x500000000), resolve, &ctx,
+                               error, sizeof(error)) == 0);
+    assert(rd64(image + DATA_OFF) == ctx.value - 17u);
+
+    fixture(image, 4096u);
+    le64(image + DATA_OFF + 8u, 0x300000u);
+    parse_bad(image); /* rebase outside every mapped segment */
+    fixture(image, 4096u);
+    le16(image + FIXUPS_OFF + 60u, 5u); /* five 4K pages in 16K segment */
+    le32(image + FIXUPS_OFF + 40u, 32u);
+    parse_bad(image);
     fixture(image, 4096u);
     le32(image + FIXUPS_OFF, 1u); /* version */
     parse_bad(image);
     fixture(image, 4096u);
-    le32(image + FIXUPS_OFF + 20u, 2u); /* unsupported import-addend format */
+    le32(image + FIXUPS_OFF + 20u, 99u); /* unsupported import format */
     parse_bad(image);
     fixture(image, 4096u);
     le32(image + FIXUPS_OFF + 24u, 1u); /* compressed symbols unsupported */
