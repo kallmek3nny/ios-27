@@ -8,7 +8,7 @@
 
 ![evidence-backed subsystem progress](docs/progress.svg)
 
-**Next development agent:** see [HANDOFF.md](HANDOFF.md) for phase 6 status, safety constraints, phase 7 priorities, and PR/CI rules.
+**Development status:** check [verified capability progress](docs/PROGRESS.md), [live main provenance](docs/repo-status.json), and [technical ceilings](docs/CEILINGS.md). The legacy [HANDOFF.md](HANDOFF.md) may describe older phases; verify against the latest merged main.
 
 **Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
