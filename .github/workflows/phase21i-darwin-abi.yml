@@ -1,0 +1,30 @@
+name: phase21i darwin pthread abi boundary
+on:
+  pull_request:
+    paths:
+      - 'src/libsystem21i_*'
+      - 'include/ios27/libsystem21i_*'
+      - 'tests/phase21i-*'
+      - 'tools/phase21i-*'
+      - 'docs/phase21i-*'
+      - '.github/workflows/phase21i-darwin-abi.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pthread-abi:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: check architecture and compiler
+        run: |
+          set -euo pipefail
+          uname -m
+          timeout 20s clang --version
+      - name: independent host tests and real clang darwin mach-o evidence
+        run: timeout 300s python3 tools/phase21i-standalone.py
