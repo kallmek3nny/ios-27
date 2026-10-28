@@ -17,7 +17,7 @@ typedef struct {
     ios27_21c_runtime *runtime;
     ios27_21c_handle mutex, condition;
     ios27_21j_diagnostics *diag;
-    pthread_barrier_t gate;
+    pthread_barrier_t gate, timeout_completed;
     unsigned epoch, mode, published;
     int wait_result, predicate_after_wait;
 } round_state;
@@ -46,6 +46,12 @@ static void *waiting(void *pointer) {
         if (rc == ETIMEDOUT) { r->wait_result = rc; break; }
     }
     r->predicate_after_wait = (int)r->published;
+    /* The guaranteed-expiry control releases the signaler only after
+       the expired wait has returned, eliminating deadline/signal races. */
+    if (r->mode == 0u) {
+        int ended = pthread_barrier_wait(&r->timeout_completed);
+        CHECK(ended == 0 || ended == PTHREAD_BARRIER_SERIAL_THREAD);
+    }
     CHECK(r->wait_result == 0 || r->wait_result == ETIMEDOUT);
     OK(ios27_21j_record(r->diag,
         r->wait_result == ETIMEDOUT ? IOS27_21J_TIMEOUT : IOS27_21J_WAIT,
@@ -57,6 +63,10 @@ static void *signaling(void *pointer) {
     round_state *r = pointer;
     int rc = pthread_barrier_wait(&r->gate);
     CHECK(rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD);
+    if (r->mode == 0u) {
+        rc = pthread_barrier_wait(&r->timeout_completed);
+        CHECK(rc == 0 || rc == PTHREAD_BARRIER_SERIAL_THREAD);
+    }
     OK(ios27_21c_mutex_lock(r->runtime, r->mutex));
     CHECK(r->published == 0);
     r->published = 1;
@@ -84,11 +94,13 @@ static void run(void) {
             .wait_result = -1, .predicate_after_wait = -1,
         };
         OK(pthread_barrier_init(&r.gate, NULL, 2));
+        OK(pthread_barrier_init(&r.timeout_completed, NULL, 2));
         OK(pthread_create(&waiter, NULL, waiting, &r));
         OK(pthread_create(&signaler, NULL, signaling, &r));
         OK(pthread_join(waiter, NULL));
         OK(pthread_join(signaler, NULL));
         OK(pthread_barrier_destroy(&r.gate));
+        OK(pthread_barrier_destroy(&r.timeout_completed));
         CHECK(r.published == 1);
         CHECK((r.wait_result == 0 && r.predicate_after_wait == 1) ||
               (r.wait_result == ETIMEDOUT &&
