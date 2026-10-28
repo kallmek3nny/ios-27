@@ -1,6 +1,129 @@
 "use strict";
 const fs=require("node:fs");
 const path=require("node:path");
+const makeMap = function makeMap(data,colors,names,esc,count,gather){
+  const width=760, margin=18, mapW=724;
+  const panels=data.panels.map(panel=>{
+    const groups=gather(panel.id);
+    const targets=groups.flatMap(g=>g.targets);
+    return {panel,groups,targets,h:Math.round(Math.max(230,Math.min(485,166+0.92*targets.length)))};
+  });
+  const top=84,header=42,gap=22,bottom=67;
+  const height=top+panels.reduce((a,p)=>a+header+p.h+gap,0)+bottom;
+  const svg=[
+    '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="proportional ios-27 compatibility blocks">',
+    '<rect width="'+width+'" height="'+height+'" fill="#0e1724"/>',
+    '<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#f0f5fa">ios-27 / compatibility</text>',
+    '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#9cacc0">component area scales with its tracked functions; colors show test status</text>'
+  ];
+  const rect=(x,y,w,h,color,r)=>{
+    if(![x,y,w,h].every(Number.isFinite)||w<0||h<0)throw Error("invalid rectangle");
+    return '<rect x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="'+(r||0)+'" fill="'+color+'"/>';
+  };
+  function partition(items,x,y,w,h){
+    const total=items.reduce((a,g)=>a+g.targets.length,0);
+    let pending=items.map(g=>({group:g,a:w*h*g.targets.length/total}));
+    let row=[],xx=x,yy=y,ww=w,hh=h;
+    const result=[];
+    const badness=(list,side)=>{
+      const sum=list.reduce((a,v)=>a+v.a,0);
+      const min=Math.min(...list.map(v=>v.a));
+      const max=Math.max(...list.map(v=>v.a));
+      return Math.max(side*side*max/(sum*sum),sum*sum/(side*side*min));
+    };
+    function place(){
+      const a=row.reduce((z,item)=>z+item.a,0);
+      if(ww>=hh){
+        const slice=a/hh;
+        let offset=0;
+        for(const item of row){
+          const ph=item.a/slice;
+          result.push({group:item.group,x:xx,y:yy+offset,w:slice,h:ph});
+          offset+=ph;
+        }
+        xx+=slice;ww-=slice;
+      }else{
+        const slice=a/ww;
+        let offset=0;
+        for(const item of row){
+          const pw=item.a/slice;
+          result.push({group:item.group,x:xx+offset,y:yy,w:pw,h:slice});
+          offset+=pw;
+        }
+        yy+=slice;hh-=slice;
+      }
+      row=[];
+    }
+    while(pending.length){
+      const next=pending[0];
+      if(!row.length||badness(row.concat(next),Math.min(ww,hh))<=badness(row,Math.min(ww,hh))){
+        row.push(pending.shift());
+      }else place();
+    }
+    if(row.length)place();
+    return result;
+  }
+  let y=top;
+  const totals=[];
+  for(const p of panels){
+    const c=count(p.targets);
+    totals.push({panel:p.panel,groups:p.groups,c,total:p.targets.length});
+    svg.push('<text x="'+margin+'" y="'+(y+15)+'" font-family="sans-serif" font-size="17" font-weight="600" fill="#e7edf4">'+esc(p.panel.title)+'</text>');
+    svg.push('<text x="'+(width-margin)+'" y="'+(y+15)+'" text-anchor="end" font-family="sans-serif" font-size="12" fill="#9db0c4">'+p.groups.length+' components · '+p.targets.length+' targets</text>');
+    svg.push('<line x1="'+margin+'" x2="'+(width-margin)+'" y1="'+(y+30)+'" y2="'+(y+30)+'" stroke="#2c3a4b" stroke-width="1"/>');
+    const mapY=y+header;
+    const ordered=p.groups.slice().sort((a,b)=>b.targets.length-a.targets.length||a.id.localeCompare(b.id));
+    const placements=partition(ordered,margin,mapY,mapW,p.h);
+    let area=0, rendered=0;
+    for(const box of placements){
+      area+=box.w*box.h;
+      if(box.x<margin-0.01||box.y<mapY-0.01||box.x+box.w>margin+mapW+0.01||box.y+box.h>mapY+p.h+0.01)throw Error("component bounds failed");
+      const g=box.group,x=box.x+2,y0=box.y+2,w=Math.max(0,box.w-4),h=Math.max(0,box.h-4);
+      svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' targets · '+g.ceiling+' ceiling')+'</title>');
+      svg.push(rect(x,y0,w,h,"#1b293b",2));
+      const labelH=(w>82&&h>38)?22:0;
+      const iw=Math.max(0,w-4),ih=Math.max(0,h-4-labelH);
+      const rows=Math.max(1,Math.min(g.targets.length,Math.round(Math.sqrt(g.targets.length*ih/Math.max(iw,1)))));
+      let index=0;
+      for(let r=0;r<rows;r++){
+        const n=Math.floor(g.targets.length/rows)+(r<g.targets.length%rows?1:0);
+        for(let col=0;col<n;col++){
+          const t=g.targets[index++];
+          const cw=iw/n,ch=ih/rows,tx=x+2+col*cw,ty=y0+2+labelH+r*ch;
+          const gutter=Math.min(1.2,cw*.15,ch*.15);
+          svg.push('<g><title>'+esc(g.label+' / '+t.name+': '+names[t.status])+'</title>');
+          svg.push(rect(tx+gutter/2,ty+gutter/2,Math.max(.1,cw-gutter),Math.max(.1,ch-gutter),colors[t.status],Math.min(1,cw/6,ch/6)));
+          svg.push('</g>');
+        }
+      }
+      if(index!==g.targets.length)throw Error("target count mismatch "+g.id);
+      rendered+=index;
+      if(labelH){
+        const maxChars=Math.floor((w-12)/6.1);
+        const label=g.label.length>maxChars?g.label.slice(0,maxChars-1)+"…":g.label;
+        svg.push('<text x="'+(x+6).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" font-family="sans-serif" font-size="11.5" fill="#dee7f2">'+esc(label)+'</text>');
+      }
+      svg.push('</g>');
+    }
+    if(Math.abs(area-mapW*p.h)>0.05||rendered!==p.targets.length)throw Error("proportional area accounting error");
+    y+=header+p.h+gap;
+  }
+  const legendY=height-40;
+  svg.push('<line x1="18" x2="742" y1="'+(legendY-20)+'" y2="'+(legendY-20)+'" stroke="#2c3a4b" stroke-width="1"/>');
+  let lx=18;
+  for(const [status,title,advance] of [
+    ["native-fixture","native fixture",139],
+    ["synthetic","synthetic model/probe",210],
+    ["missing","not implemented",182],
+    ["excluded","excluded",130]
+  ]){
+    svg.push(rect(lx,legendY-3,10,10,colors[status],2));
+    svg.push('<text x="'+(lx+16)+'" y="'+(legendY+6)+'" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">'+esc(title)+'</text>');
+    lx+=advance;
+  }
+  svg.push('</svg>');
+  return {svg,totals};
+};
 const render = function render(data){
   "use strict";
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -17,58 +140,7 @@ const render = function render(data){
     for(const t of g.targets){if(!t.name||seen.has(t.name)||!(t.status in names))throw Error("invalid target "+g.id+" "+t.name);seen.add(t.name);}
     if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")&&(!g.evidence||!g.test))throw Error("unproven status "+g.id);
   }
-  const px=485,gap=11,top=103,contentH=705,width=px*3+gap*2,height=866;
-  const svg=[
-    '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="ios-27 compatibility blocks for system libraries, Darwin and Apple UI">',
-    '<rect width="100%" height="100%" fill="#0e1726"/>',
-    '<text x="15" y="31" font-family="sans-serif" font-size="26" font-weight="bold" fill="#f3f7fd">ios-27 / system compatibility blocks</text>',
-    '<text x="15" y="53" font-family="sans-serif" font-size="14" fill="#adc1d8">each square = 1 declared representative function or contract, NOT the whole Apple API surface</text>'
-  ];
-  const totals=[];
-  for(let pi=0;pi<data.panels.length;pi++){
-    const panel=data.panels[pi], x=pi*(px+gap), gs=gather(panel.id);
-    const all=gs.flatMap(g=>g.targets),c=count(all);
-    totals.push({panel,groups:gs,c,total:all.length});
-    svg.push('<rect x="'+x+'" y="67" width="'+px+'" height="749" rx="8" fill="#17263b" stroke="#48617b" stroke-width="1"/>');
-    svg.push('<text x="'+(x+11)+'" y="88" font-family="sans-serif" font-size="16" font-weight="bold" fill="#fafafa">'+esc(panel.title)+'</text>');
-    svg.push('<text x="'+(x+11)+'" y="104" font-family="sans-serif" font-size="12" fill="#aac8d9">'+c["native-fixture"]+' native / '+c.synthetic+' synthetic / '+all.length+' tracked</text>');
-    const order=gs.slice().sort((a,b)=>b.targets.length-a.targets.length||a.id.localeCompare(b.id));
-    const columns=[[],[]],loads=[0,0];
-    for(const g of order){const col=loads[0]<=loads[1]?0:1;columns[col].push(g);loads[col]+=g.targets.length;}
-    for(let col=0;col<2;col++){
-      const w=(px-27)/2,cx=x+8+col*(w+10);
-      let yy=top+8;const total=loads[col];
-      for(let gi=0;gi<columns[col].length;gi++){
-        const g=columns[col][gi];
-        const isLast=gi===columns[col].length-1;
-        const gh=isLast?top+8+contentH-yy:contentH*g.targets.length/total;
-        svg.push('<g><title>'+esc(g.label+'; '+g.targets.length+' targets; ceiling: '+g.ceiling+'; '+g.note)+'</title>');
-        svg.push('<rect x="'+cx.toFixed(2)+'" y="'+yy.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+Math.max(gh,0).toFixed(2)+'" fill="#23344c" stroke="#8b9bb1" stroke-width="1"/>');
-        const titleH=gh>34?19:0;
-        const short=g.label.slice(0,Math.floor((w-8)/7));
-        if(titleH)svg.push('<text x="'+(cx+5).toFixed(2)+'" y="'+(yy+14).toFixed(2)+'" font-family="sans-serif" font-size="12" fill="#f4f6fc">'+esc(short)+'</text>');
-        const n=g.targets.length, cw=w-4,ch=Math.max(0,gh-titleH-5);
-        const ncols=Math.max(1,Math.min(n,Math.ceil(Math.sqrt(n*cw/Math.max(ch,1)))));
-        const nrows=Math.ceil(n/ncols), tw=cw/ncols,th=ch/nrows;
-        for(let ti=0;ti<n;ti++){
-          const t=g.targets[ti],tx=cx+2+(ti%ncols)*tw,ty=yy+titleH+2+Math.floor(ti/ncols)*th;
-          svg.push('<g><title>'+esc(g.label+' / '+t.name+': '+names[t.status])+'</title>');
-          svg.push('<rect x="'+(tx+.45).toFixed(2)+'" y="'+(ty+.45).toFixed(2)+'" width="'+Math.max(.1,tw-.9).toFixed(2)+'" height="'+Math.max(.1,th-.9).toFixed(2)+'" fill="'+colors[t.status]+'" stroke="#1c2a40" stroke-width=".45"/>');
-          svg.push('</g>');
-        }
-        svg.push('</g>');
-        yy+=gh;
-      }
-    }
-    svg.push('<text x="'+(x+11)+'" y="840" font-family="sans-serif" font-size="13" fill="#b4c5d8">'+gs.length+' groups · ceiling categories in docs/BLOCKS.md</text>');
-  }
-  let lx=15;
-  for(const s of ["native-fixture","synthetic","missing","excluded"]){
-    svg.push('<rect x="'+lx+'" y="850" width="10" height="10" fill="'+colors[s]+'"/>');
-    svg.push('<text x="'+(lx+16)+'" y="860" font-family="sans-serif" font-size="12" fill="#dde6f3">'+esc(names[s])+'</text>');
-    lx+=s==="synthetic"?236:s==="native-fixture"?178:s==="missing"?143:220;
-  }
-  svg.push('</svg>');
+  const {svg,totals}=makeMap(data,colors,names,esc,count,gather);
   const md=[
     "# ios-27 | API/function block map and feasibility ceilings","",
     "![per-function compatibility block map](blocks.svg)","",

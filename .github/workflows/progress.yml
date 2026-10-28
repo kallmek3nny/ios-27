@@ -5,7 +5,7 @@ on:
     paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, .github/workflows/progress.yml]
   pull_request:
     branches: [main]
-    paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, .github/workflows/progress.yml]
+    paths: [docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, .github/workflows/progress.yml]
 permissions:
   contents: read
 jobs:
