@@ -24,10 +24,10 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 | ↳ Foundation / classes | 0 | 0 | 16 | 0 | 16 |
 | ↳ Security / keychain | 0 | 0 | 12 | 0 | 12 |
 | ↳ CFNetwork / Network.framework | 0 | 0 | 12 | 0 | 12 |
-| **darwin runtime / native compatibility** | **4** | **34** | **45** | **2** | **85** |
+| **darwin runtime / native compatibility** | **4** | **37** | **43** | **2** | **86** |
 | ↳ mach-o parser and native loader | 3 | 5 | 4 | 0 | 12 |
 | ↳ dyld / image graph | 1 | 9 | 6 | 0 | 16 |
-| ↳ mach ipc model | 0 | 10 | 6 | 0 | 16 |
+| ↳ mach ipc model | 0 | 13 | 4 | 0 | 17 |
 | ↳ bsd syscall boundary | 0 | 7 | 10 | 0 | 17 |
 | ↳ arm64e and abi compatibility | 0 | 0 | 10 | 0 | 10 |
 | ↳ guest security / isolation | 0 | 3 | 9 | 2 | 14 |
@@ -45,10 +45,9 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `a424b9030310`
+main source: `b3b66fef5a72`
 
 - [PR #51](https://github.com/kallmek3nny/ios-27/pull/51) · incoming, not counted
-- [PR #49](https://github.com/kallmek3nny/ios-27/pull/49) · incoming, not counted
 
 ## realistic ceilings for every tracked area
 
@@ -72,7 +71,7 @@ main source: `a424b9030310`
 
 - **mach-o parser and native loader** · **plausible** (limited subset feasible). merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.
 - **dyld / image graph** · **conditional** (needs major compatibility layer). merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.
-- **mach ipc model** · **conditional** (needs major compatibility layer). task-local messages are a tested synchronous model, not actual mach trap delivery or an xnu service provider.
+- **mach ipc model** · **conditional** (needs major compatibility layer). phase18c adds synthetic task-local port sets, bounded 128-byte single OOL descriptors and sequence trailers; all operations are synchronous fixture calls, not kernel Mach traps, audit tokens, full OOL VM or entitlement-aware processes.
 - **bsd syscall boundary** · **conditional** (needs major compatibility layer). a narrow interpreter responds to six identity calls plus a virtual exit, not general darwin syscalls from native processes.
 - **arm64e and abi compatibility** · **unknown** (official Apple compatibility unproven). native aarch64 is not proof of arm64e abi; authenticated pointer formats are deliberately rejected rather than bypassed.
 - **guest security / isolation** · **conditional** (needs major compatibility layer). the current reviewed fixture runner executes in-process. boot chain writes and weakening selinux are explicitly excluded.

@@ -2,33 +2,31 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "a424b9030310b079901319800f5df6c9535742fd",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/a424b9030310b079901319800f5df6c9535742fd",
-    "committed_at": "2026-10-28T17:43:13Z"
+    "sha": "b3b66fef5a72b3bcbecc71466d257b6eebae8797",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/b3b66fef5a72b3bcbecc71466d257b6eebae8797",
+    "committed_at": "2026-10-28T17:45:40Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 51,
       "branch": "feat/live-evidence-progress-ceilings",
-      "sha": "9f9679a64b1c43b704eeb32c2c400530ef5caf50",
+      "sha": "a48131b348a1583bba475673e8326a3a07e7bc7b",
       "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
       "url": "https://github.com/kallmek3nny/ios-27/pull/51",
-      "updated_at": "2026-10-28T17:44:17Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 49,
-      "branch": "phase18c-mach-portsets-trailers",
-      "sha": "5acf526c319c89d42cbb7166f92f789a76baab90",
-      "title": "phase 18c: bounded mach port sets and sequence trailers",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/49",
-      "updated_at": "2026-10-28T17:44:08Z",
+      "updated_at": "2026-10-28T17:46:16Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 49,
+      "title": "phase 18c: bounded mach ool, port sets, trailers and guest isolation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/49",
+      "head_sha": "5acf526c319c89d42cbb7166f92f789a76baab90",
+      "merged_at": "2026-10-28T17:45:40Z"
+    },
     {
       "number": 50,
       "title": "phase 18b: path-aware native dyld graphs, relocations and linked ARM64 fixtures",
@@ -71,5 +69,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:44:17Z"
+  "observed_at": "2026-10-28T17:46:16Z"
 }
