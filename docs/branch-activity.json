@@ -11,7 +11,7 @@
       "sha": "2e9afb57435637ca99c4e3b4e6f855f5fc681185",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "pr_number": 80,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 12,
       "possibly_truncated": false,
@@ -45,7 +45,7 @@
       "sha": "81c5e71ec238b2f280deab135b38fc03a6b11490",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "pr_number": 77,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 12,
       "possibly_truncated": false,
@@ -247,14 +247,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/80",
         "source_files": 4,
         "fixture_files": 6,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
         "url": "https://github.com/kallmek3nny/ios-27/pull/77",
         "source_files": 4,
         "fixture_files": 6,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21f-fifo-mutex-20261028",
@@ -611,5 +611,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:25:30Z"
+  "observed_at": "2026-10-28T21:25:57Z"
 }
