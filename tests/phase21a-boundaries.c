@@ -37,6 +37,11 @@ int main(void) {
     for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
         p = BASE + 512u + (uint64_t)i * 256u;
         assert(invoke(rt, "pthread_mutex_init", p, 0) == 0);
+        if (i == 0u) {
+            assert(invoke(rt, "pthread_cond_init", p + 32u, 0) == EBUSY);
+            assert(invoke(rt, "pthread_mutex_lock", p, 0) == 0);
+            assert(invoke(rt, "pthread_mutex_unlock", p, 0) == 0);
+        }
     }
     assert(invoke(rt, "pthread_mutex_init", BASE + 512u +
                   (uint64_t)IOS27_21A_MAX_OBJECTS * 256u, 0) == EAGAIN);
