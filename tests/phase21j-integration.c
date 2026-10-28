@@ -4,7 +4,6 @@
 #include "ios27/libsystem21e_tls.h"
 #include "ios27/libsystem21j_diagnostics.h"
 #include <errno.h>
-#include <limits.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdint.h>
@@ -314,20 +313,19 @@ int main(void) {
         unsigned long long supplied;
         errno = 0;
         if (*configured == '-') {
-            fprintf(stderr, "phase21j: negative seed rejected\\n");
+            fprintf(stderr, "phase21j: negative seed rejected\n");
             return 2;
         }
         supplied = strtoull(configured, &end, 0);
-        if (errno == ERANGE || !end || *end || end == configured ||
-            supplied > UINT64_MAX) {
-            fprintf(stderr, "phase21j: invalid seed base\\n");
+        if (errno == ERANGE || !end || *end || end == configured) {
+            fprintf(stderr, "phase21j: invalid seed base\n");
             return 2;
         }
         seed_base = (uint64_t)supplied;
     }
     for (unsigned r = 0; r < ROUNDS; ++r)
         run_once(r, seed_base);
-    printf("phase21j integration: 60k queued items, seed %016llx, cancellation and teardown; PASS\\n",
+    printf("phase21j integration: 60k queued items, seed %016llx, cancellation and teardown; PASS\n",
            (unsigned long long)seed_base);
     return 0;
 }
