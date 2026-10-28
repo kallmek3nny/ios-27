@@ -2,24 +2,31 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "bfb03ef8574b5d1495551672f2750f4b29ee4d22",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/bfb03ef8574b5d1495551672f2750f4b29ee4d22",
-    "committed_at": "2026-10-28T18:06:19Z"
+    "sha": "81df51719a12205f73293f0b7e64d3663ed6640e",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/81df51719a12205f73293f0b7e64d3663ed6640e",
+    "committed_at": "2026-10-28T18:08:08Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 53,
-      "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
-      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T18:07:16Z",
+      "number": 57,
+      "branch": "phase19e-objc-libsystem-foundations",
+      "sha": "e095ac25867528ba984fd8848aea35d98de5324b",
+      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+      "updated_at": "2026-10-28T18:08:39Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 53,
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "head_sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
+      "merged_at": "2026-10-28T18:08:09Z"
+    },
     {
       "number": 55,
       "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
@@ -68,13 +75,6 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/50",
       "head_sha": "e624dfa6a9dbd12c775a122fb403c5de5dd5e544",
       "merged_at": "2026-10-28T17:43:13Z"
-    },
-    {
-      "number": 48,
-      "title": "phase 18a: native darwin LC_MAIN guest stack and argv startup",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/48",
-      "head_sha": "d5ce7b309fd16e88b8e5fe01869020b4330fd2dc",
-      "merged_at": "2026-10-28T17:40:35Z"
     }
   ],
   "scan_limits": {
@@ -83,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:07:54Z"
+  "observed_at": "2026-10-28T18:08:51Z"
 }
