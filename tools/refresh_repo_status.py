@@ -178,9 +178,9 @@ def self_test():
     calls = []
     def page_request(url):
         calls.append(url)
-        if "page=1" in url:
+        if "&page=1" in url:
             return [bot] * 100
-        if "page=2" in url:
+        if "&page=2" in url:
             return [bot, real]
         raise AssertionError(url)
     assert latest_source("/repos/test/repo", page_request)["sha"] == "a" * 40
