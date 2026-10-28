@@ -48,3 +48,13 @@ Darwin-target objects on each. Shared CMake/entrypoint files are unchanged.
 - Runtime destruction requires all users to be quiescent. Clients may not use
   handles or runtime addresses after destruction. The bridge does not protect
   calls racing with destruction of the runtime object itself.
+
+## extended active stress campaign
+
+`timeout 300s python3 tools/phase21f-campaign.py --duration 240`
+
+This optional bounded test repeatedly runs compiler-produced native programs
+with varied deterministic PRNG seeds, records graph-cycle rejections, and
+interleaves contention/cancellation/queue-lifetime suites. Each child program
+has a hard 60s limit; compilation has a hard 120s limit. No artificial waits
+or idle padding are used. This is independent of the normal quick CI gate.

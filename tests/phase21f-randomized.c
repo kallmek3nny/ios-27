@@ -66,11 +66,20 @@ int main(void) {
     ios27_21f_stats stats;
     uint64_t limit, actual = 0, expected = 0;
     unsigned i;
+    uint32_t basis = 0x9e3779b9u;
+    const char *supplied = getenv("PHASE21F_SEED");
+    if (supplied && *supplied) {
+        char *end;
+        unsigned long parsed = strtoul(supplied, &end, 0);
+        ASSERT(*end == '\0' && parsed <= UINT32_MAX);
+        basis = (uint32_t)parsed;
+        if (!basis) basis = 1u;
+    }
     ASSERT(ios27_21f_runtime_create(&s.rt, LOCKS) == 0);
     for (i = 0; i < LOCKS; ++i)
         ASSERT(ios27_21f_mutex_create(s.rt, IOS27_21F_ERRORCHECK, &s.h[i]) == 0);
     for (i = 0; i < THREADS; ++i) {
-        args[i] = (actor){&s, 0x9e3779b9u + i * 0x45d9f3bu};
+        args[i] = (actor){&s, basis + i * 0x45d9f3bu};
         ASSERT(pthread_create(&threads[i], NULL, worker, &args[i]) == 0);
     }
     limit = millis() + 7000;
