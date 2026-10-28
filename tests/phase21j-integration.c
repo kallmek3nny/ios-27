@@ -4,6 +4,7 @@
 #include "ios27/libsystem21e_tls.h"
 #include "ios27/libsystem21j_diagnostics.h"
 #include <errno.h>
+#include <limits.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdint.h>
@@ -175,7 +176,7 @@ static void *worker(void *value) {
     OK(ios27_21j_release(r->diag, a->lease));
     return a;
 }
-static void run_once(unsigned round) {
+static void run_once(unsigned round, uint64_t seed_base) {
     run_state r = {0};
     ios27_21j_snapshot_data info;
     ios27_21c_handle recycled;
@@ -184,7 +185,7 @@ static void run_once(unsigned round) {
     uint64_t cleanups, destructors;
     struct timespec expired;
     const unsigned total = PRODUCERS * ITEMS;
-    r.seed = UINT64_C(0x21a000009f) + round;
+    r.seed = seed_base + round;
     OK(ios27_21b_runtime_create(&r.threads, WORKERS));
     OK(ios27_21c_runtime_create(&r.sync, 4));
     OK(ios27_21e_create(&r.tls));
@@ -306,7 +307,27 @@ static void run_once(unsigned round) {
            (unsigned long long)info.waits, (unsigned long long)info.contention);
 }
 int main(void) {
-    for (unsigned r = 0; r < ROUNDS; ++r) run_once(r);
-    puts("phase21j integration: 60k queued items, cancellation, diagnostics and repeated teardown; PASS");
+    uint64_t seed_base = UINT64_C(0x21a000009f);
+    const char *configured = getenv("PHASE21J_SEED_BASE");
+    if (configured && *configured) {
+        char *end = NULL;
+        unsigned long long supplied;
+        errno = 0;
+        if (*configured == '-') {
+            fprintf(stderr, "phase21j: negative seed rejected\\n");
+            return 2;
+        }
+        supplied = strtoull(configured, &end, 0);
+        if (errno == ERANGE || !end || *end || end == configured ||
+            supplied > UINT64_MAX) {
+            fprintf(stderr, "phase21j: invalid seed base\\n");
+            return 2;
+        }
+        seed_base = (uint64_t)supplied;
+    }
+    for (unsigned r = 0; r < ROUNDS; ++r)
+        run_once(r, seed_base);
+    printf("phase21j integration: 60k queued items, seed %016llx, cancellation and teardown; PASS\\n",
+           (unsigned long long)seed_base);
     return 0;
 }
