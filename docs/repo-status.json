@@ -2,97 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "be616c6d148318ec93ea49d26d5f75817a00ee2e",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/be616c6d148318ec93ea49d26d5f75817a00ee2e",
-    "committed_at": "2026-10-28T17:47:44Z"
+    "sha": "0a7f89465131ba71bf0eaef6bb9e4883f306735d",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/0a7f89465131ba71bf0eaef6bb9e4883f306735d",
+    "committed_at": "2026-10-28T17:50:22Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
+  "open_pull_requests": [],
+  "ahead_branches": [],
+  "recent_merged_pull_requests": [
     {
       "number": 52,
-      "branch": "fix/ignore-stale-squash-merged-branches",
-      "sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
       "title": "fix: exclude stale squash-merged refs from recent branch candidates",
       "url": "https://github.com/kallmek3nny/ios-27/pull/52",
-      "updated_at": "2026-10-28T17:49:34Z",
-      "status": "unmerged: not counted"
-    }
-  ],
-  "ahead_branches": [
-    {
-      "branch": "docs/ios27-capability-progress",
-      "sha": "1de2b7722659da75126787922db1140802db1e66",
-      "ahead_by": 2,
-      "behind_by": 9,
-      "last_commit_at": "2026-10-28T17:00:53Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/docs%2Fios27-capability-progress",
-      "status": "unmerged: not counted"
+      "head_sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
+      "merged_at": "2026-10-28T17:50:23Z"
     },
-    {
-      "branch": "phase17a-native-multisegment-execution",
-      "sha": "75c0722dfe9e9192bdfb9287159cc5da057942cf",
-      "ahead_by": 1,
-      "behind_by": 10,
-      "last_commit_at": "2026-10-28T16:54:12Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase17a-native-multisegment-execution",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase17b-rebased-staging-20261028",
-      "sha": "1a6bee694f394e6af79c03736195857dbe062000",
-      "ahead_by": 10,
-      "behind_by": 11,
-      "last_commit_at": "2026-10-28T16:52:46Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase17b-rebased-staging-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase17b-native-multiimage-20261028",
-      "sha": "1a6bee694f394e6af79c03736195857dbe062000",
-      "ahead_by": 10,
-      "behind_by": 11,
-      "last_commit_at": "2026-10-28T16:52:46Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase17b-native-multiimage-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase17c-mach-multidescriptor-20261028",
-      "sha": "05ca6368b5e01307bf98320e7df95f35cbbd3790",
-      "ahead_by": 13,
-      "behind_by": 12,
-      "last_commit_at": "2026-10-28T16:48:42Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase17c-mach-multidescriptor-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase16c-mach-send-once-forwarding",
-      "sha": "e3bdd06fa2010b007898805700f56a879732acbb",
-      "ahead_by": 1,
-      "behind_by": 13,
-      "last_commit_at": "2026-10-28T16:27:42Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase16c-mach-send-once-forwarding",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase16b-rebased-20261028",
-      "sha": "e81a78fcd024b7705b56638fa1ab347a4bd0aad9",
-      "ahead_by": 6,
-      "behind_by": 15,
-      "last_commit_at": "2026-10-28T16:26:28Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase16b-rebased-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase16b-chained-addend-graph-hardening",
-      "sha": "e81a78fcd024b7705b56638fa1ab347a4bd0aad9",
-      "ahead_by": 6,
-      "behind_by": 15,
-      "last_commit_at": "2026-10-28T16:26:28Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase16b-chained-addend-graph-hardening",
-      "status": "unmerged: not counted"
-    }
-  ],
-  "recent_merged_pull_requests": [
     {
       "number": 51,
       "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
@@ -141,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/45",
       "head_sha": "571ce308e57cecc3d22bab14dbbc09accda986f7",
       "merged_at": "2026-10-28T17:11:54Z"
-    },
-    {
-      "number": 43,
-      "title": "phase17a follow-up: fail-closed segment roles and inert dyld-info compatibility",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/43",
-      "head_sha": "b8939c6177521f75ee9bced6cee2dc466faa7b84",
-      "merged_at": "2026-10-28T17:07:51Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 45,
+    "branches_scanned": 46,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:50:18Z"
+  "observed_at": "2026-10-28T17:51:04Z"
 }
