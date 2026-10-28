@@ -21,6 +21,16 @@ REQUIRED = (
     b"_pthread_cond_signal",
     b"_pthread_rwlock_wrlock",
     b"_pthread_once",
+    b"_pthread_attr_init",
+    b"_pthread_attr_getstacksize",
+    b"_pthread_mutexattr_settype",
+    b"_pthread_condattr_init",
+    b"_pthread_rwlockattr_init",
+    b"_pthread_key_create",
+    b"_pthread_setspecific",
+    b"_pthread_getspecific",
+    b"_pthread_self",
+    b"_pthread_equal",
 )
 
 
