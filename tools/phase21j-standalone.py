@@ -50,15 +50,17 @@ def main():
         architecture, sanitize), flush=True)
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration"):
+            for test in ("diagnostics", "integration", "schedule"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
                     sources.extend(INTEGRATION)
+                if test == "schedule":
+                    sources.append(ROOT / "src/libsystem21j_schedule.c")
                 sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
                 run([str(output)], 150)
-    print("phase21j: native compiler -Werror, {}, diagnostics and integration passed".format(
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration and exact interleaving schedules passed".format(
         "ASan/UBSan" if sanitize else "O0/O2"), flush=True)
 
 if __name__ == "__main__":
