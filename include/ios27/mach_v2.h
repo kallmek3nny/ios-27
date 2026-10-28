@@ -49,6 +49,10 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
  * task-local reply send-once name in received header.remote_port, with
  * MOVE_SEND_ONCE in the received remote disposition bits.
  * Optionally one port descriptor carries COPY_SEND or MOVE_SEND.
+ * On receive, both are normalized to MOVE_SEND, describing the delivered
+ * send right rather than the sender's transfer instruction.
+ * Caller-owned receive buffers must not overlap the length result or this
+ * fixture's internal state; rejected host aliases do not consume messages.
  *
  * No OOL, trailers, port sets, vouchers, send-once descriptor, kernel RPC,
  * background threads or arbitrary host syscall forwarding. Timeout
