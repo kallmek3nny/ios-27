@@ -10,7 +10,7 @@ candidate branches with mapped changes: **2** · audited base: `e84a0f2ca216`
 
 head: `51a314e94bda` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 14 test/fixture files, +2361/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 15 test/fixture files, +2437/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
