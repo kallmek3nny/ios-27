@@ -76,6 +76,36 @@ int main(void) {
     EXPECT(invoke(rt, "_pthread_mutex_destroy", BASE + 64, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_nonexistent", BASE + 64, 0, 0) == IOS27_21I_DARWIN_ENOSYS);
     EXPECT(invoke(rt, "_pthread_mutex_lock", UINT64_MAX, 0, 0) == IOS27_21I_DARWIN_EINVAL);
+    /* Mach-O symbol tables are byte slices, not trusted NUL strings. */
+    {
+        const char valid[] = "_pthread_mutex_init";
+        const char embedded_nul[] = {'_', 'p', '\0', 'x'};
+        const char non_ascii[] = {'_', 'p', (char)0xff};
+        const char unsupported[] = {'_', 'p', 't', 'h', 'r', 'e', 'a', 'd', '_', 'x'};
+        ios27_21i_arm64_registers call = {{BASE + 64u, 0, 0, 4, 5, 6, 7, 8}};
+        ios27_21i_arm64_registers snapshot;
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, valid, sizeof(valid) - 1,
+                                           &call) == 0);
+        EXPECT(call.x[0] == 0 && call.x[3] == 4 && call.x[7] == 8);
+        EXPECT(invoke(rt, "_pthread_mutex_destroy", BASE + 64u, 0, 0) == 0);
+        call.x[0] = BASE + 64u;
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, unsupported, sizeof(unsupported),
+                                           &call) == 0);
+        EXPECT(call.x[0] == IOS27_21I_DARWIN_ENOSYS);
+        snapshot = call;
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, embedded_nul, sizeof(embedded_nul),
+                                           &call) == EINVAL);
+        EXPECT(memcmp(&call, &snapshot, sizeof(call)) == 0);
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, non_ascii, sizeof(non_ascii),
+                                           &call) == EINVAL);
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, valid, SIZE_MAX,
+                                           &call) == EINVAL);
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, valid, 0,
+                                           &call) == EINVAL);
+        EXPECT(ios27_21i_dispatch_arm64_n(rt, NULL, 3,
+                                           &call) == EINVAL);
+        EXPECT(memcmp(&call, &snapshot, sizeof(call)) == 0);
+    }
     EXPECT(memcmp(memory, original, sizeof(memory)) == 0);
     EXPECT(ios27_21i_destroy(rt) == 0);
     puts("phase21i: AArch64 argument decoding, Apple XNU errno in w0, preserved x1-x7, unchanged guest layout passed");
