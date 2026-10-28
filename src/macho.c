@@ -385,6 +385,18 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
             (s->initprot & 6u) == 6u ||
             (s->maxprot & 6u) == 6u)
             return bad(error, error_size, "invalid or W+X protections");
+        /*
+         * Enforce segment roles before mapping, including maxprot. Even
+         * when initially NX, data/linkedit can never become executable;
+         * text and linkedit cannot acquire writable permissions.
+         */
+        if ((strcmp(s->name, "__TEXT") == 0 &&
+             ((s->initprot | s->maxprot) & 2u) != 0u) ||
+            (strcmp(s->name, "__TEXT") != 0 &&
+             ((s->initprot | s->maxprot) & 4u) != 0u) ||
+            (strcmp(s->name, "__LINKEDIT") == 0 &&
+             (s->initprot != 1u || s->maxprot != 1u)))
+            return bad(error, error_size, "unsupported executable segment permissions");
         if (strcmp(s->name, "__PAGEZERO") == 0) {
             if (pagezero_found++ || s->vmaddr != 0u ||
                 s->fileoff != 0u || s->filesize || s->initprot || s->maxprot)

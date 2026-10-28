@@ -18,6 +18,9 @@ static uint32_t rd32(const uint8_t *p) {
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8u) |
            ((uint32_t)p[2] << 16u) | ((uint32_t)p[3] << 24u);
 }
+static uint64_t rd64(const uint8_t *p) {
+    return (uint64_t)rd32(p) | ((uint64_t)rd32(p + 4u) << 32u);
+}
 static void wr32(uint8_t *p, uint32_t v) {
     for (unsigned i = 0u; i < 4u; ++i)
         p[i] = (uint8_t)(v >> (i * 8u));
@@ -217,6 +220,66 @@ int main(int argc, char **argv) {
     assert(rd32(bytes + textsec + 60u) == 0u);
     assert(rd32(bytes + dysymcmd + 28u) == 0u);
     assert(rd32(bytes + maincmd + 8u) == (uint32_t)exe.entry_file_offset);
+
+    /*
+     * A real linked LLVM Mach-O can carry strictly inert legacy dyld info
+     * instead of an inert chained-fixup command. Rewrite only that header
+     * command, leaving all original Clang-produced instructions and
+     * actual loadable segment bytes unchanged.
+     */
+    {
+        const size_t cmd_end = 32u + rd32(bytes + 20u);
+        const size_t old_fix_size = rd32(bytes + fixcmd + 4u);
+        const size_t text_start = (size_t)exe.text_file_offset;
+        const size_t text_bytes = (size_t)exe.text_size;
+        const size_t text_section = textcmd + 72u;
+        const size_t sym_start = rd32(bytes + symcmd + 8u);
+        const uint32_t symbol_count = rd32(bytes + symcmd + 12u);
+        const size_t shifted_main = maincmd > fixcmd ? maincmd + 32u : maincmd;
+        assert(old_fix_size == 16u);
+        assert(fixcmd + old_fix_size <= cmd_end && cmd_end <= text_start);
+        assert(text_bytes <= 4096u && text_start <= 4096u &&
+               text_start + text_bytes + 32u <= 4096u);
+        assert(sym_start <= length && (uint64_t)symbol_count * 16u <=
+               length - sym_start);
+        memcpy(bad, bytes, length);
+        /*
+         * The phase15a fallback has no unused command padding. Move the
+         * original compiler-linked text together by 32 bytes *inside*
+         * its existing RX page before expanding the command table.
+         * Its relative branches keep exactly the same displacements.
+         */
+        memmove(bad + text_start + 32u, bad + text_start, text_bytes);
+        memmove(bad + fixcmd + 48u, bad + fixcmd + old_fix_size,
+                cmd_end - fixcmd - old_fix_size);
+        /* Clear the old chained-fixup offset and size as well: those
+         * two fields otherwise masquerade as legacy rebase metadata. */
+        memset(bad + fixcmd + 8u, 0, 40u);
+        wr32(bad + fixcmd, UINT32_C(0x80000022));
+        wr32(bad + fixcmd + 4u, 48u);
+        wr32(bad + 20u, rd32(bytes + 20u) + 32u);
+        wr64(bad + text_section + 32u, rd64(bytes + text_section + 32u) + 32u);
+        wr32(bad + text_section + 48u, rd32(bytes + text_section + 48u) + 32u);
+        wr64(bad + shifted_main + 8u, rd64(bytes + maincmd + 8u) + 32u);
+        for (uint32_t j = 0u; j < symbol_count; ++j) {
+            const size_t sym = sym_start + (size_t)j * 16u;
+            if ((bad[sym + 4u] & 0x0eu) == 0x0eu && bad[sym + 5u] == 1u)
+                wr64(bad + sym + 8u, rd64(bytes + sym + 8u) + 32u);
+        }
+        assert(ios27_darwin_executable_inspect(bad, length, &exe,
+                                               error, sizeof(error)) == 0);
+        {
+            ios27_macho_info legacy;
+            ios27_exec_layout mapped;
+            assert(ios27_macho_parse(bad, length, &legacy,
+                                     error, sizeof(error)) == 0);
+            assert(ios27_macho_executable_layout(bad, length, &legacy, 4096u,
+                                                 &mapped, error, sizeof(error)) == 0);
+        }
+        wr32(bad + fixcmd + 12u, 1u); /* actual dyld rebase is never inert */
+        rejected(bad, length);
+        memcpy(bad, bytes, length);
+    }
 
     memcpy(bad, bytes, length);
     wr32(bad + 12u, 1u); /* MH_OBJECT is not executable */

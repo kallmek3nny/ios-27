@@ -161,8 +161,9 @@ int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
     size_t cursor = 32u;
     uint64_t textoff = 0u, textlen = 0u;
     uint32_t symbols = 0u;
+    ios27_exec_layout executable_layout;
     unsigned saw_text = 0u, saw_symtab = 0u, saw_dysymtab = 0u;
-    unsigned saw_fixups = 0u, saw_entry_cmd = 0u;
+    unsigned saw_fixups = 0u, saw_legacy_dyld = 0u, saw_entry_cmd = 0u;
     unsigned saw_pagezero = 0u, saw_linkedit = 0u, saw_text_seg = 0u;
     if (!file || !out || size < 32u || size > 2u * 1024u * 1024u)
         return fail(error, cap, "invalid or oversized linked executable");
@@ -174,6 +175,14 @@ int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
         !info.has_main || info.encrypted || info.has_dylibs ||
         !info.segment_count || !info.needs_dyld)
         return fail(error, cap, "requires linked ARM64-all Darwin MH_EXECUTE");
+    /*
+     * The detailed inspector must never approve a linked image that the
+     * actual native loader would reject. This also checks the complete
+     * contents of legacy dyld-info and chained fixup commands first.
+     */
+    if (ios27_macho_executable_layout(file, size, &info, 4096u,
+                                      &executable_layout, error, cap) != 0)
+        return -1;
 
     for (size_t i = 0u; i < info.segment_count; ++i) {
         const ios27_segment *s = &info.segments[i];
@@ -312,6 +321,13 @@ int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
             if (len < 16u ||
                 !within(u32(cmd + 8u), u32(cmd + 12u), size))
                 return fail(error, cap, "out of bounds linkedit data command");
+        } else if (op == UINT32_C(0x80000022) || op == 0x22u) {
+            /* Some LLVM linkers emit empty LC_DYLD_INFO_ONLY instead of
+             * LC_DYLD_CHAINED_FIXUPS. The mandatory layout preflight has
+             * checked that all rebase and bind streams have zero length.
+             */
+            if (saw_legacy_dyld++ || len != 48u)
+                return fail(error, cap, "invalid or duplicate inert dyld info");
         } else if (op == UINT32_C(0x80000028)) {
             if (saw_entry_cmd++ || len != 24u)
                 return fail(error, cap, "invalid LC_MAIN");
@@ -325,7 +341,7 @@ int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
         cursor += len;
     }
     if (saw_text != 1u || saw_symtab != 1u || saw_dysymtab != 1u ||
-        saw_entry_cmd != 1u || saw_fixups != 1u ||
+        saw_entry_cmd != 1u || (saw_fixups + saw_legacy_dyld) != 1u ||
         info.entryoff < textoff || (uint64_t)info.entryoff - textoff > textlen ||
         textlen - ((uint64_t)info.entryoff - textoff) < 4u ||
         ((info.entryoff - textoff) & 3u))
