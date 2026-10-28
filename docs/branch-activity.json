@@ -3,24 +3,24 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 4,
-  "candidate_count": 4,
+  "candidates_checked": 3,
+  "candidate_count": 3,
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "7177adb796fb2fde5eedab0d783a7199a4b292c8",
+      "sha": "bb27c1c58ebf2fc496a314635170fccda122fa23",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 20,
+      "files_checked": 21,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 16,
-          "additions": 2574,
+          "fixture_files": 17,
+          "additions": 2659,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_attach_thread",
@@ -39,6 +39,56 @@
             "src/libsystem21a_abi.c",
             "tests/phase21a-adversarial.c",
             "tests/phase21a-arm64-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "2265f89f62c2d73cfa9dcefc0daa3416776075ed",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "pr_number": 73,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 14,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 9,
+          "additions": 1984,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21d_create",
+            "ios27_21d_destroy",
+            "ios27_21d_once",
+            "ios27_21d_rdlock",
+            "ios27_21d_runtime_create",
+            "ios27_21d_runtime_destroy",
+            "ios27_21d_timedrdlock",
+            "ios27_21d_timedwrlock",
+            "ios27_21d_tryrdlock",
+            "ios27_21d_trywrlock",
+            "ios27_21d_unlock",
+            "ios27_21d_usage"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21d_rw_once.h",
+            "src/libsystem21d_rw_once.c",
+            "tests/phase21d-cancel.c",
+            "tests/phase21d-darwin.c"
+          ]
+        },
+        {
+          "group_id": "objc-host-model",
+          "source_files": 0,
+          "fixture_files": 1,
+          "additions": 47,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase21d-objc.m"
           ]
         }
       ]
@@ -79,106 +129,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "dd0355350547a536f74100402a4b9474beacbef8",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "pr_number": 73,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 14,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 9,
-          "additions": 1984,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21d_create",
-            "ios27_21d_destroy",
-            "ios27_21d_once",
-            "ios27_21d_rdlock",
-            "ios27_21d_runtime_create",
-            "ios27_21d_runtime_destroy",
-            "ios27_21d_timedrdlock",
-            "ios27_21d_timedwrlock",
-            "ios27_21d_tryrdlock",
-            "ios27_21d_trywrlock",
-            "ios27_21d_unlock",
-            "ios27_21d_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21d_rw_once.h",
-            "src/libsystem21d_rw_once.c",
-            "tests/phase21d-cancel.c",
-            "tests/phase21d-darwin.c"
-          ]
-        },
-        {
-          "group_id": "objc-host-model",
-          "source_files": 0,
-          "fixture_files": 1,
-          "additions": 47,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/phase21d-objc.m"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "2265f89f62c2d73cfa9dcefc0daa3416776075ed",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 14,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 9,
-          "additions": 1984,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21d_create",
-            "ios27_21d_destroy",
-            "ios27_21d_once",
-            "ios27_21d_rdlock",
-            "ios27_21d_runtime_create",
-            "ios27_21d_runtime_destroy",
-            "ios27_21d_timedrdlock",
-            "ios27_21d_timedwrlock",
-            "ios27_21d_tryrdlock",
-            "ios27_21d_trywrlock",
-            "ios27_21d_unlock",
-            "ios27_21d_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21d_rw_once.h",
-            "src/libsystem21d_rw_once.c",
-            "tests/phase21d-cancel.c",
-            "tests/phase21d-darwin.c"
-          ]
-        },
-        {
-          "group_id": "objc-host-model",
-          "source_files": 0,
-          "fixture_files": 1,
-          "additions": 47,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/phase21d-objc.m"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -187,7 +137,14 @@
         "branch": "phase21a/darwin-pthread-abi-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
-        "fixture_files": 16,
+        "fixture_files": 17,
+        "ci": "running"
+      },
+      {
+        "branch": "feat/phase21d-fair-rwlock-once",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+        "source_files": 2,
+        "fixture_files": 9,
         "ci": "running"
       },
       {
@@ -196,20 +153,6 @@
         "source_files": 1,
         "fixture_files": 4,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-        "source_files": 2,
-        "fixture_files": 9,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-        "source_files": 2,
-        "fixture_files": 9,
-        "ci": "not_checked"
       }
     ],
     "libsystem-pthread": [
@@ -227,14 +170,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-        "source_files": 0,
-        "fixture_files": 1,
-        "ci": "not_checked"
+        "ci": "running"
       }
     ]
   },
@@ -550,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:20:01Z"
+  "observed_at": "2026-10-28T20:20:25Z"
 }
