@@ -11,7 +11,7 @@
       "sha": "b766e4a0e23550f49614799883c1ffeb2ff580c3",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 12,
       "possibly_truncated": false,
@@ -87,7 +87,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 8,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -376,5 +376,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:06:15Z"
+  "observed_at": "2026-10-28T20:06:50Z"
 }
