@@ -2,10 +2,10 @@ name: capability progress
 on:
   push:
     branches: [main]
-    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
+    paths: [tools/refresh_repo_status.py, tools/scan_branch_activity.py, docs/repo-status.json, docs/branch-activity.json, docs/BRANCHES.md, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
   pull_request:
     branches: [main]
-    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
+    paths: [tools/refresh_repo_status.py, tools/scan_branch_activity.py, docs/repo-status.json, docs/branch-activity.json, docs/BRANCHES.md, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
 permissions:
   contents: read
 jobs:
@@ -17,6 +17,7 @@ jobs:
       - name: validate documented milestone gates and generated dashboard
         run: |
           timeout 15s python3 tools/refresh_repo_status.py --self-test
+          timeout 15s python3 tools/scan_branch_activity.py --self-test
           timeout 15s python3 tools/progress.py --check
           timeout 15s node --check tools/compat_blocks.cjs
           timeout 15s node tools/compat_blocks.cjs --check

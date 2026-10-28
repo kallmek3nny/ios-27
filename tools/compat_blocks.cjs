@@ -1,7 +1,7 @@
 "use strict";
 const fs=require("node:fs");
 const path=require("node:path");
-const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
+const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activity){
   const width=760, margin=18, mapW=724;
   const panels=data.panels.map(panel=>{
     const groups=gather(panel.id);
@@ -16,7 +16,9 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
     '<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3">ios-27 / compatibility</text>',
     '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e">component area = tracked targets · color = test evidence</text>'
   ];
-  svg.push('<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e">main '+esc(live && live.main_source ? live.main_source.sha.slice(0,8) : "unknown")+' · '+(live && Array.isArray(live.open_pull_requests) ? live.open_pull_requests.length : 0)+' incoming prs</text>');
+  const pending = activity && activity.groups ? activity.groups : {};
+  const pendingCount = activity ? activity.candidate_count : 0;
+  svg.push('<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#a371f7">'+pendingCount+' source-diff candidate(s) · not verified</text>');
   const rect=(x,y,w,h,color,r)=>{
     if(![x,y,w,h].every(Number.isFinite)||w<0||h<0)throw Error("invalid rectangle");
     return '<rect x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="'+(r||0)+'" fill="'+color+'"/>';
@@ -86,7 +88,8 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
       area+=box.w*box.h;
       if(box.x<margin-0.01||box.y<mapY-0.01||box.x+box.w>margin+mapW+0.01||box.y+box.h>mapY+p.h+0.01)throw Error("component bounds failed");
       const g=box.group,x=box.x+2,y0=box.y+2,w=Math.max(0,box.w-4),h=Math.max(0,box.h-4);
-      svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' targets · '+g.ceiling+' ceiling')+'</title>');
+      const wip = Array.isArray(pending[g.id]) ? pending[g.id].length : 0;
+      svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' tracked targets · '+g.ceiling+' ceiling · '+wip+' incoming branches, not counted as compatibility')+'</title>');
       svg.push(rect(x,y0,w,h,"#161b22",3));
       const labelH=(w>82&&h>43)?29:0;
       const iw=Math.max(0,w-4),ih=Math.max(0,h-4-labelH);
@@ -105,6 +108,10 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
       }
       if(index!==g.targets.length)throw Error("target count mismatch "+g.id);
       rendered+=index;
+      if(wip){
+        svg.push('<rect x="'+x.toFixed(2)+'" y="'+y0.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>');
+        if(w>110)svg.push('<text x="'+(x+w-7).toFixed(2)+'" y="'+(y0+h-7).toFixed(2)+'" text-anchor="end" font-family="sans-serif" font-size="11" fill="#c9a7ff">'+wip+' WIP branch'+(wip===1?'':'es')+'</text>');
+      }
       if(labelH){
         const evidence=g.targets.filter(t=>t.status==="native-fixture"||t.status==="synthetic").length;
         const showPercent=w>=155;
@@ -150,7 +157,7 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
   themed.push('</svg>');
   return {svg:themed,totals};
 };
-const render = function render(data,live){
+const render = function render(data,live,activity){
   "use strict";
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const colors={"native-fixture":"#3fb950","synthetic":"#d29922","missing":"#30363d","excluded":"#b85c64"};
@@ -166,7 +173,7 @@ const render = function render(data,live){
     for(const t of g.targets){if(!t.name||seen.has(t.name)||!(t.status in names))throw Error("invalid target "+g.id+" "+t.name);seen.add(t.name);}
     if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")&&(!g.evidence||!(g.test||g.standalone_test)))throw Error("unproven status "+g.id);
   }
-  const {svg,totals}=makeMap(data,colors,names,esc,count,gather,live);
+  const {svg,totals}=makeMap(data,colors,names,esc,count,gather,live,activity);
   const md=[
     "# ios-27 | API/function block map and feasibility ceilings","",
     "![per-function compatibility block map](blocks.svg)","",
@@ -174,7 +181,7 @@ const render = function render(data,live){
       +"green = native ARM64 test fixture only; amber = parser, bounded synthetic Mach model or syscall interpreter probe; "
       +"grey = not implemented; red = expressly excluded by userspace-only policy. "
       +"No color means that a real Apple framework or application is runnable.","",
-    "[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md) · [Audited ceilings](CEILINGS.md) · [Live provenance](repo-status.json)","",
+    "[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md) · [Audited ceilings](CEILINGS.md) · [Incoming agent work](BRANCHES.md)","",
     "The displayed percentages are **sample evidence coverage**: native fixtures plus synthetic probes divided by explicitly tracked targets, not real iOS framework compatibility.","",
     "## counted target samples","",
     "| layer | native fixtures | synthetic/probe | unimplemented | excluded | sampled targets |",
@@ -192,6 +199,13 @@ const render = function render(data,live){
       const n=Number(p.number);
       if(Number.isSafeInteger(n)&&n>0)md.push("- [PR #"+n+"](https://github.com/kallmek3nny/ios-27/pull/"+n+") · incoming, not counted");
     }
+  }
+  md.push("","## parsed branch diffs (provisional, not merged)","",
+    "the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.","",
+    "[Live branch diff inventory and CI evidence](BRANCHES.md) · "+(activity?activity.candidate_count:0)+" active candidate(s) with recognized code changes.","");
+  for(const g of data.groups){
+    const work=activity&&activity.groups?activity.groups[g.id]:null;
+    if(Array.isArray(work)&&work.length)md.push("- **"+g.label+"**: "+work.length+" unmerged candidate branch(es), not counted");
   }
   md.push("","## realistic ceilings for every tracked area","","[Why these ceilings are not numerical guarantees](CEILINGS.md).","");
   for(const item of totals){
@@ -218,7 +232,7 @@ const render = function render(data,live){
     '</head><body><h1>ios-27 / block compatibility explorer</h1>',
     '<p class="lead">anyps5-style visualization for deliberately enumerated target api functions and contracts. representative target sample, not all iOS exports. native means a restricted ARM64 test fixture; synthetic means a limited parser/probe/model. neither proves a working Apple app. no exact completion ceiling can be derived for Apple framework layers.</p>',
     '<img class="map" src="blocks.svg" alt="system libraries and iOS runtime target block map">',
-    '<p class="lead">expand any library or subsystem to inspect every tracked function, its current status and the qualitative feasibility ceiling. <a href="BLOCKS.md">counting rules and roadmap</a></p>',
+    '<p class="lead">purple dashed outlines mark active unmerged source diffs, not validated API translations. <a href="BRANCHES.md">inspect agent branches and changed files</a>. expand components for details.</p>',
     '<div class="panels">'
   ];
   for(const it of totals){
@@ -226,7 +240,12 @@ const render = function render(data,live){
     html.push('<p class="stats">'+it.total+' targets · '+it.c["native-fixture"]+' native · '+it.c.synthetic+' synthetic · '+it.c.missing+' missing · '+it.c.excluded+' excluded</p>');
     for(const g of it.groups){
       const c=count(g.targets);
-      html.push('<details class="group"><summary><strong>'+esc(g.label)+'</strong> <span class="tag">'+esc(g.ceiling)+' ceiling</span> <span class="stats">'+c["native-fixture"]+' native, '+c.synthetic+' synthetic, '+g.targets.length+' targets</span></summary>');
+      const work=activity && activity.groups && Array.isArray(activity.groups[g.id]) ? activity.groups[g.id] : [];
+      html.push('<details class="group"><summary><strong>'+esc(g.label)+'</strong> <span class="tag">'+esc(g.ceiling)+' ceiling</span> <span class="stats">'+c["native-fixture"]+' native, '+c.synthetic+' synthetic, '+g.targets.length+' targets</span>'+(work.length?' <span style="color:#a371f7">'+work.length+' incoming</span>':'')+'</summary>');
+      for(const candidate of work){
+        const href=String(candidate.url);
+        if(href.startsWith('https://github.com/kallmek3nny/ios-27/'))html.push('<p class="description"><a href="'+esc(href)+'">'+esc(candidate.branch)+'</a> · '+candidate.source_files+' source, '+candidate.fixture_files+' fixture files · CI: '+esc(candidate.ci)+' · not yet merged</p>');
+      }
       html.push('<p>'+esc(g.note)+'</p>');
       if(g.evidence)html.push('<p>evidence: <a href="../'+esc(g.evidence)+'">'+esc(g.evidence)+'</a> · test: '+esc(g.test)+'</p>');
       html.push('<div class="chips">');
@@ -236,7 +255,40 @@ const render = function render(data,live){
     html.push('</section>');
   }
   html.push('</div><p class="lead">snapshot '+esc(data.as_of)+'. no real Apple frameworks, SpringBoard, or UI demonstrated. <a href="PROGRESS.md">research milestone progress</a>.</p></body></html>');
-  return {svg:svg.join("\n")+"\n",html:html.join("\n")+"\n",md:md.join("\n")+"\n",counts:totals.map(x=>({id:x.panel.id,total:x.total,...x.c}))};
+  const branches=[
+    "# ios-27 | live agent branch source diffs","",
+    "![proportional API blocks with purple WIP markers](blocks.svg)","",
+    "**purple outlines = changed source or test files on an unmerged branch.** "+
+    "these are *provisional change signals*, not implementations that passed an Apple ABI conformance test. "+
+    "the verified green/amber counts remain strictly controlled by reviewed main catalogs.","",
+    "candidate branches with mapped changes: **"+(activity?activity.candidate_count:0)+"** · "+
+    "audited base: `"+(activity?activity.main_source_sha.slice(0,12):"unknown")+"`",""
+  ];
+  if(!activity||!activity.candidates.length){
+    branches.push("no unmerged branches currently have source or test changes matching the catalog's known subsystem paths. this does **not** mean older work is absent from main.","");
+  } else for(const cand of activity.candidates){
+    const branch=String(cand.branch).replace(/[^a-zA-Z0-9_./-]/g,"");
+    const target=cand.pr_number?"https://github.com/kallmek3nny/ios-27/pull/"+Number(cand.pr_number):"https://github.com/kallmek3nny/ios-27/tree/"+encodeURIComponent(branch);
+    branches.push("### ["+branch+"]("+target+")","",
+      "head: `"+cand.sha.slice(0,12)+"` · ci: **"+cand.ci+"** · unmerged, not credited.","");
+    for(const item of cand.groups){
+      const group=data.groups.find(g=>g.id===item.group_id);
+      const label=group?group.label:item.group_id;
+      branches.push("- **"+label+"**: "+item.source_files+" source files, "+item.fixture_files+
+        " test/fixture files, +"+item.additions+"/-"+item.deletions+" lines");
+      if(item.symbols_preview.length)branches.push("  - candidate declarations: `"+item.symbols_preview.join("`, `")+"`");
+    }
+    branches.push("");
+  }
+  branches.push("## verification policy","",
+    "changed paths and added declarations are parsed from GitHub PR file patches or main-vs-branch diffs, not commit messages. "+
+    "CI status is a hint only. staged branches may fail integration, omit needed tests, or duplicate already merged work. "+
+    "only separately reviewed catalog updates from merged main can change confirmed target statuses.","",
+    "Refresh: `timeout 150s python3 tools/scan_branch_activity.py`, then `timeout 15s node tools/compat_blocks.cjs`. "+
+    "a scheduled workflow checks for new agent work at least every 15 minutes, subject to GitHub Actions scheduling delays.","");
+  return {svg:svg.join("\n")+"\n",html:html.join("\n")+"\n",md:md.join("\n")+"\n",
+          branches:branches.join("\n")+"\n",
+          counts:totals.map(x=>({id:x.panel.id,total:x.total,...x.c}))};
 };
 const root=path.resolve(__dirname,"..");
 const raw=fs.readFileSync(path.join(root,"docs/compat-targets.json"),"utf8");
@@ -251,8 +303,11 @@ for(const g of data.groups){if(g.targets.some(t=>t.status==="native-fixture"||t.
 const liveFile=path.join(root,"docs/repo-status.json");
 const live=fs.existsSync(liveFile)?JSON.parse(fs.readFileSync(liveFile,"utf8")):null;
 if(live&&(live.schema!==1||!live.main_source||!/^[0-9a-f]{40}$/.test(live.main_source.sha)||!Array.isArray(live.open_pull_requests)))throw Error("invalid repo provenance");
-const result=render(data,live);
-const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md]];
+const activityPath=path.join(root,"docs/branch-activity.json");
+const activity=JSON.parse(fs.readFileSync(activityPath,"utf8"));
+if(activity.schema!==1||!Array.isArray(activity.candidates)||!activity.groups||typeof activity.candidate_count!=="number"||!/^[a-f0-9]{40}$/.test(activity.main_source_sha))throw Error("invalid candidate branch snapshot");
+const result=render(data,live,activity);
+const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md],["docs/BRANCHES.md",result.branches]];
 if(process.argv.includes("--check")){const stale=files.filter(([name,content])=>{const file=path.join(root,name);return !fs.existsSync(file)||fs.readFileSync(file,"utf8")!==content;}).map(([name])=>name);if(stale.length){process.stderr.write("stale block outputs: "+stale.join(", ")+"\n");process.exit(1);}}
 else {for(const [name,content] of files)fs.writeFileSync(path.join(root,name),content,"utf8");}
 process.stdout.write("compat blocks verified: "+result.counts.map(c=>c.id+" "+c.total).join(", ")+"\n");

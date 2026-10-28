@@ -4,7 +4,7 @@
 
 **how to read:** each block is one explicitly enumerated **sample target**, not every function exported by iOS. green = native ARM64 test fixture only; amber = parser, bounded synthetic Mach model or syscall interpreter probe; grey = not implemented; red = expressly excluded by userspace-only policy. No color means that a real Apple framework or application is runnable.
 
-[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md) · [Audited ceilings](CEILINGS.md) · [Live provenance](repo-status.json)
+[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md) · [Audited ceilings](CEILINGS.md) · [Incoming agent work](BRANCHES.md)
 
 The displayed percentages are **sample evidence coverage**: native fixtures plus synthetic probes divided by explicitly tracked targets, not real iOS framework compatibility.
 
@@ -50,6 +50,13 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 main source: `7c5b48525b13`
 
 - [PR #60](https://github.com/kallmek3nny/ios-27/pull/60) · incoming, not counted
+
+## parsed branch diffs (provisional, not merged)
+
+the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
+
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 0 active candidate(s) with recognized code changes.
+
 
 ## realistic ceilings for every tracked area
 
