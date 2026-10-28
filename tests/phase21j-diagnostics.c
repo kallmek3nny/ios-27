@@ -61,6 +61,7 @@ static void faults_and_overflow(void) {
 typedef struct { ios27_21j_diagnostics *d; unsigned actor; } churn_arg;
 static _Atomic unsigned created;
 static void *churn(void *arg) {
+    static const uint64_t levels[5] = {1, 5000, 50000, 500000, 5000000};
     churn_arg *a = arg;
     for (unsigned i = 0; i < LOOPS; ++i) {
         ios27_21j_lease handle;
@@ -71,8 +72,8 @@ static void *churn(void *arg) {
         }
         CHECK(rc == 0);
         CHECK(ios27_21j_probe(a->d, 11, a->actor, i) == 0);
-        CHECK(ios27_21j_record(a->d, IOS27_21J_CONTENTION,
-                                a->actor, 0, i) == 0);
+        CHECK(ios27_21j_note_contention(a->d, a->actor,
+                                         levels[i % 5u]) == 0);
         CHECK(ios27_21j_release(a->d, handle) == 0);
         CHECK(ios27_21j_release(a->d, handle) == EINVAL);
         atomic_fetch_add(&created, 1u);
@@ -110,6 +111,10 @@ static void races_and_quota(void) {
     CHECK(info.leases_created == ACTORS * LOOPS);
     CHECK(info.leases_created == info.leases_released);
     CHECK(info.contention == ACTORS * LOOPS);
+    CHECK(info.contention_ns_max == 5000000u);
+    CHECK(info.contention_ns_total == UINT64_C(5555001) * (ACTORS * LOOPS / 5u));
+    for (unsigned bucket = 0; bucket < 5; ++bucket)
+        CHECK(info.contention_ns_buckets[bucket] == ACTORS * LOOPS / 5u);
     for (unsigned i = 0; i < RACES; ++i) {
         ios27_21j_lease h;
         pthread_barrier_t barrier;
