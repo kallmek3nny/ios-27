@@ -35,6 +35,7 @@ _Static_assert(_Alignof(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
 #define IOS27_21A_ONCE_STATIC_SIG UINT64_C(0x30b1bcba)
 #define IOS27_21A_MAX_ONCE_CALLBACKS 32u
 #define IOS27_21A_MAX_BOUND_THREADS 64u
+#define IOS27_21A_MAX_KEYS 64u
 #define IOS27_21A_MAX_OBJECTS 128u
 #define IOS27_21A_MAX_REGIONS 8u
 #define IOS27_21A_READ 1u
