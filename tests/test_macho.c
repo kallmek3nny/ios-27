@@ -466,6 +466,54 @@ static void phase17a_section_layout_tests(void) {
         assert(value == 42);
     }
 #endif
+    /* Two independently page-protected executable segments. Entry offset
+     * is linked relative to __TEXT but executes out of __TEXT_EXEC. */
+    memset(b + ro + 8u, 0, 16u);
+    memcpy(b + ro + 8u, "__TEXT_EXEC", 11u);
+    memset(b + rosec + 16u, 0, 16u);
+    memcpy(b + rosec + 16u, "__TEXT_EXEC", 11u);
+    put32(b + ro + 56u, 5u);
+    put32(b + ro + 60u, 5u);
+    put32(b + rosec + 64u, UINT32_C(0x80000400));
+    put64(b + maincmd + 8u, 0x4000u);
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) == 0);
+    assert(layout.entry_vmaddr == base + 0x4000u);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         16384u, &layout, err, sizeof(err)) == 0);
+    /* A second RX segment really executes on ARM64 hardware, independent
+     * of the initial __TEXT code segment and the host page granule. */
+    put64(b + rosec + 40u, 8u);
+    put32(b + 0x4000u, UINT32_C(0x52800540)); /* mov w0,#42 */
+    put32(b + 0x4004u, UINT32_C(0xd65f03c0)); /* ret */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+    {
+        int value = -1;
+        assert(ios27_run_freestanding(b, sizeof(b), &image,
+                                      &value, err, sizeof(err)) == 0);
+        assert(value == 42);
+    }
+#endif
+    put64(b + rosec + 40u, 4u);
+    put32(b + 0x4000u, 37u);
+    put32(b + 0x4004u, 0u);
+    put32(b + ro + 60u, 7u);
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) != 0);
+    assert(layout.span == 0u);
+    put32(b + ro + 60u, 5u);
+    memset(b + ro + 8u, 0, 16u);
+    memcpy(b + ro + 8u, "__DATA_CONST", 12u);
+    memset(b + rosec + 16u, 0, 16u);
+    memcpy(b + rosec + 16u, "__DATA_CONST", 12u);
+    put32(b + ro + 56u, 1u);
+    put32(b + ro + 60u, 1u);
+    put32(b + rosec + 64u, 0u);
+    put64(b + maincmd + 8u, 1024u);
+
     put32(b + rosec + 48u, 0x4004u); /* incorrect file/VM correspondence */
     assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
     assert(ios27_macho_executable_layout(b, sizeof(b), &image,

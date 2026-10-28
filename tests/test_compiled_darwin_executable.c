@@ -173,6 +173,103 @@ static void phase17a_compiler_linked_test(void) {
 #endif
 }
 
+
+/* A second original Clang executable, linked as MH_EXECUTE by real LLVM
+ * ld64.lld or the narrow verified fallback, checks actual Darwin main
+ * registers, isolated writable stack, argv/envp copies and fresh lifecycle. */
+static void phase18a_compiler_linked_test(void) {
+#if defined(__linux__)
+    int status = system("timeout 75s python3 ../tools/phase18a-build.py "
+                        "phase18a-startup");
+    uint8_t *bytes, *mutated;
+    size_t length, maincmd, textcmd;
+    ios27_macho_info info;
+    ios27_exec_layout layout;
+    ios27_darwin_executable exe;
+    char error[160] = {0};
+    int result = 777;
+    const char *args[] = {"ios27", "oak", "pine"};
+    const char *env[] = {"MODE=test", NULL};
+    assert(status >= 0 && WIFEXITED(status) && WEXITSTATUS(status) == 0);
+    bytes = read_file("phase18a-startup", &length);
+    mutated = malloc(length);
+    assert(mutated);
+    assert(ios27_darwin_executable_inspect(bytes, length, &exe,
+                                           error, sizeof(error)) == 0);
+    assert(ios27_macho_parse(bytes, length, &info,
+                             error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(bytes, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(bytes, length, &info, 16384u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(info.segment_count >= 5u);
+    maincmd = command(bytes, length, UINT32_C(0x80000028), NULL);
+    textcmd = command(bytes, length, 0x19u, "__TEXT");
+    memcpy(mutated, bytes, length);
+    wr64(mutated + maincmd + 16u, 131072u);
+    assert(ios27_macho_parse(mutated, length, &info,
+                             error, sizeof(error)) == 0);
+    assert(info.stacksize == 131072u);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 16384u,
+                                         &layout, error, sizeof(error)) == 0);
+#if defined(__aarch64__)
+    assert(ios27_run_executable_argv(mutated, length, &info, 3, args, env,
+                                     &result, error, sizeof(error)) == 0);
+    assert(result == 42);
+    assert(strcmp(args[1], "oak") == 0 && strcmp(env[0], "MODE=test") == 0);
+    result = 777;
+    assert(ios27_run_executable_argv(mutated, length, &info, 3, args, env,
+                                     &result, error, sizeof(error)) == 0);
+    assert(result == 42); /* no state or mappings persist across calls */
+    result = 777;
+    assert(ios27_run_executable_argv(mutated, length, &info, 0, NULL, NULL,
+                                     &result, error, sizeof(error)) == 0);
+    assert(result == 101); /* entry genuinely receives the ABI arguments */
+    result = 777;
+    assert(ios27_run_executable_argv(mutated, length, &info, -1, args, env,
+                                     &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+    assert(ios27_run_executable_argv(mutated, length, &info, 129, args, env,
+                                     &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+    assert(ios27_run_executable_argv(mutated, length, &info, 3, NULL, env,
+                                     &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+#else
+    assert(ios27_run_executable_argv(mutated, length, &info, 3, args, env,
+                                     &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+#endif
+    /* Reject oversized process stacks on both architectures at preflight. */
+    wr64(mutated + maincmd + 16u, UINT64_C(8) * 1024u * 1024u + 1u);
+    assert(ios27_macho_parse(mutated, length, &info,
+                             error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 16384u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u);
+    assert(ios27_run_executable_argv(mutated, length, &info, 3, args, env,
+                                     &result, error, sizeof(error)) != 0);
+#if defined(__aarch64__)
+    assert(result == 777);
+#endif
+    memcpy(mutated, bytes, length);
+    wr32(mutated + textcmd + 60u, 7u);
+    assert(ios27_macho_parse(mutated, length, &info,
+                             error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u);
+    free(mutated);
+    free(bytes);
+    puts("phase18a native Darwin main/argv/envp/guest stack tests passed");
+#endif
+}
+
 int main(int argc, char **argv) {
     uint8_t *bytes, *bad;
     size_t length, textcmd, editcmd, pagecmd, maincmd;
@@ -364,6 +461,7 @@ int main(int argc, char **argv) {
     free(bad);
     free(bytes);
     phase17a_compiler_linked_test();
+    phase18a_compiler_linked_test();
     puts("genuine Clang+LLD Darwin MH_EXECUTE fixture passed");
     return 0;
 }
