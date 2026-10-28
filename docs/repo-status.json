@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "b1475c31bb571a285cb63186c4bb0722e29eb6c4",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:18:35Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 78,
       "branch": "phase21f-fifo-mutex-20261028",
       "sha": "e550b043ddba5c3f82a7ddc773dc6c6556f0ff92",
       "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
       "updated_at": "2026-10-28T21:18:09Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "ea6dffd970b3e4fedce22d98c6bfa50892c0f18d",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:17:48Z",
       "status": "unmerged: not counted"
     },
     {
@@ -128,5 +128,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:18:28Z"
+  "observed_at": "2026-10-28T21:18:57Z"
 }
