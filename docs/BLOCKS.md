@@ -56,9 +56,9 @@ main source: `2a1f8af8f814`
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 2 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 3 active candidate(s) with recognized code changes.
 
-- **libSystem guest model (not dylib)**: 2 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 3 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 

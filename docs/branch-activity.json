@@ -3,12 +3,12 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2a1f8af8f814fce750dab39a1baea2695acdc256",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 2,
-  "candidate_count": 2,
+  "candidates_checked": 3,
+  "candidate_count": 3,
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "1a7dd2dc67ebae335354b1e5c6333cdbab6bf32e",
+      "sha": "c3324f7b05955b1b77b1a05c6b904273eaafddac",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 11,
-          "additions": 1983,
+          "additions": 1997,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_attach_thread",
@@ -81,6 +81,32 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase21e-cancellation-ownership-20261028",
+      "sha": "bed479092c72f102aa92dbd9acef0e9aa78b1aa0",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-cancellation-ownership-20261028",
+      "pr_number": null,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 16,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 7,
+          "additions": 452,
+          "deletions": 15,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/libsystem21e_tls.h",
+            "src/libsystem21e_tls.c",
+            "tests/phase21e-allocation-rollback.c",
+            "tests/phase21e-cancel-races.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -98,6 +124,13 @@
         "source_files": 2,
         "fixture_files": 6,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21e-cancellation-ownership-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-cancellation-ownership-20261028",
+        "source_files": 2,
+        "fixture_files": 7,
+        "ci": "running"
       }
     ]
   },
@@ -379,5 +412,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:12:16Z"
+  "observed_at": "2026-10-28T20:12:40Z"
 }
