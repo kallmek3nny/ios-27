@@ -452,6 +452,16 @@ static void check_phase19b_transitive_rpath(void) {
     ios27_images_unload(images);
     assert(memcmp(original, top, IMAGE_SIZE) == 0);
     images = NULL;
+    /* Reverse/shuffled declaration order must still resolve the main's
+     * full transitive runpath closure before disconnected catalog entries. */
+    const char *reordered_paths[] = {paths[2], paths[1], paths[0]};
+    ios27_image_spec reversed[] = {specs[2], specs[1], specs[0]};
+    assert(!ios27_images_load_with_paths(reversed, 3u, reordered_paths,
+                                         paths[0], &images, error, sizeof(error)));
+    assert(!ios27_images_initialization_image(images, 0u, &name));
+    assert(!strcmp(name, "leaf.dylib"));
+    ios27_images_unload(images);
+    images = NULL;
     /* A missing leaf must reject the whole graph, even if the top was found. */
     paths[2] = "/App/Other/Leaf";
     assert(ios27_images_load_with_paths(specs, 3u, paths, paths[0],

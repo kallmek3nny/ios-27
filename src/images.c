@@ -465,10 +465,11 @@ static int resolve_guest_dependencies(ios27_images *images,
     /* A catalog of dylibs without an MH_EXECUTE root is valid as well.
      * First resolve the main's closure, then remaining independent roots. */
     for (size_t root = 0u; root <= images->count; ++root) {
-        if (queue_pos == queue_count && root < images->count &&
-            !contexts[root].queued) {
-            queue[queue_count++] = root;
-            contexts[root].queued = 1u;
+        /* Iteration zero exhausts the main's closure. Subsequent passes
+         * visit every disconnected catalog node regardless of input order. */
+        if (root > 0u && !contexts[root - 1u].queued) {
+            queue[queue_count++] = root - 1u;
+            contexts[root - 1u].queued = 1u;
         }
         while (queue_pos < queue_count) {
             size_t i = queue[queue_pos++];
