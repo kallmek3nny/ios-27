@@ -62,3 +62,11 @@ or idle padding are used. This is independent of the normal quick CI gate.
 The capacity test compiles a 16-waiter bridge to verify the 17th waiter
 receives `EAGAIN`, then cancels one queued waiter and verifies quota reuse.
 The production default remains 1,024 concurrent waiter nodes.
+
+For longer work sessions, the bounded no-idle orchestrator is available:
+
+`timeout 2700s python3 tools/phase21f-endurance.py --duration 2400`
+
+It alternates gcc/clang campaigns, verifies each child's success, and records
+actual UTC start/end timestamps plus elapsed test duration. Each wave and the
+entire session are hard-bounded. No reported duration is estimated or padded.
