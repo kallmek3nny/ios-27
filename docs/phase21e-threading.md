@@ -33,7 +33,8 @@ or changes to shared CMake or existing agents' files.
    `ECANCELED`. Cancellation requests never terminate a thread asynchronously.
    Exit invalidates outstanding tokens, protecting against reused slots.
 3. **Scoped cleanup and teardown**: strictly nested, capped 64-entry cleanup
-   stacks; unique non-repeating scope IDs; LIFO pop/unwind; callback ownership
+   stacks; process-unique non-repeating scope IDs (even after same-thread
+   detach/reattach and cross-runtime recycling); LIFO pop/unwind; callback ownership
    transferred off-stack before invocation. Cleanup execution pins its owning
    thread context until callback return; attempts to detach or recursively
    drain the same stack are rejected with `EBUSY`. Callbacks cannot extend
@@ -46,12 +47,23 @@ or changes to shared CMake or existing agents' files.
    in 128 batches, 8,193 destructor invocations, 128 simultaneous cancellation
    registrations, reentrant/recursive destructor exercises, nested cleanup,
    invalid ownership/handles, repeated teardown, exhaustion, stale handles and
-   deletion during in-flight destructor. Additional compiled tests cover 1,000
-   separate runtime creations, 768 cross-key destructor reentries, 768 threads
+   deletion during in-flight destructor. Additional compiled tests cover 7,144 runtime creations (including 6,144 from 24 simultaneous
+   creators), 768 cross-key destructor reentries, 768 threads
    each managing three independent runtimes, and 4,000 key generations with
    at least one synchronized reader per generation amid concurrent deletion.
+   Additional cancellation-race verification runs 1,280 workers and 720,000
+   competing cancellation requests across 80 rounds, with pending cancellation
+   surviving disabled intervals; resource ownership verification checks
+   5,122 allocations (including manual reclamation after TLS replacement and
+   key deletion), 3,072 LIFO handlers and 2,048 TLS destructor calls,
+   under both automatic and manual detach. A dedicated allocation-fault
+   injection fixture verifies `ENOMEM` rollback across create, attach,
+   TLS assignment, cancellation registration and cleanup registration.
    Run both `-O0` and `-O2` with `-Werror`,
    optional ASan+UBSan, plus a genuine SDK-free Clang ARM64 Mach-O object.
+   The object inspection checks CPU/filetype, bounded Mach-O load commands,
+   symbol table bounds and seven actual unresolved API callsites, not just
+   a magic-number prefix. The real Darwin ABI remains out of scope.
 
 ## standalone verification
 
@@ -88,6 +100,9 @@ CI matrix results must be checked on the PR's **unchanged head SHA**.
   cleanup registration and same-thread detach are rejected while a callback
   is executing, avoiding reentrant teardown and freed-context reuse.
   Nonlocal control transfers are unsupported.
+- Cleanup scopes use a separate process-wide increasing 64-bit sequence.
+  Concurrent runtime and thread context creation cannot cause scope reuse;
+  stale scopes return `EINVAL` rather than removing a newer handler.
 - Every key/cancellation handle contains a runtime identity that does not repeat
   until the process-wide 64-bit identity sequence is exhausted. These handles
   are *not* binary compatible with Darwin opaque pthread handles.
@@ -101,6 +116,8 @@ CI matrix results must be checked on the PR's **unchanged head SHA**.
 
 Initial engineering began at 2026-10-28 19:45 UTC. The first isolated PR
 (#72) merged at 19:56:54 UTC after roughly twelve minutes of engineering
-and CI. This follow-up fixes independently discovered lifetime and cross-
-runtime handle hazards. Report its completion timestamp separately; initial
-work plus follow-up work does not by itself establish a sixty-minute session.
+and CI. The second PR (#74) merged at 20:05:34 UTC, after additional scope/lifetime
+hardening and x86_64+ARM64 CI. A third batch targets stronger cancellation
+races, allocation rollback, cross-context cleanup identity and resource-ownership
+verification. Do not mistake cumulative test counts or elapsed waits for an
+actual sixty-minute active engineering session.

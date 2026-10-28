@@ -47,7 +47,7 @@ int ios27_21e_cancel_setstate(ios27_21e_runtime *runtime,
                               enum ios27_21e_cancel_state *previous);
 int ios27_21e_cancel_checkpoint(ios27_21e_runtime *runtime);
 
-/* Strictly nested stack, nonzero monotonically increasing scope IDs. Pop
+/* Strictly nested stack, process-unique nonzero increasing scope IDs. Pop
  * removes ownership BEFORE optional callback invocation. */
 int ios27_21e_cleanup_push(ios27_21e_runtime *runtime,
                            ios27_21e_callback handler, void *argument,

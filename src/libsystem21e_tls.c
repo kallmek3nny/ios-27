@@ -33,7 +33,6 @@ struct context {
     uint32_t generations[IOS27_21E_MAX_KEYS];
     struct cleanup stack[IOS27_21E_MAX_CLEANUPS];
     size_t depth;
-    uint64_t next_scope;
     uint32_t token_slot;
     uint32_t token_generation;
     enum ios27_21e_cancel_state state;
@@ -55,6 +54,19 @@ struct ios27_21e_runtime {
 
 /* Never recycle a runtime identity during this process lifetime. */
 static atomic_uint_fast64_t runtime_serial = ATOMIC_VAR_INIT(0);
+/* Cleanup scope IDs also survive context retirement and runtime recreation.
+ * A stale scope can never accidentally pop a new handler. */
+static atomic_uint_fast64_t cleanup_scope_serial = ATOMIC_VAR_INIT(0);
+static int mint_scope_id(uint64_t *out) {
+    uint_fast64_t old = atomic_load(&cleanup_scope_serial);
+    for (;;) {
+        if (old == UINT64_MAX) return EOVERFLOW;
+        if (atomic_compare_exchange_weak(&cleanup_scope_serial, &old, old + 1u)) {
+            *out = (uint64_t)(old + 1u);
+            return 0;
+        }
+    }
+}
 static int assign_identity(ios27_21e_runtime *runtime) {
     uint_fast64_t old = atomic_load(&runtime_serial);
     for (;;) {
@@ -435,19 +447,18 @@ int ios27_21e_cleanup_push(ios27_21e_runtime *runtime,
     int rc = EBUSY;
     if (!ctx->tearing_down && !ctx->draining_cleanup &&
         !ctx->active_cleanup_callbacks &&
-        ctx->depth < IOS27_21E_MAX_CLEANUPS &&
-        ctx->next_scope != UINT64_MAX) {
-        uint64_t id = ++ctx->next_scope;
-        ctx->stack[ctx->depth++] = (struct cleanup){id, handler, argument};
-        *scope = id;
-        rc = 0;
+        ctx->depth < IOS27_21E_MAX_CLEANUPS) {
+        uint64_t id = 0;
+        rc = mint_scope_id(&id);
+        if (!rc) {
+            ctx->stack[ctx->depth++] = (struct cleanup){id, handler, argument};
+            *scope = id;
+        }
     } else if (ctx->tearing_down || ctx->draining_cleanup ||
                ctx->active_cleanup_callbacks) {
         rc = EBUSY;
     } else if (ctx->depth >= IOS27_21E_MAX_CLEANUPS) {
         rc = EAGAIN;
-    } else {
-        rc = EOVERFLOW;
     }
     unlock_runtime(runtime);
     return rc;

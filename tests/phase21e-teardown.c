@@ -66,6 +66,16 @@ static void test_explicit_cleanup_reentrancy(void) {
     CHECK(atomic_load(&cleanup_runs) == 3);
     CHECK(ios27_21e_thread_detach(r) == 0);
 }
+static void test_scope_reuse_rejection(void) {
+    uint64_t old_scope=0,new_scope=0;
+    CHECK(ios27_21e_cleanup_push(r,reentrant_unwind,&stage,&old_scope)==0);
+    CHECK(ios27_21e_thread_detach(r)==0);
+    CHECK(ios27_21e_cleanup_push(r,reentrant_unwind,&stage,&new_scope)==0);
+    CHECK(old_scope && new_scope && old_scope!=new_scope);
+    CHECK(ios27_21e_cleanup_pop(r,old_scope,1)==EINVAL);
+    CHECK(ios27_21e_cleanup_pop(r,new_scope,1)==0);
+    CHECK(ios27_21e_thread_detach(r)==0);
+}
 static void test_manual_detach(void) {
     atomic_store(&calls, 0);
     CHECK(ios27_21e_key_create(r, dtor_four_passes, &key) == 0);
@@ -117,6 +127,7 @@ int main(void) {
     CHECK(ios27_21e_create(&r) == 0);
     test_exit_teardown();
     test_explicit_cleanup_reentrancy();
+    test_scope_reuse_rejection();
     test_manual_detach();
     test_stale_cancel_token();
     test_deleted_key_no_attached_context();
