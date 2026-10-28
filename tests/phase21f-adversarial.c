@@ -43,6 +43,28 @@ static void *chain_worker(void *p) {
 typedef struct {
     ios27_21f_runtime *rt;
     ios27_21f_handle h;
+    atomic_uint *completed;
+    unsigned minimum;
+} barger;
+static void *barger_worker(void *p) {
+    barger *b = p;
+    uint64_t stop = tick() + 6000;
+    int result;
+    do {
+        result = ios27_21f_mutex_trylock(b->rt, b->h);
+        CHECK(result == 0 || result == EBUSY);
+        if (result == EBUSY) {
+            CHECK(tick() < stop);
+            sched_yield();
+        }
+    } while (result == EBUSY);
+    CHECK(atomic_load_explicit(b->completed, memory_order_acquire) >= b->minimum);
+    CHECK(ios27_21f_mutex_unlock(b->rt, b->h) == 0);
+    return NULL;
+}
+typedef struct {
+    ios27_21f_runtime *rt;
+    ios27_21f_handle h;
     unsigned id;
     unsigned *order;
     atomic_uint *completed;
@@ -106,7 +128,13 @@ int main(void) {
             CHECK(pthread_join(th[0], &ret) == 0 && ret == PTHREAD_CANCELED);
         }
         wait_pending(rt, a, 4);
-        CHECK(ios27_21f_mutex_unlock(rt, a) == 0);
+        {
+            pthread_t outsider;
+            barger candidate = {rt, a, &completed, 4};
+            CHECK(pthread_create(&outsider, NULL, barger_worker, &candidate) == 0);
+            CHECK(ios27_21f_mutex_unlock(rt, a) == 0);
+            CHECK(pthread_join(outsider, NULL) == 0);
+        }
         for (j = 2; j < N; j += 2) CHECK(pthread_join(th[j], NULL) == 0);
         CHECK(atomic_load_explicit(&completed, memory_order_relaxed) == 4);
         for (j = 0; j < 4; ++j) CHECK(order[j] == 2u * (j + 1u));
