@@ -24,7 +24,7 @@ int ios27_21j_lockorder_acquire(ios27_21j_lockorder *graph,
 int ios27_21j_lockorder_release(ios27_21j_lockorder *graph,
                                 uint32_t actor, uint32_t lock_id);
 /* Register a blocked acquisition while another actor owns lock_id.
-   EBUSY for unowned lock, EALREADY for duplicate pending registration,
+   EAGAIN for unowned lock, EALREADY for duplicate pending registration,
    EDEADLK if the prospective wait-for dependency closes a cycle.
    Returns zero only when registration succeeded and caller may block. */
 int ios27_21j_lockorder_wait(ios27_21j_lockorder *graph,
