@@ -1,0 +1,29 @@
+name: phase19b real linked darwin dylibs
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  real-dylibs:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: install open-source Mach-O linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
+      - name: configure
+        run: timeout 120s cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
+      - name: build
+        run: timeout 300s cmake --build build --parallel 2
+      - name: genuine compiler-linked four-image graph
+        run: timeout 180s python3 tools/phase19b-build.py --output-dir build/phase19b --core build/libios27_core.a
