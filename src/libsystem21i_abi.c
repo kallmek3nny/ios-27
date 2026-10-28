@@ -151,7 +151,8 @@ static uint32_t read_le32(const uint8_t *p) {
 static int decode_lp64_attr(ios27_21i_runtime *rt, uint64_t addr,
                              size_t extent, uint64_t attribute, int kind,
                              enum ios27_21c_kind *backend_kind) {
-    const uint8_t *bytes;
+    uint8_t snapshot[16];
+    const uint8_t *bytes = snapshot;
     uint64_t signature;
     uint32_t flags;
     int rc;
@@ -164,7 +165,12 @@ static int decode_lp64_attr(ios27_21i_runtime *rt, uint64_t addr,
     rc = region_view(rt, attribute, 16, 8, 0);
     if (rc) return rc;
     if (intersects(addr, extent, attribute, 16)) return EINVAL;
-    bytes = rt->guest.memory + (size_t)(attribute - rt->guest.base);
+    /* The attribute writer uses this same guard. Snapshot all fields
+     * together, so another bridge thread cannot expose torn attributes. */
+    (void)pthread_mutex_lock(&rt->guard);
+    memcpy(snapshot, rt->guest.memory +
+           (size_t)(attribute - rt->guest.base), sizeof(snapshot));
+    (void)pthread_mutex_unlock(&rt->guard);
     signature = read_le64(bytes);
     flags = read_le32(bytes + 12u);
     if (kind == IOS27_21I_MUTEX) {
