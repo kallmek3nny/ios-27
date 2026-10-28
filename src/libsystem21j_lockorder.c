@@ -199,3 +199,87 @@ int ios27_21j_lockorder_edge(ios27_21j_lockorder *g,
     (void)pthread_mutex_unlock(&g->mutex);
     return 0;
 }
+
+int ios27_21j_lockorder_audit(ios27_21j_lockorder *g,
+                              ios27_21j_graph_audit *out) {
+    ios27_21j_graph_audit result = {0};
+    uint32_t indegree[IOS27_21J_GRAPH_MAX_LOCKS] = {0};
+    unsigned char removed[IOS27_21J_GRAPH_MAX_LOCKS] = {0};
+    if (!g || !out) return EINVAL;
+    (void)pthread_mutex_lock(&g->mutex);
+    result.examined_actors = g->nactors;
+    for (uint32_t actor = 0; actor < g->nactors; ++actor) {
+        uint32_t waiting = g->waiting_on[actor];
+        if (waiting) {
+            ++result.waiting;
+            if (waiting > g->nlocks)
+                result.violations |= IOS27_21J_GRAPH_AUDIT_WAITS;
+        }
+        for (uint32_t lock = 0; lock < g->nlocks; ++lock) {
+            uint64_t bit = UINT64_C(1) << lock;
+            int held = (g->held[actor] & bit) != 0;
+            int owner = g->owners[lock] == actor + 1u;
+            if (held != owner)
+                result.violations |= IOS27_21J_GRAPH_AUDIT_OWNERS;
+        }
+    }
+    for (uint32_t lock = 0; lock < g->nlocks; ++lock) {
+        if (g->owners[lock]) {
+            ++result.owned;
+            if (g->owners[lock] > g->nactors)
+                result.violations |= IOS27_21J_GRAPH_AUDIT_OWNERS;
+        }
+        uint64_t neighbors = g->edges[lock];
+        if (g->nlocks < 64u && (neighbors >> g->nlocks))
+            result.violations |= IOS27_21J_GRAPH_AUDIT_EDGES;
+        for (uint32_t to = 0; to < g->nlocks; ++to) {
+            if (neighbors & (UINT64_C(1) << to)) {
+                ++result.edges;
+                ++indegree[to];
+            }
+        }
+    }
+    if (result.owned != g->statistics.active)
+        result.violations |= IOS27_21J_GRAPH_AUDIT_OWNERS;
+    if (result.waiting != g->statistics.waiting)
+        result.violations |= IOS27_21J_GRAPH_AUDIT_WAITS;
+    if (result.edges != g->statistics.edges)
+        result.violations |= IOS27_21J_GRAPH_AUDIT_EDGES;
+    for (uint32_t actor = 0; actor < g->nactors; ++actor) {
+        uint32_t current = actor;
+        for (size_t hops = 0; hops < g->nactors; ++hops) {
+            uint32_t target = g->waiting_on[current];
+            if (!target || target > g->nlocks) break;
+            uint32_t owner = g->owners[target - 1u];
+            if (!owner || owner > g->nactors) break;
+            current = owner - 1u;
+            if (current == actor) {
+                result.violations |= IOS27_21J_GRAPH_AUDIT_WAITS;
+                break;
+            }
+        }
+    }
+    /* Bounded Kahn topological sort independently checks that all
+       accepted historical lock order edges still form a DAG. */
+    for (uint32_t removed_count = 0; removed_count < g->nlocks;
+         ++removed_count) {
+        uint32_t node = g->nlocks;
+        for (uint32_t i = 0; i < g->nlocks; ++i) {
+            if (!removed[i] && indegree[i] == 0) {
+                node = i;
+                break;
+            }
+        }
+        if (node == g->nlocks) {
+            result.violations |= IOS27_21J_GRAPH_AUDIT_EDGES;
+            break;
+        }
+        removed[node] = 1;
+        for (uint32_t to = 0; to < g->nlocks; ++to)
+            if (g->edges[node] & (UINT64_C(1) << to))
+                --indegree[to];
+    }
+    *out = result;
+    (void)pthread_mutex_unlock(&g->mutex);
+    return result.violations ? EPROTO : 0;
+}
