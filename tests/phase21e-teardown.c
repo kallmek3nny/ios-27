@@ -27,6 +27,7 @@ static void cleanup_before_dtor(void *p) {
     CHECK(atomic_load(&calls) == 0);
     atomic_fetch_add(&cleanup_runs, 1);
     CHECK(ios27_21e_thread_detach(r) == EBUSY);
+    CHECK(ios27_21e_cleanup_unwind(r) == EBUSY);
 }
 static void *worker(void *p) {
     (void)p;
@@ -44,6 +45,26 @@ static void test_exit_teardown(void) {
     CHECK(atomic_load(&calls) == IOS27_21E_DESTRUCTOR_PASSES);
     CHECK(atomic_load(&cleanup_runs) == 1);
     CHECK(ios27_21e_key_delete(r, key) == 0);
+}
+static void reentrant_unwind(void *p) {
+    CHECK(p == (void *)&stage);
+    CHECK(ios27_21e_thread_detach(r) == EBUSY);
+    CHECK(ios27_21e_cleanup_unwind(r) == EBUSY);
+    uint64_t nested = 0;
+    CHECK(ios27_21e_cleanup_push(r, reentrant_unwind, &stage, &nested) == EBUSY);
+    CHECK(nested == 0);
+    atomic_fetch_add(&cleanup_runs, 1);
+}
+static void test_explicit_cleanup_reentrancy(void) {
+    uint64_t scope;
+    CHECK(ios27_21e_cleanup_push(r, reentrant_unwind, &stage, &scope) == 0);
+    CHECK(ios27_21e_cleanup_unwind(r) == 0);
+    CHECK(atomic_load(&cleanup_runs) == 2);
+    CHECK(ios27_21e_cleanup_pop(r, scope, 0) == EINVAL);
+    CHECK(ios27_21e_cleanup_push(r, reentrant_unwind, &stage, &scope) == 0);
+    CHECK(ios27_21e_cleanup_pop(r, scope, 1) == 0);
+    CHECK(atomic_load(&cleanup_runs) == 3);
+    CHECK(ios27_21e_thread_detach(r) == 0);
 }
 static void test_manual_detach(void) {
     atomic_store(&calls, 0);
@@ -95,6 +116,7 @@ static void test_deleted_key_no_attached_context(void) {
 int main(void) {
     CHECK(ios27_21e_create(&r) == 0);
     test_exit_teardown();
+    test_explicit_cleanup_reentrancy();
     test_manual_detach();
     test_stale_cancel_token();
     test_deleted_key_no_attached_context();

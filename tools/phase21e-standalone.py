@@ -12,6 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'src/libsystem21e_tls.c'
 TEST = ROOT / 'tests/phase21e-stress.c'
 EDGE = ROOT / 'tests/phase21e-teardown.c'
+ISOLATION = ROOT / 'tests/phase21e-runtime-isolation.c'
+ORDER = ROOT / 'tests/phase21e-destructor-order.c'
+CROSS = ROOT / 'tests/phase21e-cross-runtime-thread-exit.c'
+RACE = ROOT / 'tests/phase21e-racing-deletion.c'
 MACHO = ROOT / 'tests/phase21e-arm64-darwin.c'
 
 
@@ -42,6 +46,16 @@ def main():
             edge = td / ('teardown' + optimization)
             run([cc, *opts, optimization, str(SOURCE), str(EDGE), '-o', str(edge)], 120)
             run([str(edge)], 180)
+            isolation = td / ('isolation' + optimization)
+            run([cc, *opts, optimization, str(SOURCE), str(ISOLATION), '-o', str(isolation)], 120)
+            run([str(isolation)], 180)
+            order = td / ('nested' + optimization)
+            run([cc, *opts, optimization, str(SOURCE), str(ORDER), '-o', str(order)], 120)
+            run([str(order)], 180)
+            for name, source in (('cross-runtime',CROSS), ('key-race',RACE)):
+                target = td / (name+optimization)
+                run([cc,*opts,optimization,str(SOURCE),str(source),'-o',str(target)],120)
+                run([str(target)],180)
         if os.environ.get('PHASE21E_SANITIZE') == '1':
             exe = td / 'sanitized'
             run([clang, *opts, '-O1', '-g', '-fno-omit-frame-pointer',
@@ -57,6 +71,28 @@ def main():
             run([str(edge)], 180, dict(os.environ,
                 ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
                 UBSAN_OPTIONS='halt_on_error=1'))
+            isolation = td / 'isolation-sanitized'
+            run([clang, *opts, '-O1', '-g', '-fno-omit-frame-pointer',
+                 '-fsanitize=address,undefined', str(SOURCE), str(ISOLATION),
+                 '-o', str(isolation)], 120)
+            run([str(isolation)], 180, dict(os.environ,
+                ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+                UBSAN_OPTIONS='halt_on_error=1'))
+            order = td / 'nested-sanitized'
+            run([clang, *opts, '-O1', '-g', '-fno-omit-frame-pointer',
+                 '-fsanitize=address,undefined', str(SOURCE), str(ORDER),
+                 '-o', str(order)], 120)
+            run([str(order)], 180, dict(os.environ,
+                ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+                UBSAN_OPTIONS='halt_on_error=1'))
+            for name, source in (('cross-runtime',CROSS), ('key-race',RACE)):
+                target = td / (name+'-sanitized')
+                run([clang,*opts,'-O1','-g','-fno-omit-frame-pointer',
+                     '-fsanitize=address,undefined',str(SOURCE),str(source),
+                     '-o',str(target)],120)
+                run([str(target)],180,dict(os.environ,
+                    ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+                    UBSAN_OPTIONS='halt_on_error=1'))
         obj = td / 'phase21e-darwin-arm64.o'
         run([clang, '--target=arm64-apple-darwin', '-ffreestanding',
              '-fno-builtin', '-fno-stack-protector', '-std=c11', '-Wall',
