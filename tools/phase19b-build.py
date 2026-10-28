@@ -7,6 +7,7 @@ the link stubs are only build-time symbol declarations, not loaded at runtime.
 import argparse
 import pathlib
 import runpy
+import shutil
 import subprocess
 import sys
 
@@ -36,6 +37,12 @@ def main():
     root = pathlib.Path(__file__).resolve().parent.parent
     output = pathlib.Path(args.output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    if not shutil.which(args.linker):
+        candidates = ["ld64.lld", "ld64.lld-20", "ld64.lld-19",
+                      "ld64.lld-18", "ld64.lld-17"]
+        args.linker = next((x for x in candidates if shutil.which(x)), "")
+        if not args.linker:
+            raise ValueError("ld64.lld not available after installing LLVM lld")
     helpers = runpy.run_path(str(root / "tools/phase17b-build.py"))
     run = helpers["run"]
     link = helpers["link"]
@@ -71,7 +78,7 @@ def main():
                         "-rpath", "@loader_path/Frameworks"]
         link(args.linker, options, obj, *(stubs[x] for x in dependencies[stem]))
         commands = check(dylib)
-        if dependencies[stem] and 0xcu not in commands:
+        if dependencies[stem] and 0x0c not in commands:
             raise ValueError("missing linked LC_LOAD_DYLIB for " + stem)
         paths[stem] = dylib
         link_stub = output / ("phase19b-" + stem + ".tbd")
