@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Track repository evidence without promoting unmerged branch work.
+
+Main is authoritative. Open PRs and ahead branches are candidates, never
+implemented claims. Bounded GitHub API calls run under an outer CLI timeout.
+"""
+import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import re
+import sys
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+API = "https://api.github.com"
+BOT_PREFIX = "chore(progress):"
+SHA_RE = re.compile(r"^[a-f0-9]{40}$")
+REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+
+
+def request_json(path, token):
+    if not path.startswith("/") or path.startswith("//"):
+        raise ValueError("invalid API path")
+    headers = {"Accept": "application/vnd.github+json",
+               "X-GitHub-Api-Version": "2022-11-28",
+               "User-Agent": "ios27-compat-progress"}
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    with urlopen(Request(API + path, headers=headers), timeout=6) as response:
+        return json.load(response)
+
+
+def source_commit(commits):
+    for item in commits:
+        if not item["commit"]["message"].startswith(BOT_PREFIX):
+            sha = item["sha"]
+            if not SHA_RE.fullmatch(sha):
+                raise ValueError("invalid main source commit")
+            return {"sha": sha, "url": item["html_url"],
+                    "committed_at": item["commit"]["committer"]["date"]}
+    raise ValueError("no non-dashboard main commit in history")
+
+
+def snapshot(repo, get):
+    if not REPO_RE.fullmatch(repo):
+        raise ValueError("invalid repo")
+    base = "/repos/" + repo
+    source = source_commit(get(base + "/commits?sha=main&per_page=30"))
+    open_prs = get(base + "/pulls?state=open&sort=updated&direction=desc&per_page=25")
+    closed = get(base + "/pulls?state=closed&sort=updated&direction=desc&per_page=40")
+    branches = get(base + "/branches?per_page=100")
+    if any(not isinstance(value, list) for value in (open_prs, closed, branches)):
+        raise ValueError("bad repository response")
+    recently_merged = [
+        {"number": p["number"], "title": p["title"][:120],
+         "url": p["html_url"], "head_sha": p["head"]["sha"],
+         "merged_at": p["merged_at"]}
+        for p in closed if p.get("merged_at") and p["base"]["ref"] == "main"
+    ][:8]
+    pending = [
+        {"number": p["number"], "branch": p["head"]["ref"],
+         "sha": p["head"]["sha"], "title": p["title"][:120],
+         "url": p["html_url"], "updated_at": p["updated_at"],
+         "status": "unmerged: not counted"}
+        for p in open_prs if p["base"]["ref"] == "main"
+    ][:8]
+    excluded_sha = {p["head_sha"] for p in recently_merged} | {p["sha"] for p in pending}
+    candidates = [
+        (p["name"], p["commit"]["sha"]) for p in branches
+        if p["name"] != "main" and p["commit"]["sha"] not in excluded_sha
+        and p["commit"]["sha"] != source["sha"]
+        and SHA_RE.fullmatch(p["commit"]["sha"])
+    ]
+    # The API branch page is alphabetically ordered. Scan up to 100 and sort
+    # confirmed-ahead candidates by actual head commit date, not branch name.
+    def compare(pair):
+        name, sha = pair
+        try:
+            c = get(base + "/compare/" + source["sha"] + "..." + quote(name, safe=""))
+        except HTTPError as exc:
+            if exc.code in (404, 409):
+                return None
+            raise
+        if c.get("status") not in ("ahead", "diverged") or c.get("ahead_by", 0) < 1:
+            return None
+        history = c.get("commits", [])
+        return {"branch": name, "sha": sha,
+                "ahead_by": c["ahead_by"], "behind_by": c.get("behind_by", 0),
+                "last_commit_at": history[-1]["commit"]["committer"]["date"] if history else "",
+                "url": "https://github.com/" + repo + "/tree/" + quote(name, safe=""),
+                "status": "unmerged: not counted"}
+    ahead = []
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futures = [pool.submit(compare, x) for x in candidates]
+        for future in as_completed(futures):
+            item = future.result()
+            if item:
+                ahead.append(item)
+    ahead.sort(key=lambda entry: (entry["last_commit_at"], entry["branch"]), reverse=True)
+    return {
+        "schema": 1,
+        "repository": repo,
+        "main_source": source,
+        "method": "only reviewed evidence merged into main can change confirmed target statuses",
+        "open_pull_requests": pending,
+        "ahead_branches": ahead[:8],
+        "recent_merged_pull_requests": recently_merged,
+        "scan_limits": {"branch_page": 100, "branches_scanned": len(candidates),
+                        "open_pr_page": 25, "merged_pr_page": 40},
+    }
+
+
+def unchanged(previous, fresh):
+    return previous is not None and {
+        k: v for k, v in previous.items() if k != "observed_at"
+    } == fresh
+
+
+def self_test():
+    real = {"sha": "a" * 40, "html_url": "https://example.com/a",
+            "commit": {"message": "phase18", "committer": {"date": "2026-10-28"}}}
+    bot = {"sha": "b" * 40, "commit": {"message": BOT_PREFIX + " refresh"}}
+    assert source_commit([bot, real])["sha"] == "a" * 40
+    sample = {"schema": 1, "main_source": {"sha": "a" * 40}}
+    assert unchanged(dict(sample, observed_at="2026-10-28"), sample)
+    assert not unchanged(dict(sample, main_source={"sha": "b" * 40}), sample)
+    print("repository provenance self-test passed")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", default="kallmek3nny/ios-27")
+    parser.add_argument("--output", default="docs/repo-status.json")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
+    output = Path(args.output)
+    previous = json.loads(output.read_text(encoding="utf-8")) if output.is_file() else None
+    token = os.environ.get("GITHUB_TOKEN", "")
+    fresh = snapshot(args.repo, lambda path: request_json(path, token))
+    if unchanged(previous, fresh):
+        print("no new source or candidate branches")
+        return
+    fresh["observed_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    output.write_text(json.dumps(fresh, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print("main source", fresh["main_source"]["sha"], "ahead branches", len(fresh["ahead_branches"]))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (HTTPError, URLError, OSError, ValueError, KeyError, TypeError) as exc:
+        sys.exit("provenance refresh failed closed: " + str(exc))

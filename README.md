@@ -1,6 +1,6 @@
 # ios-27
 
-[capability progress and realistic ceiling](docs/PROGRESS.md)
+[capability progress and realistic ceiling](docs/PROGRESS.md) · [audited technical ceilings](docs/CEILINGS.md) · [live main/branch status](docs/repo-status.json)
 
 ![system library and runtime capability blocks](docs/blocks.svg)
 

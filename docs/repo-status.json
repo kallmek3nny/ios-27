@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "repository": "kallmek3nny/ios-27",
+  "main_source": {
+    "sha": "b3b66fef5a72b3bcbecc71466d257b6eebae8797",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/b3b66fef5a72b3bcbecc71466d257b6eebae8797",
+    "committed_at": "2026-10-28T17:45:40Z"
+  },
+  "method": "only reviewed evidence merged into main can change confirmed target statuses",
+  "open_pull_requests": [
+    {
+      "number": 51,
+      "branch": "feat/live-evidence-progress-ceilings",
+      "sha": "a48131b348a1583bba475673e8326a3a07e7bc7b",
+      "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/51",
+      "updated_at": "2026-10-28T17:46:16Z",
+      "status": "unmerged: not counted"
+    }
+  ],
+  "ahead_branches": [],
+  "recent_merged_pull_requests": [
+    {
+      "number": 49,
+      "title": "phase 18c: bounded mach ool, port sets, trailers and guest isolation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/49",
+      "head_sha": "5acf526c319c89d42cbb7166f92f789a76baab90",
+      "merged_at": "2026-10-28T17:45:40Z"
+    },
+    {
+      "number": 50,
+      "title": "phase 18b: path-aware native dyld graphs, relocations and linked ARM64 fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/50",
+      "head_sha": "e624dfa6a9dbd12c775a122fb403c5de5dd5e544",
+      "merged_at": "2026-10-28T17:43:13Z"
+    },
+    {
+      "number": 48,
+      "title": "phase 18a: native darwin LC_MAIN guest stack and argv startup",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/48",
+      "head_sha": "d5ce7b309fd16e88b8e5fe01869020b4330fd2dc",
+      "merged_at": "2026-10-28T17:40:35Z"
+    },
+    {
+      "number": 47,
+      "title": "style: GitHub-native transparent dashboards with clearer progress percentages",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/47",
+      "head_sha": "bae514000565c683d8d04ca903b1ed76f53549d2",
+      "merged_at": "2026-10-28T17:26:54Z"
+    },
+    {
+      "number": 46,
+      "title": "style: minimalist, proportional and mobile-friendly compatibility blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/46",
+      "head_sha": "1b559faa531085739ae22268398f27245f38edd5",
+      "merged_at": "2026-10-28T17:21:48Z"
+    },
+    {
+      "number": 45,
+      "title": "feat: AnyPS5-style API block tracker with scoped compatibility ceilings",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/45",
+      "head_sha": "571ce308e57cecc3d22bab14dbbc09accda986f7",
+      "merged_at": "2026-10-28T17:11:54Z"
+    }
+  ],
+  "scan_limits": {
+    "branch_page": 100,
+    "branches_scanned": 0,
+    "open_pr_page": 25,
+    "merged_pr_page": 40
+  },
+  "observed_at": "2026-10-28T17:46:16Z"
+}

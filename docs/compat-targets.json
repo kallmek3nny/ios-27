@@ -1088,8 +1088,8 @@
       "id": "mach-o",
       "label": "mach-o parser and native loader",
       "ceiling": "plausible",
-      "note": "source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.",
-      "evidence": "docs/phase17a-native-multisegment-execution.md",
+      "note": "merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.",
+      "evidence": "docs/phase18a-darwin-process-startup.md",
       "test": "compiled-darwin-real-mh-execute",
       "targets": [
         {
@@ -1122,7 +1122,7 @@
         },
         {
           "name": "darwin user stack",
-          "status": "missing"
+          "status": "native-fixture"
         },
         {
           "name": "full process startup",
@@ -1147,8 +1147,8 @@
       "id": "dyld-engine",
       "label": "dyld / image graph",
       "ceiling": "conditional",
-      "note": "linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.",
-      "evidence": "docs/phase17b-linked-multiimage.md",
+      "note": "merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.",
+      "evidence": "docs/phase18b-linked-graph.md",
       "test": "native-multi-image-wx",
       "targets": [
         {
@@ -1222,8 +1222,8 @@
       "id": "mach-ipc",
       "label": "mach ipc model",
       "ceiling": "conditional",
-      "note": "task-local messages are a tested synchronous model, not actual mach trap delivery or an xnu service provider.",
-      "evidence": "docs/phase17c-mach-lifecycle.md",
+      "note": "phase18c adds synthetic task-local port sets, bounded 128-byte single OOL descriptors and sequence trailers; all operations are synchronous fixture calls, not kernel Mach traps, audit tokens, full OOL VM or entitlement-aware processes.",
+      "evidence": "docs/phase18c-mach-sets-and-trailers.md",
       "test": "task-local-mach-names",
       "targets": [
         {
@@ -1267,12 +1267,12 @@
           "status": "synthetic"
         },
         {
-          "name": "out-of-line descriptors",
-          "status": "missing"
+          "name": "bounded single ool memory descriptor",
+          "status": "synthetic"
         },
         {
-          "name": "mach message trailers",
-          "status": "missing"
+          "name": "sequence-number receive trailer",
+          "status": "synthetic"
         },
         {
           "name": "voucher support",
@@ -1289,6 +1289,10 @@
         {
           "name": "concurrency and races",
           "status": "missing"
+        },
+        {
+          "name": "port-set membership and round-robin receive",
+          "status": "synthetic"
         }
       ]
     },
