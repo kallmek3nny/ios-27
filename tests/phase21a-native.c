@@ -42,6 +42,12 @@ static void *rw_worker(void *arg) {
     }
     return NULL;
 }
+static void *invalid_unlock_worker(void *arg) {
+    uint64_t *addresses = arg;
+    assert(call("pthread_mutex_unlock", addresses[0], 0) == EPERM);
+    assert(call("pthread_rwlock_unlock", addresses[1], 0) == EPERM);
+    return NULL;
+}
 int main(void) {
     pthread_t threads[8];
     uint64_t mutex = BASE + 64u, cond = BASE + 256u, rwlock = BASE + 512u;
@@ -83,6 +89,17 @@ int main(void) {
     assert(call("pthread_cond_signal", cond, 0) == 0);
     assert(call("pthread_cond_broadcast", cond, 0) == 0);
     assert(call("pthread_rwlock_init", rwlock, 0) == 0);
+    {
+        uint64_t addresses[2] = {mutex, rwlock};
+        assert(call("pthread_mutex_lock", mutex, 0) == 0);
+        assert(call("pthread_rwlock_wrlock", rwlock, 0) == 0);
+        assert(pthread_create(&threads[0], NULL, invalid_unlock_worker, addresses) == 0);
+        assert(pthread_join(threads[0], NULL) == 0);
+        assert(call("pthread_rwlock_destroy", rwlock, 0) == EBUSY);
+        assert(call("pthread_mutex_destroy", mutex, 0) == EBUSY);
+        assert(call("pthread_rwlock_unlock", rwlock, 0) == 0);
+        assert(call("pthread_mutex_unlock", mutex, 0) == 0);
+    }
     for (i = 0; i < 8; ++i)
         assert(pthread_create(&threads[i], NULL, rw_worker, &rwlock) == 0);
     for (i = 0; i < 8; ++i)
