@@ -201,6 +201,22 @@ int main(void) {
                                error, sizeof(error)) == 0);
     assert(rd64(image + DATA_OFF) == ctx.value - 17u);
 
+    /* Genuine ld64.lld dylibs use format 2 (preferred VM address),
+     * unlike the offset format 6 used by the original synthetic fixture. */
+    fixture(image, 4096u);
+    le16(image + FIXUPS_OFF + 46u, 2u); /* DYLD_CHAINED_PTR_64 */
+    le64(image + DATA_OFF + 8u, UINT64_C(0x100000070));
+    parse_ok(image, &info, &plan);
+    assert(plan.patches[1].rebase_target == 0x70u);
+    assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                               UINT64_C(0x500000000), resolve, &ctx,
+                               error, sizeof(error)) == 0);
+    assert(rd64(image + DATA_OFF + 8u) == UINT64_C(0x500000070));
+    fixture(image, 4096u);
+    le16(image + FIXUPS_OFF + 46u, 2u);
+    le64(image + DATA_OFF + 8u, 0x70u); /* before preferred VM base */
+    parse_bad(image);
+
     fixture(image, 4096u);
     le64(image + DATA_OFF + 8u, 0x300000u);
     parse_bad(image); /* rebase outside every mapped segment */
@@ -220,9 +236,29 @@ int main(void) {
     fixture(image, 4096u);
     le32(image + FIXUPS_OFF + 16u, 10000u); /* import count */
     parse_bad(image);
+    /* Weak imports may resolve to zero, but strong imports still fail
+     * transactionally. Nonzero addends must not turn null into an address. */
     fixture(image, 4096u);
-    le32(image + FIXUPS_OFF + 64u, 0x101u); /* weak import unsupported */
-    parse_bad(image);
+    le32(image + FIXUPS_OFF + 64u, 0x101u);
+    parse_ok(image, &info, &plan);
+    assert(plan.imports[0].weak_import);
+    ctx.permitted = 0;
+    plan.imports[0].addend = 27;
+    assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                               UINT64_C(0x500000000), resolve, &ctx,
+                               error, sizeof(error)) == 0);
+    assert(rd64(image + DATA_OFF) == 0u);
+    assert(rd64(image + DATA_OFF + 8u) == UINT64_C(0x500000070));
+    fixture(image, 4096u);
+    le32(image + FIXUPS_OFF + 64u, 0x101u);
+    parse_ok(image, &info, &plan);
+    ctx.permitted = 1;
+    assert(ios27_chained_apply(image, IMAGE_SIZE, &info, &plan,
+                               UINT64_C(0x500000000), resolve, &ctx,
+                               error, sizeof(error)) == 0);
+    assert(rd64(image + DATA_OFF) == ctx.value);
+    ctx.permitted = 1;
+
     fixture(image, 4096u);
     le32(image + FIXUPS_OFF + 64u, 0x7fu << 9u | 1u); /* symbol outside pool */
     parse_bad(image);
