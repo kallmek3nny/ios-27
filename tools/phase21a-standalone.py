@@ -23,6 +23,9 @@ def main():
     clang = shutil.which("clang")
     if not shutil.which(cc) or not clang:
         raise RuntimeError("host C compiler and clang required")
+    repeats = int(os.environ.get("PHASE21A_STRESS_REPEATS", "1"))
+    if not 1 <= repeats <= 20:
+        raise RuntimeError("PHASE21A_STRESS_REPEATS must be 1..20")
     flags = ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
              "-pthread", "-I" + str(ROOT / "include")]
     with tempfile.TemporaryDirectory(prefix="phase21a-") as d:
@@ -32,7 +35,10 @@ def main():
                 executable = out / (name + optimization)
                 run([cc, *flags, optimization, str(SRC), str(ROOT / "tests" / name),
                      "-o", str(executable)])
-                run([str(executable)])
+                for attempt in range(repeats):
+                    if repeats > 1:
+                        print("phase21a: repeat", attempt + 1, "of", repeats, name, optimization)
+                    run([str(executable)])
         if os.environ.get("PHASE21A_SANITIZE") == "1":
             for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c", "phase21a-once.c", "phase21a-identity.c", "phase21a-tls.c"):
                 executable = out / (name + "-sanitized")
