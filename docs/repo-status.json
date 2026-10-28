@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 53,
-      "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "7cb58571acafb963b9a548e0c3fe855859e018e2",
-      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T17:57:29Z",
+      "number": 56,
+      "branch": "phase19c-mach-task-exceptions",
+      "sha": "6456726c2d5751e4d54d27fc5afdab0eef7c0d8a",
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "updated_at": "2026-10-28T17:59:12Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 56,
-      "branch": "phase19c-mach-task-exceptions",
-      "sha": "7e259c4f14bf4a2943d07c53e08616d71c50859f",
-      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
-      "updated_at": "2026-10-28T17:57:00Z",
+      "number": 53,
+      "branch": "phase19b-native-dyld-lifecycle",
+      "sha": "63f49b1ac3a9e4cfc2a5567911f79c5a05d3517d",
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "updated_at": "2026-10-28T17:59:11Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "a1c5064ca1921a124f2e7fc9cb5aeaf2d97d4d02",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T17:58:53Z",
       "status": "unmerged: not counted"
     },
     {
@@ -33,15 +42,6 @@
       "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
       "url": "https://github.com/kallmek3nny/ios-27/pull/55",
       "updated_at": "2026-10-28T17:56:59Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 54,
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "d663452117ac4149b078ce3cd8d09e2f8fe870ce",
-      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
-      "updated_at": "2026-10-28T17:56:13Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -110,5 +110,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:57:41Z"
+  "observed_at": "2026-10-28T17:59:17Z"
 }
