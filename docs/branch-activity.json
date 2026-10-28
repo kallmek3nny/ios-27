@@ -48,7 +48,7 @@
       "sha": "2265f89f62c2d73cfa9dcefc0daa3416776075ed",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "pr_number": 73,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -145,7 +145,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 2,
         "fixture_files": 9,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21e-exit-cancellation-20261028",
@@ -170,7 +170,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -486,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:20:25Z"
+  "observed_at": "2026-10-28T20:20:49Z"
 }
