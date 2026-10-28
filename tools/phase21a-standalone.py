@@ -54,6 +54,8 @@ def main():
              str(ROOT / "tests/phase21a-arm64-darwin.c"), "-o", str(object_file)])
         run([sys.executable, str(ROOT / "tools/phase21a-macho-verify.py"),
              str(object_file)])
+        run([sys.executable, str(ROOT / "tests/phase21a-macho-corruption.py"),
+             str(object_file)])
     print("phase21a: all native and compiler-produced Darwin checks passed")
 
 if __name__ == "__main__":
