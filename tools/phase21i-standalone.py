@@ -39,6 +39,7 @@ def main():
                      str(ROOT / "src/libsystem21c_sync.c"),
                      str(ROOT / "src/libsystem21i_abi.c"),
                      str(ROOT / "src/libsystem21i_arm64.c"),
+                     str(ROOT / "src/libsystem21i_errno.c"),
                      str(ROOT / "tests" / source),
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
