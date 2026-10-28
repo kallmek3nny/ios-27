@@ -11,10 +11,10 @@
     {
       "number": 60,
       "branch": "feat/progress-live-branch-evidence",
-      "sha": "a1127ea74a83c15a337b58d8d0a58782865025e0",
+      "sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
       "title": "feat: parse active agent branch diffs into live provisional progress blocks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/60",
-      "updated_at": "2026-10-28T19:11:59Z",
+      "updated_at": "2026-10-28T19:13:09Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -26,6 +26,15 @@
       "behind_by": 0,
       "last_commit_at": "2026-10-28T18:52:29Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase20e-libsystem-userspace",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase20d-darwin-threading",
+      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T18:52:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
       "status": "unmerged: not counted"
     },
     {
@@ -107,9 +116,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 56,
+    "branches_scanned": 57,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:12:39Z"
+  "observed_at": "2026-10-28T19:13:43Z"
 }
