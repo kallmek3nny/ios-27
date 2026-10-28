@@ -1,26 +1,26 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "d8c08c2ebb80db0045d79852551aad14d153dcb4",
+  "main_source_sha": "e7deb774da6d41f4f97ae221959ee0cc734762fd",
   "method": "diff-based provisional activity, no automatic completion promotion",
   "candidates_checked": 5,
-  "candidate_count": 3,
+  "candidate_count": 5,
   "candidates": [
     {
       "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "b88b1adbf96b13696ff492fdadc92290f036ce1c",
+      "sha": "8a19875a5201c72886215da60f0a7c450e70674a",
       "url": "https://github.com/kallmek3nny/ios-27/pull/63",
       "pr_number": 63,
       "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
+      "files_checked": 9,
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "objc-host-model",
           "source_files": 2,
-          "fixture_files": 2,
-          "additions": 581,
+          "fixture_files": 0,
+          "additions": 384,
           "deletions": 0,
           "symbols_preview": [
             "ios27_objc20b_alloc",
@@ -38,28 +38,87 @@
           ],
           "example_paths": [
             "include/ios27/objc20b_dispatch.h",
-            "src/objc20b_dispatch.c",
+            "src/objc20b_dispatch.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 4,
+          "additions": 212,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
             "tests/phase20b-clang.m",
-            "tests/phase20b-dispatch.c"
+            "tests/phase20b-dispatch.c",
+            "tools/phase20b-sysroot/stdlib.h",
+            "tools/phase20b-sysroot/string.h"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase20a-objc-metadata-20261028",
+      "sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "pr_number": 65,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 3,
+          "fixture_files": 0,
+          "additions": 748,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20a_counts",
+            "ios27_objc20a_find_class",
+            "ios27_objc20a_inspect",
+            "ios27_objc20a_register",
+            "ios27_objc20a_register_image",
+            "ios27_objc20a_registry_create",
+            "ios27_objc20a_registry_destroy"
+          ],
+          "example_paths": [
+            "include/ios27/objc20a_metadata.h",
+            "src/objc20a_reader.c",
+            "src/objc20a_registry.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 5,
+          "additions": 254,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase20a-category.m",
+            "tests/phase20a-external.m",
+            "tests/phase20a-graph.m",
+            "tests/phase20a-validate.c"
           ]
         }
       ]
     },
     {
       "branch": "phase20e-libsystem-userspace",
-      "sha": "87dadf9419ceecfdd1a7d6ecbdef909829239ec8",
+      "sha": "b9fa9469596c3b5169dc6afd085b25e11bc24a75",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "pr_number": 62,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 3,
-          "additions": 558,
+          "fixture_files": 0,
+          "additions": 360,
           "deletions": 0,
           "symbols_preview": [
             "ios27_20e_advance_time",
@@ -77,28 +136,39 @@
           ],
           "example_paths": [
             "include/ios27/libsystem20e_services.h",
-            "src/libsystem20e_services.c",
+            "src/libsystem20e_services.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 3,
+          "additions": 198,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
             "tests/phase20e-darwin-fixture.c",
-            "tests/phase20e-standalone.c"
+            "tests/phase20e-standalone.c",
+            "tools/phase20e-standalone.py"
           ]
         }
       ]
     },
     {
       "branch": "phase20d-darwin-threading",
-      "sha": "d821203a5c42bf6c0de693bb2a98ffc0522e7bc0",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
-      "pr_number": null,
-      "ci": "not_checked",
+      "sha": "7a0fc43cf6ebad828fcddb47dc6c0ce9e9fc4ab0",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "pr_number": 64,
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "libsystem-pthread",
           "source_files": 2,
-          "fixture_files": 4,
-          "additions": 983,
+          "fixture_files": 0,
+          "additions": 553,
           "deletions": 0,
           "symbols_preview": [
             "ios27_20d_cancel_point",
@@ -116,38 +186,156 @@
           ],
           "example_paths": [
             "include/ios27/libsystem20d_threads.h",
-            "src/libsystem20d_threads.c",
+            "src/libsystem20d_threads.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 4,
+          "additions": 430,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
             "tests/phase20d-arm64-abi.c",
-            "tests/phase20d-edge.c"
+            "tests/phase20d-edge.c",
+            "tests/phase20d-native.c",
+            "tools/phase20d-standalone.py"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "baeb5a5c3752f34c58f7ae5f6d040458d7ab13de",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 384,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20b_alloc",
+            "ios27_objc20b_bind",
+            "ios27_objc20b_create",
+            "ios27_objc20b_destroy",
+            "ios27_objc20b_register",
+            "ios27_objc20b_release",
+            "ios27_objc20b_replace",
+            "ios27_objc20b_resolve",
+            "ios27_objc20b_resolve_global",
+            "ios27_objc20b_resolve_super_global",
+            "ios27_objc20b_selector",
+            "ios27_objc20b_send_words"
+          ],
+          "example_paths": [
+            "include/ios27/objc20b_dispatch.h",
+            "src/objc20b_dispatch.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 4,
+          "additions": 212,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase20b-clang.m",
+            "tests/phase20b-dispatch.c",
+            "tools/phase20b-sysroot/stdlib.h",
+            "tools/phase20b-sysroot/string.h"
           ]
         }
       ]
     }
   ],
   "groups": {
-    "unclassified": [
+    "libsystem-host-model": [
+      {
+        "branch": "phase20e-libsystem-userspace",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "running"
+      }
+    ],
+    "libsystem-pthread": [
+      {
+        "branch": "phase20d-darwin-threading",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "running"
+      }
+    ],
+    "objc-host-model": [
       {
         "branch": "phase20b-native-objc-dispatch-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/63",
         "source_files": 2,
-        "fixture_files": 2,
+        "fixture_files": 0,
+        "ci": "running"
+      },
+      {
+        "branch": "agent/phase20a-objc-metadata-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+        "source_files": 3,
+        "fixture_files": 0,
+        "ci": "running"
+      },
+      {
+        "branch": "phase20b-native-objc-dispatch-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "not_checked"
+      }
+    ],
+    "unclassified": [
+      {
+        "branch": "phase20b-native-objc-dispatch-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+        "source_files": 0,
+        "fixture_files": 4,
+        "ci": "running"
+      },
+      {
+        "branch": "agent/phase20a-objc-metadata-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+        "source_files": 0,
+        "fixture_files": 5,
         "ci": "running"
       },
       {
         "branch": "phase20e-libsystem-userspace",
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-        "source_files": 2,
+        "source_files": 0,
         "fixture_files": 3,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase20d-darwin-threading",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
-        "source_files": 2,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+        "source_files": 0,
+        "fixture_files": 4,
+        "ci": "running"
+      },
+      {
+        "branch": "phase20b-native-objc-dispatch-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
+        "source_files": 0,
         "fixture_files": 4,
         "ci": "not_checked"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:18:36Z"
+  "observed_at": "2026-10-28T19:19:28Z"
 }

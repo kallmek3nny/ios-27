@@ -2,61 +2,68 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "d8c08c2ebb80db0045d79852551aad14d153dcb4",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/d8c08c2ebb80db0045d79852551aad14d153dcb4",
-    "committed_at": "2026-10-28T19:14:10Z"
+    "sha": "e7deb774da6d41f4f97ae221959ee0cc734762fd",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/e7deb774da6d41f4f97ae221959ee0cc734762fd",
+    "committed_at": "2026-10-28T19:18:51Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 63,
       "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "b88b1adbf96b13696ff492fdadc92290f036ce1c",
+      "sha": "8a19875a5201c72886215da60f0a7c450e70674a",
       "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/63",
-      "updated_at": "2026-10-28T19:18:14Z",
+      "updated_at": "2026-10-28T19:19:21Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 65,
+      "branch": "agent/phase20a-objc-metadata-20261028",
+      "sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "title": "phase 20a: clang ARM64 ObjC2 metadata graphs and transactional registration",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "updated_at": "2026-10-28T19:19:00Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 62,
       "branch": "phase20e-libsystem-userspace",
-      "sha": "87dadf9419ceecfdd1a7d6ecbdef909829239ec8",
+      "sha": "b9fa9469596c3b5169dc6afd085b25e11bc24a75",
       "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "updated_at": "2026-10-28T19:17:57Z",
+      "updated_at": "2026-10-28T19:18:59Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 61,
-      "branch": "fix/phase20-live-branch-classification",
-      "sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
-      "title": "fix: recognize new phase-numbered agent sources in live progress map",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/61",
-      "updated_at": "2026-10-28T19:17:49Z",
+      "number": 64,
+      "branch": "phase20d-darwin-threading",
+      "sha": "7a0fc43cf6ebad828fcddb47dc6c0ce9e9fc4ab0",
+      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "updated_at": "2026-10-28T19:18:50Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "phase20d-darwin-threading",
-      "sha": "d821203a5c42bf6c0de693bb2a98ffc0522e7bc0",
-      "ahead_by": 8,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T19:17:35Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "agent/phase20a-objc-metadata-20261028",
-      "sha": "1e07f898a800bb2760385b94dbb8fe3369bb0bcc",
-      "ahead_by": 2,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T19:16:54Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase20a-objc-metadata-20261028",
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "baeb5a5c3752f34c58f7ae5f6d040458d7ab13de",
+      "ahead_by": 4,
+      "behind_by": 2,
+      "last_commit_at": "2026-10-28T19:19:22Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
       "status": "unmerged: not counted"
     }
   ],
   "recent_merged_pull_requests": [
+    {
+      "number": 61,
+      "title": "fix: recognize new phase-numbered agent sources in live progress map",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/61",
+      "head_sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
+      "merged_at": "2026-10-28T19:18:52Z"
+    },
     {
       "number": 60,
       "title": "feat: parse active agent branch diffs into live provisional progress blocks",
@@ -105,13 +112,6 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/54",
       "head_sha": "61b4062eb85b0605542b3b87f629d3859f60ee02",
       "merged_at": "2026-10-28T18:03:44Z"
-    },
-    {
-      "number": 56,
-      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
-      "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
-      "merged_at": "2026-10-28T18:01:05Z"
     }
   ],
   "scan_limits": {
@@ -120,5 +120,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:18:33Z"
+  "observed_at": "2026-10-28T19:19:25Z"
 }
