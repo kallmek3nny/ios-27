@@ -11,12 +11,17 @@ EXPECTED = {
     "_pthread_cond_destroy", "_pthread_cond_wait", "_pthread_cond_timedwait",
     "_pthread_cond_signal", "_pthread_cond_broadcast",
 }
+THREAD_EXPECTED = {
+    "_pthread_create", "_pthread_join", "_pthread_mutex_lock",
+    "_pthread_mutex_unlock", "_pthread_cond_wait",
+    "_pthread_cond_signal", "_pthread_cond_broadcast",
+}
 
 class MachOError(ValueError):
     pass
 
 
-def inspect(data):
+def inspect(data, expected=EXPECTED):
     def take(offset, size):
         if offset < 0 or size < 0 or offset > len(data) or size > len(data) - offset:
             raise MachOError("out of bounds Mach-O field")
@@ -85,20 +90,20 @@ def inspect(data):
     branches = {names[index] for index, pcrel, length, external, kind in relocations
                 if external and kind == 2 and pcrel == 1 and length == 2
                 and (types[index] & 0x0f) == 1}
-    if not EXPECTED <= branches:
+    if not expected <= branches:
         raise MachOError("missing external ARM64_RELOC_BRANCH26: " +
-                         repr(sorted(EXPECTED - branches)))
+                         repr(sorted(expected - branches)))
     return len(branches), len(relocations)
 
 
-def selftest(original):
-    count, total = inspect(original)
-    assert count >= len(EXPECTED) and total >= len(EXPECTED)
+def selftest(original, expected=EXPECTED):
+    count, total = inspect(original, expected)
+    assert count >= len(expected) and total >= len(expected)
     for broken in (b"", original[:12], b"\0" + original[1:],
                    original[:20] + b"\xff\xff\xff\xff" + original[24:],
                    original[:16] + b"\xff\xff\xff\xff" + original[20:]):
         try:
-            inspect(broken)
+            inspect(broken, expected)
         except MachOError:
             pass
         else:
@@ -119,7 +124,7 @@ def selftest(original):
                         broken = bytearray(original)
                         broken[mutate_at:mutate_at+4] = raw
                         try:
-                            inspect(bytes(broken))
+                            inspect(bytes(broken), expected)
                         except MachOError:
                             pass
                         else:
@@ -140,16 +145,20 @@ def selftest(original):
             at = rng.randrange(len(broken))
             broken[at] = rng.randrange(256)
         try:
-            inspect(bytes(broken))
+            inspect(bytes(broken), expected)
         except MachOError:
             continue
     print(f"phase21i: {count} external ARM64 branch targets, {total} relocations; malformed inputs + 1500 bounded mutations checked")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit("usage: phase21i-macho.py path-to-clang-macho-object")
+    if len(sys.argv) == 3 and sys.argv[1] == "--threads":
+        expected, pathname = THREAD_EXPECTED, sys.argv[2]
+    elif len(sys.argv) == 2:
+        expected, pathname = EXPECTED, sys.argv[1]
+    else:
+        sys.exit("usage: phase21i-macho.py [--threads] clang-macho-object")
     try:
-        selftest(Path(sys.argv[1]).read_bytes())
+        selftest(Path(pathname).read_bytes(), expected)
     except (OSError, MachOError, AssertionError) as exc:
         sys.exit(f"phase21i Mach-O verification failed: {exc}")
