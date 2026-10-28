@@ -1,4 +1,5 @@
 #include "ios27/darwin_got.h"
+#include "ios27/darwin_branch26.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -74,6 +75,191 @@ static void apply_rejected(uint8_t *text, size_t size,
     assert(error[0]);
     assert(memcmp(before, text, size) == 0);
     free(before);
+}
+
+
+/* The two relocations here come from genuine independent Clang Mach-O
+ * objects. Exercise the generic ARM64e-safe (non-PAC) transaction with
+ * the same real instructions as the legacy fixture-specific binder. */
+static void phase19d_real_got(const uint8_t *original,
+                             const ios27_darwin_got_plan *plan) {
+    ios27_darwin_arm64_reloc ops[2] = {{0}};
+    uint8_t *first, *legacy, *before;
+    size_t n = (size_t)plan->text_size;
+    char error[160] = {0};
+    first = malloc(n);
+    legacy = malloc(n);
+    before = malloc(n);
+    assert(first && legacy && before);
+    memcpy(first, original, n);
+    memcpy(legacy, original, n);
+    memcpy(before, original, n);
+    ops[0].offset = plan->ldr_offset;
+    ops[0].type = 6u; ops[0].length = 2u;
+    ops[0].target = UINT32_C(0x101018);
+    ops[1].offset = plan->adrp_offset;
+    ops[1].type = 5u; ops[1].length = 2u;
+    ops[1].pcrel = 1u;
+    ops[1].target = ops[0].target;
+    assert(ios27_darwin_arm64_apply_batch(first, n, UINT32_C(0x100000),
+                                          ops, 2u, error,
+                                          sizeof(error)) == 0);
+    assert(ios27_darwin_got_apply(legacy, n, plan,
+                                  UINT32_C(0x100000),
+                                  UINT32_C(0x101018),
+                                  error, sizeof(error)) == 0);
+    assert(memcmp(first, legacy, n) == 0);
+    memcpy(first, before, n);
+    ops[1].target = UINT64_C(0x200001018);
+    assert(ios27_darwin_arm64_apply_batch(first, n, UINT32_C(0x100000),
+                                          ops, 2u, error,
+                                          sizeof(error)) == -1);
+    assert(memcmp(first, before, n) == 0);
+    ops[1].target = ops[0].target;
+    ops[0].target += 1u;
+    assert(ios27_darwin_arm64_apply_batch(first, n, UINT32_C(0x100000),
+                                          ops, 2u, error,
+                                          sizeof(error)) == -1);
+    assert(memcmp(first, before, n) == 0);
+    free(first); free(legacy); free(before);
+}
+
+
+static void phase19d_linked_got(const uint8_t *consumer, size_t consumer_size,
+                                const uint8_t *provider, size_t provider_size) {
+    ios27_darwin_link_input inputs[2] = {
+        {consumer, consumer_size}, {provider, provider_size}
+    };
+    ios27_darwin_link_layout layout = {0};
+    char error[160] = {0};
+    uint8_t *stage = malloc(4u * 16384u);
+    assert(stage);
+    for (unsigned pass = 0u; pass < 48u; ++pass) {
+        const size_t page = (pass & 1u) ? 4096u : 16384u;
+        if (ios27_darwin_link_objects(
+                inputs, 2u, "_fixture_read_data",
+                stage, 4u * 16384u, UINT32_C(0x100000),
+                page, &layout, error, sizeof(error)) != 0) {
+            fprintf(stderr, "phase19d GOT linking failed: %s\n", error);
+            assert(!"phase19d multi-object GOT link failed");
+        }
+        assert(layout.rx_bytes == page);
+        assert(layout.ro_bytes == page);
+        assert(layout.rw_bytes == 0u);
+        assert(layout.image_bytes == 2u * page);
+        assert(layout.entry_offset < layout.rx_bytes);
+    }
+#if defined(__aarch64__) && defined(__linux__)
+    {
+        long page = sysconf(_SC_PAGESIZE);
+        uint8_t *map;
+        uintptr_t addr;
+        int (*entry)(void);
+        assert(page == 4096L || page == 16384L);
+        map = mmap(NULL, 4u * (size_t)page,
+                   PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        assert(map != MAP_FAILED);
+        assert(ios27_darwin_link_objects(
+                   inputs, 2u, "_fixture_read_data",
+                   map, 4u * (size_t)page, (uintptr_t)map,
+                   (size_t)page, &layout, error, sizeof(error)) == 0);
+        __builtin___clear_cache((char *)map,
+                                (char *)map + layout.rx_bytes);
+        assert(mprotect(map, layout.rx_bytes,
+                        PROT_READ | PROT_EXEC) == 0);
+        assert(mprotect(map + layout.rx_bytes, layout.ro_bytes,
+                        PROT_READ) == 0);
+        addr = (uintptr_t)(map + layout.entry_offset);
+        memcpy(&entry, &addr, sizeof(entry));
+        assert(entry() == 43);
+        assert(munmap(map, 4u * (size_t)page) == 0);
+    }
+#endif
+    free(stage);
+}
+
+
+/* Four separately compiled Mach-O objects, two independent external
+ * bindings, shared executable layout and a const-data/GOT subgraph. */
+static void phase19d_quad_link(const char *consumer_path,
+                               const uint8_t *data_consumer, size_t dc_size,
+                               const uint8_t *data_provider, size_t dp_size) {
+    const char *slash = strrchr(consumer_path, '/');
+    char path[1024];
+    size_t prefix, branch_size, provider_size;
+    uint8_t *branch_consumer, *branch_provider, *map;
+    ios27_darwin_link_input inputs[5];
+    ios27_darwin_link_layout layout = {0};
+    char error[160] = {0};
+    assert(slash);
+    prefix = (size_t)(slash - consumer_path);
+    assert(prefix < 900u);
+    assert(snprintf(path, sizeof(path), "%.*s/arm64_darwin_consumer.o",
+                    (int)prefix, consumer_path) > 0);
+    branch_consumer = load(path, &branch_size);
+    assert(snprintf(path, sizeof(path), "%.*s/arm64_darwin_fixture.o",
+                    (int)prefix, consumer_path) > 0);
+    branch_provider = load(path, &provider_size);
+    inputs[0] = (ios27_darwin_link_input){data_consumer, dc_size};
+    inputs[1] = (ios27_darwin_link_input){data_provider, dp_size};
+    inputs[2] = (ios27_darwin_link_input){branch_consumer, branch_size};
+    inputs[3] = (ios27_darwin_link_input){branch_provider, provider_size};
+    inputs[4] = inputs[2]; /* duplicate export must fail before output write */
+    map = malloc(4u * 16384u);
+    assert(map);
+    for (unsigned pass = 0u; pass < 32u; ++pass) {
+        size_t page = (pass & 1u) ? 4096u : 16384u;
+        assert(ios27_darwin_link_objects(
+                   inputs, 4u, "_fixture_consumer", map,
+                   4u * 16384u, UINT32_C(0x100000), page,
+                   &layout, error, sizeof(error)) == 0);
+        assert(layout.rx_bytes == page && layout.ro_bytes == page);
+        assert(ios27_darwin_link_objects(
+                   inputs, 4u, "_fixture_read_data", map,
+                   4u * 16384u, UINT32_C(0x100000), page,
+                   &layout, error, sizeof(error)) == 0);
+        assert(layout.entry_offset < layout.rx_bytes);
+    }
+    memset(map, 0x3d, 4u * 16384u);
+    assert(ios27_darwin_link_objects(
+               inputs, 5u, "_fixture_consumer", map,
+               4u * 16384u, UINT32_C(0x100000), 4096u,
+               &layout, error, sizeof(error)) == -1);
+    for (size_t i = 0u; i < 4u * 16384u; ++i)
+        assert(map[i] == 0x3du);
+#if defined(__aarch64__) && defined(__linux__)
+    {
+        long page = sysconf(_SC_PAGESIZE);
+        uint8_t *memory;
+        uintptr_t address;
+        int (*fn)(void);
+        assert(page == 4096L || page == 16384L);
+        memory = mmap(NULL, 4u * (size_t)page, PROT_READ | PROT_WRITE,
+                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        assert(memory != MAP_FAILED);
+        assert(ios27_darwin_link_objects(
+                   inputs, 4u, "_fixture_consumer", memory,
+                   4u * (size_t)page, (uintptr_t)memory, (size_t)page,
+                   &layout, error, sizeof(error)) == 0);
+        /* Both entrypoints are exported; the second is found by a second
+         * private link transaction into the same fresh writable mapping. */
+        __builtin___clear_cache((char *)memory,
+                                (char *)memory + layout.rx_bytes);
+        assert(mprotect(memory, layout.rx_bytes,
+                        PROT_READ | PROT_EXEC) == 0);
+        assert(mprotect(memory + layout.rx_bytes, layout.ro_bytes,
+                        PROT_READ) == 0);
+        /* layout.entry_offset currently points at _fixture_consumer. */
+        address = (uintptr_t)(memory + layout.entry_offset);
+        memcpy(&fn, &address, sizeof(fn));
+        assert(fn() == 43);
+        assert(munmap(memory, 4u * (size_t)page) == 0);
+    }
+#endif
+    free(map);
+    free(branch_consumer);
+    free(branch_provider);
 }
 
 int main(int argc, char **argv) {
@@ -162,6 +348,10 @@ int main(int argc, char **argv) {
     wr32(bad + 8u, 2u);
     provider_rejected(bad, provider_size);
 
+    phase19d_real_got(consumer + (size_t)plan.text_file_offset, &plan);
+    phase19d_linked_got(consumer, consumer_size, provider, provider_size);
+    phase19d_quad_link(argv[1], consumer, consumer_size, provider, provider_size);
+
     staged = malloc((size_t)plan.text_size);
     original = malloc((size_t)plan.text_size);
     assert(staged && original);
@@ -209,10 +399,22 @@ int main(int argc, char **argv) {
                (size_t)data_plan.data_size);
         slot_value = (uintptr_t)(mapping + (size_t)page * 2u);
         memcpy(mapping + (size_t)page, &slot_value, sizeof(slot_value));
-        assert(ios27_darwin_got_apply(
-                   mapping, (size_t)plan.text_size, &plan,
-                   (uintptr_t)mapping, (uintptr_t)(mapping + (size_t)page),
-                   error, sizeof(error)) == 0);
+        {
+            ios27_darwin_arm64_reloc relocations[2] = {{0}};
+            relocations[0].offset = plan.ldr_offset;
+            relocations[0].type = 6u;
+            relocations[0].length = 2u;
+            relocations[0].target =
+                (uintptr_t)(mapping + (size_t)page);
+            relocations[1].offset = plan.adrp_offset;
+            relocations[1].type = 5u;
+            relocations[1].length = 2u;
+            relocations[1].pcrel = 1u;
+            relocations[1].target = relocations[0].target;
+            assert(ios27_darwin_arm64_apply_batch(
+                       mapping, (size_t)plan.text_size, (uintptr_t)mapping,
+                       relocations, 2u, error, sizeof(error)) == 0);
+        }
         __builtin___clear_cache((char *)mapping,
                                 (char *)mapping + (size_t)page);
         assert(mprotect(mapping, (size_t)page,
