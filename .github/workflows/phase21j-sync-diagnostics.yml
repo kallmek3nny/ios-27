@@ -28,6 +28,8 @@ jobs:
         env:
           PHASE21J_REPORT_PATH: ${{ runner.temp }}/phase21j-evidence.json
           PHASE21J_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: exercise evidence verifier against forged and incomplete fixtures
+        run: timeout 30s python3 tools/phase21j-test-evidence.py
       - name: reject missing, skipped, or inconsistent native test evidence
         run: timeout 30s python3 tools/phase21j-verify-evidence.py "${{ runner.temp }}/phase21j-evidence.json"
         env:
@@ -61,6 +63,8 @@ jobs:
         env:
           PHASE21J_REPORT_PATH: ${{ runner.temp }}/phase21j-evidence.json
           PHASE21J_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: exercise evidence verifier against forged and incomplete fixtures
+        run: timeout 30s python3 tools/phase21j-test-evidence.py
       - name: reject missing, skipped, or inconsistent native test evidence
         run: timeout 30s python3 tools/phase21j-verify-evidence.py "${{ runner.temp }}/phase21j-evidence.json"
         env:
@@ -93,6 +97,8 @@ jobs:
         env:
           PHASE21J_REPORT_PATH: ${{ runner.temp }}/phase21j-evidence.json
           PHASE21J_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: exercise evidence verifier against forged and incomplete fixtures
+        run: timeout 30s python3 tools/phase21j-test-evidence.py
       - name: reject missing, skipped, or inconsistent native test evidence
         run: timeout 30s python3 tools/phase21j-verify-evidence.py "${{ runner.temp }}/phase21j-evidence.json"
         env:
@@ -125,6 +131,8 @@ jobs:
         env:
           PHASE21J_REPORT_PATH: ${{ runner.temp }}/phase21j-evidence.json
           PHASE21J_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: exercise evidence verifier against forged and incomplete fixtures
+        run: timeout 30s python3 tools/phase21j-test-evidence.py
       - name: reject missing, skipped, or inconsistent native test evidence
         run: timeout 30s python3 tools/phase21j-verify-evidence.py "${{ runner.temp }}/phase21j-evidence.json"
         env:
