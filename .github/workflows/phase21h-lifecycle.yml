@@ -1,0 +1,39 @@
+name: phase21h lifecycle safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/libsystem21h_*'
+      - 'include/ios27/libsystem21h_*'
+      - 'tests/phase21h-*'
+      - 'tools/phase21h-*'
+      - 'docs/phase21h-*'
+      - '.github/workflows/phase21h-lifecycle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle:
+    name: phase21h / ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@v4
+      - name: compiler provenance
+        run: |
+          timeout 30s uname -m
+          timeout 30s cc --version
+          timeout 30s clang --version
+      - name: independent compiled stress and ARM64 Darwin object verification
+        run: timeout 300s python3 tools/phase21h-standalone.py
+      - name: address and undefined behavior sanitizers
+        env:
+          PHASE21H_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase21h-standalone.py
