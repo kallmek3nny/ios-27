@@ -1,0 +1,26 @@
+name: phase21c pthread synchronization
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: install cross compiler
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y clang
+      - name: standalone host and Mach-O compiler tests
+        run: timeout 180s python3 tools/phase21c-standalone.py
