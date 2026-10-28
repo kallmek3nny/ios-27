@@ -2,14 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "83038ea120daacf8dc124799f7818e801f7a72bd",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/83038ea120daacf8dc124799f7818e801f7a72bd",
-    "committed_at": "2026-10-28T18:10:36Z"
+    "sha": "e0d5b3127b0ab861f53b1f7d2f60ad285a742719",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/e0d5b3127b0ab861f53b1f7d2f60ad285a742719",
+    "committed_at": "2026-10-28T18:49:37Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 58,
+      "title": "fix: audit phase19 progress and verify standalone Objective-C/libSystem CI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/58",
+      "head_sha": "6167c8a3fa848b39e2aa36cb84a5f3bc60446594",
+      "merged_at": "2026-10-28T18:49:37Z"
+    },
     {
       "number": 57,
       "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
@@ -58,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/51",
       "head_sha": "f340541b0622159f80cf12411fe11a16ef795926",
       "merged_at": "2026-10-28T17:47:44Z"
-    },
-    {
-      "number": 49,
-      "title": "phase 18c: bounded mach ool, port sets, trailers and guest isolation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/49",
-      "head_sha": "5acf526c319c89d42cbb7166f92f789a76baab90",
-      "merged_at": "2026-10-28T17:45:40Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 51,
+    "branches_scanned": 52,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:11:22Z"
+  "observed_at": "2026-10-28T18:50:28Z"
 }
