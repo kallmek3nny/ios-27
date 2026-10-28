@@ -141,6 +141,68 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
                 status == IOS27_MACH_TOO_LARGE)
                 reply.x[0] = bytes;
             break;
+        case IOS27_DARWIN_FIXTURE_THREAD_CREATE:
+            status = ios27_mach_v2_thread_create(space, task, &a);
+            if (status == IOS27_MACH_OK) reply.x[0] = a;
+            break;
+        case IOS27_DARWIN_FIXTURE_THREAD_DESTROY:
+        case IOS27_DARWIN_FIXTURE_THREAD_IDENTITY:
+            if (!checked32(input->x[0])) return IOS27_MACH_BAD_ARGUMENT;
+            if (selector == IOS27_DARWIN_FIXTURE_THREAD_DESTROY)
+                status = ios27_mach_v2_thread_destroy(space, task,
+                                                       (uint32_t)input->x[0]);
+            else {
+                status = ios27_mach_v2_thread_identity(space, task,
+                                    (uint32_t)input->x[0], &a);
+                if (status == IOS27_MACH_OK) reply.x[0] = a;
+            }
+            break;
+        case IOS27_DARWIN_FIXTURE_EXCEPTION_SET:
+            if (!checked32(input->x[0]) || !checked32(input->x[1]))
+                return IOS27_MACH_BAD_ARGUMENT;
+            status = ios27_mach_v2_exception_set(space, task,
+                                                  (uint32_t)input->x[0],
+                                                  (uint32_t)input->x[1]);
+            break;
+        case IOS27_DARWIN_FIXTURE_EXCEPTION_GET:
+            if (!checked32(input->x[0])) return IOS27_MACH_BAD_ARGUMENT;
+            status = ios27_mach_v2_exception_get(space, task,
+                                                  (uint32_t)input->x[0], &a);
+            if (status == IOS27_MACH_OK) reply.x[0] = a;
+            break;
+        case IOS27_DARWIN_FIXTURE_EXCEPTION_RAISE:
+            if (!checked32(input->x[0]) || !checked32(input->x[1]) ||
+                !checked32(input->x[2]))
+                return IOS27_MACH_BAD_ARGUMENT;
+            status = ios27_mach_v2_exception_raise(space, task,
+                                            (uint32_t)input->x[0],
+                                            (uint32_t)input->x[1],
+                                            (uint32_t)input->x[2]);
+            break;
+        case IOS27_DARWIN_FIXTURE_VM_COPY:
+        case IOS27_DARWIN_FIXTURE_VM_ZERO: {
+            uint64_t start = input->x[0];
+            uint64_t dest = selector == IOS27_DARWIN_FIXTURE_VM_COPY ?
+                            input->x[1] : input->x[0];
+            uint64_t count = selector == IOS27_DARWIN_FIXTURE_VM_COPY ?
+                             input->x[2] : input->x[1];
+            if (!arena || count > IOS27_DARWIN_FIXTURE_VM_MAX ||
+                dest > (uint64_t)arena_size ||
+                count > (uint64_t)arena_size - dest)
+                return IOS27_MACH_BAD_ARGUMENT;
+            if (selector == IOS27_DARWIN_FIXTURE_VM_COPY) {
+                if (start > (uint64_t)arena_size ||
+                    count > (uint64_t)arena_size - start)
+                    return IOS27_MACH_BAD_ARGUMENT;
+                memmove(arena + (size_t)dest, arena + (size_t)start,
+                        (size_t)count);
+            } else {
+                memset(arena + (size_t)dest, 0, (size_t)count);
+            }
+            reply.x[0] = count;
+            status = IOS27_MACH_OK;
+            break;
+        }
         default:
             return IOS27_MACH_UNSUPPORTED;
     }
