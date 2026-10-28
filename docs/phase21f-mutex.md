@@ -91,3 +91,14 @@ For longer work sessions, the bounded no-idle orchestrator is available:
 It alternates gcc/clang campaigns, verifies each child's success, and records
 actual UTC start/end timestamps plus elapsed test duration. Each wave and the
 entire session are hard-bounded. No reported duration is estimated or padded.
+
+## optional sustained sanitizers
+
+`timeout 720s python3 tools/phase21f-sanitizer-campaign.py --sanitizer tsan --duration 600`
+
+`timeout 720s python3 tools/phase21f-sanitizer-campaign.py --sanitizer asan --duration 600`
+
+Both are optional independent, strictly bounded native multithreaded runs.
+They vary the randomized workload seed and interleave queue and graph tests.
+TSAN uses GCC; ASAN plus UBSAN uses Clang. No sanitizer success is
+assumed from a missing runtime or compiler.
