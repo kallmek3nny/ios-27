@@ -1,21 +1,22 @@
 "use strict";
 const fs=require("node:fs");
 const path=require("node:path");
-const makeMap = function makeMap(data,colors,names,esc,count,gather){
+const makeMap = function makeMap(data,colors,names,esc,count,gather,live){
   const width=760, margin=18, mapW=724;
   const panels=data.panels.map(panel=>{
     const groups=gather(panel.id);
     const targets=groups.flatMap(g=>g.targets);
     return {panel,groups,targets,h:Math.round(Math.max(230,Math.min(485,166+0.92*targets.length)))};
   });
-  const top=82,header=58,gap=24,bottom=66;
+  const top=100,header=58,gap=24,bottom=70;
   const height=top+panels.reduce((a,p)=>a+header+p.h+gap,0)+bottom;
   const svg=[
     '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="ios-27 tracked API sample with proportional component size and evidence status">',
     '<style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>',
     '<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3">ios-27 / compatibility</text>',
-    '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e">component size = tracked targets · color = test evidence</text>'
+    '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e">component area = tracked targets · color = test evidence</text>'
   ];
+  svg.push('<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e">main '+esc(live && live.main_source ? live.main_source.sha.slice(0,8) : "unknown")+' · '+(live && Array.isArray(live.open_pull_requests) ? live.open_pull_requests.length : 0)+' incoming prs</text>');
   const rect=(x,y,w,h,color,r)=>{
     if(![x,y,w,h].every(Number.isFinite)||w<0||h<0)throw Error("invalid rectangle");
     return '<rect x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="'+(r||0)+'" fill="'+color+'"/>';
@@ -87,7 +88,7 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
       const g=box.group,x=box.x+2,y0=box.y+2,w=Math.max(0,box.w-4),h=Math.max(0,box.h-4);
       svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' targets · '+g.ceiling+' ceiling')+'</title>');
       svg.push(rect(x,y0,w,h,"#161b22",3));
-      const labelH=(w>82&&h>38)?22:0;
+      const labelH=(w>82&&h>43)?29:0;
       const iw=Math.max(0,w-4),ih=Math.max(0,h-4-labelH);
       const rows=Math.max(1,Math.min(g.targets.length,Math.round(Math.sqrt(g.targets.length*ih/Math.max(iw,1)))));
       let index=0;
@@ -110,6 +111,13 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
         const maxChars=Math.max(3,Math.floor((w-(showPercent?52:12))/6.1));
         const label=g.label.length>maxChars?g.label.slice(0,maxChars-1)+"…":g.label;
         svg.push('<text x="'+(x+6).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9">'+esc(label)+'</text>');
+        if(w>=105){
+          const green=g.targets.filter(t=>t.status==="native-fixture").length;
+          const amber=g.targets.filter(t=>t.status==="synthetic").length;
+          svg.push(rect(x+6,y0+22,w-12,2,"#30363d",1));
+          if(green)svg.push(rect(x+6,y0+22,(w-12)*green/g.targets.length,2,colors["native-fixture"],1));
+          if(amber)svg.push(rect(x+6+(w-12)*green/g.targets.length,y0+22,(w-12)*amber/g.targets.length,2,colors.synthetic,1));
+        }
         if(showPercent){
           svg.push('<text x="'+(x+w-7).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="'+(evidence?"#d29922":"#8b949e")+'">'+Math.round(100*evidence/g.targets.length)+'%</text>');
         }
@@ -142,7 +150,7 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
   themed.push('</svg>');
   return {svg:themed,totals};
 };
-const render = function render(data){
+const render = function render(data,live){
   "use strict";
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const colors={"native-fixture":"#3fb950","synthetic":"#d29922","missing":"#30363d","excluded":"#b85c64"};
@@ -158,7 +166,7 @@ const render = function render(data){
     for(const t of g.targets){if(!t.name||seen.has(t.name)||!(t.status in names))throw Error("invalid target "+g.id+" "+t.name);seen.add(t.name);}
     if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")&&(!g.evidence||!g.test))throw Error("unproven status "+g.id);
   }
-  const {svg,totals}=makeMap(data,colors,names,esc,count,gather);
+  const {svg,totals}=makeMap(data,colors,names,esc,count,gather,live);
   const md=[
     "# ios-27 | API/function block map and feasibility ceilings","",
     "![per-function compatibility block map](blocks.svg)","",
@@ -166,7 +174,7 @@ const render = function render(data){
       +"green = native ARM64 test fixture only; amber = parser, bounded synthetic Mach model or syscall interpreter probe; "
       +"grey = not implemented; red = expressly excluded by userspace-only policy. "
       +"No color means that a real Apple framework or application is runnable.","",
-    "[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md)","",
+    "[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md) · [Audited ceilings](CEILINGS.md) · [Live provenance](repo-status.json)","",
     "The displayed percentages are **sample evidence coverage**: native fixtures plus synthetic probes divided by explicitly tracked targets, not real iOS framework compatibility.","",
     "## counted target samples","",
     "| layer | native fixtures | synthetic/probe | unimplemented | excluded | sampled targets |",
@@ -176,7 +184,16 @@ const render = function render(data){
     md.push("| **"+item.panel.title+"** | **"+item.c["native-fixture"]+"** | **"+item.c.synthetic+"** | **"+item.c.missing+"** | **"+item.c.excluded+"** | **"+item.total+"** |");
     for(const g of item.groups){const c=count(g.targets);md.push("| ↳ "+g.label+" | "+c["native-fixture"]+" | "+c.synthetic+" | "+c.missing+" | "+c.excluded+" | "+g.targets.length+" |");}
   }
-  md.push("","## realistic ceilings for every tracked area","");
+  md.push("","## merged main and incoming work","",
+    "confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.","",
+    "main source: `"+(live && live.main_source?live.main_source.sha.slice(0,12):"unavailable")+"`","");
+  if(live && Array.isArray(live.open_pull_requests)){
+    for(const p of live.open_pull_requests.slice(0,8)){
+      const n=Number(p.number);
+      if(Number.isSafeInteger(n)&&n>0)md.push("- [PR #"+n+"](https://github.com/kallmek3nny/ios-27/pull/"+n+") · incoming, not counted");
+    }
+  }
+  md.push("","## realistic ceilings for every tracked area","","[Why these ceilings are not numerical guarantees](CEILINGS.md).","");
   for(const item of totals){
     md.push("### "+item.panel.title,"");
     for(const g of item.groups)md.push("- **"+g.label+"** · **"+g.ceiling+"** ("+classes[g.ceiling]+"). "+g.note);
@@ -229,7 +246,10 @@ for(const g of data.groups){if(g.targets.some(t=>t.status==="native-fixture"||t.
  if(!g.evidence||!g.test||g.evidence.startsWith("/")||g.evidence.includes("..")||!fs.existsSync(path.join(root,g.evidence)))throw Error("missing evidence for "+g.id);
  if(!new RegExp("add_test\\s*\\(\\s*NAME\\s+"+g.test.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?:\\s|\\))").test(cmake))throw Error("missing registered CTest for "+g.id+" "+g.test);
 }}
-const result=render(data);
+const liveFile=path.join(root,"docs/repo-status.json");
+const live=fs.existsSync(liveFile)?JSON.parse(fs.readFileSync(liveFile,"utf8")):null;
+if(live&&(live.schema!==1||!live.main_source||!/^[0-9a-f]{40}$/.test(live.main_source.sha)||!Array.isArray(live.open_pull_requests)))throw Error("invalid repo provenance");
+const result=render(data,live);
 const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md]];
 if(process.argv.includes("--check")){const stale=files.filter(([name,content])=>{const file=path.join(root,name);return !fs.existsSync(file)||fs.readFileSync(file,"utf8")!==content;}).map(([name])=>name);if(stale.length){process.stderr.write("stale block outputs: "+stale.join(", ")+"\n");process.exit(1);}}
 else {for(const [name,content] of files)fs.writeFileSync(path.join(root,name),content,"utf8");}

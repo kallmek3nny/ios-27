@@ -1088,8 +1088,8 @@
       "id": "mach-o",
       "label": "mach-o parser and native loader",
       "ceiling": "plausible",
-      "note": "source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.",
-      "evidence": "docs/phase17a-native-multisegment-execution.md",
+      "note": "merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.",
+      "evidence": "docs/phase18a-darwin-process-startup.md",
       "test": "compiled-darwin-real-mh-execute",
       "targets": [
         {
@@ -1122,7 +1122,7 @@
         },
         {
           "name": "darwin user stack",
-          "status": "missing"
+          "status": "native-fixture"
         },
         {
           "name": "full process startup",
@@ -1147,8 +1147,8 @@
       "id": "dyld-engine",
       "label": "dyld / image graph",
       "ceiling": "conditional",
-      "note": "linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.",
-      "evidence": "docs/phase17b-linked-multiimage.md",
+      "note": "merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.",
+      "evidence": "docs/phase18b-linked-graph.md",
       "test": "native-multi-image-wx",
       "targets": [
         {

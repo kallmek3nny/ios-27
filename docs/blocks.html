@@ -288,10 +288,10 @@
 </div></details>
 </section>
 <section class="panel"><h2>darwin runtime / native compatibility</h2><p class="lead">narrow tests, parser contracts and mach models; NOT general ios execution</p>
-<p class="stats">85 targets · 3 native · 34 synthetic · 46 missing · 2 excluded</p>
-<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">2 native, 5 synthetic, 12 targets</span></summary>
-<p>source-backed features are only demonstrated for supported reviewed sdk-free arm64 fixtures. no process sandbox or general ios binary execution.</p>
-<p>evidence: <a href="../docs/phase17a-native-multisegment-execution.md">docs/phase17a-native-multisegment-execution.md</a> · test: compiled-darwin-real-mh-execute</p>
+<p class="stats">85 targets · 4 native · 34 synthetic · 45 missing · 2 excluded</p>
+<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">3 native, 5 synthetic, 12 targets</span></summary>
+<p>merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.</p>
+<p>evidence: <a href="../docs/phase18a-darwin-process-startup.md">docs/phase18a-darwin-process-startup.md</a> · test: compiled-darwin-real-mh-execute</p>
 <div class="chips">
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>thin arm64 parsing</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>universal arm64 inventory</span></div>
@@ -300,15 +300,15 @@
 <div class="chip" title="native arm64 fixture"><span class="sq" style="background:#3fb950"></span><span>multi-segment native entry</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>16k-compatible fixture mapping</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>w-x sealing and rollback</span></div>
-<div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>darwin user stack</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#3fb950"></span><span>darwin user stack</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>full process startup</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>tls and thread initialization</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>untrusted binary isolation</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>real apple app entry</span></div>
 </div></details>
 <details class="group"><summary><strong>dyld / image graph</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 9 synthetic, 16 targets</span></summary>
-<p>linked fixtures and rebases exist in a bounded explicit graph; full dyld cache, arm64e, closures and app relocations remain missing.</p>
-<p>evidence: <a href="../docs/phase17b-linked-multiimage.md">docs/phase17b-linked-multiimage.md</a> · test: native-multi-image-wx</p>
+<p>merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.</p>
+<p>evidence: <a href="../docs/phase18b-linked-graph.md">docs/phase18b-linked-graph.md</a> · test: native-multi-image-wx</p>
 <div class="chips">
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>virtual @rpath resolution</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>export trie parse</span></div>
