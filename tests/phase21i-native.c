@@ -51,6 +51,30 @@ static void *waiter(void *arg) {
 static void write_le64(uint8_t *dest, uint64_t value) {
     for (unsigned i = 0; i < 8; ++i) dest[i] = (uint8_t)(value >> (8u*i));
 }
+typedef struct {
+    ios27_21i_runtime *rt;
+    pthread_barrier_t ready;
+} cancel_state;
+static void *cancelled_mutex_wait(void *arg) {
+    cancel_state *s = arg;
+    (void)pthread_barrier_wait(&s->ready);
+    OK(CALL(s->rt, "mutex_lock", MUTEX, 0, 0));
+    OK(CALL(s->rt, "mutex_unlock", MUTEX, 0, 0));
+    return NULL;
+}
+static void cancelled_unlock(void *arg) {
+    cancel_state *s = arg;
+    OK(CALL(s->rt, "mutex_unlock", MUTEX, 0, 0));
+}
+static void *cancelled_condition_wait(void *arg) {
+    cancel_state *s = arg;
+    OK(CALL(s->rt, "mutex_lock", MUTEX, 0, 0));
+    (void)pthread_barrier_wait(&s->ready);
+    pthread_cleanup_push(cancelled_unlock, s);
+    (void)CALL(s->rt, "cond_wait", RELEASE, MUTEX, 0);
+    pthread_cleanup_pop(1);
+    return NULL;
+}
 static void test_bridge(void) {
     uint8_t memory[4096] = {0};
     ios27_21i_guest guest = {memory, sizeof(memory), BASE, 64, 48, 8, 8};
@@ -119,6 +143,33 @@ static void test_bridge(void) {
     OK(CALL(rt, "mutex_unlock", MUTEX, 0, 0));
     for (int i = 0; i < 12; ++i) OK(pthread_join(threads[i], NULL));
     CHECK(condition.finished == 12);
+    /* Cancellation of a contended mutex must drop bridge in-flight refs. */
+    cancel_state cancel = {0};
+    pthread_t cancelled_thread;
+    void *cancel_result = NULL;
+    cancel.rt = rt;
+    OK(pthread_barrier_init(&cancel.ready, NULL, 2));
+    OK(CALL(rt, "mutex_lock", MUTEX, 0, 0));
+    OK(pthread_create(&cancelled_thread, NULL, cancelled_mutex_wait, &cancel));
+    (void)pthread_barrier_wait(&cancel.ready);
+    OK(pthread_cancel(cancelled_thread));
+    OK(pthread_join(cancelled_thread, &cancel_result));
+    CHECK(cancel_result == PTHREAD_CANCELED);
+    CHECK(CALL(rt, "mutex_destroy", MUTEX, 0, 0) == EBUSY);
+    OK(CALL(rt, "mutex_unlock", MUTEX, 0, 0));
+    OK(pthread_barrier_destroy(&cancel.ready));
+    /* Cond cancellation must restore guest ownership for cleanup handlers. */
+    OK(pthread_barrier_init(&cancel.ready, NULL, 2));
+    cancel_result = NULL;
+    OK(pthread_create(&cancelled_thread, NULL, cancelled_condition_wait, &cancel));
+    (void)pthread_barrier_wait(&cancel.ready);
+    OK(CALL(rt, "mutex_lock", MUTEX, 0, 0));
+    CHECK(CALL(rt, "cond_destroy", RELEASE, 0, 0) == EBUSY);
+    OK(CALL(rt, "mutex_unlock", MUTEX, 0, 0));
+    OK(pthread_cancel(cancelled_thread));
+    OK(pthread_join(cancelled_thread, &cancel_result));
+    CHECK(cancel_result == PTHREAD_CANCELED);
+    OK(pthread_barrier_destroy(&cancel.ready));
     OK(CALL(rt, "mutex_destroy", OTHER, 0, 0));
     OK(CALL(rt, "cond_destroy", READY, 0, 0));
     OK(CALL(rt, "cond_destroy", RELEASE, 0, 0));
@@ -134,6 +185,6 @@ static void test_bridge(void) {
     }
     OK(CALL(rt, "mutex_destroy", MUTEX, 0, 0));
     OK(ios27_21i_destroy(rt));
-    puts("phase21i: guest bounds, overlap, 48k contested ops, 12 waiters, timed waits, 300 recycling cycles, and teardown passed");
+    puts("phase21i: guest bounds, overlap, 48k contested ops, 12 waiters, cancellation cleanup, timed waits, 300 recycling cycles, and teardown passed");
 }
 int main(void) { test_bridge(); return 0; }
