@@ -56,18 +56,169 @@ static void initialize_zerofill(const uint8_t *file,
         cursor += (size_t)read32(cmd + 4u);
     }
 }
+
+/*
+ * LC_MAIN uses the Darwin C main ABI, not a Linux process-entry stack.
+ * An out-of-line trampoline is mandatory: C compilers assume SP is stable.
+ * Preserve host callee-saved state and leave platform register x18 alone.
+ * This trusted SDK-free guest must return normally.
+ */
+__asm__(".text\n"
+        ".global ios27_arm64_enter_main\n"
+        ".type ios27_arm64_enter_main, %function\n"
+        "ios27_arm64_enter_main:\n"
+        "stp x29, x30, [sp, #-16]!\n"
+        "stp x19, x20, [sp, #-16]!\n"
+        "mov x19, sp\n"
+        "mov x9, x0\n"
+        "mov x10, x1\n"
+        "mov x0, x2\n"
+        "mov x1, x3\n"
+        "mov x2, x4\n"
+        "mov x3, x5\n"
+        "mov sp, x10\n"
+        "blr x9\n"
+        "mov sp, x19\n"
+        "ldp x19, x20, [sp], #16\n"
+        "ldp x29, x30, [sp], #16\n"
+        "ret\n"
+        ".size ios27_arm64_enter_main, .-ios27_arm64_enter_main\n");
+
+extern int ios27_arm64_enter_main(uintptr_t entry, uintptr_t guest_sp,
+                                  int argc, char **argv, char **envp,
+                                  char **apple);
+
+#define IOS27_GUEST_MAX_ARGS 128u
+#define IOS27_GUEST_MAX_STRING 4096u
+#define IOS27_GUEST_MAX_BYTES (64u * 1024u)
+#define IOS27_GUEST_DEFAULT_STACK (1024u * 1024u)
+#define IOS27_GUEST_MAX_STACK (8u * 1024u * 1024u)
+
+typedef struct {
+    uint8_t *reservation;
+    size_t size;
+    uintptr_t sp;
+    char **argv;
+    char **envp;
+    char **apple;
+} ios27_guest_stack;
+
+static void release_guest_stack(ios27_guest_stack *stack) {
+    if (stack->reservation)
+        (void)munmap(stack->reservation, stack->size);
+    memset(stack, 0, sizeof(*stack));
+}
+
+/* All argument checks precede stack allocation and executable mappings. No
+ * host environment is automatically passed to the Darwin image. */
+static int prepare_guest_stack(int argc, const char *const argv[],
+                               const char *const envp[], uint64_t requested,
+                               size_t page_size, ios27_guest_stack *stack,
+                               char *error, size_t error_size) {
+    size_t env_count = 0u, payload = 0u, capacity;
+    size_t count, vector_bytes;
+    char *args[IOS27_GUEST_MAX_ARGS];
+    char *env[IOS27_GUEST_MAX_ARGS];
+    uintptr_t cursor, base;
+    uint8_t *mapped;
+    memset(stack, 0, sizeof(*stack));
+    if (argc < 0 || argc > (int)IOS27_GUEST_MAX_ARGS ||
+        (argc != 0 && !argv))
+        return fail(error, error_size, "invalid guest argc/argv");
+    if (envp) {
+        while (env_count <= IOS27_GUEST_MAX_ARGS && envp[env_count])
+            ++env_count;
+        if (env_count > IOS27_GUEST_MAX_ARGS)
+            return fail(error, error_size, "too many guest environment variables");
+    }
+    count = (size_t)argc;
+    vector_bytes = (count + env_count + 3u) * sizeof(char *);
+    for (size_t i = 0u; i < count + env_count; ++i) {
+        const char *value = i < count ? argv[i] : envp[i - count];
+        const char *end;
+        size_t n;
+        if (!value)
+            return fail(error, error_size, "null guest argument");
+        end = memchr(value, '\0', IOS27_GUEST_MAX_STRING);
+        if (!end)
+            return fail(error, error_size, "guest argument exceeds string limit");
+        n = (size_t)(end - value) + 1u;
+        if (n > IOS27_GUEST_MAX_BYTES - payload)
+            return fail(error, error_size, "guest argument payload too large");
+        payload += n;
+    }
+    if (requested > IOS27_GUEST_MAX_STACK)
+        return fail(error, error_size, "LC_MAIN stacksize exceeds trusted limit");
+    capacity = requested ? (size_t)requested : IOS27_GUEST_DEFAULT_STACK;
+    if (capacity < 65536u)
+        capacity = 65536u;
+    if (capacity > SIZE_MAX - (page_size - 1u))
+        return fail(error, error_size, "guest stack capacity overflow");
+    capacity = (capacity + page_size - 1u) & ~(page_size - 1u);
+    if (capacity < payload + vector_bytes + 16384u ||
+        capacity > SIZE_MAX - 2u * page_size)
+        return fail(error, error_size, "guest stack insufficient for arguments");
+    stack->size = capacity + 2u * page_size;
+    mapped = mmap(NULL, stack->size, PROT_NONE,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (mapped == MAP_FAILED) {
+        stack->size = 0u;
+        return fail(error, error_size, "guest stack reservation failed");
+    }
+    stack->reservation = mapped;
+    if (mprotect(mapped + page_size, capacity, PROT_READ | PROT_WRITE))
+        goto failed;
+    base = (uintptr_t)(mapped + page_size);
+    cursor = base + capacity;
+    for (size_t i = count; i > 0u; --i) {
+        size_t n = strlen(argv[i - 1u]) + 1u;
+        cursor -= n;
+        memcpy((void *)cursor, argv[i - 1u], n);
+        args[i - 1u] = (char *)cursor;
+    }
+    for (size_t i = env_count; i > 0u; --i) {
+        size_t n = strlen(envp[i - 1u]) + 1u;
+        cursor -= n;
+        memcpy((void *)cursor, envp[i - 1u], n);
+        env[i - 1u] = (char *)cursor;
+    }
+    cursor &= ~(uintptr_t)15u;
+    cursor -= vector_bytes;
+    cursor &= ~(uintptr_t)15u;
+    if (cursor < base + 16384u)
+        goto failed;
+    stack->sp = cursor;
+    stack->argv = (char **)cursor;
+    stack->envp = stack->argv + count + 1u;
+    stack->apple = stack->envp + env_count + 1u;
+    for (size_t i = 0u; i < count; ++i)
+        stack->argv[i] = args[i];
+    stack->argv[count] = NULL;
+    for (size_t i = 0u; i < env_count; ++i)
+        stack->envp[i] = env[i];
+    stack->envp[env_count] = NULL;
+    stack->apple[0] = NULL;
+    return 0;
+failed:
+    release_guest_stack(stack);
+    return fail(error, error_size, "guest stack protection/setup failed");
+}
 #endif
 
-int ios27_run_freestanding(const uint8_t *data, size_t size,
-                          const ios27_macho_info *info,
-                          int *exit_code, char *error, size_t error_size) {
+int ios27_run_executable_argv(const uint8_t *data, size_t size,
+                             const ios27_macho_info *info,
+                             int argc, const char *const argv[],
+                             const char *const envp[],
+                             int *exit_code, char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
+    (void)argc; (void)argv; (void)envp;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
+    ios27_guest_stack guest;
     if (!data || !info || !exit_code || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
     /* Fail closed on unsupported host pages, stale metadata or W^X ambiguity.
@@ -75,12 +226,15 @@ int ios27_run_freestanding(const uint8_t *data, size_t size,
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
         return -1;
-    if (info->stacksize != 0u)
-        return fail(error, error_size, "nonzero LC_MAIN stacksize not implemented");
+    if (prepare_guest_stack(argc, argv, envp, info->stacksize,
+                            layout.page_size, &guest, error, error_size))
+        return -1;
     mapping = mmap(NULL, layout.span, PROT_NONE,
                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (mapping == MAP_FAILED)
+    if (mapping == MAP_FAILED) {
+        release_guest_stack(&guest);
         return fail(error, error_size, "native VM reservation failed");
+    }
 
     for (size_t i = 0u; i < info->segment_count; ++i) {
         const ios27_segment *s = &info->segments[i];
@@ -127,19 +281,30 @@ int ios27_run_freestanding(const uint8_t *data, size_t size,
             goto mapping_failed;
     }
     {
-        /* Trusted fixture ABI: int entry(void); no Darwin services or stack. */
-        int (*entry)(void);
-        uintptr_t address = (uintptr_t)(mapping +
-                              (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        memcpy(&entry, &address, sizeof(entry));
-        *exit_code = entry();
+        uintptr_t entry = (uintptr_t)(mapping +
+                            (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
+        /* Only ordinary returns are supported, not Darwin process exit,
+         * dyld, ObjC, syscalls or exception unwinding. */
+        int result = ios27_arm64_enter_main(entry, guest.sp, argc, guest.argv,
+                                             guest.envp, guest.apple);
+        *exit_code = result;
     }
     (void)munmap(mapping, layout.span);
+    release_guest_stack(&guest);
     if (error && error_size) error[0] = '\0';
     return 0;
 
 mapping_failed:
     (void)munmap(mapping, layout.span); /* unwind the entire reservation */
+    release_guest_stack(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");
 #endif
+}
+
+/* Preserve the no-argument API for existing compiler-produced fixtures. */
+int ios27_run_freestanding(const uint8_t *data, size_t size,
+                          const ios27_macho_info *info,
+                          int *exit_code, char *error, size_t error_size) {
+    return ios27_run_executable_argv(data, size, info, 0, NULL, NULL,
+                                      exit_code, error, error_size);
 }
