@@ -62,9 +62,10 @@ int main(void) {
         CHECK(pthread_join(threads[i], NULL) == 0);
     CHECK(atomic_load_explicit(&success, memory_order_relaxed) ==
           (uint64_t)WORKERS * ITERATIONS);
-    CHECK(atomic_load_explicit(&denied, memory_order_relaxed) > 0);
+    /* An allowed single-core schedule can serialize the workers entirely;
+     * the separate full-capacity test guarantees EAGAIN coverage. */
     CHECK(ios27_21f_runtime_destroy(rt) == 0);
-    printf("phase21f lifecycle: %u concurrent reuse cycles, %llu quota refusals passed\n",
+    printf("phase21f lifecycle: %u concurrent reuse cycles passed, %llu quota refusals observed\n",
            WORKERS * ITERATIONS,
            (unsigned long long)atomic_load_explicit(&denied, memory_order_relaxed));
     return 0;
