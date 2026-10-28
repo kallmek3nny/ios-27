@@ -11,6 +11,11 @@ EXPECTED = {
     "_pthread_cond_destroy", "_pthread_cond_wait", "_pthread_cond_timedwait",
     "_pthread_cond_signal", "_pthread_cond_broadcast",
 }
+ATTR_EXPECTED = {
+    "_pthread_mutexattr_init", "_pthread_mutexattr_settype",
+    "_pthread_mutexattr_destroy", "_pthread_condattr_init",
+    "_pthread_condattr_destroy",
+}
 THREAD_EXPECTED = {
     "_pthread_create", "_pthread_join", "_pthread_mutex_lock",
     "_pthread_mutex_unlock", "_pthread_cond_wait",
@@ -154,10 +159,12 @@ def selftest(original, expected=EXPECTED):
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "--threads":
         expected, pathname = THREAD_EXPECTED, sys.argv[2]
+    elif len(sys.argv) == 3 and sys.argv[1] == "--attrs":
+        expected, pathname = ATTR_EXPECTED, sys.argv[2]
     elif len(sys.argv) == 2:
         expected, pathname = EXPECTED, sys.argv[1]
     else:
-        sys.exit("usage: phase21i-macho.py [--threads] clang-macho-object")
+        sys.exit("usage: phase21i-macho.py [--threads|--attrs] clang-macho-object")
     try:
         selftest(Path(pathname).read_bytes(), expected)
     except (OSError, MachOError, AssertionError) as exc:
