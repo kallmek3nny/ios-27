@@ -22,6 +22,8 @@ struct ios27_21i_runtime {
     ios27_21i_guest guest;
     size_t capacity;
     int apple_lp64_attrs;
+    ios27_21i_access_check access;
+    void *access_context;
     struct entry entries[MAX_SLOTS];
 };
 int ios27_21i_get_stats(ios27_21i_runtime *rt, ios27_21i_stats *out) {
@@ -47,6 +49,14 @@ static int region(const ios27_21i_guest *g, uint64_t addr,
     if (!addr || !alignment || addr % alignment || addr < g->base) return EINVAL;
     offset = addr - g->base;
     if (offset > g->length || length > g->length - (size_t)offset)
+        return EFAULT;
+    return 0;
+}
+static int region_view(ios27_21i_runtime *rt, uint64_t addr,
+                       size_t length, size_t alignment, int writable) {
+    int rc = region(&rt->guest, addr, length, alignment);
+    if (rc) return rc;
+    if (rt->access && rt->access(rt->access_context, addr, length, writable))
         return EFAULT;
     return 0;
 }
@@ -97,6 +107,22 @@ int ios27_21i_create_apple_lp64_attrs(ios27_21i_runtime **out,
     if (!rc) (*out)->apple_lp64_attrs = 1;
     return rc;
 }
+int ios27_21i_create_checked(ios27_21i_runtime **out,
+                              const ios27_21i_guest *g, size_t capacity,
+                              ios27_21i_access_check checker, void *context,
+                              int apple_lp64_attribute_profile) {
+    int rc;
+    if (out) *out = NULL;
+    if (!checker) return EINVAL;
+    rc = apple_lp64_attribute_profile ?
+        ios27_21i_create_apple_lp64_attrs(out, g, capacity) :
+        ios27_21i_create(out, g, capacity);
+    if (!rc) {
+        (*out)->access = checker;
+        (*out)->access_context = context;
+    }
+    return rc;
+}
 int ios27_21i_destroy(ios27_21i_runtime *rt) {
     int rc;
     if (!rt) return EINVAL;
@@ -135,7 +161,7 @@ static int decode_lp64_attr(ios27_21i_runtime *rt, uint64_t addr,
         return 0;
     }
     if (!rt->apple_lp64_attrs) return ENOTSUP;
-    rc = region(&rt->guest, attribute, 16, 8);
+    rc = region_view(rt, attribute, 16, 8, 0);
     if (rc) return rc;
     if (intersects(addr, extent, attribute, 16)) return EINVAL;
     bytes = rt->guest.memory + (size_t)(attribute - rt->guest.base);
@@ -168,7 +194,7 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
                                                   rt->guest.cond_alignment;
     enum ios27_21c_kind backend_kind;
     int rc;
-    rc = region(&rt->guest, addr, extent, alignment);
+    rc = region_view(rt, addr, extent, alignment, 1);
     if (rc) return rc;
     rc = decode_lp64_attr(rt, addr, extent, attributes, kind,
                           &backend_kind);
@@ -200,6 +226,12 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
 static int destroy_object(ios27_21i_runtime *rt, uint64_t addr, int kind) {
     struct entry *e;
     int rc;
+    rc = region_view(rt, addr,
+                     kind == IOS27_21I_MUTEX ? rt->guest.mutex_extent :
+                                              rt->guest.cond_extent,
+                     kind == IOS27_21I_MUTEX ? rt->guest.mutex_alignment :
+                                              rt->guest.cond_alignment, 1);
+    if (rc) return rc;
     (void)pthread_mutex_lock(&rt->guard);
     e = find(rt, addr, kind);
     if (!e) rc = EINVAL;
@@ -264,7 +296,7 @@ static uint64_t read_le64(const uint8_t *p) {
 static int get_deadline(ios27_21i_runtime *rt, uint64_t guest_addr,
                         struct timespec *out) {
     uint64_t offset, sec, nanosec;
-    int rc = region(&rt->guest, guest_addr, 16, 8);
+    int rc = region_view(rt, guest_addr, 16, 8, 0);
     if (rc) return rc;
     offset = guest_addr - rt->guest.base;
     sec = read_le64(rt->guest.memory + (size_t)offset);
@@ -303,7 +335,7 @@ static int dispatch_lp64_attr(ios27_21i_runtime *rt, const char *symbol,
         return ENOSYS;
     }
     if (!rt->apple_lp64_attrs) return ENOTSUP;
-    rc = region(&rt->guest, address, 16, 8);
+    rc = region_view(rt, address, 16, 8, 1);
     if (rc) return rc;
     bytes = rt->guest.memory + (size_t)(address - rt->guest.base);
     signature = mutex_attr ? UINT64_C(0x4d545841) :
@@ -382,6 +414,16 @@ int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
                               IOS27_21I_MUTEX : IOS27_21I_CONDITION);
     kind = (action == LOCK || action == TRYLOCK || action == UNLOCK) ?
            IOS27_21I_MUTEX : IOS27_21I_CONDITION;
+    rc = region_view(rt, a0, kind == IOS27_21I_MUTEX ?
+                     rt->guest.mutex_extent : rt->guest.cond_extent,
+                     kind == IOS27_21I_MUTEX ?
+                     rt->guest.mutex_alignment : rt->guest.cond_alignment, 1);
+    if (rc) return rc;
+    if (action == WAIT || action == TIMEDWAIT) {
+        rc = region_view(rt, a1, rt->guest.mutex_extent,
+                         rt->guest.mutex_alignment, 1);
+        if (rc) return rc;
+    }
     /* Snapshot absolute timeout before taking in-flight references. */
     if (action == TIMEDWAIT) {
         rc = get_deadline(rt, a2, &deadline);
