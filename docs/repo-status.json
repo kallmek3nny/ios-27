@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "bdba487e3985d34f79597c2a8ef8e97bfd925f09",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T18:01:50Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 55,
       "branch": "phase19d-arm64-relocs-20261028",
       "sha": "86fdf47657086ac5ce51396f0ebcb6e69309bd79",
@@ -25,28 +34,9 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
       "updated_at": "2026-10-28T18:01:23Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 54,
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "64506cd5d7827356938cc7ba742cd86eb5be0073",
-      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
-      "updated_at": "2026-10-28T18:00:49Z",
-      "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "bdba487e3985d34f79597c2a8ef8e97bfd925f09",
-      "ahead_by": 13,
-      "behind_by": 3,
-      "last_commit_at": "2026-10-28T18:01:49Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19a-native-startup-20261028",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 56,
@@ -107,9 +97,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 49,
+    "branches_scanned": 48,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:01:55Z"
+  "observed_at": "2026-10-28T18:02:11Z"
 }
