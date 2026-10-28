@@ -34,6 +34,7 @@ _Static_assert(_Alignof(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
 #define IOS27_21A_RWLOCK_STATIC_SIG UINT64_C(0x2da8b3b4)
 #define IOS27_21A_ONCE_STATIC_SIG UINT64_C(0x30b1bcba)
 #define IOS27_21A_MAX_ONCE_CALLBACKS 32u
+#define IOS27_21A_MAX_BOUND_THREADS 64u
 #define IOS27_21A_MAX_OBJECTS 128u
 #define IOS27_21A_MAX_REGIONS 8u
 #define IOS27_21A_READ 1u
@@ -60,6 +61,11 @@ int ios27_21a_destroy(ios27_21a_runtime *rt);
 int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
                             ios27_21a_once_callback callback, void *context);
 int ios27_21a_release_once(ios27_21a_runtime *rt, uint64_t once_address);
+/* Host-thread binding to an existing, mapped guest pthread_t address.
+ * Never cast host pthread_t to guest integer; addresses cannot be reused
+ * within this runtime after detachment (stale-pointer fail-closed policy). */
+int ios27_21a_attach_thread(ios27_21a_runtime *rt, uint64_t guest_thread_addr);
+int ios27_21a_detach_thread(ios27_21a_runtime *rt);
 int ios27_21a_validate_access(ios27_21a_runtime *rt, uint64_t guest_addr,
                               size_t span, size_t alignment, unsigned permissions);
 int ios27_21a_validate(ios27_21a_runtime *rt, uint64_t guest_addr,
