@@ -47,10 +47,9 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `2a1f8af8f814`
+main source: `e84a0f2ca216`
 
 - [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
-- [PR #75](https://github.com/kallmek3nny/ios-27/pull/75) · incoming, not counted
 - [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
@@ -59,16 +58,17 @@ the purple dashed outlines identify components with new source or test changes o
 
 [Live branch diff inventory and CI evidence](BRANCHES.md) · 3 active candidate(s) with recognized code changes.
 
+- **ObjC host prototype (not Apple libobjc)**: 2 unmerged candidate branch(es), not counted
 - **libSystem guest model (not dylib)**: 3 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
 blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
 
-latest scanned merged PRs: **6** · [source diffs](BRANCHES.md).
+latest scanned merged PRs: **7** · [source diffs](BRANCHES.md).
 
 - **ObjC host prototype (not Apple libobjc)**: 1 recently merged code PR(s), compatibility review pending
-- **libSystem guest model (not dylib)**: 5 recently merged code PR(s), compatibility review pending
+- **libSystem guest model (not dylib)**: 6 recently merged code PR(s), compatibility review pending
 
 ## realistic ceilings for every tracked area
 

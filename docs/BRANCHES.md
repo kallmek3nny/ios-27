@@ -4,33 +4,42 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **3** · audited base: `2a1f8af8f814`
+candidate branches with mapped changes: **3** · audited base: `e84a0f2ca216`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `ab52aaeae209` · ci: **running** · unmerged, not credited.
+head: `bbf277a8e0be` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 12 test/fixture files, +2051/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 13 test/fixture files, +2220/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
-
-### [phase21e-cancellation-ownership-20261028](https://github.com/kallmek3nny/ios-27/pull/75)
-
-head: `bed479092c72` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +452/-15 lines
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
 head: `d4e67343ede0` · ci: **passing_checks** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +1450/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1901/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
+- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
+
+### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once)
+
+head: `dd0355350547` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1901/-0 lines
+  - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
+- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **6**
+recent merged PRs with source changes: **7**
+
+### [merged PR #75](https://github.com/kallmek3nny/ios-27/pull/75)
+
+merged: 2026-10-28T20:14:11Z · source changes awaiting function-level audit.
+
+- **libSystem guest model (not dylib)**: 2 source files, 7 fixtures, +452/-15 lines
 
 ### [merged PR #74](https://github.com/kallmek3nny/ios-27/pull/74)
 

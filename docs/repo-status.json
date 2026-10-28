@@ -2,28 +2,19 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "2a1f8af8f814fce750dab39a1baea2695acdc256",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/2a1f8af8f814fce750dab39a1baea2695acdc256",
-    "committed_at": "2026-10-28T20:05:33Z"
+    "sha": "e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
+    "committed_at": "2026-10-28T20:14:11Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "ab52aaeae209862b4e823809096bddc97ba46dd1",
+      "sha": "bbf277a8e0becc86a13fd20eed7911a4205a549a",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T20:12:42Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 75,
-      "branch": "phase21e-cancellation-ownership-20261028",
-      "sha": "bed479092c72f102aa92dbd9acef0e9aa78b1aa0",
-      "title": "phase21e: globally unique cleanup scopes and deep cancellation/ownership tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/75",
-      "updated_at": "2026-10-28T20:12:30Z",
+      "updated_at": "2026-10-28T20:14:11Z",
       "status": "unmerged: not counted"
     },
     {
@@ -36,8 +27,25 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "dd0355350547a536f74100402a4b9474beacbef8",
+      "ahead_by": 4,
+      "behind_by": 58,
+      "last_commit_at": "2026-10-28T20:14:22Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
+    {
+      "number": 75,
+      "title": "phase21e: globally unique cleanup scopes and deep cancellation/ownership tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/75",
+      "head_sha": "bed479092c72f102aa92dbd9acef0e9aa78b1aa0",
+      "merged_at": "2026-10-28T20:14:11Z"
+    },
     {
       "number": 74,
       "title": "phase21e follow-up: runtime identity and deterministic cleanup lifetimes",
@@ -86,20 +94,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
       "merged_at": "2026-10-28T19:22:22Z"
-    },
-    {
-      "number": 66,
-      "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/66",
-      "head_sha": "63818f8893f292b70487ba83742be14de305319b",
-      "merged_at": "2026-10-28T19:22:03Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 32,
+    "branches_scanned": 34,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:12:55Z"
+  "observed_at": "2026-10-28T20:14:29Z"
 }
