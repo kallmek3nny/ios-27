@@ -244,6 +244,88 @@ static void check_graph(uint8_t provider_bytes[IMAGE_SIZE],
 #endif
     ios27_images_unload(images);
 }
+/* Real graph behavior: LC_REEXPORT_DYLIB aliases, weak definitions and
+ * optional absent weak dependencies. All image buffers are caller-owned. */
+static void check_phase17b_graph(void) {
+    static uint8_t leaf[IMAGE_SIZE], wrapper[IMAGE_SIZE];
+    static uint8_t caller_bytes[IMAGE_SIZE], before[IMAGE_SIZE];
+    const char *caller_dep[] = {"provider.dylib"};
+    const char *wrapper_dep[] = {"leaf.dylib"};
+    ios27_image_spec specs[] = {
+        {"consumer.dylib", caller_bytes, IMAGE_SIZE, caller_dep, 1u},
+        {"provider.dylib", wrapper, IMAGE_SIZE, wrapper_dep, 1u},
+        {"leaf.dylib", leaf, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    uintptr_t resolved, leaf_address, entry;
+    char error[128];
+
+    provider(leaf, NULL);
+    /* Weak-definition exports are valid addresses when present. */
+    leaf[EXPORTS_OFF + 4u + strlen("_answer") + 1u] = 4u;
+    provider(wrapper, "leaf.dylib");
+    /* Change the original 3-byte terminal into flags=REEXPORT,
+     * ordinal=1, empty alias, preserving the valid trie length. */
+    wrapper[EXPORTS_OFF + 4u + strlen("_answer") + 1u] = 8u;
+    wrapper[EXPORTS_OFF + 4u + strlen("_answer") + 2u] = 1u;
+    wrapper[EXPORTS_OFF + 4u + strlen("_answer") + 3u] = 0u;
+    le32(wrapper + 120u, 0x8000001fu); /* LC_REEXPORT_DYLIB */
+    consumer(caller_bytes, 4096u);
+    memcpy(before, caller_bytes, IMAGE_SIZE);
+    assert(ios27_images_load(specs, 3u, &images, error, sizeof(error)) == 0);
+    assert(ios27_images_symbol(images, "leaf.dylib", "_answer",
+                               &leaf_address) == 0);
+    assert(ios27_images_symbol(images, "provider.dylib", "_answer",
+                               &resolved) == 0);
+    assert(resolved == leaf_address);
+    assert(ios27_images_symbol(images, "consumer.dylib", "_call",
+                               &entry) == 0);
+    assert(rd64((const uint8_t *)(entry - CODE_OFF + DATA_OFF)) == leaf_address);
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+    {
+        int (*call)(void);
+        memcpy(&call, &entry, sizeof(call));
+        assert(call() == 42);
+    }
+#endif
+    ios27_images_unload(images);
+    assert(memcmp(before, caller_bytes, IMAGE_SIZE) == 0);
+
+    /* Reexport ordinal beyond the declared graph is never a weak success. */
+    wrapper[EXPORTS_OFF + 4u + strlen("_answer") + 2u] = 2u;
+    expect_failure(specs, 3u);
+    wrapper[EXPORTS_OFF + 4u + strlen("_answer") + 2u] = 1u;
+
+    /* An absent LC_LOAD_WEAK_DYLIB is permitted only when the import
+     * itself is weak. The missing address remains exactly null. */
+    consumer(caller_bytes, 4096u);
+    le32(caller_bytes + 192u, 0x80000018u);
+    le32(caller_bytes + FIXUPS_OFF + 64u, 0x101u);
+    memcpy(before, caller_bytes, IMAGE_SIZE);
+    assert(ios27_images_load(specs, 1u, &images, error, sizeof(error)) == 0);
+    assert(ios27_images_symbol(images, "consumer.dylib", "_call",
+                               &entry) == 0);
+    assert(rd64((const uint8_t *)(entry - CODE_OFF + DATA_OFF)) == 0u);
+    ios27_images_unload(images);
+    assert(memcmp(before, caller_bytes, IMAGE_SIZE) == 0);
+    le32(caller_bytes + FIXUPS_OFF + 64u, 1u); /* now strong */
+    expect_failure(specs, 1u);
+    le32(caller_bytes + FIXUPS_OFF + 64u, 0x102u); /* bad ordinal */
+    expect_failure(specs, 1u);
+
+    /* Present weak provider still resolves to its real mapped address. */
+    consumer(caller_bytes, 4096u);
+    le32(caller_bytes + 192u, 0x80000018u);
+    le32(caller_bytes + FIXUPS_OFF + 64u, 0x101u);
+    assert(ios27_images_load(specs, 3u, &images, error, sizeof(error)) == 0);
+    assert(ios27_images_symbol(images, "consumer.dylib", "_call",
+                               &entry) == 0);
+    assert(ios27_images_symbol(images, "leaf.dylib", "_answer",
+                               &leaf_address) == 0);
+    assert(rd64((const uint8_t *)(entry - CODE_OFF + DATA_OFF)) == leaf_address);
+    ios27_images_unload(images);
+}
+
 int main(void) {
     static uint8_t provider_bytes[IMAGE_SIZE];
     static uint8_t consumer_bytes[IMAGE_SIZE];
@@ -378,6 +460,7 @@ int main(void) {
     /* An earlier rejected graph may not poison a subsequent fresh load. */
     classic_consumer(consumer_bytes);
     check_graph(provider_bytes, consumer_bytes, 1);
-    puts("native multi-image entry, W^X and rollback tests passed");
+    check_phase17b_graph();
+    puts("native multi-image entry, W^X, weak, reexports and rollback tests passed");
     return 0;
 }
