@@ -8,19 +8,19 @@
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "a7759a173fd30a0c5433b83932eaeee524f0e7eb",
+      "sha": "32701ded7df77806c10afd8360a60c4ce543d6f9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
+      "files_checked": 14,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 9,
-          "additions": 1783,
+          "fixture_files": 10,
+          "additions": 1861,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_attach_thread",
@@ -89,7 +89,7 @@
         "branch": "phase21a/darwin-pthread-abi-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
-        "fixture_files": 9,
+        "fixture_files": 10,
         "ci": "running"
       },
       {
@@ -379,5 +379,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:08:44Z"
+  "observed_at": "2026-10-28T20:09:06Z"
 }
