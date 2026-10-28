@@ -272,13 +272,15 @@ int ios27_21f_mutex_unlock(ios27_21f_runtime *rt, ios27_21f_handle id) {
 int ios27_21f_mutex_info(ios27_21f_runtime *rt, ios27_21f_handle id,
                           ios27_21f_info *out) {
     mutex_slot *m;
+    int found;
     if (!rt || !out) return EINVAL;
     (void)pthread_mutex_lock(&rt->guard);
     m = lookup(rt, id);
-    if (m) *out = (ios27_21f_info){m->owned, m->depth, m->queued,
-                                  m->handoffs};
+    found = m != NULL;
+    if (found) *out = (ios27_21f_info){m->owned, m->depth, m->queued,
+                                      m->handoffs};
     (void)pthread_mutex_unlock(&rt->guard);
-    return m ? 0 : EINVAL;
+    return found ? 0 : EINVAL;
 }
 int ios27_21f_runtime_stats(ios27_21f_runtime *rt, ios27_21f_stats *out) {
     if (!rt || !out) return EINVAL;

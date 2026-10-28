@@ -35,6 +35,13 @@ def main():
                      str(ROOT / ("tests/phase21f-" + test + ".c")),
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
+        for opt in ("-O0", "-O2"):
+            exe = tmp / ("exhaustion" + opt)
+            run([cc, *flags, opt, "-DIOS27_21F_MAX_WAITERS=16",
+                 str(ROOT / "src/libsystem21f_mutex.c"),
+                 str(ROOT / "tests/phase21f-exhaustion.c"),
+                 "-o", str(exe)], 120)
+            run([str(exe)], 120)
         for target in ("arm64-apple-darwin", "x86_64-apple-darwin"):
             obj = tmp / (target + ".o")
             run([clang, "--target=" + target, "-ffreestanding", "-fno-builtin",

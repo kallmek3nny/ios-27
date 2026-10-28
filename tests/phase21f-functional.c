@@ -67,7 +67,10 @@ int main(void) {
     size_t round;
     REQUIRE(ios27_21f_runtime_create(NULL, 4) == EINVAL);
     REQUIRE(ios27_21f_runtime_create(&rt, 0) == EINVAL);
+    REQUIRE(ios27_21f_runtime_create(&rt, IOS27_21F_MAX_MUTEXES + 1u) == EINVAL);
     REQUIRE(ios27_21f_runtime_create(&rt, 4) == 0);
+    REQUIRE(ios27_21f_runtime_stats(rt, NULL) == EINVAL);
+    REQUIRE(ios27_21f_mutex_create(rt, IOS27_21F_NORMAL, NULL) == EINVAL);
     REQUIRE(ios27_21f_mutex_create(rt, (ios27_21f_kind)77, &a) == EINVAL);
     REQUIRE(ios27_21f_mutex_create(rt, IOS27_21F_NORMAL, &a) == 0);
     REQUIRE(ios27_21f_mutex_create(rt, IOS27_21F_RECURSIVE, &b) == 0);
@@ -75,6 +78,14 @@ int main(void) {
     REQUIRE(ios27_21f_mutex_create(rt, IOS27_21F_NORMAL, &d) == 0);
     REQUIRE(ios27_21f_mutex_create(rt, IOS27_21F_NORMAL, &exhausted) == EAGAIN);
     REQUIRE(ios27_21f_mutex_unlock(rt, a) == EPERM);
+    REQUIRE(ios27_21f_mutex_lock(NULL, a) == EINVAL);
+    REQUIRE(ios27_21f_mutex_trylock(NULL, a) == EINVAL);
+    REQUIRE(ios27_21f_mutex_unlock(NULL, a) == EINVAL);
+    REQUIRE(ios27_21f_mutex_info(NULL, a, &info) == EINVAL);
+    REQUIRE(ios27_21f_mutex_info(rt, a, NULL) == EINVAL);
+    REQUIRE(ios27_21f_mutex_info(rt, (ios27_21f_handle){0, 0}, &info) == EINVAL);
+    REQUIRE(ios27_21f_mutex_lock(rt, (ios27_21f_handle){0, 0}) == EINVAL);
+    REQUIRE(ios27_21f_mutex_trylock(rt, (ios27_21f_handle){0, 0}) == EINVAL);
     REQUIRE(ios27_21f_mutex_lock(rt, a) == 0);
     REQUIRE(ios27_21f_mutex_lock(rt, a) == EDEADLK);
     REQUIRE(ios27_21f_mutex_trylock(rt, a) == EBUSY);

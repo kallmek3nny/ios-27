@@ -5,7 +5,9 @@
 
 /* A bounded native host bridge, NOT a Darwin pthread_mutex_t ABI layout. */
 #define IOS27_21F_MAX_MUTEXES 128u
+#ifndef IOS27_21F_MAX_WAITERS
 #define IOS27_21F_MAX_WAITERS 1024u
+#endif
 typedef struct ios27_21f_runtime ios27_21f_runtime;
 typedef struct { uint32_t slot, generation; } ios27_21f_handle;
 typedef enum {
