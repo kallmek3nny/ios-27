@@ -183,25 +183,48 @@ static int slot_pin(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
                     object_slot **out) {
     unsigned char *p;
     object_slot *s;
-    uint64_t sig, token;
+    uint64_t sig, token, expected;
+    unsigned pass;
     int e = guest_view(rt, address, object_size(kind), 8u, &p);
     if (e) return e;
     *out = NULL;
-    (void)pthread_mutex_lock(&rt->guard);
-    s = find_slot(rt, address);
-    if (!s || s->kind != kind) { e = EINVAL; goto done; }
-    memcpy(&sig, p, sizeof(sig));
-    memcpy(&token, p + sizeof(sig), sizeof(token));
-    if (sig != bridge_sig(kind) || token != s->token) {
-        e = EINVAL;
-        goto done;
+    for (pass = 0; pass < 2u; ++pass) {
+        (void)pthread_mutex_lock(&rt->guard);
+        s = find_slot(rt, address);
+        if (!s) {
+            memcpy(&sig, p, sizeof(sig));
+            (void)pthread_mutex_unlock(&rt->guard);
+            expected = kind == KIND_MUTEX ? IOS27_21A_MUTEX_STATIC_SIG :
+                       kind == KIND_COND ? IOS27_21A_COND_STATIC_SIG : 0u;
+            if (pass == 0u && expected && sig == expected) {
+                /* One winner initializes the static Darwin object; races
+                 * observe the committed bridge record on second pass. */
+                e = slot_init(rt, address, kind, 1);
+                if (e != 0 && e != EBUSY) return e;
+                continue;
+            }
+            return EINVAL;
+        }
+        if (s->kind != kind) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EINVAL;
+        }
+        memcpy(&sig, p, sizeof(sig));
+        memcpy(&token, p + sizeof(sig), sizeof(token));
+        if (sig != bridge_sig(kind) || token != s->token) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EINVAL;
+        }
+        if (s->pins == UINT32_MAX) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EAGAIN;
+        }
+        ++s->pins;
+        *out = s;
+        (void)pthread_mutex_unlock(&rt->guard);
+        return 0;
     }
-    if (s->pins == UINT32_MAX) { e = EAGAIN; goto done; }
-    ++s->pins;
-    *out = s;
-done:
-    (void)pthread_mutex_unlock(&rt->guard);
-    return e;
+    return EINVAL;
 }
 static void slot_unpin(ios27_21a_runtime *rt, object_slot *s) {
     (void)pthread_mutex_lock(&rt->guard);
