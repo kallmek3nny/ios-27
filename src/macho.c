@@ -368,6 +368,10 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
         parsed.encrypted || parsed.unsupported_required ||
         parsed.segment_count == 0u)
         return bad(error, error_size, "not a freestanding LC_MAIN executable");
+    /* Do not accept a process stack request the native runner cannot honor.
+     * Keep the architecture-independent inspector and runtime in sync. */
+    if (parsed.stacksize > UINT64_C(8) * 1024u * 1024u)
+        return bad(error, error_size, "LC_MAIN stacksize exceeds trusted limit");
     if (freestanding_linkedit_safe(data, size, error, error_size) != 0)
         return -1;
 
