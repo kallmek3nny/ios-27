@@ -323,6 +323,17 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
             goto done;
         }
     }
+    /* Guest pthread_t identity cells are permanently reserved; an opaque
+     * object may not overwrite either active or tombstoned thread addresses. */
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *thread = &rt->threads[i];
+        if (thread->occupied &&
+            address < thread->guest_address + sizeof(uint64_t) &&
+            thread->guest_address < address + sz) {
+            e = EBUSY;
+            goto done;
+        }
+    }
     sig = guest_load64(p);
     if (static_initializer) {
         int accepted = kind == KIND_MUTEX ?
