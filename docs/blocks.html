@@ -7,7 +7,7 @@
 <p class="lead">expand any library or subsystem to inspect every tracked function, its current status and the qualitative feasibility ceiling. <a href="BLOCKS.md">counting rules and roadmap</a></p>
 <div class="panels">
 <section class="panel"><h2>system libraries / api targets</h2><p class="lead">representative abi/function contracts, NOT an exhaustive apple export database</p>
-<p class="stats">233 targets · 0 native · 7 synthetic · 226 missing · 0 excluded</p>
+<p class="stats">249 targets · 1 native · 22 synthetic · 226 missing · 0 excluded</p>
 <details class="group"><summary><strong>libsystem_kernel / bsd</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 42 targets</span></summary>
 <p>selected xnu bsd calls can be translated, but guest ownership, cancellation, darwin errno, rights and file isolation need proof. only seven syscall probe selectors currently work in a tiny interpreter, not as linked libsystem exports.</p>
 <p>evidence: <a href="../src/darwin_probe.c">src/darwin_probe.c</a> · test: darwin-svc-probe</p>
@@ -286,12 +286,38 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>TLS trust bridge</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>Network sandbox policy</span></div>
 </div></details>
+<details class="group"><summary><strong>ObjC host prototype (not Apple libobjc)</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 7 synthetic, 8 targets</span></summary>
+<p>Standalone ObjC2 parser and trusted host-callback runtime, not Apple objc_msgSend ABI, guest IMP bindings, categories, arm64e or UIKit.</p>
+<p>evidence: <a href="../docs/phase19e-architecture.md">docs/phase19e-architecture.md</a> · test: undefined</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>Clang ObjC2 absolute metadata parsing</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>metadata relocation and malformed input validation</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>metadata to trusted host IMP bridge</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>host class registration and superclass lookup</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>selector interning and host callback dispatch</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>once-only class initialization and retries</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>bounded host object allocation and release</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#3fb950"></span><span>single relocation-free compiler ObjC method execution</span></div>
+</div></details>
+<details class="group"><summary><strong>libSystem guest model (not dylib)</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 8 synthetic, 8 targets</span></summary>
+<p>Standalone bounded guest trap dispatcher. Not real linked libSystem API exports, Darwin kernel traps, or host filesystem integration.</p>
+<p>evidence: <a href="../docs/phase19e-architecture.md">docs/phase19e-architecture.md</a> · test: undefined</p>
+<div class="chips">
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>guest offset-checked read trap</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>captured guest write trap</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>bounded guest close trap</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>synthetic PID and guest identity</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>Darwin errno for supported traps</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>bounded guest memory arena</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>captured IO without host file access</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>quota-checked host heap ownership</span></div>
+</div></details>
 </section>
 <section class="panel"><h2>darwin runtime / native compatibility</h2><p class="lead">narrow tests, parser contracts and mach models; NOT general ios execution</p>
-<p class="stats">86 targets · 4 native · 37 synthetic · 43 missing · 2 excluded</p>
-<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">3 native, 5 synthetic, 12 targets</span></summary>
+<p class="stats">91 targets · 5 native · 41 synthetic · 43 missing · 2 excluded</p>
+<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">4 native, 5 synthetic, 13 targets</span></summary>
 <p>merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.</p>
-<p>evidence: <a href="../docs/phase18a-darwin-process-startup.md">docs/phase18a-darwin-process-startup.md</a> · test: compiled-darwin-real-mh-execute</p>
+<p>evidence: <a href="../docs/phase19d-relocation-linker.md">docs/phase19d-relocation-linker.md</a> · test: compiled-darwin-real-mh-execute</p>
 <div class="chips">
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>thin arm64 parsing</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>universal arm64 inventory</span></div>
@@ -305,10 +331,11 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>tls and thread initialization</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>untrusted binary isolation</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>real apple app entry</span></div>
+<div class="chip" title="native arm64 fixture"><span class="sq" style="background:#3fb950"></span><span>transactional multi-object ARM64 relocation execution</span></div>
 </div></details>
-<details class="group"><summary><strong>dyld / image graph</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 9 synthetic, 16 targets</span></summary>
+<details class="group"><summary><strong>dyld / image graph</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 10 synthetic, 17 targets</span></summary>
 <p>merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.</p>
-<p>evidence: <a href="../docs/phase18b-linked-graph.md">docs/phase18b-linked-graph.md</a> · test: native-multi-image-wx</p>
+<p>evidence: <a href="../src/images.c">src/images.c</a> · test: native-multi-image-wx</p>
 <div class="chips">
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>virtual @rpath resolution</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>export trie parse</span></div>
@@ -326,10 +353,11 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>launch closure support</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>authenticated arm64e fixups</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>swift tls fixups</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>special ordinal binding and dependency finalizer plan</span></div>
 </div></details>
-<details class="group"><summary><strong>mach ipc model</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 13 synthetic, 17 targets</span></summary>
+<details class="group"><summary><strong>mach ipc model</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 16 synthetic, 20 targets</span></summary>
 <p>phase18c adds synthetic task-local port sets, bounded 128-byte single OOL descriptors and sequence trailers; all operations are synchronous fixture calls, not kernel Mach traps, audit tokens, full OOL VM or entitlement-aware processes.</p>
-<p>evidence: <a href="../docs/phase18c-mach-sets-and-trailers.md">docs/phase18c-mach-sets-and-trailers.md</a> · test: task-local-mach-names</p>
+<p>evidence: <a href="../docs/phase19c-mach-compat.md">docs/phase19c-mach-compat.md</a> · test: task-local-mach-names</p>
 <div class="chips">
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>task-local names</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>send and receive rights</span></div>
@@ -348,6 +376,9 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>host process mach ipc</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>concurrency and races</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>port-set membership and round-robin receive</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>task-local thread identity and stale-handle rejection</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>fixture exception registration and delivery</span></div>
+<div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>bounded guest VM copy/zero model</span></div>
 </div></details>
 <details class="group"><summary><strong>bsd syscall boundary</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 17 targets</span></summary>
 <p>a narrow interpreter responds to six identity calls plus a virtual exit, not general darwin syscalls from native processes.</p>

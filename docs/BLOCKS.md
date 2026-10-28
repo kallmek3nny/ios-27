@@ -12,7 +12,7 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 | layer | native fixtures | synthetic/probe | unimplemented | excluded | sampled targets |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| **system libraries / api targets** | **0** | **7** | **226** | **0** | **233** |
+| **system libraries / api targets** | **1** | **22** | **226** | **0** | **249** |
 | ↳ libsystem_kernel / bsd | 0 | 7 | 35 | 0 | 42 |
 | ↳ libsystem_c / libc | 0 | 0 | 35 | 0 | 35 |
 | ↳ libsystem_pthread | 0 | 0 | 21 | 0 | 21 |
@@ -24,10 +24,12 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 | ↳ Foundation / classes | 0 | 0 | 16 | 0 | 16 |
 | ↳ Security / keychain | 0 | 0 | 12 | 0 | 12 |
 | ↳ CFNetwork / Network.framework | 0 | 0 | 12 | 0 | 12 |
-| **darwin runtime / native compatibility** | **4** | **37** | **43** | **2** | **86** |
-| ↳ mach-o parser and native loader | 3 | 5 | 4 | 0 | 12 |
-| ↳ dyld / image graph | 1 | 9 | 6 | 0 | 16 |
-| ↳ mach ipc model | 0 | 13 | 4 | 0 | 17 |
+| ↳ ObjC host prototype (not Apple libobjc) | 1 | 7 | 0 | 0 | 8 |
+| ↳ libSystem guest model (not dylib) | 0 | 8 | 0 | 0 | 8 |
+| **darwin runtime / native compatibility** | **5** | **41** | **43** | **2** | **91** |
+| ↳ mach-o parser and native loader | 4 | 5 | 4 | 0 | 13 |
+| ↳ dyld / image graph | 1 | 10 | 6 | 0 | 17 |
+| ↳ mach ipc model | 0 | 16 | 4 | 0 | 20 |
 | ↳ bsd syscall boundary | 0 | 7 | 10 | 0 | 17 |
 | ↳ arm64e and abi compatibility | 0 | 0 | 10 | 0 | 10 |
 | ↳ guest security / isolation | 0 | 3 | 9 | 2 | 14 |
@@ -65,6 +67,8 @@ main source: `83038ea120da`
 - **Foundation / classes** · **unknown** (official Apple compatibility unproven). selected class contracts, not every foundation method or real symbols. apple foundation loading has not been demonstrated.
 - **Security / keychain** · **unknown** (official Apple compatibility unproven). keychain, signing, attestation and entitlements rely on an apple-specific trust model that the android host does not provide.
 - **CFNetwork / Network.framework** · **conditional** (needs major compatibility layer). the network path may use android transports through an isolated proxy; authentic apple policy and entitlement behavior is unproven.
+- **ObjC host prototype (not Apple libobjc)** · **conditional** (needs major compatibility layer). Standalone ObjC2 parser and trusted host-callback runtime, not Apple objc_msgSend ABI, guest IMP bindings, categories, arm64e or UIKit.
+- **libSystem guest model (not dylib)** · **conditional** (needs major compatibility layer). Standalone bounded guest trap dispatcher. Not real linked libSystem API exports, Darwin kernel traps, or host filesystem integration.
 
 ### darwin runtime / native compatibility
 
