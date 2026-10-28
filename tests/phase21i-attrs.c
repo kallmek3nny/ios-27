@@ -117,8 +117,28 @@ int main(void) {
     OK(CALL(runtime, "cond_signal", C, 0));
     OK(CALL(runtime, "cond_broadcast", C, 0));
     OK(CALL(runtime, "cond_destroy", C, 0));
+    /* Guest can construct and mutate published LP64 attributes through
+     * actual exported pthread symbols, without Linux host pthread layouts. */
+    OK(CALL(runtime, "mutexattr_init", MATTR, 0));
+    ASSERT(CALL(runtime, "mutexattr_settype", MATTR, 3) == EINVAL);
+    OK(CALL(runtime, "mutexattr_settype", MATTR,
+            UINT64_C(0xffffffff00000002)));
+    OK(CALL(runtime, "mutex_init", M, MATTR));
+    OK(CALL(runtime, "mutex_lock", M, 0));
+    OK(CALL(runtime, "mutex_lock", M, 0));
+    OK(CALL(runtime, "mutex_unlock", M, 0));
+    OK(CALL(runtime, "mutex_unlock", M, 0));
+    OK(CALL(runtime, "mutex_destroy", M, 0));
+    OK(CALL(runtime, "mutexattr_destroy", MATTR, 0));
+    ASSERT(CALL(runtime, "mutex_init", M, MATTR) == EINVAL);
+    ASSERT(CALL(runtime, "mutexattr_destroy", MATTR, 0) == EINVAL);
+    OK(CALL(runtime, "condattr_init", CATTR, 0));
+    OK(CALL(runtime, "cond_init", C, CATTR));
+    OK(CALL(runtime, "cond_destroy", C, 0));
+    OK(CALL(runtime, "condattr_destroy", CATTR, 0));
+    ASSERT(CALL(runtime, "cond_init", C, CATTR) == EINVAL);
     assert_unused(runtime);
     OK(ios27_21i_destroy(runtime));
-    puts("phase21i: Apple LP64 attr signature/bitfield validation, normal/errorcheck/recursive backends, unsupported pshared, and rollback passed");
+    puts("phase21i: Apple LP64 attr exported init/destroy/settype, signature/bitfield validation, recursive/errorcheck/normal, and rollback passed");
     return 0;
 }
