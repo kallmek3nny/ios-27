@@ -18,11 +18,11 @@ INTEGRATION = (
     ROOT / "src/libsystem21e_tls.c",
 )
 
-def run(args, seconds):
+def run(args, seconds, env=None):
     print("+", " ".join(map(str, args)), flush=True)
     completed = subprocess.run(
         args, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, timeout=seconds,
+        text=True, timeout=seconds, env=env,
     )
     if completed.stdout:
         print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n", flush=True)
@@ -30,9 +30,10 @@ def run(args, seconds):
         raise RuntimeError("command failed ({})".format(completed.returncode))
 
 def main():
-    if sys.argv[1:] not in ([], ["--sanitize"]):
-        raise RuntimeError("expected no args or --sanitize")
+    if sys.argv[1:] not in ([], ["--sanitize"], ["--stress"]):
+        raise RuntimeError("expected no args, --sanitize or --stress")
     sanitize = sys.argv[1:] == ["--sanitize"]
+    stress = sys.argv[1:] == ["--stress"]
     architecture = platform.machine().lower()
     if architecture not in ("x86_64", "amd64", "aarch64", "arm64"):
         raise RuntimeError("unexpected native architecture: " + architecture)
@@ -46,10 +47,11 @@ def main():
     if sanitize:
         flags.extend(["-g", "-fsanitize=address,undefined",
                       "-fno-omit-frame-pointer"])
-    print("phase21j native architecture: {}; sanitizer={}".format(
-        architecture, sanitize), flush=True)
+    print("phase21j native architecture: {}; sanitizer={}; stress={}".format(
+        architecture, sanitize, stress), flush=True)
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
-        for optimize in (("-O1",) if sanitize else ("-O0", "-O2")):
+        for optimize in (("-O1",) if sanitize else
+                         ("-O2",) if stress else ("-O0", "-O2")):
             for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
@@ -68,9 +70,17 @@ def main():
                     ])
                 sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
-                run([str(output)], 150)
+                for attempt in range(8 if stress else 1):
+                    env = os.environ.copy()
+                    if stress and test == "integration":
+                        env["PHASE21J_SEED_BASE"] = hex(
+                            0x21A000009F + attempt * 0x10000)
+                        print("phase21j stress seed:", env["PHASE21J_SEED_BASE"],
+                              flush=True)
+                    run([str(output)], 150, env)
     print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots passed".format(
-        "ASan/UBSan" if sanitize else "O0/O2"), flush=True)
+        "ASan/UBSan" if sanitize else
+        "8x native O2 stress" if stress else "O0/O2"), flush=True)
 
 if __name__ == "__main__":
     try:
