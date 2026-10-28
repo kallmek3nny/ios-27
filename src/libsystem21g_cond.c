@@ -73,9 +73,14 @@ static void notify_one(slot *s) {
 static int acquire(ios27_21g_runtime *rt, slot *s) {
     int error;
     if (s->locked && pthread_equal(s->owner, pthread_self())) return EDEADLK;
-    while (s->locked) {
-        error = pthread_cond_wait(&s->gate, &rt->guard);
-        if (error) return error;
+    if (s->locked) {
+        /* Keep destroy from tearing down a gate with blocked acquirers. */
+        ++s->references;
+        while (s->locked) {
+            error = pthread_cond_wait(&s->gate, &rt->guard);
+            if (error) { --s->references; return error; }
+        }
+        --s->references;
     }
     s->locked = 1;
     s->owner = pthread_self();
@@ -170,7 +175,17 @@ int ios27_21g_mutex_lock(ios27_21g_runtime *rt, ios27_21g_handle handle) {
     if (!rt) return EINVAL;
     (void)pthread_mutex_lock(&rt->guard);
     s = lookup(rt, handle, IOS27_21G_MUTEX);
-    error = s ? acquire(rt, s) : EINVAL;
+    if (!s) error = EINVAL;
+    else {
+        int previous;
+        /* POSIX mutex_lock is not a cancellation point, although the
+         * host condition used for contention is one. */
+        (void)pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &previous);
+        error = acquire(rt, s);
+        (void)pthread_mutex_unlock(&rt->guard);
+        (void)pthread_setcancelstate(previous, NULL);
+        return error;
+    }
     (void)pthread_mutex_unlock(&rt->guard);
     return error;
 }
@@ -309,10 +324,14 @@ static int wait_common(ios27_21g_runtime *rt, ios27_21g_handle ch,
     if (--c->references == 0) c->binding = (ios27_21g_handle){0, 0};
     --m->references;
     pthread_cleanup_pop(0);
-    (void)pthread_setcancelstate(previous, NULL);
     if (relock) error = relock;
     /* The waiter is no longer visible to any signaler before destruction. */
     (void)pthread_cond_destroy(&w.cv);
+    (void)pthread_mutex_unlock(&rt->guard);
+    /* Re-enable cancellation only after releasing the internal guard;
+     * a pending cancellation can now run caller cleanup handlers safely. */
+    (void)pthread_setcancelstate(previous, NULL);
+    return error;
 exit:
     (void)pthread_mutex_unlock(&rt->guard);
     return error;
