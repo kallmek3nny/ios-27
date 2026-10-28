@@ -1,5 +1,9 @@
 # ios-27
 
+[capability progress and realistic ceiling](docs/PROGRESS.md)
+
+![evidence-backed subsystem progress](docs/progress.svg)
+
 **Next development agent:** see [HANDOFF.md](HANDOFF.md) for phase 6 status, safety constraints, phase 7 priorities, and PR/CI rules.
 
 **Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
