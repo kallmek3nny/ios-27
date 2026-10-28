@@ -7,7 +7,17 @@
     "committed_at": "2026-10-28T17:47:44Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
+  "open_pull_requests": [
+    {
+      "number": 52,
+      "branch": "fix/ignore-stale-squash-merged-branches",
+      "sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
+      "title": "fix: exclude stale squash-merged refs from recent branch candidates",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/52",
+      "updated_at": "2026-10-28T17:49:34Z",
+      "status": "unmerged: not counted"
+    }
+  ],
   "ahead_branches": [
     {
       "branch": "docs/ios27-capability-progress",
@@ -146,5 +156,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:48:21Z"
+  "observed_at": "2026-10-28T17:50:18Z"
 }
