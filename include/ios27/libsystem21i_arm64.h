@@ -17,4 +17,11 @@ typedef struct {
 int ios27_21i_dispatch_arm64(ios27_21i_runtime *runtime,
                              const char *external_macho_symbol,
                              ios27_21i_arm64_registers *registers);
+/* For Mach-O string tables: accept an exact byte count excluding any NUL.
+ * Reject embedded NUL, non-ASCII and oversized/invalid names without reading
+ * beyond the provided slice or changing the guest register snapshot. */
+int ios27_21i_dispatch_arm64_n(ios27_21i_runtime *runtime,
+                               const char *external_symbol_bytes,
+                               size_t symbol_length,
+                               ios27_21i_arm64_registers *registers);
 #endif
