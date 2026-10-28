@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 55,
-      "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "fba2c53c0d72701513e3d352879d343c67bf9c0d",
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "updated_at": "2026-10-28T18:00:05Z",
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "0740b0a1a5efce950580219f22f26825f8c5d887",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T18:00:19Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 54,
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "dbed5037c53403c3e966d308311ad8bc03658cfe",
-      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
-      "updated_at": "2026-10-28T18:00:01Z",
+      "number": 53,
+      "branch": "phase19b-native-dyld-lifecycle",
+      "sha": "cf779db69cce1b4785e7dbad4295432a7f0ea2c9",
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "updated_at": "2026-10-28T18:00:19Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 55,
+      "branch": "phase19d-arm64-relocs-20261028",
+      "sha": "046f764cab15cbaaecba16a395a15a93cf19b1b0",
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "updated_at": "2026-10-28T18:00:16Z",
       "status": "unmerged: not counted"
     },
     {
@@ -33,15 +42,6 @@
       "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
       "url": "https://github.com/kallmek3nny/ios-27/pull/56",
       "updated_at": "2026-10-28T17:59:56Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 53,
-      "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "63f49b1ac3a9e4cfc2a5567911f79c5a05d3517d",
-      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T17:59:11Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -110,5 +110,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:00:16Z"
+  "observed_at": "2026-10-28T18:00:31Z"
 }
