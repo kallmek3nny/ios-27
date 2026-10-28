@@ -207,7 +207,8 @@ static void run_once(unsigned round) {
     CHECK(active == WORKERS && keys == 1 && tokens == WORKERS);
     OK(ios27_21j_snapshot(r.diag, &info));
     CHECK(info.active == WORKERS && info.peak == WORKERS);
-    CHECK(info.probes >= total * 2u + WORKERS &&\n          info.probes <= total * 2u + WORKERS * 128u && info.injections != 0);
+    CHECK(info.probes >= total * 2u + WORKERS &&
+          info.probes <= total * 2u + WORKERS * 128u && info.injections != 0);
     for (unsigned i = 0; i < WORKERS; ++i)
         OK(ios27_21e_cancel_request(r.tls, r.args[i].token));
     OK(pthread_mutex_lock(&r.gate));
