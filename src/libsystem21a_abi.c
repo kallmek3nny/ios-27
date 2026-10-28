@@ -12,7 +12,7 @@ enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATT
                    KIND_CONDATTR = 6, KIND_RWLOCKATTR = 7 };
 enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
-    OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW,
+    OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW, OP_CREL,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
     OP_KC, OP_KD, OP_KS, OP_KG,
@@ -76,6 +76,7 @@ static const entry symbols[] = {
     {"pthread_cond_broadcast", OP_CB},
     {"pthread_cond_wait", OP_CW},
     {"pthread_cond_timedwait", OP_CTW},
+    {"pthread_cond_timedwait_relative_np", OP_CREL},
     {"pthread_rwlock_init", OP_RI},
     {"pthread_rwlock_destroy", OP_RD},
     {"pthread_rwlock_rdlock", OP_RL},
@@ -105,7 +106,7 @@ static const entry symbols[] = {
     {"pthread_key_delete", OP_KD},
     {"pthread_getspecific", OP_KG},
     {"pthread_setspecific", OP_KS},
-    {"pthread_cond_timedwait_relative_np", OP_UNSUPPORTED}
+    {"pthread_cancel", OP_UNSUPPORTED}
 };
 static size_t object_size(unsigned kind) {
     switch (kind) {
@@ -601,12 +602,12 @@ static int guest_store_u32(ios27_21a_runtime *rt, uint64_t address, uint32_t val
 /* Cond waits operate only on a mutex owned exactly once by this thread.
  * Both registry entries stay pinned for the entire blocking interval. */
 static int cond_wait_native(ios27_21a_runtime *rt, const uint64_t args[6],
-                            int timed) {
+                            int mode) {
     object_slot *cond = NULL, *mutex = NULL;
     struct timespec deadline = {0, 0};
     pthread_t self = pthread_self();
     int e;
-    if (timed) {
+    if (mode) {
         unsigned char *p;
         int64_t sec, ns;
         e = guest_view_access(rt, args[2], 16u, 8u, IOS27_21A_READ, &p);
@@ -615,6 +616,18 @@ static int cond_wait_native(ios27_21a_runtime *rt, const uint64_t args[6],
         ns = (int64_t)guest_load64(p + 8u);
         if (ns < 0 || ns >= 1000000000LL ||
             (int64_t)(time_t)sec != sec) return EINVAL;
+        if (mode == 2) {
+            struct timespec now;
+            uint64_t nsecs;
+            if (sec < 0) return EINVAL;
+            if (clock_gettime(CLOCK_REALTIME, &now) != 0) return EINVAL;
+            nsecs = (uint64_t)now.tv_nsec + (uint64_t)ns;
+            if (sec > INT64_MAX - (int64_t)now.tv_sec -
+                          (int64_t)(nsecs / 1000000000u)) return EOVERFLOW;
+            sec += (int64_t)now.tv_sec +
+                   (int64_t)(nsecs / 1000000000u);
+            ns = (int64_t)(nsecs % 1000000000u);
+        }
         deadline.tv_sec = (time_t)sec;
         deadline.tv_nsec = (long)ns;
     }
@@ -635,7 +648,7 @@ static int cond_wait_native(ios27_21a_runtime *rt, const uint64_t args[6],
     }
     (void)pthread_mutex_unlock(&rt->guard);
     if (e) goto cleanup;
-    e = timed ? pthread_cond_timedwait(&cond->native.cond,
+    e = mode ? pthread_cond_timedwait(&cond->native.cond,
                                        &mutex->native.mutex, &deadline) :
                 pthread_cond_wait(&cond->native.cond, &mutex->native.mutex);
     (void)pthread_mutex_lock(&rt->guard);
@@ -979,8 +992,9 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
         e = slot_destroy(rt, args[0], KIND_MUTEXATTR);
-    } else if (op == OP_CW || op == OP_CTW) {
-        e = cond_wait_native(rt, args, op == OP_CTW);
+    } else if (op == OP_CW || op == OP_CTW || op == OP_CREL) {
+        e = cond_wait_native(rt, args, op == OP_CTW ? 1 :
+                                         op == OP_CREL ? 2 : 0);
     } else if (op == OP_MAS || op == OP_MAG) {
         unsigned type = (unsigned)args[1];
         if (op == OP_MAS && args[1] > 2u) e = EINVAL;
@@ -990,7 +1004,7 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
         } else e = attr_value(rt, args[0], 1, &type);
     } else {
         kind = (op <= OP_MU) ? KIND_MUTEX :
-               (op <= OP_CTW) ? KIND_COND : KIND_RWLOCK;
+               (op <= OP_CREL) ? KIND_COND : KIND_RWLOCK;
         if (op == OP_MI || op == OP_CI || op == OP_RI) {
             unsigned type = 0u;
             if (args[1]) {
