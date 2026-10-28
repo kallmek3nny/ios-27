@@ -7,8 +7,46 @@
     "committed_at": "2026-10-28T18:51:51Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
-  "ahead_branches": [],
+  "open_pull_requests": [
+    {
+      "number": 60,
+      "branch": "feat/progress-live-branch-evidence",
+      "sha": "f1dd9058c2f080de1203e95482e04f2a12503499",
+      "title": "feat: parse active agent branch diffs into live provisional progress blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/60",
+      "updated_at": "2026-10-28T19:10:31Z",
+      "status": "unmerged: not counted"
+    }
+  ],
+  "ahead_branches": [
+    {
+      "branch": "phase20e-libsystem-userspace",
+      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T18:52:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20e-libsystem-userspace",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase20c-native-objc-ownership",
+      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T18:52:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20c-native-objc-ownership",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T18:52:29Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 59,
@@ -69,9 +107,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 53,
+    "branches_scanned": 56,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:52:29Z"
+  "observed_at": "2026-10-28T19:11:15Z"
 }
