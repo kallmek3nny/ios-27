@@ -11,7 +11,7 @@
       "sha": "1c3b84eeff25a01ca5c9dec6b57823711096dc07",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 8,
       "possibly_truncated": false,
@@ -42,7 +42,7 @@
       "sha": "1fd3dc09051ab8dd4be2138a3247ed49b0ce6e65",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "pr_number": 73,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -122,14 +122,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 4,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 2,
         "fixture_files": 5,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21c-pthread-sync-20261028",
@@ -433,5 +433,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:57:08Z"
+  "observed_at": "2026-10-28T19:57:31Z"
 }
