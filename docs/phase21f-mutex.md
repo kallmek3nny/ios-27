@@ -80,6 +80,10 @@ interleaves contention/cancellation/queue-lifetime suites. Each child program
 has a hard 60s limit; compilation has a hard 120s limit. No artificial waits
 or idle padding are used. This is independent of the normal quick CI gate.
 
+GNU linker fault injection exercises 128 host condition-variable initialization
+failures and verifies that waiter registration never leaks and normal FIFO
+progress resumes after the failure injection ends.
+
 The capacity test compiles a 16-waiter bridge to verify the 17th waiter
 receives `EAGAIN`, then cancels one queued waiter and verifies quota reuse.
 The production default remains 1,024 concurrent waiter nodes.
