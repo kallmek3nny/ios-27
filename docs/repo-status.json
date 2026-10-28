@@ -11,39 +11,39 @@
     {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "130dba0184af7cd2f684ae616f8bf925984570a8",
+      "sha": "60f91eee3d8f9c2c61e1080e7ac5acfdff8264cb",
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T17:55:12Z",
+      "updated_at": "2026-10-28T17:56:20Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "d663452117ac4149b078ce3cd8d09e2f8fe870ce",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T17:56:13Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "phase19c-mach-task-exceptions",
-      "sha": "036dfdf4c6bd0c8fd81762917055e61e364f96b3",
-      "ahead_by": 3,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:55:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19c-mach-task-exceptions",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "75e564865ec475230986739920bd41bd877003be",
-      "ahead_by": 5,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:55:17Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19a-native-startup-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
       "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "d590ca765bbe7d469374ba44ffca3b596f8c55f4",
-      "ahead_by": 1,
+      "sha": "cb94b22853a839c093affab4e9c85ca950aeddd6",
+      "ahead_by": 4,
       "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:51:04Z",
+      "last_commit_at": "2026-10-28T17:56:35Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase19d-arm64-relocs-20261028",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase19c-mach-task-exceptions",
+      "sha": "a6e6bed68a99f12a72cf2bc29ffdf8fc1924196b",
+      "ahead_by": 6,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T17:56:25Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19c-mach-task-exceptions",
       "status": "unmerged: not counted"
     }
   ],
@@ -107,9 +107,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 49,
+    "branches_scanned": 48,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:55:46Z"
+  "observed_at": "2026-10-28T17:56:44Z"
 }
