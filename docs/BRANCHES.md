@@ -15,7 +15,7 @@ head: `ab52aaeae209` · ci: **running** · unmerged, not credited.
 
 ### [phase21e-cancellation-ownership-20261028](https://github.com/kallmek3nny/ios-27/pull/75)
 
-head: `bed479092c72` · ci: **running** · unmerged, not credited.
+head: `bed479092c72` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +452/-15 lines
 
