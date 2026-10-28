@@ -55,7 +55,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else
                          ("-O2",) if stress else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast", "rules", "large-cycle", "boundaries", "identities", "trace-cli"):
+            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast", "rules", "large-cycle", "boundaries", "identities", "timed-handoff", "trace-cli"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -73,7 +73,7 @@ def main():
                         ROOT / "src/libsystem21c_sync.c",
                         ROOT / "src/libsystem21j_lockorder.c",
                     ])
-                if test == "handoff":
+                if test in ("handoff", "timed-handoff"):
                     sources.extend([
                         ROOT / "src/libsystem21c_sync.c",
                         ROOT / "src/libsystem21j_schedule.c",
@@ -122,7 +122,7 @@ def main():
                             raise RuntimeError("corrupted trace was accepted")
                     else:
                         run([str(output)], 150, env)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and concurrent runtime identities and an independently checked JSON trace CLI passed".format(
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and concurrent runtime identities, timed condition races and an independently checked JSON trace CLI passed".format(
         "ASan/UBSan" if sanitize else
         "8x native O2 stress" if stress else "O0/O2"), flush=True)
 
