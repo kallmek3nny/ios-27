@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 53,
+      "branch": "phase19b-native-dyld-lifecycle",
+      "sha": "cf4c65d005114c350fd2e3ff44dc4e34b9684ba0",
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "updated_at": "2026-10-28T18:03:08Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 55,
       "branch": "phase19d-arm64-relocs-20261028",
       "sha": "17f8526cd43d68604652d3fba03092a459f87615",
@@ -24,15 +33,6 @@
       "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
       "url": "https://github.com/kallmek3nny/ios-27/pull/54",
       "updated_at": "2026-10-28T18:02:34Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 53,
-      "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "a7018b9422bc196075dfa1adfedc6f367130c3f1",
-      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T18:02:10Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -101,5 +101,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:03:01Z"
+  "observed_at": "2026-10-28T18:03:18Z"
 }
