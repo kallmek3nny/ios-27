@@ -21,8 +21,9 @@ def run(args, seconds=60):
 def main():
     cc = os.environ.get("CC", "cc")
     clang = shutil.which("clang")
-    if not shutil.which(cc) or not clang:
-        raise RuntimeError("host C compiler and clang required")
+    clang_cpp = shutil.which("clang++")
+    if not shutil.which(cc) or not clang or not clang_cpp:
+        raise RuntimeError("host C compiler, clang and clang++ required")
     repeats = int(os.environ.get("PHASE21A_STRESS_REPEATS", "1"))
     if not 1 <= repeats <= 20:
         raise RuntimeError("PHASE21A_STRESS_REPEATS must be 1..20")
@@ -56,6 +57,15 @@ def main():
              str(object_file)])
         run([sys.executable, str(ROOT / "tests/phase21a-macho-corruption.py"),
              str(object_file)])
+        cpp_object = out / "phase21a-cpp-darwin.o"
+        run([clang_cpp, "--target=arm64-apple-darwin", "-ffreestanding",
+             "-fno-builtin", "-fno-exceptions", "-fno-rtti",
+             "-fno-stack-protector", "-std=c++17", "-Wall", "-Wextra",
+             "-Werror", "-O2", "-I" + str(ROOT / "include"),
+             "-c", str(ROOT / "tests/phase21a-arm64-cpp.cpp"),
+             "-o", str(cpp_object)])
+        run([sys.executable, str(ROOT / "tools/phase21a-macho-verify.py"),
+             str(cpp_object), "--cpp"])
     print("phase21a: all native and compiler-produced Darwin checks passed")
 
 if __name__ == "__main__":
