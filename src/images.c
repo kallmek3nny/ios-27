@@ -403,12 +403,126 @@ int ios27_images_entrypoint(const ios27_images *images, const char *name,
     return 0;
 }
 
+
+/* A runpath belongs to its declaring image, not to the consumer of a
+ * transitive dependency. Expand it to a guest-absolute path before it is
+ * inherited. The first discovered parent owns each image's search context;
+ * later parents cannot silently change already-established bindings. */
+typedef struct {
+    ios27_dyld_image_metadata metadata;
+    char paths[IOS27_DYLD_MAX_CANDIDATES][IOS27_DYLD_PATH_MAX];
+    size_t path_count;
+    unsigned char queued;
+} path_context;
+
+static int append_path(path_context *ctx, const char *path,
+                       char *error, size_t cap) {
+    for (size_t i = 0u; i < ctx->path_count; ++i)
+        if (strcmp(ctx->paths[i], path) == 0) return 0;
+    if (ctx->path_count >= IOS27_DYLD_MAX_CANDIDATES)
+        return fail(error, cap, "transitive runpath limit exceeded");
+    (void)snprintf(ctx->paths[ctx->path_count++],
+                   IOS27_DYLD_PATH_MAX, "%s", path);
+    return 0;
+}
+
+static int resolve_guest_dependencies(ios27_images *images,
+                                      const char *main_executable,
+                                      char *error, size_t cap) {
+    path_context *contexts = calloc(images->count, sizeof(*contexts));
+    const char *catalog[IOS27_IMAGES_MAX];
+    size_t queue[IOS27_IMAGES_MAX], queue_count = 0u, queue_pos = 0u;
+    size_t main_index = SIZE_MAX;
+    int result = -1;
+    if (!contexts) return fail(error, cap, "dyld path context allocation failed");
+    for (size_t i = 0u; i < images->count; ++i) {
+        const image_node *node = &images->nodes[i];
+        path_context *ctx = &contexts[i];
+        catalog[i] = node->guest_path;
+        if (!strcmp(node->guest_path, main_executable))
+            main_index = i;
+        if (ios27_dyld_inspect_image(node->source, node->source_size,
+                                     &ctx->metadata, error, cap))
+            goto done;
+        if (ctx->metadata.dependency_count != node->dep_count) {
+            (void)fail(error, cap, "dependency metadata count mismatch");
+            goto done;
+        }
+        for (size_t r = 0u; r < ctx->metadata.rpath_count; ++r) {
+            ios27_dyld_candidates expanded;
+            if (ios27_dyld_paths(ctx->metadata.rpaths[r],
+                                 node->guest_path, main_executable,
+                                 NULL, 0u, &expanded, error, cap) ||
+                expanded.count != 1u ||
+                append_path(ctx, expanded.paths[0], error, cap))
+                goto done;
+        }
+    }
+    if (main_index != SIZE_MAX) {
+        queue[queue_count++] = main_index;
+        contexts[main_index].queued = 1u;
+    }
+    /* A catalog of dylibs without an MH_EXECUTE root is valid as well.
+     * First resolve the main's closure, then remaining independent roots. */
+    for (size_t root = 0u; root <= images->count; ++root) {
+        if (queue_pos == queue_count && root < images->count &&
+            !contexts[root].queued) {
+            queue[queue_count++] = root;
+            contexts[root].queued = 1u;
+        }
+        while (queue_pos < queue_count) {
+            size_t i = queue[queue_pos++];
+            image_node *node = &images->nodes[i];
+            path_context *ctx = &contexts[i];
+            ios27_dyld_image_metadata match_metadata = ctx->metadata;
+            match_metadata.rpath_count = ctx->path_count;
+            for (size_t j = 0u; j < ctx->path_count; ++j)
+                (void)snprintf(match_metadata.rpaths[j],
+                               IOS27_DYLD_PATH_MAX, "%s", ctx->paths[j]);
+            for (size_t d = 0u; d < node->dep_count; ++d) {
+                ios27_dyld_catalog_match match;
+                int found;
+                size_t child;
+                if (strcmp(ctx->metadata.dependencies[d].install_name,
+                           node->dependencies[d])) {
+                    (void)fail(error, cap, "dependency ordinal/name mismatch");
+                    goto done;
+                }
+                found = ios27_dyld_match_dependency(
+                    &match_metadata, d, node->guest_path, main_executable,
+                    catalog, images->count, &match, error, cap);
+                if (found < 0 || (found == 1 && !node->dep_weak[d]) ||
+                    (found == 0 && match.image_index == i)) {
+                    if (found >= 0)
+                        (void)fail(error, cap, "missing mandatory/self guest dylib");
+                    goto done;
+                }
+                child = found == 1 ? SIZE_MAX : match.image_index;
+                node->dep_index[d] = child;
+                if (child != SIZE_MAX && !contexts[child].queued) {
+                    path_context *next = &contexts[child];
+                    for (size_t r = 0u; r < ctx->path_count; ++r)
+                        if (append_path(next, ctx->paths[r], error, cap))
+                            goto done;
+                    next->queued = 1u;
+                    queue[queue_count++] = child;
+                }
+            }
+        }
+    }
+    result = 0;
+done:
+    free(contexts);
+    return result;
+}
+
 static int images_load_impl(const ios27_image_spec *specs, size_t count,
                             const char *const *guest_paths,
                             const char *main_executable,
                             ios27_images **out, char *error, size_t cap) {
     ios27_images *images;
     unsigned char color[IOS27_IMAGES_MAX] = {0};
+    int fixup_types[IOS27_IMAGES_MAX];
 #if IOS27_POSIX_MAPPING
     long os_page = sysconf(_SC_PAGESIZE);
 #else
@@ -524,68 +638,18 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
             }
     }
 
+
+    /* Parse every load-command ordinal before resolving any guest path. */
+    for (size_t i = 0u; i < count; ++i) {
+        fixup_types[i] = dependency_commands(&images->nodes[i], error, cap);
+        if (fixup_types[i] < 0) goto rollback;
+    }
+    if (guest_paths &&
+        resolve_guest_dependencies(images, main_executable, error, cap))
+        goto rollback;
     for (size_t i = 0u; i < count; ++i) {
         image_node *node = &images->nodes[i];
-        int fixup_type;
-        fixup_type = dependency_commands(node, error, cap);
-        if (fixup_type < 0) goto rollback;
-        if (guest_paths) {
-            ios27_dyld_image_metadata metadata;
-            const char *catalog[IOS27_IMAGES_MAX];
-            if (ios27_dyld_inspect_image(node->source, node->source_size,
-                                         &metadata, error, cap))
-                goto rollback;
-            if (metadata.dependency_count != node->dep_count) {
-                (void)fail(error, cap, "dependency metadata count mismatch");
-                goto rollback;
-            }
-            /* The main image's runpaths retain their declaring context:
-             * @loader_path there means the main image, not this dylib. */
-            for (size_t root = 0u; root < count; ++root) {
-                ios27_dyld_image_metadata main_meta;
-                if (root == i ||
-                    strcmp(images->nodes[root].guest_path, main_executable))
-                    continue;
-                if (ios27_dyld_inspect_image(images->nodes[root].source,
-                                             images->nodes[root].source_size,
-                                             &main_meta, error, cap))
-                    goto rollback;
-                for (size_t r = 0u; r < main_meta.rpath_count; ++r) {
-                    ios27_dyld_candidates expanded;
-                    if (metadata.rpath_count == IOS27_DYLD_MAX_CANDIDATES ||
-                        ios27_dyld_paths(main_meta.rpaths[r], main_executable,
-                                         main_executable, NULL, 0u,
-                                         &expanded, error, cap)) {
-                        (void)fail(error, cap, "invalid inherited runpath");
-                        goto rollback;
-                    }
-                    (void)snprintf(metadata.rpaths[metadata.rpath_count++],
-                                   IOS27_DYLD_PATH_MAX, "%s", expanded.paths[0]);
-                }
-                break;
-            }
-            for (size_t path = 0u; path < count; ++path)
-                catalog[path] = images->nodes[path].guest_path;
-            for (size_t d = 0u; d < node->dep_count; ++d) {
-                ios27_dyld_catalog_match match;
-                int result;
-                if (strcmp(metadata.dependencies[d].install_name,
-                           node->dependencies[d])) {
-                    (void)fail(error, cap, "dependency ordinal/name mismatch");
-                    goto rollback;
-                }
-                result = ios27_dyld_match_dependency(
-                    &metadata, d, node->guest_path, main_executable, catalog,
-                    count, &match, error, cap);
-                if (result < 0 || (result == 1 && !node->dep_weak[d]) ||
-                    (result == 0 && match.image_index == i)) {
-                    if (result >= 0)
-                        (void)fail(error, cap, "missing mandatory/self guest dylib");
-                    goto rollback;
-                }
-                node->dep_index[d] = result == 1 ? SIZE_MAX : match.image_index;
-            }
-        } else {
+        if (!guest_paths) {
             for (size_t d = 0u; d < node->dep_count; ++d) {
                 int index = index_of(images, node->dependencies[d]);
                 if ((index < 0 && !node->dep_weak[d]) ||
@@ -596,7 +660,7 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
                 node->dep_index[d] = index < 0 ? SIZE_MAX : (size_t)index;
             }
         }
-        if (fixup_type == 1) {
+        if (fixup_types[i] == 1) {
             node->classic = calloc(1u, sizeof(*node->classic));
             if (!node->classic) {
                 (void)fail(error, cap, "classic plan allocation failed");
@@ -605,7 +669,7 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
             if (ios27_binds_parse(node->source, node->source_size, &node->info,
                                   node->classic, error, cap))
                 goto rollback;
-        } else if (fixup_type == 2) {
+        } else if (fixup_types[i] == 2) {
             node->chained = calloc(1u, sizeof(*node->chained));
             if (!node->chained) {
                 (void)fail(error, cap, "chained plan allocation failed");

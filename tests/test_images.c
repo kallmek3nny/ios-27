@@ -413,8 +413,56 @@ static void check_phase18b_virtual_paths(void) {
 
 /* Special Mach-O ordinals, stable flat lookup and repeated clean reload.
  * All images are locally constructed and never looked up on the host. */
+/* Parent-owned runpaths are expanded before being inherited by a child.
+ * The middle dylib has no LC_RPATH of its own, yet its leaf resolves. */
+static void check_phase19b_transitive_rpath(void) {
+    static uint8_t top[IMAGE_SIZE], middle[IMAGE_SIZE], leaf[IMAGE_SIZE];
+    static uint8_t original[IMAGE_SIZE];
+    const char *topdeps[] = {"@rpath/Mid"};
+    const char *middeps[] = {"@rpath/Leaf"};
+    const char *paths[] = {"/App/Top", "/App/Shared/Mid", "/App/Shared/Leaf"};
+    ios27_image_spec specs[] = {
+        {"top.dylib", top, IMAGE_SIZE, topdeps, 1u},
+        {"middle.dylib", middle, IMAGE_SIZE, middeps, 1u},
+        {"leaf.dylib", leaf, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    const char *name = NULL;
+    char error[128];
+    provider(top, topdeps[0]);
+    provider(middle, middeps[0]);
+    provider(leaf, NULL);
+    /* LC_RPATH lives in the unused command padding before the export trie. */
+    header(top, 4u, 160u, 6u);
+    le32(top + 160u, 0x8000001cu);
+    le32(top + 164u, 32u);
+    le32(top + 168u, 12u);
+    memcpy(top + 172u, "@loader_path/Shared", 20u);
+    memcpy(original, top, IMAGE_SIZE);
+    assert(!ios27_images_load_with_paths(specs, 3u, paths, paths[0],
+                                          &images, error, sizeof(error)));
+    assert(!ios27_images_initialization_image(images, 0u, &name));
+    assert(!strcmp(name, "leaf.dylib"));
+    assert(!ios27_images_initialization_image(images, 1u, &name));
+    assert(!strcmp(name, "middle.dylib"));
+    assert(!ios27_images_initialization_image(images, 2u, &name));
+    assert(!strcmp(name, "top.dylib"));
+    assert(!ios27_images_finalization_image(images, 0u, &name));
+    assert(!strcmp(name, "top.dylib"));
+    ios27_images_unload(images);
+    assert(memcmp(original, top, IMAGE_SIZE) == 0);
+    images = NULL;
+    /* A missing leaf must reject the whole graph, even if the top was found. */
+    paths[2] = "/App/Other/Leaf";
+    assert(ios27_images_load_with_paths(specs, 3u, paths, paths[0],
+                                        &images, error, sizeof(error)) == -1);
+    assert(images == NULL);
+    paths[2] = "/App/Shared/Leaf";
+}
+
 static void check_phase19b_special_ordinals(void) {
     static uint8_t main_bytes[IMAGE_SIZE], provider_bytes[IMAGE_SIZE];
+    static uint8_t other_bytes[IMAGE_SIZE];
     const char *deps[] = {"provider.dylib"};
     ios27_image_spec specs[] = {
         {"main.exe", main_bytes, IMAGE_SIZE, deps, 1u},
@@ -468,11 +516,13 @@ static void check_phase19b_special_ordinals(void) {
     consumer(main_bytes, 4096u);
     memcpy(main_bytes + FIXUPS_OFF + 68u, "_call", 6u);
     le32(main_bytes + FIXUPS_OFF + 64u, 0xffu);
-    consumer(provider_bytes, 4096u);
-    specs[1].name = "another.exe";
-    specs[1].dependencies = deps;
-    specs[1].dependency_count = 1u;
-    expect_failure(specs, 2u);
+    consumer(other_bytes, 4096u);
+    ios27_image_spec ambiguity[] = {
+        {"main.exe", main_bytes, IMAGE_SIZE, deps, 1u},
+        {"another.exe", other_bytes, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
+    };
+    expect_failure(ambiguity, 3u);
 }
 
 int main(void) {
@@ -612,6 +662,7 @@ int main(void) {
     check_phase17b_graph();
     check_phase18b_virtual_paths();
     check_phase19b_special_ordinals();
+    check_phase19b_transitive_rpath();
     puts("native multi-image entry, W^X, special ordinals, reload and rollback tests passed");
     return 0;
 }
