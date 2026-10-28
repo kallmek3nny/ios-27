@@ -47,7 +47,37 @@ ALLOWED_CI = ("native tests", "capability progress", "phase19b real linked darwi
 
 
 def get_group(filename):
-    return next((name for name, regex in GROUPS if regex.search(filename)), None)
+    matched = next((name for name, regex in GROUPS if regex.search(filename)), None)
+    if matched:
+        return matched
+    # Agents frequently create brand-new phase-numbered source/header paths.
+    # Classify them by explicit subsystem vocabulary rather than requiring
+    # every filename to be whitelisted before the branch becomes visible.
+    if not filename.startswith(("src/", "include/ios27/", "tests/", "tools/phase")):
+        return None
+    name = filename.rsplit("/", 1)[-1].lower()
+    if ("pthread" in name or ("libsystem" in name and "thread" in name)
+            or ("phase20d" in name and "thread" in name)):
+        return "libsystem-pthread"
+    if "objc" in name or "objective_c" in name:
+        return "objc-host-model"
+    if "libsystem" in name:
+        return "libsystem-host-model"
+    if "mach" in name and "macho" not in name:
+        return "mach-ipc"
+    if "dyld" in name or "chained" in name or "exports" in name:
+        return "dyld-engine"
+    if "metal" in name or "iosurface" in name or "vulkan" in name:
+        return "metal"
+    if "springboard" in name or "frontboard" in name or "backboard" in name:
+        return "springboard"
+    if "swiftui" in name:
+        return "swiftui"
+    if "coreanimation" in name:
+        return "coreanimation"
+    if "foundation" in name:
+        return "foundation"
+    return None
 
 
 def is_source(filename):
@@ -203,6 +233,10 @@ def self_test():
     assert get_group("README.md") is None
     assert get_group("src/metal_bridge.c") == "metal"
     assert get_group("src/brand_new_subsystem.c") is None
+    assert get_group("include/ios27/libsystem20d_threads.h") == "libsystem-pthread"
+    assert get_group("src/libsystem20d_threads.c") == "libsystem-pthread"
+    assert get_group("tests/phase20d_threads.c") == "libsystem-pthread"
+    assert get_group("src/objc20e_metadata.c") == "objc-host-model"
     assert extract_symbols("+int ios27_objc_create(void) {\n+return ios27_objc_fake();\n") == {"ios27_objc_create"}
     provenance = {"main_source": {"sha": "a" * 40},
                   "open_pull_requests": [{"branch": "phase19e", "sha": "b" * 40,
