@@ -127,6 +127,8 @@ int main(void) {
         assert(call("pthread_mutexattr_init", attr, 0) == 0);
         assert(call("pthread_mutexattr_settype", attr, 9u) == EINVAL);
         assert(call("pthread_mutexattr_settype", attr, 2u) == 0);
+        assert(call("pthread_mutexattr_gettype", attr, attr + 8u) == EINVAL);
+        assert(call("pthread_mutexattr_gettype", attr, BASE + sizeof(memory)) == EFAULT);
         assert(call("pthread_mutexattr_gettype", attr, BASE + 2200u) == 0);
         memcpy(&type, memory + 2200u, sizeof(type));
         assert(type == 2u);
