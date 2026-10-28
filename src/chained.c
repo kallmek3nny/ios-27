@@ -201,7 +201,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
         size_t max_length, length;
         ios27_chained_import *entry = &out->imports[i];
         int32_t ordinal = (int32_t)(int8_t)(uint8_t)bits;
-        if (ordinal <= 0 || name_off > UINT32_MAX - symbols_off)
+        if (ordinal < -3 || name_off > UINT32_MAX - symbols_off)
             return fail(error, cap, "unsupported chained import flags/ordinal");
         name_start = symbols_off + name_off;
         if (name_start >= datasize)
@@ -315,7 +315,7 @@ int ios27_chained_apply(uint8_t *copy, size_t size,
             if (patch->import_index >= plan->import_count || !resolver)
                 return fail(error, cap, "missing chained import/resolver");
             imp = &plan->imports[patch->import_index];
-            if (imp->ordinal <= 0 || !imp->symbol[0] ||
+            if (imp->ordinal < -3 || !imp->symbol[0] ||
                 !memchr(imp->symbol, '\0', sizeof(imp->symbol)))
                 return fail(error, cap, "invalid chained import");
             if (resolver(context, imp->symbol, imp->ordinal, &value)) {

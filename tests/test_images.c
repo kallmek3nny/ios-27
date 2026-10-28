@@ -356,6 +356,11 @@ static void check_phase18b_virtual_paths(void) {
     assert(ios27_images_initialization_image(images, 1u, &name) == 0);
     assert(strcmp(name, "consumer.dylib") == 0);
     assert(ios27_images_initialization_image(images, 2u, &name) == -1);
+    assert(ios27_images_finalization_image(images, 0u, &name) == 0);
+    assert(strcmp(name, "consumer.dylib") == 0);
+    assert(ios27_images_finalization_image(images, 1u, &name) == 0);
+    assert(strcmp(name, "provider.dylib") == 0);
+    assert(ios27_images_finalization_image(images, 2u, &name) == -1);
     assert(ios27_images_symbol(images, "provider.dylib", "_answer", &target) == 0);
     assert(ios27_images_symbol(images, "consumer.dylib", "_call", &code) == 0);
     assert(rd64((const uint8_t *)(code - CODE_OFF + DATA_OFF)) == target);
@@ -404,6 +409,130 @@ static void check_phase18b_virtual_paths(void) {
     assert(ios27_images_load_with_paths(specs, 2u, paths, paths[0],
                                         &images, error, sizeof(error)) != 0);
     assert(images == NULL);
+}
+
+/* Special Mach-O ordinals, stable flat lookup and repeated clean reload.
+ * All images are locally constructed and never looked up on the host. */
+/* Parent-owned runpaths are expanded before being inherited by a child.
+ * The middle dylib has no LC_RPATH of its own, yet its leaf resolves. */
+static void check_phase19b_transitive_rpath(void) {
+    static uint8_t top[IMAGE_SIZE], middle[IMAGE_SIZE], leaf[IMAGE_SIZE];
+    static uint8_t original[IMAGE_SIZE];
+    const char *topdeps[] = {"@rpath/Mid"};
+    const char *middeps[] = {"@rpath/Leaf"};
+    const char *paths[] = {"/App/Top", "/App/Shared/Mid", "/App/Shared/Leaf"};
+    ios27_image_spec specs[] = {
+        {"top.dylib", top, IMAGE_SIZE, topdeps, 1u},
+        {"middle.dylib", middle, IMAGE_SIZE, middeps, 1u},
+        {"leaf.dylib", leaf, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    const char *name = NULL;
+    char error[128];
+    provider(top, topdeps[0]);
+    provider(middle, middeps[0]);
+    provider(leaf, NULL);
+    /* LC_RPATH lives in the unused command padding before the export trie. */
+    header(top, 4u, 160u, 6u);
+    le32(top + 160u, 0x8000001cu);
+    le32(top + 164u, 32u);
+    le32(top + 168u, 12u);
+    memcpy(top + 172u, "@loader_path/Shared", 20u);
+    memcpy(original, top, IMAGE_SIZE);
+    assert(!ios27_images_load_with_paths(specs, 3u, paths, paths[0],
+                                          &images, error, sizeof(error)));
+    assert(!ios27_images_initialization_image(images, 0u, &name));
+    assert(!strcmp(name, "leaf.dylib"));
+    assert(!ios27_images_initialization_image(images, 1u, &name));
+    assert(!strcmp(name, "middle.dylib"));
+    assert(!ios27_images_initialization_image(images, 2u, &name));
+    assert(!strcmp(name, "top.dylib"));
+    assert(!ios27_images_finalization_image(images, 0u, &name));
+    assert(!strcmp(name, "top.dylib"));
+    ios27_images_unload(images);
+    assert(memcmp(original, top, IMAGE_SIZE) == 0);
+    images = NULL;
+    /* Reverse/shuffled declaration order must still resolve the main's
+     * full transitive runpath closure before disconnected catalog entries. */
+    const char *reordered_paths[] = {paths[2], paths[1], paths[0]};
+    ios27_image_spec reversed[] = {specs[2], specs[1], specs[0]};
+    assert(!ios27_images_load_with_paths(reversed, 3u, reordered_paths,
+                                         paths[0], &images, error, sizeof(error)));
+    assert(!ios27_images_initialization_image(images, 0u, &name));
+    assert(!strcmp(name, "leaf.dylib"));
+    ios27_images_unload(images);
+    images = NULL;
+    /* A missing leaf must reject the whole graph, even if the top was found. */
+    paths[2] = "/App/Other/Leaf";
+    assert(ios27_images_load_with_paths(specs, 3u, paths, paths[0],
+                                        &images, error, sizeof(error)) == -1);
+    assert(images == NULL);
+    paths[2] = "/App/Shared/Leaf";
+}
+
+static void check_phase19b_special_ordinals(void) {
+    static uint8_t main_bytes[IMAGE_SIZE], provider_bytes[IMAGE_SIZE];
+    static uint8_t other_bytes[IMAGE_SIZE];
+    const char *deps[] = {"provider.dylib"};
+    ios27_image_spec specs[] = {
+        {"main.exe", main_bytes, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    uintptr_t caller, answer;
+    char error[128];
+    provider(provider_bytes, NULL);
+    for (unsigned iteration = 0u; iteration < 32u; ++iteration) {
+        consumer(main_bytes, 4096u);
+        /* Ordinal -2: flat lookup of the real provider. */
+        le32(main_bytes + FIXUPS_OFF + 64u, 0xfeu);
+        assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+        assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+        assert(!ios27_images_symbol(images, "provider.dylib", "_answer", &answer));
+        assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == answer);
+        ios27_images_unload(images);
+        images = NULL;
+    }
+    consumer(main_bytes, 4096u);
+    /* Ordinal 0: self lookup, no cross-image dependency needed. */
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_call", 6u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0u);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == caller);
+    ios27_images_unload(images);
+    images = NULL;
+    /* Ordinal -1: MAIN_EXECUTABLE resolves only against MH_EXECUTE. */
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xffu);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == caller);
+    ios27_images_unload(images);
+    images = NULL;
+    /* Weak lookup of absent symbol is exactly null; strong lookup fails. */
+    consumer(main_bytes, 4096u);
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_absent", 8u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0x1fdu);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == 0u);
+    ios27_images_unload(images);
+    images = NULL;
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xfdu);
+    expect_failure(specs, 2u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xfcu);
+    expect_failure(specs, 2u);
+    /* A second MH_EXECUTE makes MAIN_EXECUTABLE ambiguous, never guessed. */
+    consumer(main_bytes, 4096u);
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_call", 6u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xffu);
+    consumer(other_bytes, 4096u);
+    ios27_image_spec ambiguity[] = {
+        {"main.exe", main_bytes, IMAGE_SIZE, deps, 1u},
+        {"another.exe", other_bytes, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
+    };
+    expect_failure(ambiguity, 3u);
 }
 
 int main(void) {
@@ -542,6 +671,8 @@ int main(void) {
     check_graph(provider_bytes, consumer_bytes, 1);
     check_phase17b_graph();
     check_phase18b_virtual_paths();
-    puts("native multi-image entry, W^X, weak, reexports and rollback tests passed");
+    check_phase19b_special_ordinals();
+    check_phase19b_transitive_rpath();
+    puts("native multi-image entry, W^X, special ordinals, reload and rollback tests passed");
     return 0;
 }
