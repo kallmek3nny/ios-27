@@ -7,7 +7,17 @@
     "committed_at": "2026-10-28T18:49:37Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
+  "open_pull_requests": [
+    {
+      "number": 59,
+      "branch": "fix/progress-refresh-merge-race",
+      "sha": "788e8882e16c628a33eb735117680d9fbc286336",
+      "title": "fix: handle progress refresh/main races and remove stale phase references",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
+      "updated_at": "2026-10-28T18:51:04Z",
+      "status": "unmerged: not counted"
+    }
+  ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
@@ -73,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:50:28Z"
+  "observed_at": "2026-10-28T18:51:47Z"
 }
