@@ -81,6 +81,21 @@ static size_t object_size(unsigned kind) {
 static uint64_t bridge_sig(unsigned kind) {
     return UINT64_C(0x213a0000) + (uint64_t)kind;
 }
+/* Darwin arm64 guest records are little-endian, independent of host C ABI. */
+static uint64_t guest_load64(const unsigned char *p) {
+    uint64_t value = 0;
+    unsigned i;
+    for (i = 0; i < 8u; ++i) value |= (uint64_t)p[i] << (i * 8u);
+    return value;
+}
+static void guest_store64(unsigned char *p, uint64_t value) {
+    unsigned i;
+    for (i = 0; i < 8u; ++i) p[i] = (unsigned char)(value >> (i * 8u));
+}
+static void guest_store32(unsigned char *p, uint32_t value) {
+    unsigned i;
+    for (i = 0; i < 4u; ++i) p[i] = (unsigned char)(value >> (i * 8u));
+}
 static int guest_view_access(ios27_21a_runtime *rt, uint64_t address,
                              size_t span, size_t alignment, unsigned access,
                              unsigned char **out) {
@@ -218,7 +233,7 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
             goto done;
         }
     }
-    memcpy(&sig, p, sizeof(sig));
+    sig = guest_load64(p);
     if (static_initializer) {
         int accepted = kind == KIND_MUTEX ?
                 (sig == IOS27_21A_MUTEX_STATIC_SIG ||
@@ -243,8 +258,8 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     token = rt->next_token++;
     memset(p, 0, sz);
     sig = bridge_sig(kind);
-    memcpy(p, &sig, sizeof(sig));
-    memcpy(p + sizeof(sig), &token, sizeof(token));
+    guest_store64(p, sig);
+    guest_store64(p + 8u, token);
     s->addr = address;
     s->token = token;
     s->pins = 0;
@@ -271,7 +286,7 @@ static int slot_pin(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
         (void)pthread_mutex_lock(&rt->guard);
         s = find_slot(rt, address);
         if (!s) {
-            memcpy(&sig, p, sizeof(sig));
+            sig = guest_load64(p);
             (void)pthread_mutex_unlock(&rt->guard);
             expected = kind == KIND_MUTEX ?
                        (sig == IOS27_21A_MUTEX_STATIC_SIG ||
@@ -292,8 +307,8 @@ static int slot_pin(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
             (void)pthread_mutex_unlock(&rt->guard);
             return EINVAL;
         }
-        memcpy(&sig, p, sizeof(sig));
-        memcpy(&token, p + sizeof(sig), sizeof(token));
+        sig = guest_load64(p);
+        token = guest_load64(p + 8u);
         if (sig != bridge_sig(kind) || token != s->token) {
             (void)pthread_mutex_unlock(&rt->guard);
             return EINVAL;
@@ -323,8 +338,8 @@ static int slot_destroy(ios27_21a_runtime *rt, uint64_t address, unsigned kind) 
     (void)pthread_mutex_lock(&rt->guard);
     s = find_slot(rt, address);
     if (!s || s->kind != kind) { e = EINVAL; goto done; }
-    memcpy(&sig, p, sizeof(sig));
-    memcpy(&token, p + sizeof(sig), sizeof(token));
+    sig = guest_load64(p);
+    token = guest_load64(p + 8u);
     if (sig != bridge_sig(kind) || token != s->token) {
         e = EINVAL;
         goto done;
@@ -505,7 +520,7 @@ static int guest_store_u32(ios27_21a_runtime *rt, uint64_t address, uint32_t val
             return EINVAL;
         }
     }
-    memcpy(p, &value, sizeof(value));
+    guest_store32(p, value);
     (void)pthread_mutex_unlock(&rt->guard);
     return 0;
 }
