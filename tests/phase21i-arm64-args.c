@@ -1,4 +1,5 @@
 #include "ios27/libsystem21i_arm64.h"
+#include "ios27/libsystem21i_errno.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -38,7 +39,14 @@ int main(void) {
         UINT64_C(0x1122334455667788), UINT64_C(0x8877665544332211)
     }};
     memset(memory, 0xa5, sizeof(memory));
+    memset(memory + 384, 0, 16); /* a valid absolute deadline in the past */
     memcpy(original, memory, sizeof(original));
+    EXPECT(ios27_21i_errno_to_darwin(EDEADLK) == 11);
+    EXPECT(ios27_21i_errno_to_darwin(EAGAIN) == 35);
+    EXPECT(ios27_21i_errno_to_darwin(ENOTSUP) == 45);
+    EXPECT(ios27_21i_errno_to_darwin(ETIMEDOUT) == 60);
+    EXPECT(ios27_21i_errno_to_darwin(ENOSYS) == 78);
+    EXPECT(ios27_21i_errno_to_darwin(100000) == 5);
     EXPECT(ios27_21i_create(&rt, &guest, 3) == 0);
     EXPECT(ios27_21i_dispatch_arm64(NULL, "_pthread_mutex_lock", &regs)
            == EINVAL);
@@ -47,24 +55,29 @@ int main(void) {
     EXPECT(ios27_21i_dispatch_arm64(rt, "_pthread_mutex_lock", NULL)
            == EINVAL);
     EXPECT(invoke(rt, "_pthread_mutex_init", BASE + 64, BASE + 256, 0)
-           == ENOTSUP);
-    EXPECT(invoke(rt, "_pthread_mutex_init", BASE + 65, 0, 0) == EINVAL);
+           == IOS27_21I_DARWIN_ENOTSUP);
+    EXPECT(invoke(rt, "_pthread_mutex_init", BASE + 65, 0, 0) == IOS27_21I_DARWIN_EINVAL);
     EXPECT(invoke(rt, "_pthread_mutex_init", BASE + 64, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_mutex_lock", BASE + 64, 0, 0) == 0);
-    EXPECT(invoke(rt, "_pthread_mutex_trylock", BASE + 64, 0, 0) == EBUSY);
-    EXPECT(invoke(rt, "_pthread_mutex_destroy", BASE + 64, 0, 0) == EBUSY);
+    EXPECT(invoke(rt, "_pthread_mutex_trylock", BASE + 64, 0, 0) == IOS27_21I_DARWIN_EBUSY);
+    EXPECT(invoke(rt, "_pthread_mutex_lock", BASE + 64, 0, 0) == IOS27_21I_DARWIN_EDEADLK);
+    EXPECT(invoke(rt, "_pthread_mutex_destroy", BASE + 64, 0, 0) == IOS27_21I_DARWIN_EBUSY);
     EXPECT(invoke(rt, "_pthread_mutex_unlock", BASE + 64, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_cond_init", BASE + 192, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_cond_signal", BASE + 192, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_cond_broadcast", BASE + 192, 0, 0) == 0);
+    EXPECT(invoke(rt, "_pthread_mutex_lock", BASE + 64, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_cond_timedwait", BASE + 192, BASE + 64,
-                  BASE + 500) == EINVAL);
+                  BASE + 384) == IOS27_21I_DARWIN_ETIMEDOUT);
+    EXPECT(invoke(rt, "_pthread_mutex_unlock", BASE + 64, 0, 0) == 0);
+    EXPECT(invoke(rt, "_pthread_cond_timedwait", BASE + 192, BASE + 64,
+                  BASE + 504) == IOS27_21I_DARWIN_EFAULT);
     EXPECT(invoke(rt, "_pthread_cond_destroy", BASE + 192, 0, 0) == 0);
     EXPECT(invoke(rt, "_pthread_mutex_destroy", BASE + 64, 0, 0) == 0);
-    EXPECT(invoke(rt, "_pthread_nonexistent", BASE + 64, 0, 0) == ENOSYS);
-    EXPECT(invoke(rt, "_pthread_mutex_lock", UINT64_MAX, 0, 0) == EINVAL);
+    EXPECT(invoke(rt, "_pthread_nonexistent", BASE + 64, 0, 0) == IOS27_21I_DARWIN_ENOSYS);
+    EXPECT(invoke(rt, "_pthread_mutex_lock", UINT64_MAX, 0, 0) == IOS27_21I_DARWIN_EINVAL);
     EXPECT(memcmp(memory, original, sizeof(memory)) == 0);
     EXPECT(ios27_21i_destroy(rt) == 0);
-    puts("phase21i: AArch64 x0-x2 argument capture and w0 status, preserved x1-x7, no guest-layout writes passed");
+    puts("phase21i: AArch64 argument decoding, Apple XNU errno in w0, preserved x1-x7, unchanged guest layout passed");
     return 0;
 }
