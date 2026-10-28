@@ -16,6 +16,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+
+def newer_than_main(branch_date, main_date):
+    return (isinstance(branch_date, str) and isinstance(main_date, str)
+            and branch_date.endswith("Z") and main_date.endswith("Z")
+            and branch_date > main_date)
+
 API = "https://api.github.com"
 BOT_PREFIX = "chore(progress):"
 SHA_RE = re.compile(r"^[a-f0-9]{40}$")
@@ -88,6 +94,12 @@ def snapshot(repo, get):
         if c.get("status") not in ("ahead", "diverged") or c.get("ahead_by", 0) < 1:
             return None
         history = c.get("commits", [])
+        # Squash merges leave obsolete source refs looking "ahead" even after
+        # their work reaches main. Only surface branches updated AFTER the
+        # audited main source, in addition to separately tracked open PRs.
+        last_date = history[-1]["commit"]["committer"]["date"] if history else ""
+        if not newer_than_main(last_date, source["committed_at"]):
+            return None
         return {"branch": name, "sha": sha,
                 "ahead_by": c["ahead_by"], "behind_by": c.get("behind_by", 0),
                 "last_commit_at": history[-1]["commit"]["committer"]["date"] if history else "",
@@ -128,6 +140,8 @@ def self_test():
     sample = {"schema": 1, "main_source": {"sha": "a" * 40}}
     assert unchanged(dict(sample, observed_at="2026-10-28"), sample)
     assert not unchanged(dict(sample, main_source={"sha": "b" * 40}), sample)
+    assert not newer_than_main("2026-10-28T16:45:00Z", "2026-10-28T17:47:44Z")
+    assert newer_than_main("2026-10-28T18:45:00Z", "2026-10-28T17:47:44Z")
     print("repository provenance self-test passed")
 
 
