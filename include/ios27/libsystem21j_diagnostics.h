@@ -7,6 +7,7 @@
 /* Native diagnostic harness, NOT a Darwin pthread layout or guest ABI. */
 #define IOS27_21J_MAX_LEASES 64u
 #define IOS27_21J_TRACE_CAPACITY 1024u
+#define IOS27_21J_MAX_FAULT_RULES 16u
 typedef struct ios27_21j_diagnostics ios27_21j_diagnostics;
 typedef struct { uint32_t slot, generation; uint64_t owner; } ios27_21j_lease;
 enum ios27_21j_event_kind {
@@ -40,6 +41,14 @@ int ios27_21j_destroy(ios27_21j_diagnostics *diag);
  * of host scheduling. No real operation is faulted unless caller opts in. */
 int ios27_21j_probe(ios27_21j_diagnostics *diag, uint32_t stage,
                     uint32_t actor, uint64_t ordinal);
+/* One-shot configuration of an exact deterministic probe override.
+   Rules can only be changed before the first probe, to make concurrent
+   scheduling irrelevant to the selected fault outcomes. inject must be 0/1.
+   EEXIST for duplicate keys; ENOSPC for the bounded rule table. */
+int ios27_21j_rule_add(ios27_21j_diagnostics *diag, uint32_t stage,
+                       uint32_t actor, uint64_t ordinal, int inject);
+int ios27_21j_rules_clear(ios27_21j_diagnostics *diag);
+
 int ios27_21j_acquire(ios27_21j_diagnostics *diag,
                        ios27_21j_lease *out);
 /* Fault-injected acquisition leaves out invalid and consumes no lease on ENOMEM. */
