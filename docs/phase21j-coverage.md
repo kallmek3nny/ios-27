@@ -21,15 +21,14 @@ phase 21b, 21c and 21e APIs without editing their sources.
 | `phase21j-lockorder` | 96,000 contended graph ownership transitions, historical order-cycle rejection, 64th-bit correctness, reset and ownership validation |
 | `phase21j-deadlock-integration` | 512 native two-worker and 256 three-worker actual mutex wait-for cycles, only one rejected dependency per cycle, no surviving owners |
 | `phase21j-large-cycle` | Sixteen 64-worker native POSIX mutex rings, bounded wait-for traversal over maximum supported actor count, complete safe unwind |
-
-| \`phase21j-rule-races\` | 1,024 first-probe versus rule-configuration pthread races; exact freeze linearization, immutable post-freeze outcomes and failure accounting |
-| \`phase21j-modelcheck\` | 200,000 randomized nested logical lock acquisitions checked against an independently implemented FIFO BFS graph-reachability oracle, including edge accounting |
-| \`phase21j-wait-model\` | 120,000 seeded live lock-owner/wait-for transitions compared to an independent state machine, including cancellation, recursive lock checks, and reset invariants |
-| \`phase21j-identities\` | 4,096 concurrent runtime create/destroy lifecycles with unique nonwrapping identities and rejection of previous runtime handles |
-| \`phase21j-boundaries\` | 180,000 malformed scalar arguments, wrong slots, invalid event kinds, out-of-range schedule indices, and nonmutating error returns |
-| \`phase21j-timed-handoff\` | 64 guaranteed monotonic expirations and 512 ordered successful timed condition waits; exact trace suffix checks |
-| \`phase21j-timeout-races\` | 768 real native condition signal/deadline interactions, separately synchronized guaranteed-expiry controls, guaranteed signaled controls and truly competing timeout cases |
-| \`phase21j-trace\` and independent verifier | Compiled explicit actor-plan or seeded replay with stable JSON/JSONL digest, independent Python checker reconstructs all retained events and rejects tampered actor plans, corrupted events and malformed IDs |
+| `phase21j-rule-races` | 1,024 first-probe versus rule-configuration pthread races; exact freeze linearization, immutable post-freeze outcomes and failure accounting |
+| `phase21j-modelcheck` | 200,000 randomized nested logical lock acquisitions checked against an independently implemented FIFO BFS graph-reachability oracle, including edge accounting |
+| `phase21j-wait-model` | 120,000 seeded live lock-owner/wait-for transitions compared to an independent state machine, including cancellation, recursive lock checks, and reset invariants |
+| `phase21j-identities` | 4,096 concurrent runtime create/destroy lifecycles with unique nonwrapping identities and rejection of previous runtime handles |
+| `phase21j-boundaries` | 180,000 malformed scalar arguments, wrong slots, invalid event kinds, out-of-range schedule indices, and nonmutating error returns |
+| `phase21j-timed-handoff` | 64 guaranteed monotonic expirations and 512 ordered successful timed condition waits; exact trace suffix checks |
+| `phase21j-timeout-races` | 768 real native condition signal/deadline interactions, separately synchronized guaranteed-expiry controls, guaranteed signaled controls and truly competing timeout cases |
+| `phase21j-trace` and independent verifier | Compiled explicit actor-plan or seeded replay with stable JSON/JSONL digest, independent Python checker reconstructs all retained events and rejects tampered actor plans, corrupted events and malformed IDs |
 
 Tests abort on violated invariants and return nonzero. Nothing weakens
 `-Werror`, skips a known regression or silently treats a timeout as success.
@@ -65,19 +64,19 @@ Compile the owned CLI against the diagnostics and turn-scheduler sources; the
 test runner already does this for each native compiler/optimization combination.
 Two examples of the binary invocation after compiling it:
 
-\`\`\`sh
+```sh
 ./phase21j-trace 0x21feed 4 512 --jsonl > phase21j-seeded.jsonl
 ./phase21j-trace 0x21feed 4 8 --plan 03120121 --jsonl > phase21j-planned.jsonl
 timeout 30s python3 tools/phase21j-verify-trace.py < phase21j-planned.jsonl
-\`\`\`
+```
 
 The explicit actor-plan string only accepts 0-7 and must contain exactly
-\`STEPS\` digits. All actors must be less than \`ACTORS\`. Unplanned mode
+`STEPS` digits. All actors must be less than `ACTORS`. Unplanned mode
 derives actors from SplitMix(seed XOR step), not physical scheduler order.
 The seeded 512-step golden trace is
-\`0x084ccace638e3858\` (86 injected events and 598 total records); the
-8-step explicit actor plan \`03120121\` has golden digest
-\`0x79cdeb98a766411b\` (4 injected events and 12 total records).
+`0x084ccace638e3858` (86 injected events and 598 total records); the
+8-step explicit actor plan `03120121` has golden digest
+`0x79cdeb98a766411b` (4 injected events and 12 total records).
 The independently implemented JSONL verifier rejects extra/missing event
 fields, actor substitution, mismatched sequence, malformed plan, altered
 fault return codes and incorrect digests. Its input is bounded to 2 MiB.
@@ -92,11 +91,11 @@ is neither controlled nor described as deterministic by the seed alone.
 
 A genuine condition variable may signal near its timeout boundary. The
 winner of a competing signal versus timeout is not fixed by the deadline
-alone. The \`phase21j-timeout-races\` suite allows both legal outcomes in
+alone. The `phase21j-timeout-races` suite allows both legal outcomes in
 the competing phase, and uses a distinct synchronization barrier before
 signaling to prove the no-signal expired case. This avoids the invalid
 assumption that every already-expired deadline necessarily returns
-\`ETIMEDOUT\` when a concurrent signal races it.
+`ETIMEDOUT` when a concurrent signal races it.
 
 ## Exact replay semantics
 
