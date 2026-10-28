@@ -35,9 +35,17 @@ REQUIRED = (
     b"_pthread_main_np",
     b"_pthread_is_threaded_np",
 )
+CPP_REQUIRED = (
+    b"_pthread_mutex_init",
+    b"_pthread_mutex_lock",
+    b"_pthread_mutex_unlock",
+    b"_pthread_cond_signal",
+    b"_pthread_rwlock_rdlock",
+    b"_pthread_once",
+)
 
 
-def verify(data: bytes) -> tuple[int, int, int]:
+def verify(data: bytes, required=REQUIRED) -> tuple[int, int, int]:
     if len(data) < 32:
         raise ValueError("truncated mach_header_64")
     magic, cpu, subtype, filetype, ncmds, sizeofcmds, flags, reserved = \
@@ -94,7 +102,7 @@ def verify(data: bytes) -> tuple[int, int, int]:
         names.append(name)
         if typ & 0x01 and (typ & 0x0e) == 0:
             undef.add(name)
-    missing = set(REQUIRED) - undef
+    missing = set(required) - undef
     if missing:
         raise ValueError("not undefined external pthread imports: " +
                          ", ".join(x.decode() for x in sorted(missing)))
@@ -108,15 +116,16 @@ def verify(data: bytes) -> tuple[int, int, int]:
             if symbolnum >= nsyms:
                 raise ValueError("invalid external relocation symbol index")
             called.add(names[symbolnum])
-    if not (called & set(REQUIRED)):
+    if not (called & set(required)):
         raise ValueError("no real ARM64_RELOC_BRANCH26 to pthread import")
-    return len(undef), len(relocs), len(called & set(REQUIRED))
+    return len(undef), len(relocs), len(called & set(required))
 
 
 def main():
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: phase21a-macho-verify.py compiled-arm64-macho.o")
-    result = verify(Path(sys.argv[1]).read_bytes())
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != "--cpp"):
+        raise SystemExit("usage: phase21a-macho-verify.py compiled-arm64-macho.o [--cpp]")
+    required = CPP_REQUIRED if len(sys.argv) == 3 else REQUIRED
+    result = verify(Path(sys.argv[1]).read_bytes(), required)
     print("phase21a: verified arm64 Mach-O nlist imports and external BRANCH26 "
           "relocations (undefined=%d, relocations=%d, direct-pthread-calls=%d)" % result)
 
