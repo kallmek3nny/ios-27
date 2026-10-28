@@ -21,6 +21,7 @@ struct ios27_21i_runtime {
     ios27_21c_runtime *sync;
     ios27_21i_guest guest;
     size_t capacity;
+    int apple_lp64_attrs;
     struct entry entries[MAX_SLOTS];
 };
 int ios27_21i_get_stats(ios27_21i_runtime *rt, ios27_21i_stats *out) {
@@ -84,6 +85,18 @@ int ios27_21i_create(ios27_21i_runtime **out, const ios27_21i_guest *g,
     *out = rt;
     return 0;
 }
+int ios27_21i_create_apple_lp64_attrs(ios27_21i_runtime **out,
+                                      const ios27_21i_guest *g,
+                                      size_t capacity) {
+    int rc;
+    if (out) *out = NULL;
+    if (!g || g->mutex_extent != 64 || g->cond_extent != 48 ||
+        g->mutex_alignment != 8 || g->cond_alignment != 8)
+        return EINVAL;
+    rc = ios27_21i_create(out, g, capacity);
+    if (!rc) (*out)->apple_lp64_attrs = 1;
+    return rc;
+}
 int ios27_21i_destroy(ios27_21i_runtime *rt) {
     int rc;
     if (!rt) return EINVAL;
@@ -100,6 +113,52 @@ int ios27_21i_destroy(ios27_21i_runtime *rt) {
     free(rt);
     return 0;
 }
+/* These offsets and constants are derived from Apple's published libpthread
+ * src/types_internal.h at 42d026df5b07825070f60134b980a1ec2552dfee.
+ * This opt-in decoder does NOT imply correctness for future SDK profiles. */
+static uint64_t read_le64(const uint8_t *p);
+static uint32_t read_le32(const uint8_t *p) {
+    uint32_t value = 0;
+    for (unsigned i = 0; i < 4; ++i) value |= (uint32_t)p[i] << (i * 8u);
+    return value;
+}
+static int decode_lp64_attr(ios27_21i_runtime *rt, uint64_t addr,
+                             size_t extent, uint64_t attribute, int kind,
+                             enum ios27_21c_kind *backend_kind) {
+    const uint8_t *bytes;
+    uint64_t signature;
+    uint32_t flags;
+    int rc;
+    if (!attribute) {
+        *backend_kind = kind == IOS27_21I_MUTEX ?
+            IOS27_21C_NORMAL_MUTEX : IOS27_21C_CONDITION;
+        return 0;
+    }
+    if (!rt->apple_lp64_attrs) return ENOTSUP;
+    rc = region(&rt->guest, attribute, 16, 8);
+    if (rc) return rc;
+    if (intersects(addr, extent, attribute, 16)) return EINVAL;
+    bytes = rt->guest.memory + (size_t)(attribute - rt->guest.base);
+    signature = read_le64(bytes);
+    flags = read_le32(bytes + 12u);
+    if (kind == IOS27_21I_MUTEX) {
+        unsigned type = (flags >> 2u) & 3u;
+        unsigned shared = (flags >> 4u) & 3u;
+        unsigned policy = (flags >> 6u) & 7u;
+        if (signature != UINT64_C(0x4d545841) || type > 2u) return EINVAL;
+        if ((flags & 3u) != 0u || shared != 2u ||
+            (policy != 1u && policy != 2u) || read_le32(bytes + 8u))
+            return ENOTSUP;
+        *backend_kind = type == 2u ? IOS27_21C_RECURSIVE_MUTEX :
+                        type == 1u ? IOS27_21C_ERRORCHECK_MUTEX :
+                                     IOS27_21C_NORMAL_MUTEX;
+    } else {
+        if (signature != UINT64_C(0x434e4441)) return EINVAL;
+        if ((read_le32(bytes + 8u) & 3u) != 2u) return ENOTSUP;
+        *backend_kind = IOS27_21C_CONDITION;
+    }
+    return 0;
+}
 static int create_object(ios27_21i_runtime *rt, uint64_t addr,
                          uint64_t attributes, int kind) {
     struct entry *e = NULL;
@@ -107,10 +166,13 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
                                                rt->guest.cond_extent;
     size_t alignment = kind == IOS27_21I_MUTEX ? rt->guest.mutex_alignment :
                                                   rt->guest.cond_alignment;
+    enum ios27_21c_kind backend_kind;
     int rc;
     rc = region(&rt->guest, addr, extent, alignment);
     if (rc) return rc;
-    if (attributes) return ENOTSUP; /* No unvalidated guest attr decoding. */
+    rc = decode_lp64_attr(rt, addr, extent, attributes, kind,
+                          &backend_kind);
+    if (rc) return rc;
     (void)pthread_mutex_lock(&rt->guard);
     for (size_t i = 0; i < rt->capacity; ++i) {
         struct entry *current = &rt->entries[i];
@@ -123,9 +185,7 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
     }
     if (!e) rc = EAGAIN;
     else {
-        rc = ios27_21c_sync_create(rt->sync,
-                                   kind == IOS27_21I_MUTEX ?
-                                   IOS27_21C_NORMAL_MUTEX : IOS27_21C_CONDITION,
+        rc = ios27_21c_sync_create(rt->sync, backend_kind,
                                    &e->backend);
         if (!rc) {
             e->address = addr;
