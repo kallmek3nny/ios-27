@@ -4,20 +4,20 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **5** · audited base: `5b35123eb11f`
+candidate branches with mapped changes: **4** · audited base: `4c4667700fdb`
 
-### [feat/phase21b-native-lifecycle-20261028](https://github.com/kallmek3nny/ios-27/pull/71)
+### [phase21e-tls-cancel-20261028](https://github.com/kallmek3nny/ios-27/pull/72)
 
-head: `f537b71ce1ab` · ci: **passing_checks** · unmerged, not credited.
+head: `396e20c32030` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +774/-0 lines
-  - candidate declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +975/-0 lines
+  - candidate declarations: `ios27_21e_attach`, `ios27_21e_cancel_checkpoint`, `ios27_21e_cancel_register`, `ios27_21e_cancel_request`, `ios27_21e_cancel_setstate`, `ios27_21e_cancel_unregister`, `ios27_21e_cleanup_pop`, `ios27_21e_cleanup_push`, `ios27_21e_cleanup_unwind`, `ios27_21e_create`, `ios27_21e_destroy`, `ios27_21e_getspecific`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `9431e4e63676` · ci: **passing_checks** · unmerged, not credited.
+head: `5aee76bb3f7e` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +764/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +767/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
 
 ### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
@@ -34,18 +34,18 @@ head: `db322a8c4493` · ci: **not_checked** · unmerged, not credited.
 - **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +995/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`, `ios27_21d_wrlock`
 
-### [phase21e-tls-cancel-20261028](https://github.com/kallmek3nny/ios-27/tree/phase21e-tls-cancel-20261028)
-
-head: `f76c7bbd3aaf` · ci: **not_checked** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +975/-0 lines
-  - candidate declarations: `ios27_21e_attach`, `ios27_21e_cancel_checkpoint`, `ios27_21e_cancel_register`, `ios27_21e_cancel_request`, `ios27_21e_cancel_setstate`, `ios27_21e_cancel_unregister`, `ios27_21e_cleanup_pop`, `ios27_21e_cleanup_push`, `ios27_21e_cleanup_unwind`, `ios27_21e_create`, `ios27_21e_destroy`, `ios27_21e_getspecific`
-
 ## recently merged agent source changes · not yet compatibility-reviewed
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **5**
+recent merged PRs with source changes: **6**
+
+### [merged PR #71](https://github.com/kallmek3nny/ios-27/pull/71)
+
+merged: 2026-10-28T19:54:07Z · source changes awaiting function-level audit.
+
+- **libSystem guest model (not dylib)**: 2 source files, 3 fixtures, +774/-0 lines
+  - added declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
 
 ### [merged PR #67](https://github.com/kallmek3nny/ios-27/pull/67)
 

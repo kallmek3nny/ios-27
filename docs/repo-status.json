@@ -2,28 +2,28 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "5b35123eb11f45fca6ccc8d61893d4f4bada0716",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/5b35123eb11f45fca6ccc8d61893d4f4bada0716",
-    "committed_at": "2026-10-28T19:33:52Z"
+    "sha": "4c4667700fdb5d716c934f0d577c858caaf042b2",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/4c4667700fdb5d716c934f0d577c858caaf042b2",
+    "committed_at": "2026-10-28T19:54:07Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 71,
-      "branch": "feat/phase21b-native-lifecycle-20261028",
-      "sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
-      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
-      "updated_at": "2026-10-28T19:53:05Z",
+      "number": 72,
+      "branch": "phase21e-tls-cancel-20261028",
+      "sha": "396e20c32030754aa91ae82dde8103315293b9f0",
+      "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/72",
+      "updated_at": "2026-10-28T19:53:58Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "9431e4e6367659d53871618614e90c635227f111",
+      "sha": "5aee76bb3f7e9dc36f00207fa144672a20d75863",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:52:46Z",
+      "updated_at": "2026-10-28T19:53:56Z",
       "status": "unmerged: not counted"
     },
     {
@@ -40,23 +40,21 @@
     {
       "branch": "feat/phase21d-fair-rwlock-once",
       "sha": "db322a8c4493f1dad81aae858d40eac443c49be3",
-      "ahead_by": 2,
-      "behind_by": 0,
+      "ahead_by": 1,
+      "behind_by": 10,
       "last_commit_at": "2026-10-28T19:53:19Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase21e-tls-cancel-20261028",
-      "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T19:34:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-tls-cancel-20261028",
       "status": "unmerged: not counted"
     }
   ],
   "recent_merged_pull_requests": [
+    {
+      "number": 71,
+      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+      "head_sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
+      "merged_at": "2026-10-28T19:54:07Z"
+    },
     {
       "number": 68,
       "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
@@ -105,13 +103,6 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/65",
       "head_sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
       "merged_at": "2026-10-28T19:20:17Z"
-    },
-    {
-      "number": 61,
-      "title": "fix: recognize new phase-numbered agent sources in live progress map",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/61",
-      "head_sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
-      "merged_at": "2026-10-28T19:18:52Z"
     }
   ],
   "scan_limits": {
@@ -120,5 +111,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:53:26Z"
+  "observed_at": "2026-10-28T19:54:14Z"
 }

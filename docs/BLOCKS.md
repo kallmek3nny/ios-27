@@ -47,9 +47,9 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `5b35123eb11f`
+main source: `4c4667700fdb`
 
-- [PR #71](https://github.com/kallmek3nny/ios-27/pull/71) · incoming, not counted
+- [PR #72](https://github.com/kallmek3nny/ios-27/pull/72) · incoming, not counted
 - [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
 - [PR #70](https://github.com/kallmek3nny/ios-27/pull/70) · incoming, not counted
 
@@ -57,19 +57,19 @@ main source: `5b35123eb11f`
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 5 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 4 active candidate(s) with recognized code changes.
 
-- **libSystem guest model (not dylib)**: 5 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 4 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
 blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
 
-latest scanned merged PRs: **5** · [source diffs](BRANCHES.md).
+latest scanned merged PRs: **6** · [source diffs](BRANCHES.md).
 
 - **libsystem_pthread**: 1 recently merged code PR(s), compatibility review pending
 - **ObjC host prototype (not Apple libobjc)**: 3 recently merged code PR(s), compatibility review pending
-- **libSystem guest model (not dylib)**: 1 recently merged code PR(s), compatibility review pending
+- **libSystem guest model (not dylib)**: 2 recently merged code PR(s), compatibility review pending
 
 ## realistic ceilings for every tracked area
 
