@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="930" height="465" viewBox="0 0 930 465" role="img" aria-label="ios-27 evidence-backed milestone gate progress">
+<rect width="100%" height="100%" fill="#101827"/>
+<text x="28" y="38" fill="#f9fafb" font-family="sans-serif" font-size="23" font-weight="bold">ios-27 | capability gates</text>
+<text x="28" y="62" fill="#a5b4c7" font-family="sans-serif" font-size="13">measured research milestones, NOT percentage of iOS 27 compatibility</text>
+<text x="28" y="104" fill="#e5e7eb" font-family="sans-serif" font-size="15">mach-o and native arm64</text>
+<rect x="375" y="89" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="89" width="270" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="104" fill="#f3f4f6" font-family="sans-serif" font-size="14">4/6 (66.7%)</text>
+<text x="28" y="154" fill="#e5e7eb" font-family="sans-serif" font-size="15">dyld and image loading</text>
+<rect x="375" y="139" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="139" width="253" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="154" fill="#f3f4f6" font-family="sans-serif" font-size="14">5/8 (62.5%)</text>
+<text x="28" y="204" fill="#e5e7eb" font-family="sans-serif" font-size="15">mach ipc and darwin calls</text>
+<rect x="375" y="189" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="189" width="173" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="204" fill="#f3f4f6" font-family="sans-serif" font-size="14">3/7 (42.9%)</text>
+<text x="28" y="254" fill="#e5e7eb" font-family="sans-serif" font-size="15">objective-c swift and system libraries</text>
+<rect x="375" y="239" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="239" width="0" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="254" fill="#f3f4f6" font-family="sans-serif" font-size="14">0/4 (0.0%)</text>
+<text x="28" y="304" fill="#e5e7eb" font-family="sans-serif" font-size="15">apple graphics and liquid glass</text>
+<rect x="375" y="289" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="289" width="0" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="304" fill="#f3f4f6" font-family="sans-serif" font-size="14">0/4 (0.0%)</text>
+<text x="28" y="354" fill="#e5e7eb" font-family="sans-serif" font-size="15">official system ui and apps</text>
+<rect x="375" y="339" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="339" width="0" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="354" fill="#f3f4f6" font-family="sans-serif" font-size="14">0/4 (0.0%)</text>
+<text x="28" y="404" fill="#e5e7eb" font-family="sans-serif" font-size="15">android deployment and isolation</text>
+<rect x="375" y="389" width="405" height="17" rx="5" fill="#374151"/>
+<rect x="375" y="389" width="0" height="17" rx="5" fill="#3dbba4"/>
+<text x="804" y="404" fill="#f3f4f6" font-family="sans-serif" font-size="14">0/4 (0.0%)</text>
+<text x="28" y="444" fill="#a5b4c7" font-family="sans-serif" font-size="12">0 official Apple UI / app gates demonstrated; no Android device run confirmed</text>
+</svg>

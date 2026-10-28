@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "as_of": "2026-10-28",
+  "baseline_commit": "75d631ff507debdeb5ce07e61d77fe5e32c4f6a1",
+  "method": "curated evidence-backed milestone gates; a gate is not a percentage of real iOS compatibility, and repository test names do not independently prove on-device success",
+  "groups": [
+    {
+      "id": "macho",
+      "label": "mach-o and native arm64",
+      "gates": [
+        {
+          "title": "bounded arm64 macho parsing",
+          "done": true,
+          "evidence": "docs/architecture.md",
+          "test": "macho-parser"
+        },
+        {
+          "title": "fat binaries and dylib inventory",
+          "done": true,
+          "evidence": "docs/architecture.md",
+          "test": "macho-inventory"
+        },
+        {
+          "title": "compiler-linked mh_execute fixture",
+          "done": true,
+          "evidence": "docs/phase16a-linked-native-execution.md",
+          "test": "compiled-darwin-real-mh-execute"
+        },
+        {
+          "title": "multisegment pc-relative native execution",
+          "done": true,
+          "evidence": "docs/phase17a-native-multisegment-execution.md",
+          "test": "compiled-darwin-real-mh-execute"
+        },
+        {
+          "title": "general darwin process startup and stack abi",
+          "done": false
+        },
+        {
+          "title": "native device validation on 4k/16k hardware",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "dyld",
+      "label": "dyld and image loading",
+      "gates": [
+        {
+          "title": "guest-virtual dyld install paths",
+          "done": true,
+          "evidence": "docs/phase8-native-images.md",
+          "test": "dyld-virtual-paths"
+        },
+        {
+          "title": "bounded export trie parsing",
+          "done": true,
+          "evidence": "docs/phase14c-dyld-symbols.md",
+          "test": "dyld-export-trie"
+        },
+        {
+          "title": "classic bind planning",
+          "done": true,
+          "evidence": "docs/architecture.md",
+          "test": "dyld-classic-binding"
+        },
+        {
+          "title": "limited unauthenticated chained fixups",
+          "done": true,
+          "evidence": "docs/phase16b-chained-import-addend-validation.md",
+          "test": "dyld-chained-fixups"
+        },
+        {
+          "title": "linked cross-image dylib fixture",
+          "done": true,
+          "evidence": "docs/phase17b-linked-multiimage.md",
+          "test": "native-multi-image-wx"
+        },
+        {
+          "title": "dyld shared cache and closures",
+          "done": false
+        },
+        {
+          "title": "arm64e authenticated fixups and abi",
+          "done": false
+        },
+        {
+          "title": "general real ios framework loading",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "mach",
+      "label": "mach ipc and darwin calls",
+      "gates": [
+        {
+          "title": "task-local mach port rights and send-once",
+          "done": true,
+          "evidence": "docs/phase16c-send-once-forwarding.md",
+          "test": "task-local-mach-names"
+        },
+        {
+          "title": "complex messages with bounded descriptors",
+          "done": true,
+          "evidence": "docs/phase17c-mach-lifecycle.md",
+          "test": "task-local-mach-names"
+        },
+        {
+          "title": "synthetic dead-name observation and teardown",
+          "done": true,
+          "evidence": "docs/phase17c-mach-lifecycle.md",
+          "test": "darwin-fixture-abi-lifecycle"
+        },
+        {
+          "title": "out-of-line memory and trailers",
+          "done": false
+        },
+        {
+          "title": "mach interface generator service parity",
+          "done": false
+        },
+        {
+          "title": "real darwin syscall and libsystem compatibility",
+          "done": false
+        },
+        {
+          "title": "concurrent service lifecycle under real processes",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "runtime",
+      "label": "objective-c swift and system libraries",
+      "gates": [
+        {
+          "title": "libobjc dispatch and runtime lifecycle",
+          "done": false
+        },
+        {
+          "title": "swift runtime and metadata interoperability",
+          "done": false
+        },
+        {
+          "title": "libsystem pthread workqueue and signals",
+          "done": false
+        },
+        {
+          "title": "foundation and app bootstrap",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "graphics",
+      "label": "apple graphics and liquid glass",
+      "gates": [
+        {
+          "title": "metal to android gpu api integration",
+          "done": false
+        },
+        {
+          "title": "iosurface sharing and display integration",
+          "done": false
+        },
+        {
+          "title": "coreanimation compositor bridge",
+          "done": false
+        },
+        {
+          "title": "real liquid glass framework rendering",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "label": "official system ui and apps",
+      "gates": [
+        {
+          "title": "launchd backboardd and frontboard services",
+          "done": false
+        },
+        {
+          "title": "genuine springboard launch",
+          "done": false
+        },
+        {
+          "title": "apple lock screen and control center",
+          "done": false
+        },
+        {
+          "title": "genuine ios application lifecycle",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "device",
+      "label": "android deployment and isolation",
+      "gates": [
+        {
+          "title": "galaxy s25+ physical on-device test",
+          "done": false
+        },
+        {
+          "title": "untrusted guest process isolation",
+          "done": false
+        },
+        {
+          "title": "android input audio and permission integration",
+          "done": false
+        },
+        {
+          "title": "stable system ui overlay without boot modification",
+          "done": false
+        }
+      ]
+    }
+  ]
+}
