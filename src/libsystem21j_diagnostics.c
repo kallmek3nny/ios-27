@@ -279,3 +279,64 @@ int ios27_21j_export(ios27_21j_diagnostics *d,
     (void)pthread_mutex_unlock(&d->mutex);
     return 0;
 }
+
+int ios27_21j_audit(ios27_21j_diagnostics *d,
+                    ios27_21j_audit_data *out) {
+    ios27_21j_audit_data result = {0};
+    uint64_t histogram = 0;
+    if (!d || !out) return EINVAL;
+    (void)pthread_mutex_lock(&d->mutex);
+    for (size_t i = 0; i < d->capacity; ++i) {
+        const lease_slot *slot = &d->slots[i];
+        if (slot->used) {
+            ++result.occupied;
+            if (!slot->generation || slot->retired)
+                result.violations |= IOS27_21J_AUDIT_SLOTS;
+        }
+        if (slot->retired) {
+            ++result.retired;
+            if (slot->generation != UINT32_MAX || slot->used)
+                result.violations |= IOS27_21J_AUDIT_SLOTS;
+        }
+    }
+    if (result.occupied != d->counters.active ||
+        result.occupied + result.retired > d->capacity)
+        result.violations |= IOS27_21J_AUDIT_SLOTS;
+    if (d->counters.leases_created < d->counters.leases_released ||
+        d->counters.leases_created - d->counters.leases_released !=
+            d->counters.active ||
+        d->counters.peak < d->counters.active ||
+        d->counters.peak > d->capacity ||
+        d->counters.capacity != d->capacity ||
+        d->counters.injections > d->counters.probes)
+        result.violations |= IOS27_21J_AUDIT_LEASE_COUNTS;
+    result.last = d->counters.next_sequence;
+    result.resident = (size_t)(result.last < IOS27_21J_TRACE_CAPACITY ?
+                               result.last : IOS27_21J_TRACE_CAPACITY);
+    result.first = result.resident ?
+                   result.last - result.resident + 1u : 0u;
+    if (d->counters.dropped != result.last - result.resident)
+        result.violations |= IOS27_21J_AUDIT_TRACE;
+    for (size_t i = 0; i < result.resident; ++i) {
+        uint64_t expected = result.first + i;
+        const ios27_21j_event *event =
+            &d->events[(expected - 1u) % IOS27_21J_TRACE_CAPACITY];
+        if (event->sequence != expected ||
+            event->kind < IOS27_21J_CREATE ||
+            event->kind > IOS27_21J_INJECTION)
+            result.violations |= IOS27_21J_AUDIT_TRACE;
+    }
+    for (size_t bucket = 0; bucket < 5u; ++bucket) {
+        uint64_t count = d->counters.contention_ns_buckets[bucket];
+        if (UINT64_MAX - histogram < count)
+            histogram = UINT64_MAX;
+        else histogram += count;
+    }
+    if (histogram > d->counters.contention ||
+        d->counters.contention_ns_total <
+            d->counters.contention_ns_max)
+        result.violations |= IOS27_21J_AUDIT_CONTENTION;
+    *out = result;
+    (void)pthread_mutex_unlock(&d->mutex);
+    return result.violations ? EPROTO : 0;
+}
