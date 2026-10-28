@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = (
@@ -68,10 +69,21 @@ def main():
                       "-fno-omit-frame-pointer"])
     print("phase21j native architecture: {}; sanitizer={}; stress={}".format(
         architecture, sanitize, stress), flush=True)
+    evidence_started = time.monotonic()
+    evidence = {
+        "schema": 1,
+        "arch": architecture,
+        "compiler": compiler,
+        "cflags": flags,
+        "mode": "sanitizer" if sanitize else "stress" if stress else "default",
+        "head_sha": os.environ.get("PHASE21J_HEAD_SHA"),
+        "tests": [],
+    }
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else
                          ("-O2",) if stress else ("-O0", "-O2")):
             for test in TEST_NAMES:
+                started = time.monotonic()
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -166,6 +178,21 @@ def main():
                             raise RuntimeError("invalid actor digit was not rejected")
                     else:
                         run([str(output)], 150, env)
+                evidence["tests"].append({
+                    "name": test,
+                    "optimization": optimize,
+                    "iterations": 8 if stress else 1,
+                    "elapsed_s": round(time.monotonic() - started, 3),
+                    "outcome": "passed",
+                })
+    evidence["elapsed_s"] = round(time.monotonic() - evidence_started, 3)
+    report = os.environ.get("PHASE21J_REPORT_PATH")
+    if report:
+        Path(report).write_text(
+            json.dumps(evidence, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print("phase21j: evidence written to {}".format(report), flush=True)
     mode = "ASan/UBSan" if sanitize else (
         "8-pass O2 stress" if stress else "O0/O2")
     print("phase21j: {} native programs all passed with -Werror ({})".format(
