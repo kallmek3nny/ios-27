@@ -8,17 +8,17 @@ candidate branches with mapped changes: **2** · audited base: `2a1f8af8f814`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `b766e4a0e235` · ci: **passing_checks** · unmerged, not credited.
+head: `76e87a0e4e83` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 8 test/fixture files, +1478/-0 lines
-  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
+- **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1660/-0 lines
+  - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
-head: `1fd3dc09051a` · ci: **passing_checks** · unmerged, not credited.
+head: `d4e67343ede0` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +1054/-0 lines
-  - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`, `ios27_21d_wrlock`
+- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +1450/-0 lines
+  - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
