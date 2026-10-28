@@ -1119,7 +1119,109 @@ static void phase18c_host_alias_isolation(void) {
     ios27_mach_v2_free(s);
 }
 
+static void phase19c_thread_identity_exception_queue(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port = 0u, sender = 0u, thread = 0u, other = 0u;
+    uint32_t identity = 99u, observed = 99u, next = 0u;
+    uint8_t out[IOS27_MACH_MSG_MAX];
+    size_t n;
+    assert(s);
+    assert(ios27_mach_v2_thread_create(s, 2u, &thread) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_thread_create(s, 3u, &other) == IOS27_MACH_OK);
+    assert(other != thread);
+    assert(ios27_mach_v2_thread_identity(s, 2u, thread, &identity) ==
+           IOS27_MACH_OK && identity == 2u);
+    identity = 99u;
+    assert(ios27_mach_v2_thread_identity(s, 3u, thread, &identity) ==
+           IOS27_MACH_BAD_RIGHT && identity == 99u);
+    assert(ios27_mach_v2_thread_destroy(s, 3u, thread) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &sender) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_exception_set(s, 2u, 0u, sender) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_exception_set(s, 2u, 0x100u, sender) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_exception_set(s, 3u, 1u, sender) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_exception_set(s, 2u, 3u, sender) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_exception_get(s, 2u, 0u, &observed) ==
+           IOS27_MACH_OK && observed == sender);
+    assert(ios27_mach_v2_exception_get(s, 2u, 1u, &observed) ==
+           IOS27_MACH_OK && observed == sender);
+    assert(ios27_mach_v2_exception_get(s, 2u, 8u, &observed) ==
+           IOS27_MACH_BAD_ARGUMENT && observed == sender);
+    assert(ios27_mach_v2_exception_raise(s, 2u, other, 0u, 17u) ==
+           IOS27_MACH_BAD_RIGHT);
+    for (uint32_t i = 0u; i < IOS27_MACH_QUEUE_MAX; ++i)
+        assert(ios27_mach_v2_exception_raise(s, 2u, thread, 0u,
+                                              200u + i) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_exception_raise(s, 2u, thread, 0u, 999u) ==
+           IOS27_MACH_TIMEOUT);
+    memset(out, 0xa5, sizeof(out));
+    n = 39u;
+    assert(ios27_mach_v2_receive(s, 1u, port, out, &n, 0u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(n == 40u && out[0] == 0xa5u);
+    for (uint32_t i = 0u; i < IOS27_MACH_QUEUE_MAX; ++i) {
+        n = sizeof(out);
+        assert(ios27_mach_v2_receive(s, 1u, port, out, &n, 0u) ==
+               IOS27_MACH_OK && n == 40u);
+        assert(rd32(out + 20u) == IOS27_MACH_V2_EXCEPTION_MSG_ID);
+        assert(rd32(out + 24u) == thread && rd32(out + 28u) == 2u);
+        assert(rd32(out + 32u) == 0u && rd32(out + 36u) == 200u + i);
+    }
+    assert(ios27_mach_v2_exception_set(s, 2u, 1u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_exception_get(s, 2u, 0u, &observed) ==
+           IOS27_MACH_OK && observed == 0u);
+    assert(ios27_mach_v2_exception_raise(s, 2u, thread, 0u, 1u) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_exception_raise(s, 2u, thread, 1u, 7u) ==
+           IOS27_MACH_OK);
+    n = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, port, out, &n, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_drop_send(s, 2u, sender) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_exception_get(s, 2u, 1u, &observed) ==
+           IOS27_MACH_OK && observed == 0u);
+    assert(ios27_mach_v2_exception_raise(s, 2u, thread, 1u, 8u) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_task_teardown(s, 2u) == IOS27_MACH_OK);
+    identity = 42u;
+    assert(ios27_mach_v2_thread_identity(s, 2u, thread, &identity) ==
+           IOS27_MACH_BAD_RIGHT && identity == 42u);
+    assert(ios27_mach_v2_thread_create(s, 2u, &next) == IOS27_MACH_OK);
+    assert(next > other);
+    assert(ios27_mach_v2_thread_destroy(s, 2u, next) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_thread_destroy(s, 2u, next) ==
+           IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
+static void phase19c_thread_exhaustion_and_rollback(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t ids[IOS27_MACH_V2_THREADS], sentinel = 77u;
+    assert(s);
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i)
+        assert(ios27_mach_v2_thread_create(s, 1u, &ids[i]) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_thread_create(s, 1u, &sentinel) ==
+           IOS27_MACH_LIMIT && sentinel == 77u);
+    assert(ios27_mach_v2_thread_create(s, 1u,
+                                      (uint32_t *)(void *)s) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_thread_destroy(s, 1u, ids[0]) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_thread_create(s, 1u, &sentinel) == IOS27_MACH_OK);
+    assert(sentinel > ids[IOS27_MACH_V2_THREADS - 1u]);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_thread_destroy(s, 1u, sentinel) ==
+           IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase19c_thread_exhaustion_and_rollback();
+    phase19c_thread_identity_exception_queue();
     phase18c_host_alias_isolation();
     phase18c_port_sets_and_capacity();
     phase18c_trailer_atomicity();
