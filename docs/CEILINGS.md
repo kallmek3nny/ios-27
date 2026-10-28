@@ -1,6 +1,6 @@
 # ios-27 | audited technical ceilings and hard blockers
 
-**audit baseline:** merged `main` at [`b3b66fef5a72ba`](https://github.com/kallmek3nny/ios-27/commit/b3b66fef5a72b3bcbecc71466d257b6eebae8797) (2026-10-28). The [live provenance file](repo-status.json) tracks newer main commits and recent unmerged branches. A new commit **does not** automatically prove a capability. Re-audit any changed component before modifying its status.
+**audit scope:** merged phases through phase 19 (2026-10-28). This document reviews capabilities, not the exact current HEAD. The [live provenance file](repo-status.json) records the latest main SHA; manual target audits remain necessary. The [live provenance file](repo-status.json) tracks newer main commits and recent unmerged branches. A new commit **does not** automatically prove a capability. Re-audit any changed component before modifying its status.
 
 ## what "ceiling" means
 
