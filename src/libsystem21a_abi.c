@@ -9,7 +9,8 @@
 
 /* Host locks never occupy the Darwin opaque bytes. All slots are bounded. */
 enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4, KIND_ONCE = 5,
-                   KIND_CONDATTR = 6, KIND_RWLOCKATTR = 7 };
+                   KIND_CONDATTR = 6, KIND_RWLOCKATTR = 7,
+                   KIND_THREADATTR = 8 };
 enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW, OP_CREL,
@@ -17,13 +18,16 @@ enum operation {
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
     OP_KC, OP_KD, OP_KS, OP_KG,
     OP_CAI, OP_CAD, OP_CAS, OP_CAG, OP_RAI, OP_RAD, OP_RAS, OP_RAG,
-    OP_UNSUPPORTED
+    OP_TAI, OP_TAD, OP_TAGD, OP_TASD, OP_TAGS, OP_TASS,
+    OP_TAGG, OP_TASG, OP_TAGO, OP_TASO, OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
     unsigned kind, pins;
     unsigned mutex_locked, rw_writer_locked, mutex_type, mutex_depth;
     unsigned attr_pshared;
+    unsigned attr_detachstate, attr_scope;
+    uint64_t attr_stacksize, attr_guardsize;
     unsigned once_state;
     pthread_t once_owner;
     pthread_t mutex_owner, rw_writer;
@@ -96,6 +100,20 @@ static const entry symbols[] = {
     {"pthread_rwlockattr_destroy", OP_RAD},
     {"pthread_rwlockattr_setpshared", OP_RAS},
     {"pthread_rwlockattr_getpshared", OP_RAG},
+    {"pthread_attr_init", OP_TAI},
+    {"pthread_attr_destroy", OP_TAD},
+    {"pthread_attr_getdetachstate", OP_TAGD},
+    {"pthread_attr_setdetachstate", OP_TASD},
+    {"pthread_attr_getstacksize", OP_TAGS},
+    {"pthread_attr_setstacksize", OP_TASS},
+    {"pthread_attr_getguardsize", OP_TAGG},
+    {"pthread_attr_setguardsize", OP_TASG},
+    {"pthread_attr_getscope", OP_TAGO},
+    {"pthread_attr_setscope", OP_TASO},
+    {"pthread_attr_setstack", OP_UNSUPPORTED},
+    {"pthread_attr_getstack", OP_UNSUPPORTED},
+    {"pthread_attr_setstackaddr", OP_UNSUPPORTED},
+    {"pthread_attr_getstackaddr", OP_UNSUPPORTED},
     {"pthread_once", OP_ONCE},
     {"pthread_create", OP_UNSUPPORTED},
     {"pthread_join", OP_UNSUPPORTED},
@@ -117,6 +135,7 @@ static size_t object_size(unsigned kind) {
         case KIND_ONCE: return sizeof(ios27_21a_once);
         case KIND_CONDATTR: return sizeof(ios27_21a_condattr);
         case KIND_RWLOCKATTR: return sizeof(ios27_21a_rwlockattr);
+        case KIND_THREADATTR: return sizeof(ios27_21a_attr);
         default: return 0u;
     }
 }
@@ -245,7 +264,8 @@ static int native_init(object_slot *s, unsigned kind, unsigned mutex_type) {
         case KIND_RWLOCK: return pthread_rwlock_init(&s->native.rwlock, NULL);
         case KIND_MUTEXATTR:
         case KIND_CONDATTR:
-        case KIND_RWLOCKATTR: return 0;
+        case KIND_RWLOCKATTR:
+        case KIND_THREADATTR: return 0;
         case KIND_ONCE: {
             int e = pthread_mutex_init(&s->native.once.lock, NULL);
             if (e) return e;
@@ -263,7 +283,8 @@ static int native_destroy(object_slot *s) {
         case KIND_RWLOCK: return pthread_rwlock_destroy(&s->native.rwlock);
         case KIND_MUTEXATTR:
         case KIND_CONDATTR:
-        case KIND_RWLOCKATTR: return 0;
+        case KIND_RWLOCKATTR:
+        case KIND_THREADATTR: return 0;
         case KIND_ONCE: {
             int e = pthread_cond_destroy(&s->native.once.ready);
             if (e) return e;
@@ -328,6 +349,10 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     s->mutex_depth = 0;
     s->mutex_type = mutex_type;
     s->attr_pshared = 2u; /* Darwin PTHREAD_PROCESS_PRIVATE */
+    s->attr_detachstate = 1u; /* Darwin PTHREAD_CREATE_JOINABLE */
+    s->attr_scope = 1u; /* Darwin PTHREAD_SCOPE_SYSTEM */
+    s->attr_stacksize = UINT64_C(512) * 1024u;
+    s->attr_guardsize = UINT64_C(16) * 1024u;
     s->once_state = 0u;
     memset(s->rw_reader_counts, 0, sizeof(s->rw_reader_counts));
     s->kind = kind;
@@ -581,23 +606,45 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
 }
 /* Guest out-parameters cannot alias any active opaque object. Check and
  * write under the registry guard to avoid racing bridge metadata updates. */
-static int guest_store_u32(ios27_21a_runtime *rt, uint64_t address, uint32_t value) {
+/* Writes to user memory must not corrupt live opaque pthread objects or
+ * the explicitly bound guest pthread_t identity cells. */
+static int guest_store_scalar(ios27_21a_runtime *rt, uint64_t address,
+                              uint64_t value, size_t width) {
     unsigned char *p;
     size_t i;
-    int e = guest_view(rt, address, sizeof(value), 4u, &p);
+    int e;
+    if (width != 4u && width != 8u) return EINVAL;
+    e = guest_view(rt, address, width, width, &p);
     if (e) return e;
     (void)pthread_mutex_lock(&rt->guard);
     for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
-        object_slot *s = &rt->objects[i];
+        const object_slot *s = &rt->objects[i];
         if (s->kind && address < s->addr + object_size(s->kind) &&
-            s->addr < address + sizeof(value)) {
+            s->addr < address + width) {
             (void)pthread_mutex_unlock(&rt->guard);
             return EINVAL;
         }
     }
-    guest_store32(p, value);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *b = &rt->threads[i];
+        if (b->occupied && address < b->guest_address + sizeof(uint64_t) &&
+            b->guest_address < address + width) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EINVAL;
+        }
+    }
+    if (width == 4u) guest_store32(p, (uint32_t)value);
+    else guest_store64(p, value);
     (void)pthread_mutex_unlock(&rt->guard);
     return 0;
+}
+static int guest_store_u32(ios27_21a_runtime *rt, uint64_t address,
+                            uint32_t value) {
+    return guest_store_scalar(rt, address, value, 4u);
+}
+static int guest_store_u64(ios27_21a_runtime *rt, uint64_t address,
+                            uint64_t value) {
+    return guest_store_scalar(rt, address, value, 8u);
 }
 /* Cond waits operate only on a mutex owned exactly once by this thread.
  * Both registry entries stay pinned for the entire blocking interval. */
@@ -941,6 +988,55 @@ static int attr_pshared_guest(ios27_21a_runtime *rt, uint64_t address,
     if (!setter) return guest_store_u32(rt, argument, value);
     return 0;
 }
+/* Host-side attr fields are independent of opaque Darwin memory layout. */
+static int thread_attr_guest(ios27_21a_runtime *rt, uint64_t address,
+                             uint64_t argument, enum operation op) {
+    object_slot *s = NULL;
+    uint64_t value = argument;
+    int setter = op == OP_TASD || op == OP_TASS ||
+                 op == OP_TASG || op == OP_TASO;
+    int e;
+    if (setter) {
+        switch (op) {
+            case OP_TASD:
+                if (value != 1u && value != 2u) return EINVAL;
+                break;
+            case OP_TASS:
+                if (value < UINT64_C(65536) || value > UINT64_C(16777216) ||
+                    (value & UINT64_C(16383))) return EINVAL;
+                break;
+            case OP_TASG:
+                if (value > UINT64_C(1048576) ||
+                    (value & UINT64_C(16383))) return EINVAL;
+                break;
+            case OP_TASO:
+                if (value != 1u && value != 2u) return EINVAL;
+                if (value == 2u) return ENOTSUP;
+                break;
+            default: return EINVAL;
+        }
+    }
+    e = slot_pin(rt, address, KIND_THREADATTR, &s);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    switch (op) {
+        case OP_TAGD: value = s->attr_detachstate; break;
+        case OP_TASD: s->attr_detachstate = (unsigned)value; break;
+        case OP_TAGS: value = s->attr_stacksize; break;
+        case OP_TASS: s->attr_stacksize = value; break;
+        case OP_TAGG: value = s->attr_guardsize; break;
+        case OP_TASG: s->attr_guardsize = value; break;
+        case OP_TAGO: value = s->attr_scope; break;
+        case OP_TASO: s->attr_scope = (unsigned)value; break;
+        default: e = EINVAL; break;
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    slot_unpin(rt, s);
+    if (e || setter) return e;
+    if (op == OP_TAGD || op == OP_TAGO)
+        return guest_store_u32(rt, argument, (uint32_t)value);
+    return guest_store_u64(rt, argument, value);
+}
 int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                    const uint64_t args[6], uint64_t *x0) {
     size_t i;
@@ -977,6 +1073,15 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
             *x0 = e ? 0u : value;
             return e;
         }
+    } else if (op == OP_TAI) {
+        e = slot_init(rt, args[0], KIND_THREADATTR, 0, 0u);
+    } else if (op == OP_TAD) {
+        e = slot_destroy(rt, args[0], KIND_THREADATTR);
+    } else if (op == OP_TAGD || op == OP_TASD ||
+               op == OP_TAGS || op == OP_TASS ||
+               op == OP_TAGG || op == OP_TASG ||
+               op == OP_TAGO || op == OP_TASO) {
+        e = thread_attr_guest(rt, args[0], args[1], op);
     } else if (op == OP_CAI || op == OP_RAI) {
         e = slot_init(rt, args[0],
                       op == OP_CAI ? KIND_CONDATTR : KIND_RWLOCKATTR, 0, 0u);
