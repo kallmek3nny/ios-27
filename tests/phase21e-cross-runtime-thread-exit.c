@@ -18,7 +18,7 @@ static atomic_uint seen_cleanup[RUNTIMES], seen_destructor[RUNTIMES];
 static void cleanup(void *pointer) {
     struct value *v=pointer;
     CHECK(v && v->runtime < RUNTIMES);
-    CHECK(ios27_21e_cancel_checkpoint(r[v->runtime]) == 0);
+    CHECK(ios27_21e_cancel_checkpoint(r[v->runtime]) == EINVAL);
     atomic_fetch_add(&seen_cleanup[v->runtime], 1);
 }
 static void destructor(void *pointer) {

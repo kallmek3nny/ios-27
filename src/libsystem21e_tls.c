@@ -167,6 +167,18 @@ static void teardown_context(struct context *ctx) {
         return;
     }
     ctx->tearing_down = 1;
+    /* Retire cancellation ownership atomically at the BEGINNING of exit.
+     * Once teardown starts, a request must not succeed against an already
+     * exiting worker, even while a long-running TLS destructor executes. */
+    if (ctx->token_generation != 0) {
+        struct slot_cancel *t = &runtime->tokens[ctx->token_slot];
+        if (t->used && t->generation == ctx->token_generation && t->owner == ctx) {
+            t->used = 0;
+            t->pending = 0;
+            t->owner = NULL;
+        }
+        ctx->token_generation = 0;
+    }
     unlock_runtime(runtime);
     /* pthread_key destructors receive an already-cleared native key; restore
      * it temporarily so application TLS callbacks can reenter this bridge. */
@@ -175,14 +187,6 @@ static void teardown_context(struct context *ctx) {
     run_destructors(ctx);
     (void)pthread_setspecific(runtime->native_key, NULL);
     if (lock_runtime(runtime) != 0) return;
-    if (ctx->token_generation != 0) {
-        struct slot_cancel *t = &runtime->tokens[ctx->token_slot];
-        if (t->used && t->generation == ctx->token_generation && t->owner == ctx) {
-            t->used = 0;
-            t->pending = 0;
-            t->owner = NULL;
-        }
-    }
     struct context **it = &runtime->contexts;
     while (*it && *it != ctx) it = &(*it)->next;
     if (*it == ctx) *it = ctx->next;
