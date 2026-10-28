@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define LC_DYLD_CHAINED_FIXUPS 0x80000034u
+#define DYLD_CHAINED_PTR_64 2u
 #define DYLD_CHAINED_PTR_64_OFFSET 6u
 #define DYLD_CHAINED_IMPORT 1u
 #define DYLD_CHAINED_IMPORT_ADDEND 2u
@@ -87,7 +88,7 @@ static int add_patch(const uint8_t *file, size_t size,
                      const ios27_macho_info *info,
                      ios27_chained_plan *plan, size_t seg_index,
                      uint64_t offset, uint64_t base,
-                      char *error, size_t cap,
+                     uint16_t format, char *error, size_t cap,
                      uint32_t *next) {
     const ios27_segment *seg = &info->segments[seg_index];
     uint64_t file_off, raw;
@@ -120,6 +121,13 @@ static int add_patch(const uint8_t *file, size_t size,
         if (((raw >> 36u) & 0x7fffu) != 0u)
             return fail(error, cap, "unsupported tagged/reserved rebase bits");
         patch->rebase_target = raw & ((UINT64_C(1) << 36u) - 1u);
+        /* PTR_64 stores the preferred VM address; PTR_64_OFFSET stores
+         * an offset from the image's lowest file-backed segment. */
+        if (format == DYLD_CHAINED_PTR_64) {
+            if (patch->rebase_target < base)
+                return fail(error, cap, "PTR_64 target precedes preferred base");
+            patch->rebase_target -= base;
+        }
         if (!rebase_inside_image(info, base, patch->rebase_target))
             return fail(error, cap, "chained rebase outside mapped image");
     }
@@ -192,8 +200,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
         size_t max_length, length;
         ios27_chained_import *entry = &out->imports[i];
         int32_t ordinal = (int32_t)(int8_t)(uint8_t)bits;
-        if (ordinal <= 0 || (bits & 0x100u) ||
-            name_off > UINT32_MAX - symbols_off)
+        if (ordinal <= 0 || name_off > UINT32_MAX - symbols_off)
             return fail(error, cap, "unsupported chained import flags/ordinal");
         name_start = symbols_off + name_off;
         if (name_start >= datasize)
@@ -206,6 +213,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
             return fail(error, cap, "unterminated/oversized chained symbol");
         memcpy(entry->symbol, payload + name_start, length);
         entry->ordinal = ordinal;
+        entry->weak_import = (bits & 0x100u) != 0u;
         if (import_stride == 8u)
             entry->addend = (int32_t)rd32(payload + imports_off + (size_t)i * 8u + 4u);
     }
@@ -229,7 +237,8 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
         pagesize = rd16(segdata + 4u);
         format = rd16(segdata + 6u);
         pagecount = rd16(segdata + 20u);
-        if (format != DYLD_CHAINED_PTR_64_OFFSET ||
+        if ((format != DYLD_CHAINED_PTR_64_OFFSET &&
+             format != DYLD_CHAINED_PTR_64) ||
             (pagesize != 4096u && pagesize != 16384u) ||
             pagecount > 4096u ||
             (uint64_t)pagecount > seg->vmsize / pagesize +
@@ -255,7 +264,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
                 uint64_t off;
                 if (plus(pageoff, chainoff, &off) ||
                     add_patch(file, size, &verified, out, i, off,
-                              base, error, cap, &next))
+                              base, format, error, cap, &next))
                     return -1;
                 if (!next) break;
                 if (next > ((uint32_t)pagesize - 8u - chainoff) / 4u)
@@ -306,12 +315,16 @@ int ios27_chained_apply(uint8_t *copy, size_t size,
                 return fail(error, cap, "missing chained import/resolver");
             imp = &plan->imports[patch->import_index];
             if (imp->ordinal <= 0 || !imp->symbol[0] ||
-                !memchr(imp->symbol, '\0', sizeof(imp->symbol)) ||
-                resolver(context, imp->symbol, imp->ordinal, &value))
-                return fail(error, cap, "unresolved chained import");
-            if (add_signed(&value, imp->addend) ||
-                add_signed(&value, patch->addend))
+                !memchr(imp->symbol, '\0', sizeof(imp->symbol)))
+                return fail(error, cap, "invalid chained import");
+            if (resolver(context, imp->symbol, imp->ordinal, &value)) {
+                if (!imp->weak_import)
+                    return fail(error, cap, "unresolved chained import");
+                value = 0u; /* absent weak symbols never receive addends */
+            } else if (add_signed(&value, imp->addend) ||
+                       add_signed(&value, patch->addend)) {
                 return fail(error, cap, "chained bind addend overflow/underflow");
+            }
         } else {
             if (!rebase_inside_image(&verified, base, patch->rebase_target) ||
                 plus(load_base, patch->rebase_target, &value))
