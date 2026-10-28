@@ -1,11 +1,58 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "7c5b48525b1373f4489ec09324969051e5e99b62",
+  "main_source_sha": "d8c08c2ebb80db0045d79852551aad14d153dcb4",
   "method": "diff-based provisional activity, no automatic completion promotion",
-  "candidates_checked": 0,
-  "candidate_count": 0,
-  "candidates": [],
-  "groups": {},
-  "observed_at": "2026-10-28T18:52:29Z"
+  "candidates_checked": 1,
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "branch": "phase20d-darwin-threading",
+      "sha": "39658bc7098a3613d0fbee6a57aadf031fec4f42",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 1,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 54,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20d_cancel_point",
+            "ios27_20d_cancel_request",
+            "ios27_20d_cond_signal",
+            "ios27_20d_cond_wait",
+            "ios27_20d_create",
+            "ios27_20d_destroy",
+            "ios27_20d_getspecific",
+            "ios27_20d_key_create",
+            "ios27_20d_key_delete",
+            "ios27_20d_mutex_lock",
+            "ios27_20d_mutex_trylock",
+            "ios27_20d_mutex_unlock"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20d_threads.h"
+          ]
+        }
+      ]
+    }
+  ],
+  "groups": {
+    "unclassified": [
+      {
+        "branch": "phase20d-darwin-threading",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
+        "source_files": 1,
+        "fixture_files": 0,
+        "ci": "not_checked"
+      }
+    ]
+  },
+  "observed_at": "2026-10-28T19:14:47Z"
 }

@@ -47,15 +47,14 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `7c5b48525b13`
+main source: `d8c08c2ebb80`
 
-- [PR #60](https://github.com/kallmek3nny/ios-27/pull/60) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 0 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 1 active candidate(s) with recognized code changes.
 
 
 ## realistic ceilings for every tracked area

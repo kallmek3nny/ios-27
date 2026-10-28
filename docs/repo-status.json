@@ -2,61 +2,31 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "7c5b48525b1373f4489ec09324969051e5e99b62",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/7c5b48525b1373f4489ec09324969051e5e99b62",
-    "committed_at": "2026-10-28T18:51:51Z"
+    "sha": "d8c08c2ebb80db0045d79852551aad14d153dcb4",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/d8c08c2ebb80db0045d79852551aad14d153dcb4",
+    "committed_at": "2026-10-28T19:14:10Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
-    {
-      "number": 60,
-      "branch": "feat/progress-live-branch-evidence",
-      "sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
-      "title": "feat: parse active agent branch diffs into live provisional progress blocks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/60",
-      "updated_at": "2026-10-28T19:13:09Z",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "open_pull_requests": [],
   "ahead_branches": [
     {
-      "branch": "phase20e-libsystem-userspace",
-      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T18:52:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20e-libsystem-userspace",
-      "status": "unmerged: not counted"
-    },
-    {
       "branch": "phase20d-darwin-threading",
-      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
+      "sha": "39658bc7098a3613d0fbee6a57aadf031fec4f42",
       "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T18:52:29Z",
+      "behind_by": 4,
+      "last_commit_at": "2026-10-28T19:14:38Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase20c-native-objc-ownership",
-      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T18:52:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20c-native-objc-ownership",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "1200d26427eb6baf70a652afa1ba921d7616a1bc",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T18:52:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
       "status": "unmerged: not counted"
     }
   ],
   "recent_merged_pull_requests": [
+    {
+      "number": 60,
+      "title": "feat: parse active agent branch diffs into live provisional progress blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/60",
+      "head_sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
+      "merged_at": "2026-10-28T19:14:10Z"
+    },
     {
       "number": 59,
       "title": "fix: handle progress refresh/main races and remove stale phase references",
@@ -105,20 +75,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/56",
       "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
       "merged_at": "2026-10-28T18:01:05Z"
-    },
-    {
-      "number": 52,
-      "title": "fix: exclude stale squash-merged refs from recent branch candidates",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/52",
-      "head_sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
-      "merged_at": "2026-10-28T17:50:23Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 57,
+    "branches_scanned": 24,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:13:43Z"
+  "observed_at": "2026-10-28T19:14:46Z"
 }
