@@ -289,10 +289,7 @@ static void phase19a_compiler_linked_test(void) {
                            "ios27.mode=native", NULL};
     ios27_startup_context context = {4, args, env, apple};
     assert(status >= 0 && WIFEXITED(status));
-    if (WEXITSTATUS(status) == 77) {
-        puts("phase19a advanced Clang+LLD workload skipped: linker unavailable");
-        return;
-    }
+    /* CI must execute the new compiler-produced workload, not skip it. */
     assert(WEXITSTATUS(status) == 0);
     bytes = read_file("phase19a-process", &length);
     mutated = malloc(length);
