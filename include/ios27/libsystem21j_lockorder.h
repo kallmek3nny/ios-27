@@ -36,6 +36,19 @@ int ios27_21j_lockorder_cancel_wait(ios27_21j_lockorder *graph,
 int ios27_21j_lockorder_reset(ios27_21j_lockorder *graph);
 int ios27_21j_lockorder_snapshot(ios27_21j_lockorder *graph,
                                  ios27_21j_lockorder_stats *out);
+
+/* Atomic audit of logical owner/held equivalence, active wait registrations,
+   edge counts, historical DAG and current wait-for acyclicity. */
+#define IOS27_21J_GRAPH_AUDIT_OWNERS 1u
+#define IOS27_21J_GRAPH_AUDIT_WAITS 2u
+#define IOS27_21J_GRAPH_AUDIT_EDGES 4u
+typedef struct {
+    size_t owned, waiting, edges, examined_actors;
+    unsigned violations;
+} ios27_21j_graph_audit;
+int ios27_21j_lockorder_audit(ios27_21j_lockorder *graph,
+                              ios27_21j_graph_audit *out);
+
 /* Returns 1 or 0 through out; only direct previously observed edges. */
 int ios27_21j_lockorder_edge(ios27_21j_lockorder *graph,
                              uint32_t from, uint32_t to, int *out);
