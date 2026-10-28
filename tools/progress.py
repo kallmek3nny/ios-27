@@ -39,6 +39,9 @@ def load():
                 evidence = gate.get("evidence")
                 if not evidence or not (ROOT / evidence).is_file() or ".." in Path(evidence).parts:
                     raise ValueError(f"missing evidence for {gate['title']}")
+                standalone = gate.get("standalone_test")
+                if standalone and (standalone != "tools/phase19e-standalone.py" or not (ROOT / standalone).is_file()):
+                    raise ValueError("invalid standalone test for " + gate["title"])
                 test = gate.get("test")
                 if test and not re.search(r"add_test\s*\(\s*NAME\s+" + re.escape(test) + r"(?:\s|\))", cmake):
                     raise ValueError(f"unregistered ctest for {gate['title']}: {test}")

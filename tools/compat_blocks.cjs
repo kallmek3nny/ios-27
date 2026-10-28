@@ -243,7 +243,9 @@ const raw=fs.readFileSync(path.join(root,"docs/compat-targets.json"),"utf8");
 const data=JSON.parse(raw);
 const cmake=fs.readFileSync(path.join(root,"CMakeLists.txt"),"utf8");
 for(const g of data.groups){if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")){
- if(!g.evidence||!g.test||g.evidence.startsWith("/")||g.evidence.includes("..")||!fs.existsSync(path.join(root,g.evidence)))throw Error("missing evidence for "+g.id);
+ if(!g.evidence||g.evidence.startsWith("/")||g.evidence.includes("..")||!fs.existsSync(path.join(root,g.evidence)))throw Error("missing evidence for "+g.id);
+ if(g.standalone_test){if(g.standalone_test!=="tools/phase19e-standalone.py"||!fs.existsSync(path.join(root,g.standalone_test)))throw Error("standalone harness missing for "+g.id);continue;}
+ if(!g.test)throw Error("missing CTest name for "+g.id);
  if(!new RegExp("add_test\\s*\\(\\s*NAME\\s+"+g.test.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?:\\s|\\))").test(cmake))throw Error("missing registered CTest for "+g.id+" "+g.test);
 }}
 const liveFile=path.join(root,"docs/repo-status.json");

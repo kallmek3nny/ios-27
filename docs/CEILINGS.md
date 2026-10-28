@@ -8,18 +8,24 @@ There is no defensible hard percentage limit for iOS 27 compatibility. A source-
 
 | domain | demonstrated on merged main | realistic next supported boundary | core blocker |
 | --- | --- | --- | --- |
-| Mach-O / AArch64 | compiler-produced sdk-free ARM64 test executables, multiple segments, and bounded phase18a LC_MAIN argv/envp plus guarded native guest stack | reviewed userland Darwin programs with proper stack, process and TLS ABI | no full Darwin process lifecycle, TLS or syscall support; no untrusted-code sandbox |
-| dyld / image loader | bounded phase18b three-dylib native graph, guest-path @rpath resolution and staged fixups, verified with original-source fixtures | broader freestanding multi-image graphs with correct lifecycle | real Apple shared cache, process initializers/closures, arm64e authenticated fixups, TLS |
-| Mach IPC | bounded synchronous task-local port rights, send-once, phase18c port sets, single small OOL buffers and sequence trailers | more complete guest-local IPC, ports, MIG behavior | real XNU traps, audit-trailer identity, full OOL VM, concurrency and entitlement-aware services |
+| Mach-O / AArch64 | phase19a compiler-linked freestanding startup plus phase19d transactional cross-object relocation/execute fixtures | selected reviewed Darwin programs with bounded stack and object linking | full process lifecycle, tls, syscalls, untrusted sandbox |
+| dyld / image loader | phase19b special symbol ordinals and dependency finalizer planning plus linked multi-dylib fixture | broader freestanding graphs with safe unload/constructor behavior | Apple shared cache, closures, arm64e bindings and lifecycle |
+| Mach IPC | phase19c bounded task-local thread identity, fixture exception messages, memory copy/zero and serialized port rights | increasingly faithful guest-local Mach services | kernel XNU traps, authenticated audit tokens, real VM protections, MIG compatibility |
 | Darwin BSD / libsystem | seven limited interpreter selector behaviors (six identity calls + virtual exit), **not libc exports** | isolate and translate selected syscall interfaces | filesystem policy, process/thread/syscall ABI, isolation and signals |
-| C / pthread / dispatch | **no linked Apple-compatible libsystem API surface** | subsets of portable C and POSIX-like operations | ABI and ownership, darwin TLS, workqueues, dispatch object behavior |
-| ObjC / Swift | **not implemented** | research compatible public-runtime subset | libobjc dispatch, Swift metadata, ARC, concurrency and arm64e |
+| C / pthread / dispatch | phase19e isolated guest read/write/close, fake identity and quota-tracked allocations, **not linked libSystem ABI exports** | isolated libc/POSIX subset | syscall and process ABI, TLS, workqueues, signals and ownership |
+| ObjC / Swift | standalone Clang ObjC2 metadata parser, bounded host selectors/classes/messaging and one relocation-free native method, **not Apple's libobjc ABI** | integrate host prototypes and add verified guest-call ABI | objc_msgSend ABI, guest IMP fixups, ARC, categories, Swift, arm64e |
 | CoreFoundation / Foundation / Security | **not implemented** | selected functions may be reproduced in isolated userland | Apple implementation/services, entitlement/keychain trust and ownership |
 | UIKit / SwiftUI | **not implemented** | cannot establish a viable genuine-Apple-framework ceiling yet | private/public Apple framework dependencies, view graph and event routing |
 | Metal / CoreAnimation / IOSurface | **not implemented** | potentially a separately designed Android graphics bridge | resource, command and synchronization semantics; compositor interoperability |
 | SpringBoard / apps | **no genuine apps or official system UI running** | an auditable dependency graph and sandboxed app bootstrap proof | BackBoard/FrontBoard/launchd, Apple services, graphics, entitlements, arm64e |
 | Android device | **no documented S25+ end-to-end compatibility run** | isolated, explicitly started Android userspace host with native ARM64 fixture tests | secure process boundary, storage, audio, graphics, input and permission mediation |
 | native XNU / replacing Android | **not in project scope** | none without explicitly changing the goal | Android verified boot/firmware/kernel safety constraints |
+
+## phase19 evidence audit
+
+The latest merged phase19a/b/c/d work extends native compiler-produced ARM64 test execution and bounded Mach/dyld models. Phase19e's Objective-C and libSystem components are **standalone, original-source, host-controlled** foundations. They are **not linked into `ios27_core`**, and none of the standard `objc_msgSend`, `libsystem_kernel.dylib`, Foundation, Swift or Apple UI entrypoints are provided. The dedicated standalone harness must pass on x86_64 and ARM64 CI for the new experimental target groups.
+
+**The workflow refresh only updates repository/branch provenance and regenerates images from manually reviewed target catalogs. It cannot automatically determine feature correctness or count newly created code.**
 
 ## high-impact blockers to investigate next
 

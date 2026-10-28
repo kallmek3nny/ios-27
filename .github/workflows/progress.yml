@@ -2,10 +2,10 @@ name: capability progress
 on:
   push:
     branches: [main]
-    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, .github/workflows/progress.yml]
+    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
   pull_request:
     branches: [main]
-    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, .github/workflows/progress.yml]
+    paths: [tools/refresh_repo_status.py, docs/repo-status.json, .github/workflows/refresh-progress.yml, docs/progress.json, docs/progress.svg, docs/PROGRESS.md, tools/progress.py, tools/compat_blocks.cjs, docs/compat-targets.json, docs/blocks.svg, docs/blocks.html, docs/BLOCKS.md, docs/CEILINGS.md, src/objc_metadata.c, src/objc_runtime.c, src/objc_bridge.c, src/libsystem_user.c, tools/phase19e-standalone.py, tests/phase19e-standalone.c, tests/fixtures/phase19e-objc-classes.m, .github/workflows/progress.yml]
 permissions:
   contents: read
 jobs:
@@ -20,3 +20,16 @@ jobs:
           timeout 15s python3 tools/progress.py --check
           timeout 15s node --check tools/compat_blocks.cjs
           timeout 15s node tools/compat_blocks.cjs --check
+
+  standalone-objc-libsystem:
+    name: standalone objc/libsystem (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile and test compiler-produced objc2 and guest libsystem fixtures
+        run: timeout 180s python3 tools/phase19e-standalone.py
