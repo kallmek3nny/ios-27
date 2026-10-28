@@ -13,7 +13,7 @@ struct entry {
     uint64_t address;
     size_t extent, refs;
     uint32_t generation;
-    int kind, retired;
+    int kind, retired, static_initialization;
     ios27_21c_handle backend;
 };
 struct ios27_21i_runtime {
@@ -143,6 +143,7 @@ int ios27_21i_destroy(ios27_21i_runtime *rt) {
  * src/types_internal.h at 42d026df5b07825070f60134b980a1ec2552dfee.
  * This opt-in decoder does NOT imply correctness for future SDK profiles. */
 static uint64_t read_le64(const uint8_t *p);
+static void write_le64(uint8_t *p, uint64_t v);
 static uint32_t read_le32(const uint8_t *p) {
     uint32_t value = 0;
     for (unsigned i = 0; i < 4; ++i) value |= (uint32_t)p[i] << (i * 8u);
@@ -223,11 +224,65 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
             e->address = addr;
             e->extent = extent;
             e->kind = kind;
+            e->static_initialization = 0;
             if (!e->generation) e->generation = 1;
         }
     }
     (void)pthread_mutex_unlock(&rt->guard);
     return rc;
+}
+/* Called with runtime guard held, only in explicit Apple LP64 mode. 
+ * Sources: Apple libpthread include/pthread/pthread_impl.h,
+ * _PTHREAD_*_SIG_init public macros. Only pristine zero-filled static
+ * initializers are accepted; no Linux host pthread storage is consulted. */
+static int activate_static_locked(ios27_21i_runtime *rt, uint64_t addr,
+                                  int kind) {
+    size_t extent, alignment;
+    uint64_t signature;
+    enum ios27_21c_kind backend_kind;
+    struct entry *available = NULL;
+    const uint8_t *bytes;
+    int rc;
+    if (!rt->apple_lp64_attrs) return EINVAL;
+    extent = kind == IOS27_21I_MUTEX ? rt->guest.mutex_extent :
+                                       rt->guest.cond_extent;
+    alignment = kind == IOS27_21I_MUTEX ? rt->guest.mutex_alignment :
+                                          rt->guest.cond_alignment;
+    /* The caller already validated access permissions and guest range. */
+    rc = region(&rt->guest, addr, extent, alignment);
+    if (rc) return rc;
+    bytes = rt->guest.memory + (size_t)(addr - rt->guest.base);
+    signature = read_le64(bytes);
+    if (kind == IOS27_21I_MUTEX) {
+        if (signature == UINT64_C(0x32aaaba7) ||
+            signature == UINT64_C(0x32aaaba3))
+            backend_kind = IOS27_21C_NORMAL_MUTEX;
+        else if (signature == UINT64_C(0x32aaaba1))
+            backend_kind = IOS27_21C_ERRORCHECK_MUTEX;
+        else if (signature == UINT64_C(0x32aaaba2))
+            backend_kind = IOS27_21C_RECURSIVE_MUTEX;
+        else return EINVAL;
+    } else if (kind == IOS27_21I_CONDITION &&
+               signature == UINT64_C(0x3cb0b1bb)) {
+        backend_kind = IOS27_21C_CONDITION;
+    } else return EINVAL;
+    for (size_t byte = 8; byte < extent; ++byte)
+        if (bytes[byte]) return EINVAL;
+    for (size_t i = 0; i < rt->capacity; ++i) {
+        struct entry *e = &rt->entries[i];
+        if (e->kind && intersects(addr, extent, e->address, e->extent))
+            return EBUSY;
+        if (!available && !e->kind && !e->retired) available = e;
+    }
+    if (!available) return EAGAIN;
+    rc = ios27_21c_sync_create(rt->sync, backend_kind, &available->backend);
+    if (rc) return rc;
+    available->address = addr;
+    available->extent = extent;
+    available->kind = kind;
+    available->static_initialization = 1;
+    if (!available->generation) available->generation = 1;
+    return 0;
 }
 static int destroy_object(ios27_21i_runtime *rt, uint64_t addr, int kind) {
     struct entry *e;
@@ -240,11 +295,25 @@ static int destroy_object(ios27_21i_runtime *rt, uint64_t addr, int kind) {
     if (rc) return rc;
     (void)pthread_mutex_lock(&rt->guard);
     e = find(rt, addr, kind);
+    if (!e && rt->apple_lp64_attrs) {
+        rc = activate_static_locked(rt, addr, kind);
+        if (!rc) e = find(rt, addr, kind);
+        else if (rc != EINVAL) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return rc;
+        }
+    }
     if (!e) rc = EINVAL;
     else if (e->refs) rc = EBUSY;
     else {
         rc = ios27_21c_sync_destroy(rt->sync, e->backend);
         if (!rc) {
+            /* Match Apple's published NO_SIG value for consumed static
+             * initializers, preventing stale raw pointer resurrection. */
+            if (e->static_initialization)
+                write_le64(rt->guest.memory +
+                           (size_t)(e->address - rt->guest.base), 0);
+            e->static_initialization = 0;
             e->kind = 0;
             e->address = 0;
             e->extent = 0;
@@ -437,8 +506,25 @@ int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
     }
     (void)pthread_mutex_lock(&rt->guard);
     e = find(rt, a0, kind);
-    if (e && (action == WAIT || action == TIMEDWAIT))
+    if (!e && rt->apple_lp64_attrs) {
+        rc = activate_static_locked(rt, a0, kind);
+        if (!rc) e = find(rt, a0, kind);
+        else if (rc != EINVAL) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return rc;
+        }
+    }
+    if (e && (action == WAIT || action == TIMEDWAIT)) {
         m = find(rt, a1, IOS27_21I_MUTEX);
+        if (!m && rt->apple_lp64_attrs) {
+            rc = activate_static_locked(rt, a1, IOS27_21I_MUTEX);
+            if (!rc) m = find(rt, a1, IOS27_21I_MUTEX);
+            else if (rc != EINVAL) {
+                (void)pthread_mutex_unlock(&rt->guard);
+                return rc;
+            }
+        }
+    }
     if (!e || ((action == WAIT || action == TIMEDWAIT) && !m)) {
         (void)pthread_mutex_unlock(&rt->guard);
         return EINVAL;
