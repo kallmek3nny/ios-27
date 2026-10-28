@@ -302,6 +302,29 @@ static void phase19a_compiler_linked_test(void) {
     assert(info.segment_count >= 5u);
     maincmd = command(bytes, length, UINT32_C(0x80000028), NULL);
     datacmd = command(bytes, length, 0x19u, "__DATA");
+    {
+        /* A code-bearing RX segment may also contain non-code literals. */
+        size_t textcmd19 = command(bytes, length, 0x19u, "__TEXT");
+        size_t literal_section = 0u;
+        for (uint32_t i = 0u; i < rd32(bytes + textcmd19 + 64u); ++i) {
+            size_t sec = textcmd19 + 72u + (size_t)i * 80u;
+            if (strncmp((const char *)bytes + sec, "__cstring", 16u) == 0)
+                literal_section = sec;
+        }
+        assert(literal_section != 0u);
+        memcpy(mutated, bytes, length);
+        wr64(mutated + maincmd + 8u, rd32(bytes + literal_section + 48u));
+        assert(ios27_macho_parse(mutated, length, &info,
+                                 error, sizeof(error)) == 0);
+        assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                             &layout, error, sizeof(error)) != 0);
+        assert(layout.span == 0u);
+        assert(ios27_macho_executable_layout(mutated, length, &info, 16384u,
+                                             &layout, error, sizeof(error)) != 0);
+        memcpy(mutated, bytes, length);
+        assert(ios27_macho_parse(bytes, length, &info,
+                                 error, sizeof(error)) == 0);
+    }
 #if defined(__aarch64__)
     for (unsigned i = 0u; i < 32u; ++i) {
         result = 777;
