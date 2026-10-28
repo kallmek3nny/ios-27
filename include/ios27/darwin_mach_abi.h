@@ -22,6 +22,8 @@
 #define IOS27_DARWIN_FIXTURE_SEND       UINT32_C(0x49530107)
 #define IOS27_DARWIN_FIXTURE_RECEIVE    UINT32_C(0x49530108)
 #define IOS27_DARWIN_FIXTURE_TEARDOWN   UINT32_C(0x49530109)
+#define IOS27_DARWIN_FIXTURE_WATCH_DEAD UINT32_C(0x4953010a)
+#define IOS27_DARWIN_FIXTURE_POLL_DEAD  UINT32_C(0x4953010b)
 
 typedef struct {
     uint64_t x[8];
@@ -35,7 +37,8 @@ typedef struct {
  *   RIGHTS: x0 port -> out.x0 sends, x1 send-once, x2 receive
  *   SEND: x0 arena offset, x1 length, x2 timeout
  *   RECEIVE: x0 local port, x1 offset, x2 capacity, x3 timeout
- *   TEARDOWN: no arguments
+ *   TEARDOWN/POLL_DEAD: no arguments (POLL_DEAD -> out.x0 local name)
+ *   WATCH_DEAD: x0 existing send/send-once name
  *
  * SEND/RECEIVE success: out.x[0] = transferred bytes.
  * RECEIVE TOO_LARGE: out.x[0] = required bytes; the message remains queued.
