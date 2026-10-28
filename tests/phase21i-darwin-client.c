@@ -72,3 +72,32 @@ int phase21i_darwin_calls(phase21i_lp64_mutex *mutex, phase21i_lp64_cond *condit
     if (pthread_mutex_destroy(mutex)) return -3;
     return rc;
 }
+
+/* End-to-end *compiled* attribute-call ABI evidence, not runtime execution. */
+extern int pthread_mutexattr_init(phase21i_lp64_mutexattr *);
+extern int pthread_mutexattr_settype(phase21i_lp64_mutexattr *, int);
+extern int pthread_mutexattr_destroy(phase21i_lp64_mutexattr *);
+extern int pthread_condattr_init(phase21i_lp64_condattr *);
+extern int pthread_condattr_destroy(phase21i_lp64_condattr *);
+__attribute__((visibility("default")))
+int phase21i_darwin_attribute_calls(phase21i_lp64_mutex *mutex,
+                                    phase21i_lp64_cond *condition,
+                                    phase21i_lp64_mutexattr *mutexattr,
+                                    phase21i_lp64_condattr *condattr) {
+    int rc = pthread_mutexattr_init(mutexattr);
+    if (rc) return rc;
+    rc = pthread_condattr_init(condattr);
+    if (rc) { (void)pthread_mutexattr_destroy(mutexattr); return rc; }
+    rc = pthread_mutexattr_settype(mutexattr, 2);
+    if (rc) goto cleanup_attributes;
+    rc = pthread_mutex_init(mutex, mutexattr);
+    if (rc) goto cleanup_attributes;
+    rc = pthread_cond_init(condition, condattr);
+    if (rc) { (void)pthread_mutex_destroy(mutex); goto cleanup_attributes; }
+    rc = pthread_cond_destroy(condition);
+    if (pthread_mutex_destroy(mutex) && !rc) rc = -1;
+cleanup_attributes:
+    if (pthread_condattr_destroy(condattr) && !rc) rc = -2;
+    if (pthread_mutexattr_destroy(mutexattr) && !rc) rc = -3;
+    return rc;
+}
