@@ -1089,7 +1089,7 @@
       "label": "mach-o parser and native loader",
       "ceiling": "plausible",
       "note": "merged phase18a demonstrates bounded LC_MAIN argv/envp and a guarded guest stack for reviewed SDK-free ARM64 fixtures. no general Darwin process, TLS initialization, syscall integration, fault containment, or sandbox exists.",
-      "evidence": "docs/phase18a-darwin-process-startup.md",
+      "evidence": "docs/phase19d-relocation-linker.md",
       "test": "compiled-darwin-real-mh-execute",
       "targets": [
         {
@@ -1139,6 +1139,10 @@
         {
           "name": "real apple app entry",
           "status": "missing"
+        },
+        {
+          "name": "transactional multi-object ARM64 relocation execution",
+          "status": "native-fixture"
         }
       ]
     },
@@ -1148,7 +1152,7 @@
       "label": "dyld / image graph",
       "ceiling": "conditional",
       "note": "merged phase18b proves bounded native 3-dylib graphs and explicit guest-path @rpath resolution with no host filesystem fallback. only a dependency-first initializer plan exists; no automatic constructors, Apple dyld cache, or arm64e.",
-      "evidence": "docs/phase18b-linked-graph.md",
+      "evidence": "src/images.c",
       "test": "native-multi-image-wx",
       "targets": [
         {
@@ -1214,6 +1218,10 @@
         {
           "name": "swift tls fixups",
           "status": "missing"
+        },
+        {
+          "name": "special ordinal binding and dependency finalizer plan",
+          "status": "synthetic"
         }
       ]
     },
@@ -1223,7 +1231,7 @@
       "label": "mach ipc model",
       "ceiling": "conditional",
       "note": "phase18c adds synthetic task-local port sets, bounded 128-byte single OOL descriptors and sequence trailers; all operations are synchronous fixture calls, not kernel Mach traps, audit tokens, full OOL VM or entitlement-aware processes.",
-      "evidence": "docs/phase18c-mach-sets-and-trailers.md",
+      "evidence": "docs/phase19c-mach-compat.md",
       "test": "task-local-mach-names",
       "targets": [
         {
@@ -1292,6 +1300,18 @@
         },
         {
           "name": "port-set membership and round-robin receive",
+          "status": "synthetic"
+        },
+        {
+          "name": "task-local thread identity and stale-handle rejection",
+          "status": "synthetic"
+        },
+        {
+          "name": "fixture exception registration and delivery",
+          "status": "synthetic"
+        },
+        {
+          "name": "bounded guest VM copy/zero model",
           "status": "synthetic"
         }
       ]
@@ -1958,6 +1978,94 @@
           "status": "excluded"
         }
       ]
+    },
+    {
+      "id": "objc-host-model",
+      "label": "ObjC host prototype (not Apple libobjc)",
+      "targets": [
+        {
+          "name": "Clang ObjC2 absolute metadata parsing",
+          "status": "synthetic"
+        },
+        {
+          "name": "metadata relocation and malformed input validation",
+          "status": "synthetic"
+        },
+        {
+          "name": "metadata to trusted host IMP bridge",
+          "status": "synthetic"
+        },
+        {
+          "name": "host class registration and superclass lookup",
+          "status": "synthetic"
+        },
+        {
+          "name": "selector interning and host callback dispatch",
+          "status": "synthetic"
+        },
+        {
+          "name": "once-only class initialization and retries",
+          "status": "synthetic"
+        },
+        {
+          "name": "bounded host object allocation and release",
+          "status": "synthetic"
+        },
+        {
+          "name": "single relocation-free compiler ObjC method execution",
+          "status": "native-fixture"
+        }
+      ],
+      "note": "Standalone ObjC2 parser and trusted host-callback runtime, not Apple objc_msgSend ABI, guest IMP bindings, categories, arm64e or UIKit.",
+      "panel": "libraries",
+      "ceiling": "conditional",
+      "evidence": "docs/phase19e-architecture.md",
+      "standalone_test": "tools/phase19e-standalone.py"
+    },
+    {
+      "id": "libsystem-host-model",
+      "label": "libSystem guest model (not dylib)",
+      "targets": [
+        {
+          "name": "guest offset-checked read trap",
+          "status": "synthetic"
+        },
+        {
+          "name": "captured guest write trap",
+          "status": "synthetic"
+        },
+        {
+          "name": "bounded guest close trap",
+          "status": "synthetic"
+        },
+        {
+          "name": "synthetic PID and guest identity",
+          "status": "synthetic"
+        },
+        {
+          "name": "Darwin errno for supported traps",
+          "status": "synthetic"
+        },
+        {
+          "name": "bounded guest memory arena",
+          "status": "synthetic"
+        },
+        {
+          "name": "captured IO without host file access",
+          "status": "synthetic"
+        },
+        {
+          "name": "quota-checked host heap ownership",
+          "status": "synthetic"
+        }
+      ],
+      "note": "Standalone bounded guest trap dispatcher. Not real linked libSystem API exports, Darwin kernel traps, or host filesystem integration.",
+      "panel": "libraries",
+      "ceiling": "conditional",
+      "evidence": "docs/phase19e-architecture.md",
+      "standalone_test": "tools/phase19e-standalone.py"
     }
-  ]
+  ],
+  "last_reviewed_phase": "phase19e",
+  "catalog_policy": "Status changes require reviewed explicit evidence and matching tests; the live refresh only updates source provenance."
 }

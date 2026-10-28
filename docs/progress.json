@@ -39,6 +39,12 @@
         {
           "title": "native device validation on 4k/16k hardware",
           "done": false
+        },
+        {
+          "title": "transactional ARM64 multi-object relocations and native cross-object calls",
+          "done": true,
+          "evidence": "docs/phase19d-relocation-linker.md",
+          "test": "compiled-darwin-branch26"
         }
       ]
     },
@@ -87,6 +93,12 @@
         {
           "title": "general real ios framework loading",
           "done": false
+        },
+        {
+          "title": "special ordinal bindings and dependency finalization plan",
+          "done": true,
+          "evidence": "src/images.c",
+          "test": "native-multi-image-wx"
         }
       ]
     },
@@ -113,8 +125,10 @@
           "test": "darwin-fixture-abi-lifecycle"
         },
         {
-          "title": "out-of-line memory and trailers",
-          "done": false
+          "title": "bounded OOL descriptor and receive sequence trailers",
+          "done": true,
+          "evidence": "docs/phase18c-mach-sets-and-trailers.md",
+          "test": "task-local-mach-names"
         },
         {
           "title": "mach interface generator service parity",
@@ -127,6 +141,12 @@
         {
           "title": "concurrent service lifecycle under real processes",
           "done": false
+        },
+        {
+          "title": "task-local threads, exception messages and bounded guest VM copy",
+          "done": true,
+          "evidence": "docs/phase19c-mach-compat.md",
+          "test": "task-local-mach-names"
         }
       ]
     },
@@ -149,6 +169,24 @@
         {
           "title": "foundation and app bootstrap",
           "done": false
+        },
+        {
+          "title": "standalone compiler-produced ObjC2 metadata parsing",
+          "done": true,
+          "evidence": "docs/phase19e-architecture.md",
+          "standalone_test": "tools/phase19e-standalone.py"
+        },
+        {
+          "title": "standalone host class registration, lookup, initialization and dispatch",
+          "done": true,
+          "evidence": "docs/phase19e-architecture.md",
+          "standalone_test": "tools/phase19e-standalone.py"
+        },
+        {
+          "title": "bounded host-only Darwin libSystem guest trap model",
+          "done": true,
+          "evidence": "docs/phase19e-architecture.md",
+          "standalone_test": "tools/phase19e-standalone.py"
         }
       ]
     },
