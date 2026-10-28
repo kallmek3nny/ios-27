@@ -2,6 +2,7 @@
 
 #include "ios27/binds.h"
 #include "ios27/chained.h"
+#include "ios27/dyld_paths.h"
 #include "ios27/exports.h"
 #include "ios27/macho.h"
 
@@ -20,6 +21,9 @@
 
 #define IOS27_IMAGE_MAX_BYTES (16u * 1024u * 1024u)
 #define LC_LOAD_DYLIB 0x0cu
+#define LC_RPATH 0x8000001cu
+#define LC_MAIN 0x80000028u
+#define LC_DYLD_EXPORTS_TRIE 0x80000033u
 #define LC_LOAD_WEAK_DYLIB 0x80000018u
 #define LC_REEXPORT_DYLIB 0x8000001fu
 #define LC_LOAD_UPWARD_DYLIB 0x80000023u
@@ -30,10 +34,12 @@
 
 typedef struct {
     char name[IOS27_IMAGE_NAME_MAX];
-    char dependencies[IOS27_IMAGES_MAX][IOS27_IMAGE_NAME_MAX];
+    char dependencies[IOS27_IMAGES_MAX][IOS27_DYLD_PATH_MAX];
     size_t dep_count;
     size_t dep_index[IOS27_IMAGES_MAX];
     unsigned char dep_weak[IOS27_IMAGES_MAX];
+    unsigned char dep_reexport[IOS27_IMAGES_MAX];
+    char guest_path[IOS27_DYLD_PATH_MAX];
     const uint8_t *source;
     size_t source_size;
     ios27_macho_info info;
@@ -50,6 +56,8 @@ typedef struct {
 struct ios27_images {
     size_t count;
     size_t page_size;
+    size_t init_count;
+    size_t init_order[IOS27_IMAGES_MAX];
     image_node nodes[IOS27_IMAGES_MAX];
 };
 
@@ -75,13 +83,24 @@ static int valid_name(const char *name) {
     }
     return 0;
 }
+/* Bounded guest install names may contain dyld tokens and path separators.
+ * The legacy short-name API retains its stricter character policy. */
+static int valid_install_name(const char *name) {
+    if (!name || (name[0] != '/' && name[0] != '@')) return 0;
+    for (size_t i = 0u; i < IOS27_DYLD_PATH_MAX; ++i) {
+        unsigned char c = (unsigned char)name[i];
+        if (!c) return i != 0u;
+        if (c <= 0x20u || c >= 0x7fu || c == '\\') return 0;
+    }
+    return 0;
+}
 static int index_of(const ios27_images *images, const char *name) {
     for (size_t i = 0u; i < images->count; ++i)
         if (strcmp(images->nodes[i].name, name) == 0)
             return (int)i;
     return -1;
 }
-static int visit(const ios27_images *images, size_t i,
+static int visit(ios27_images *images, size_t i,
                  unsigned char color[IOS27_IMAGES_MAX]) {
     const image_node *node = &images->nodes[i];
     if (color[i] == 1u) return -1;
@@ -92,6 +111,7 @@ static int visit(const ios27_images *images, size_t i,
             visit(images, node->dep_index[d], color))
             return -1;
     color[i] = 2u;
+    images->init_order[images->init_count++] = i;
     return 0;
 }
 static int dependency_commands(image_node *node, char *error, size_t cap) {
@@ -113,6 +133,7 @@ static int dependency_commands(image_node *node, char *error, size_t cap) {
                        node->dependencies[found]) != 0)
                 return fail(error, cap, "dylib load order/name does not match explicit graph");
             node->dep_weak[found] = (unsigned char)(cmd == LC_LOAD_WEAK_DYLIB);
+            node->dep_reexport[found] = (unsigned char)(cmd == LC_REEXPORT_DYLIB);
             ++found;
         } else if (cmd == LC_LOAD_UPWARD_DYLIB || cmd == LC_LAZY_LOAD_DYLIB) {
             return fail(error, cap, "upward/lazy dependencies unsupported");
@@ -127,6 +148,34 @@ static int dependency_commands(image_node *node, char *error, size_t cap) {
         return fail(error, cap, "missing dylib command or mixed fixup formats");
     return chained ? 2 : legacy ? 1 : 0;
 }
+/*
+ * The shared Mach-O parser intentionally marks LC_RPATH as unknown-required
+ * for generic process execution. This graph loader recognizes it explicitly,
+ * while still refusing ANY genuinely unknown LC_REQ_DYLD command.
+ */
+static int safe_required_commands(const image_node *node,
+                                  char *error, size_t cap) {
+    size_t cursor = 32u;
+    ios27_dyld_image_metadata meta;
+    for (uint32_t i = 0u; i < rd32(node->source + 16u); ++i) {
+        uint32_t command = rd32(node->source + cursor);
+        uint32_t bytes = rd32(node->source + cursor + 4u);
+        if ((command & 0x80000000u) &&
+            command != LC_RPATH && command != LC_MAIN &&
+            command != LC_LOAD_WEAK_DYLIB &&
+            command != LC_REEXPORT_DYLIB &&
+            command != LC_LOAD_UPWARD_DYLIB &&
+            command != LC_DYLD_INFO_ONLY &&
+            command != LC_DYLD_CHAINED_FIXUPS &&
+            command != LC_DYLD_EXPORTS_TRIE)
+            return fail(error, cap, "unknown required dyld load command");
+        cursor += bytes;
+    }
+    /* Includes stringent string-offset and per-command bounds checks. */
+    return ios27_dyld_inspect_image(node->source, node->source_size,
+                                     &meta, error, cap);
+}
+
 static int valid_layout(image_node *node, size_t page,
                         char *error, size_t cap) {
     uint64_t min_vm = UINT64_MAX, max_vm = 0u;
@@ -206,27 +255,38 @@ static int find_symbol(const image_node *node, const char *symbol,
     }
     return -1;
 }
-/* Follow reexport aliases only across the caller-supplied acyclic image graph.
- * Never perform implicit filesystem lookups or search host libraries. */
-static int resolve_export(const ios27_images *images, size_t provider,
-                          const char *symbol, uintptr_t *address) {
-    for (size_t hop = 0u; hop < images->count; ++hop) {
-        const image_node *node;
-        const ios27_export *entry;
-        if (provider >= images->count) return -1;
-        node = &images->nodes[provider];
-        entry = ios27_exports_find(node->exports, symbol);
-        if (!entry) return -1;
+/* Direct symbols, explicit trie aliases, and LC_REEXPORT_DYLIB
+ * forwarding share one bounded, acyclic namespace search. */
+static int resolve_export_depth(const ios27_images *images, size_t provider,
+                                const char *symbol, uintptr_t *address,
+                                size_t depth) {
+    const image_node *node;
+    const ios27_export *entry;
+    if (depth >= images->count || provider >= images->count) return -1;
+    node = &images->nodes[provider];
+    entry = ios27_exports_find(node->exports, symbol);
+    if (entry) {
         if (!(entry->flags & IOS27_EXPORT_REEXPORT))
             return find_symbol(node, symbol, address);
         if (entry->flags & ~(uint64_t)(IOS27_EXPORT_REEXPORT |
                                       IOS27_EXPORT_WEAK_DEFINITION) ||
-            entry->ordinal == 0u || entry->ordinal > node->dep_count)
+            !entry->ordinal || entry->ordinal > node->dep_count)
             return -1;
-        if (entry->imported_name[0]) symbol = entry->imported_name;
-        provider = node->dep_index[(size_t)entry->ordinal - 1u];
+        return resolve_export_depth(images,
+             node->dep_index[(size_t)entry->ordinal - 1u],
+             entry->imported_name[0] ? entry->imported_name : symbol,
+             address, depth + 1u);
     }
+    for (size_t d = 0u; d < node->dep_count; ++d)
+        if (node->dep_reexport[d] && node->dep_index[d] != SIZE_MAX &&
+            !resolve_export_depth(images, node->dep_index[d], symbol,
+                                  address, depth + 1u))
+            return 0;
     return -1;
+}
+static int resolve_export(const ios27_images *images, size_t provider,
+                          const char *symbol, uintptr_t *address) {
+    return resolve_export_depth(images, provider, symbol, address, 0u);
 }
 typedef struct {
     ios27_images *images;
@@ -299,8 +359,10 @@ int ios27_images_entrypoint(const ios27_images *images, const char *name,
     return 0;
 }
 
-int ios27_images_load(const ios27_image_spec *specs, size_t count,
-                      ios27_images **out, char *error, size_t cap) {
+static int images_load_impl(const ios27_image_spec *specs, size_t count,
+                            const char *const *guest_paths,
+                            const char *main_executable,
+                            ios27_images **out, char *error, size_t cap) {
     ios27_images *images;
     unsigned char color[IOS27_IMAGES_MAX] = {0};
 #if IOS27_POSIX_MAPPING
@@ -310,6 +372,7 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
 #endif
     if (out) *out = NULL;
     if (!out || !specs || count == 0u || count > IOS27_IMAGES_MAX ||
+        (!!guest_paths != !!main_executable) ||
         os_page < 4096 || os_page > 65536 ||
         (((unsigned long)os_page & ((unsigned long)os_page - 1u)) != 0u))
         return fail(error, cap, "unsupported host or image graph");
@@ -329,6 +392,24 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
             goto rollback;
         }
         (void)snprintf(node->name, sizeof(node->name), "%s", spec->name);
+        if (guest_paths) {
+            ios27_dyld_candidates canonical;
+            if (ios27_dyld_paths(guest_paths[i], main_executable,
+                                 main_executable, NULL, 0u, &canonical,
+                                 error, cap) ||
+                canonical.count != 1u ||
+                strcmp(canonical.paths[0], guest_paths[i])) {
+                (void)fail(error, cap, "noncanonical guest image path");
+                goto rollback;
+            }
+            (void)snprintf(node->guest_path, sizeof(node->guest_path),
+                           "%s", canonical.paths[0]);
+            for (size_t prior = 0u; prior < i; ++prior)
+                if (!strcmp(images->nodes[prior].guest_path, node->guest_path)) {
+                    (void)fail(error, cap, "duplicate guest image path");
+                    goto rollback;
+                }
+        }
         for (size_t j = 0u; j < i; ++j)
             if (strcmp(images->nodes[j].name, node->name) == 0) {
                 (void)fail(error, cap, "duplicate image name");
@@ -338,7 +419,8 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         node->source_size = spec->size;
         node->dep_count = spec->dependency_count;
         for (size_t d = 0u; d < node->dep_count; ++d) {
-            if (!valid_name(spec->dependencies[d])) {
+            if (guest_paths ? !valid_install_name(spec->dependencies[d]) :
+                              !valid_name(spec->dependencies[d])) {
                 (void)fail(error, cap, "invalid dependency name");
                 goto rollback;
             }
@@ -355,10 +437,16 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         if (ios27_macho_parse(node->source, node->source_size,
                              &node->info, error, cap))
             goto rollback;
-        if (node->info.encrypted || node->info.unsupported_required) {
+        if (node->info.encrypted ||
+            (node->info.unsupported_required &&
+             safe_required_commands(node, error, cap))) {
             (void)fail(error, cap, "encrypted or unknown-required image unsupported");
             goto rollback;
         }
+        /* Validation above proves LC_RPATH is the sole parser exception.
+         * Clear it only on this private, graph-specific Mach-O snapshot,
+         * so LC_MAIN validation still rejects every other required opcode. */
+        node->info.unsupported_required = 0u;
         if ((node->info.filetype != IOS27_MH_EXECUTE &&
              node->info.filetype != 6u) ||
             valid_layout(node, images->page_size, error, cap)) {
@@ -397,14 +485,72 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         int fixup_type;
         fixup_type = dependency_commands(node, error, cap);
         if (fixup_type < 0) goto rollback;
-        for (size_t d = 0u; d < node->dep_count; ++d) {
-            int index = index_of(images, node->dependencies[d]);
-            if ((index < 0 && !node->dep_weak[d]) ||
-                (index >= 0 && (size_t)index == i)) {
-                (void)fail(error, cap, "missing mandatory/self dependency");
+        if (guest_paths) {
+            ios27_dyld_image_metadata metadata;
+            const char *catalog[IOS27_IMAGES_MAX];
+            if (ios27_dyld_inspect_image(node->source, node->source_size,
+                                         &metadata, error, cap))
+                goto rollback;
+            if (metadata.dependency_count != node->dep_count) {
+                (void)fail(error, cap, "dependency metadata count mismatch");
                 goto rollback;
             }
-            node->dep_index[d] = index < 0 ? SIZE_MAX : (size_t)index;
+            /* The main image's runpaths retain their declaring context:
+             * @loader_path there means the main image, not this dylib. */
+            for (size_t root = 0u; root < count; ++root) {
+                ios27_dyld_image_metadata main_meta;
+                if (root == i ||
+                    strcmp(images->nodes[root].guest_path, main_executable))
+                    continue;
+                if (ios27_dyld_inspect_image(images->nodes[root].source,
+                                             images->nodes[root].source_size,
+                                             &main_meta, error, cap))
+                    goto rollback;
+                for (size_t r = 0u; r < main_meta.rpath_count; ++r) {
+                    ios27_dyld_candidates expanded;
+                    if (metadata.rpath_count == IOS27_DYLD_MAX_CANDIDATES ||
+                        ios27_dyld_paths(main_meta.rpaths[r], main_executable,
+                                         main_executable, NULL, 0u,
+                                         &expanded, error, cap)) {
+                        (void)fail(error, cap, "invalid inherited runpath");
+                        goto rollback;
+                    }
+                    (void)snprintf(metadata.rpaths[metadata.rpath_count++],
+                                   IOS27_DYLD_PATH_MAX, "%s", expanded.paths[0]);
+                }
+                break;
+            }
+            for (size_t path = 0u; path < count; ++path)
+                catalog[path] = images->nodes[path].guest_path;
+            for (size_t d = 0u; d < node->dep_count; ++d) {
+                ios27_dyld_catalog_match match;
+                int result;
+                if (strcmp(metadata.dependencies[d].install_name,
+                           node->dependencies[d])) {
+                    (void)fail(error, cap, "dependency ordinal/name mismatch");
+                    goto rollback;
+                }
+                result = ios27_dyld_match_dependency(
+                    &metadata, d, node->guest_path, main_executable, catalog,
+                    count, &match, error, cap);
+                if (result < 0 || (result == 1 && !node->dep_weak[d]) ||
+                    (result == 0 && match.image_index == i)) {
+                    if (result >= 0)
+                        (void)fail(error, cap, "missing mandatory/self guest dylib");
+                    goto rollback;
+                }
+                node->dep_index[d] = result == 1 ? SIZE_MAX : match.image_index;
+            }
+        } else {
+            for (size_t d = 0u; d < node->dep_count; ++d) {
+                int index = index_of(images, node->dependencies[d]);
+                if ((index < 0 && !node->dep_weak[d]) ||
+                    (index >= 0 && (size_t)index == i)) {
+                    (void)fail(error, cap, "missing mandatory/self dependency");
+                    goto rollback;
+                }
+                node->dep_index[d] = index < 0 ? SIZE_MAX : (size_t)index;
+            }
         }
         if (fixup_type == 1) {
             node->classic = calloc(1u, sizeof(*node->classic));
@@ -523,4 +669,29 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
 rollback:
     ios27_images_unload(images);
     return -1;
+}
+
+/* Deterministic dependency-first order. No guest constructors run here. */
+int ios27_images_initialization_image(const ios27_images *images,
+                                      size_t position, const char **name) {
+    if (!images || !name || position >= images->init_count) return -1;
+    *name = images->nodes[images->init_order[position]].name;
+    return 0;
+}
+
+int ios27_images_load_with_paths(const ios27_image_spec *specs, size_t count,
+                                 const char *const *guest_paths,
+                                 const char *main_executable,
+                                 ios27_images **out, char *error, size_t cap) {
+    if (!guest_paths || !main_executable) {
+        if (out) *out = NULL;
+        return fail(error, cap, "missing explicit guest path catalog");
+    }
+    return images_load_impl(specs, count, guest_paths, main_executable,
+                            out, error, cap);
+}
+
+int ios27_images_load(const ios27_image_spec *specs, size_t count,
+                      ios27_images **out, char *error, size_t cap) {
+    return images_load_impl(specs, count, NULL, NULL, out, error, cap);
 }

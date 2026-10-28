@@ -95,7 +95,8 @@ static int add_patch(const uint8_t *file, size_t size,
     ios27_chained_patch *patch;
     if (plan->count >= IOS27_CHAINED_MAX_PATCHES)
         return fail(error, cap, "too many chained relocations");
-    if (!(seg->initprot & 2u) || (seg->initprot & 4u) ||
+    if (!(seg->maxprot & 2u) || !(seg->initprot & 1u) ||
+            (seg->initprot & 4u) ||
         !fits(offset, 8u, (size_t)seg->filesize) ||
         plus(seg->fileoff, offset, &file_off) ||
         !fits(file_off, 8u, size))
