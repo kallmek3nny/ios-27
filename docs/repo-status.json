@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 80,
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "60dfc975c0130716f66e3bdda255f18994b4c457",
-      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:22:04Z",
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "d67fee5594afa701deac939cac6f2c71b154da9a",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:22:41Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "d379716ee2a22d259df4af313a9b95768229b717",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:21:56Z",
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "fc54d597e0aeab19b7f7f33bcb4383ca2b8c054c",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:22:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -128,5 +128,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:22:27Z"
+  "observed_at": "2026-10-28T21:22:51Z"
 }
