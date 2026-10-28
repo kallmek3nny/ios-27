@@ -1,0 +1,23 @@
+name: phase21g darwin condition variables
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cond:
+    name: condition variables (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@v4
+      - name: standalone x86_64 / arm64 stress and Mach-O fixture
+        run: timeout 300s python3 tools/phase21g-standalone.py
