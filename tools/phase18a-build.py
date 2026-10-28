@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "tests/fixtures/phase18a-multisegment.c"
+SOURCE = ROOT / "tests/fixtures/phase18a-startup.c"
 MAGIC = 0xFEEDFACF
 
 
