@@ -11,10 +11,10 @@
     {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "8b6d482562acb7466b564d6de618e8f155a8abf8",
+      "sha": "7e518cad94e762da82c8ef6367a724747dc76dbe",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T20:24:06Z",
+      "updated_at": "2026-10-28T20:24:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -101,5 +101,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:24:16Z"
+  "observed_at": "2026-10-28T20:24:47Z"
 }
