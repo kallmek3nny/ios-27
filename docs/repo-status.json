@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 73,
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "f3a8ae787162decfe9ed8defe73c21869c567bbc",
+      "title": "phase 21d: fair reader-writer lock and safe once initialization",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "updated_at": "2026-10-28T20:28:03Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
       "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "updated_at": "2026-10-28T20:27:18Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 73,
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "2265f89f62c2d73cfa9dcefc0daa3416776075ed",
-      "title": "phase 21d: fair reader-writer lock and safe once initialization",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:19:52Z",
       "status": "unmerged: not counted"
     },
     {
@@ -36,17 +36,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "f3a8ae787162decfe9ed8defe73c21869c567bbc",
-      "ahead_by": 6,
-      "behind_by": 58,
-      "last_commit_at": "2026-10-28T20:28:00Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 75,
@@ -107,9 +97,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 34,
+    "branches_scanned": 33,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:28:05Z"
+  "observed_at": "2026-10-28T20:28:46Z"
 }

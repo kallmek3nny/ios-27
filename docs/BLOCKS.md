@@ -49,19 +49,19 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `e84a0f2ca216`
 
-- [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
 - [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
+- [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
 - [PR #76](https://github.com/kallmek3nny/ios-27/pull/76) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 4 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 3 active candidate(s) with recognized code changes.
 
 - **libsystem_pthread**: 1 unmerged candidate branch(es), not counted
-- **ObjC host prototype (not Apple libobjc)**: 2 unmerged candidate branch(es), not counted
-- **libSystem guest model (not dylib)**: 4 unmerged candidate branch(es), not counted
+- **ObjC host prototype (not Apple libobjc)**: 1 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 3 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
