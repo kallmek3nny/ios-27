@@ -8,18 +8,22 @@
 #include <time.h>
 
 /* Host locks never occupy the Darwin opaque bytes. All slots are bounded. */
-enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4, KIND_ONCE = 5 };
+enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4, KIND_ONCE = 5,
+                   KIND_CONDATTR = 6, KIND_RWLOCKATTR = 7 };
 enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
-    OP_KC, OP_KD, OP_KS, OP_KG, OP_UNSUPPORTED
+    OP_KC, OP_KD, OP_KS, OP_KG,
+    OP_CAI, OP_CAD, OP_CAS, OP_CAG, OP_RAI, OP_RAD, OP_RAS, OP_RAG,
+    OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
     unsigned kind, pins;
     unsigned mutex_locked, rw_writer_locked, mutex_type, mutex_depth;
+    unsigned attr_pshared;
     unsigned once_state;
     pthread_t once_owner;
     pthread_t mutex_owner, rw_writer;
@@ -83,6 +87,14 @@ static const entry symbols[] = {
     {"pthread_mutexattr_destroy", OP_MAD},
     {"pthread_mutexattr_settype", OP_MAS},
     {"pthread_mutexattr_gettype", OP_MAG},
+    {"pthread_condattr_init", OP_CAI},
+    {"pthread_condattr_destroy", OP_CAD},
+    {"pthread_condattr_setpshared", OP_CAS},
+    {"pthread_condattr_getpshared", OP_CAG},
+    {"pthread_rwlockattr_init", OP_RAI},
+    {"pthread_rwlockattr_destroy", OP_RAD},
+    {"pthread_rwlockattr_setpshared", OP_RAS},
+    {"pthread_rwlockattr_getpshared", OP_RAG},
     {"pthread_once", OP_ONCE},
     {"pthread_create", OP_UNSUPPORTED},
     {"pthread_join", OP_UNSUPPORTED},
@@ -102,6 +114,8 @@ static size_t object_size(unsigned kind) {
         case KIND_RWLOCK: return sizeof(ios27_21a_rwlock);
         case KIND_MUTEXATTR: return sizeof(ios27_21a_mutexattr);
         case KIND_ONCE: return sizeof(ios27_21a_once);
+        case KIND_CONDATTR: return sizeof(ios27_21a_condattr);
+        case KIND_RWLOCKATTR: return sizeof(ios27_21a_rwlockattr);
         default: return 0u;
     }
 }
@@ -228,7 +242,9 @@ static int native_init(object_slot *s, unsigned kind, unsigned mutex_type) {
         }
         case KIND_COND: return pthread_cond_init(&s->native.cond, NULL);
         case KIND_RWLOCK: return pthread_rwlock_init(&s->native.rwlock, NULL);
-        case KIND_MUTEXATTR: return 0;
+        case KIND_MUTEXATTR:
+        case KIND_CONDATTR:
+        case KIND_RWLOCKATTR: return 0;
         case KIND_ONCE: {
             int e = pthread_mutex_init(&s->native.once.lock, NULL);
             if (e) return e;
@@ -244,7 +260,9 @@ static int native_destroy(object_slot *s) {
         case KIND_MUTEX: return pthread_mutex_destroy(&s->native.mutex);
         case KIND_COND: return pthread_cond_destroy(&s->native.cond);
         case KIND_RWLOCK: return pthread_rwlock_destroy(&s->native.rwlock);
-        case KIND_MUTEXATTR: return 0;
+        case KIND_MUTEXATTR:
+        case KIND_CONDATTR:
+        case KIND_RWLOCKATTR: return 0;
         case KIND_ONCE: {
             int e = pthread_cond_destroy(&s->native.once.ready);
             if (e) return e;
@@ -308,6 +326,7 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     s->rw_writer_locked = 0;
     s->mutex_depth = 0;
     s->mutex_type = mutex_type;
+    s->attr_pshared = 2u; /* Darwin PTHREAD_PROCESS_PRIVATE */
     s->once_state = 0u;
     memset(s->rw_reader_counts, 0, sizeof(s->rw_reader_counts));
     s->kind = kind;
@@ -890,6 +909,25 @@ static int attr_value(ios27_21a_runtime *rt, uint64_t address,
     slot_unpin(rt, s);
     return 0;
 }
+static int attr_pshared_guest(ios27_21a_runtime *rt, uint64_t address,
+                               unsigned kind, uint64_t argument, int setter) {
+    object_slot *s = NULL;
+    unsigned value = 2u;
+    int e;
+    if (setter) {
+        if (argument != 1u && argument != 2u) return EINVAL;
+        if (argument == 1u) return ENOTSUP;
+    }
+    e = slot_pin(rt, address, kind, &s);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    if (setter) s->attr_pshared = (unsigned)argument;
+    else value = s->attr_pshared;
+    (void)pthread_mutex_unlock(&rt->guard);
+    slot_unpin(rt, s);
+    if (!setter) return guest_store_u32(rt, argument, value);
+    return 0;
+}
 int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                    const uint64_t args[6], uint64_t *x0) {
     size_t i;
@@ -926,6 +964,17 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
             *x0 = e ? 0u : value;
             return e;
         }
+    } else if (op == OP_CAI || op == OP_RAI) {
+        e = slot_init(rt, args[0],
+                      op == OP_CAI ? KIND_CONDATTR : KIND_RWLOCKATTR, 0, 0u);
+    } else if (op == OP_CAD || op == OP_RAD) {
+        e = slot_destroy(rt, args[0],
+                         op == OP_CAD ? KIND_CONDATTR : KIND_RWLOCKATTR);
+    } else if (op == OP_CAS || op == OP_CAG || op == OP_RAS || op == OP_RAG) {
+        unsigned attr_kind = (op == OP_CAS || op == OP_CAG) ?
+                             KIND_CONDATTR : KIND_RWLOCKATTR;
+        e = attr_pshared_guest(rt, args[0], attr_kind, args[1],
+                                op == OP_CAS || op == OP_RAS);
     } else if (op == OP_MAI) {
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
@@ -944,12 +993,22 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                (op <= OP_CTW) ? KIND_COND : KIND_RWLOCK;
         if (op == OP_MI || op == OP_CI || op == OP_RI) {
             unsigned type = 0u;
-            if (op == OP_MI && args[1]) {
-                e = attr_value(rt, args[1], 0, &type);
+            if (args[1]) {
+                if (op == OP_MI) {
+                    e = attr_value(rt, args[1], 0, &type);
+                } else {
+                    object_slot *attr = NULL;
+                    unsigned attr_kind = op == OP_CI ? KIND_CONDATTR :
+                                                         KIND_RWLOCKATTR;
+                    e = slot_pin(rt, args[1], attr_kind, &attr);
+                    if (!e) {
+                        (void)pthread_mutex_lock(&rt->guard);
+                        e = attr->attr_pshared == 2u ? 0 : ENOTSUP;
+                        (void)pthread_mutex_unlock(&rt->guard);
+                        slot_unpin(rt, attr);
+                    }
+                }
                 if (e) goto result;
-            } else if (args[1]) {
-                e = ENOTSUP;
-                goto result;
             }
             e = slot_init(rt, args[0], kind, 0, type);
         } else if (op == OP_MD || op == OP_CD || op == OP_RD) {
