@@ -19,6 +19,9 @@
 #define IOS27_MACH_MOVE_SEND 17u
 #define IOS27_MACH_COMPLEX UINT32_C(0x80000000)
 #define IOS27_MACH_PORT_DESCRIPTOR 0u
+#define IOS27_MACH_OOL_DESCRIPTOR 1u
+/* Bounded fixture copy budget, not an operating-system VM allocation. */
+#define IOS27_MACH_OOL_MAX 128u
 
 typedef struct {
     uint32_t bits;

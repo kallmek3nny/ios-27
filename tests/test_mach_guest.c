@@ -305,7 +305,206 @@ static void phase17c_complex_guest_offsets(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* Guest-virtual selector paths must never expose host pointers, and a
+ * short trailer receive must write only its explicit result slot. */
+static void phase18c_guest_portset_and_trailer(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port, send, set;
+    uint8_t arena[512], saved[512];
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_allocate(s, 1u, &set) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_add(s, 1u, set, port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &send) ==
+           IOS27_MACH_OK);
+    memset(arena, 0xcd, sizeof(arena));
+    wire(arena + 64u, send, IOS27_MACH_COPY_SEND, 0u, 1801u);
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 64u,
+                                        24u, 0u, 32u) == IOS27_MACH_OK);
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_SET,
+                                        set, arena, sizeof(arena), 128u,
+                                        23u, 0u, 40u) == IOS27_MACH_TOO_LARGE);
+    assert(rd32(arena + 40u) == 24u);
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_SET,
+                                        set, arena, sizeof(arena), 128u,
+                                        24u, 0u, 40u) == IOS27_MACH_OK);
+    assert(rd32(arena + 148u) == 1801u);
+    wire(arena + 64u, send, IOS27_MACH_COPY_SEND, 0u, 1802u);
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 64u,
+                                        24u, 0u, 32u) == IOS27_MACH_OK);
+    memcpy(saved, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_TRAILER,
+                                        port, arena, sizeof(arena), 192u,
+                                        35u, 0u, 40u) == IOS27_MACH_TOO_LARGE);
+    assert(rd32(arena + 40u) == 36u);
+    assert(memcmp(arena + 192u, saved + 192u, 36u) == 0);
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_TRAILER,
+                                        port, arena, sizeof(arena), 192u,
+                                        36u, 0u, 40u) == IOS27_MACH_OK);
+    assert(rd32(arena + 212u) == 1802u);
+    assert(rd32(arena + 220u) == 12u);
+    assert(rd32(arena + 224u) == 1u);
+    memcpy(saved, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_TRAILER,
+                                        port, arena, sizeof(arena), 192u,
+                                        36u, 0u, 200u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(memcmp(arena, saved, sizeof(arena)) == 0);
+    ios27_mach_v2_free(s);
+}
+
+static void phase18c_guest_rejects_host_alias(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint8_t arena[64] = {0};
+    uint32_t actual = 123u, port = 0u;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_guest_call(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                 port, (uint8_t *)(void *)s, 24u,
+                                 0u, 24u, 0u, &actual) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(actual == 123u);
+    assert(ios27_mach_guest_call(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                 port, arena, sizeof(arena),
+                                 0u, 24u, 0u, (uint32_t *)(void *)s) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_guest_call(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                 port, arena, sizeof(arena), 0u,
+                                 24u, 0u, &actual) == IOS27_MACH_TIMEOUT);
+    ios27_mach_v2_free(s);
+}
+
+
+/* A mixed port-right + Darwin LP64 OOL-memory descriptor transfers both
+ * atomically. OOL offsets are guest-virtual, never host dereferences. */
+static void phase18c_bounded_ool_mixed_transfer(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint8_t arena[512] = {0}, before[512];
+    uint32_t inbox, item, dest, alias, sends, once;
+    unsigned receive;
+    uint32_t delivered;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, inbox, 2u, &dest) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 3u, item, 2u, &alias) ==
+           IOS27_MACH_OK);
+    wire(arena + 32u, dest, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND,
+         0u, 1881u);
+    le32(arena + 36u, 56u);
+    le32(arena + 56u, 2u);
+    le32(arena + 60u, alias); /* port descriptor begins at wire +28 */
+    arena[70u] = IOS27_MACH_MOVE_SEND;
+    arena[71u] = IOS27_MACH_PORT_DESCRIPTOR;
+    le32(arena + 72u, 320u); /* OOL guest offset, wire +40 */
+    arena[81u] = 1u; /* MACH_MSG_VIRTUAL_COPY */
+    arena[83u] = IOS27_MACH_OOL_DESCRIPTOR;
+    le32(arena + 84u, 48u);
+    for (size_t i = 0u; i < 48u; ++i)
+        arena[320u + i] = (uint8_t)(0x41u + i);
+    memcpy(before, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 32u,
+                                        56u, 0u, 24u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_rights(s, 2u, alias, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE,
+                                        inbox, arena, sizeof(arena), 128u,
+                                        IOS27_MACH_MSG_MAX + 1u, 0u, 24u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    /* Ordinary receive has at most a 256-byte wire capacity and is
+     * deliberately unable to dequeue a message with OOL payload. */
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE,
+                                        inbox, arena, sizeof(arena), 128u,
+                                        56u, 0u, 24u) ==
+           IOS27_MACH_UNSUPPORTED);
+    memcpy(before, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_OOL,
+                                        inbox, arena, sizeof(arena), 128u,
+                                        103u, 0u, 24u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(rd32(arena + 24u) == 104u);
+    assert(memcmp(arena + 128u, before + 128u, 104u) == 0);
+    assert(ios27_mach_guest_call_offset(s, 1u,
+                                        IOS27_MACH_GUEST_RECEIVE_OOL,
+                                        inbox, arena, sizeof(arena), 128u,
+                                        104u, 0u, 24u) == IOS27_MACH_OK);
+    assert(rd32(arena + 24u) == 104u);
+    assert(rd32(arena + 132u) == 56u);
+    assert(rd32(arena + 148u) == 1881u);
+    delivered = rd32(arena + 156u);
+    assert(delivered != 0u && rd32(arena + 168u) == 184u);
+    assert(rd32(arena + 172u) == 0u);
+    assert(arena[128u + 28u + 10u] == IOS27_MACH_MOVE_SEND);
+    assert(memcmp(arena + 184u, before + 320u, 48u) == 0);
+    assert(ios27_mach_v2_rights(s, 1u, delivered, &sends, &once, &receive) ==
+           IOS27_MACH_OK && sends == 1u);
+    assert(ios27_mach_v2_drop_send(s, 1u, delivered) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+static void phase18c_reject_unsupported_ool_semantics(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint8_t arena[512] = {0}, before[512];
+    uint32_t port, send, sends, once;
+    unsigned receive;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &send) == IOS27_MACH_OK);
+    wire(arena + 32u, send, IOS27_MACH_COMPLEX | IOS27_MACH_MOVE_SEND,
+         0u, 1882u);
+    le32(arena + 36u, 44u);
+    le32(arena + 56u, 1u);
+    le32(arena + 60u, 300u);
+    arena[68u] = 1u; /* Unsupported deallocate */
+    arena[71u] = IOS27_MACH_OOL_DESCRIPTOR;
+    le32(arena + 72u, 8u);
+    memcpy(before, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 32u,
+                                        44u, 0u, 24u) ==
+           IOS27_MACH_UNSUPPORTED);
+    assert(memcmp(before, arena, sizeof(arena)) == 0);
+    assert(ios27_mach_v2_rights(s, 2u, send, &sends, &once, &receive) ==
+           IOS27_MACH_OK && sends == 1u);
+    arena[68u] = 0u;
+    le32(arena + 72u, IOS27_MACH_OOL_MAX + 1u);
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 32u,
+                                        44u, 0u, 24u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_rights(s, 2u, send, &sends, &once, &receive) ==
+           IOS27_MACH_OK && sends == 1u);
+    le32(arena + 72u, 8u);
+    le32(arena + 60u, UINT32_MAX);
+    le32(arena + 64u, UINT32_MAX);
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND,
+                                        0u, arena, sizeof(arena), 32u,
+                                        44u, 0u, 24u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_rights(s, 2u, send, &sends, &once, &receive) ==
+           IOS27_MACH_OK && sends == 1u);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase18c_bounded_ool_mixed_transfer();
+    phase18c_reject_unsupported_ool_semantics();
+    phase18c_guest_rejects_host_alias();
+    phase18c_guest_portset_and_trailer();
     phase17c_complex_guest_offsets();
     reject_unaligned_host_result();
     round_trip();

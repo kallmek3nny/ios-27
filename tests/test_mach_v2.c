@@ -966,7 +966,164 @@ static void phase17c_dead_name_multitask_teardown(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* Phase 18c: one task owns two independently queued receive rights. A
+ * too-small set receive must leave the queue and round-robin cursor intact. */
+static void phase18c_port_sets_and_capacity(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t a, b, sa, sb, set, newer;
+    uint8_t packet[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &a) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 1u, &b) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_allocate(s, 1u, &set) == IOS27_MACH_OK);
+    assert(set != a && set != b);
+    assert(ios27_mach_v2_set_add(s, 1u, set, a) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_add(s, 1u, set, b) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_add(s, 2u, set, a) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_make_send(s, 1u, a, 2u, &sa) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, b, 2u, &sb) == IOS27_MACH_OK);
+    (void)message(packet, sa, IOS27_MACH_COPY_SEND, 0u, 181u);
+    assert(ios27_mach_v2_send(s, 2u, packet, 24u, 0u) == IOS27_MACH_OK);
+    (void)message(packet, sb, IOS27_MACH_COPY_SEND, 0u, 182u);
+    assert(ios27_mach_v2_send(s, 2u, packet, 24u, 0u) == IOS27_MACH_OK);
+    (void)message(packet, sa, IOS27_MACH_COPY_SEND, 0u, 183u);
+    assert(ios27_mach_v2_send(s, 2u, packet, 24u, 0u) == IOS27_MACH_OK);
+    memset(out, 0xa5, sizeof(out));
+    cap = 23u;
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(cap == 24u && out[0] == 0xa5u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 12u) == a && rd32(out + 20u) == 181u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 12u) == b && rd32(out + 20u) == 182u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 12u) == a && rd32(out + 20u) == 183u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    assert(ios27_mach_v2_set_remove(s, 1u, set, b) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_remove(s, 1u, set, b) ==
+           IOS27_MACH_BAD_RIGHT);
+    (void)message(packet, sb, IOS27_MACH_COPY_SEND, 0u, 184u);
+    assert(ios27_mach_v2_send(s, 2u, packet, 24u, 0u) == IOS27_MACH_OK);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    assert(ios27_mach_v2_receive(s, 1u, b, out, &cap, 0u) ==
+           IOS27_MACH_OK && rd32(out + 20u) == 184u);
+    assert(ios27_mach_v2_set_destroy(s, 1u, set) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_add(s, 1u, set, a) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_set_allocate(s, 1u, &newer) == IOS27_MACH_OK);
+    assert(newer != set);
+    assert(ios27_mach_v2_set_add(s, 1u, newer, a) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 1u, a) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_set_add(s, 1u, newer, a) == IOS27_MACH_BAD_RIGHT);
+    ios27_mach_v2_free(s);
+}
+
+/* The sequence number advances for *all* successful direct receives;
+ * neither a short buffer nor a poll of an empty queue changes it. */
+static void phase18c_trailer_atomicity(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port, send;
+    uint8_t packet[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX + 12u];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &send) == IOS27_MACH_OK);
+    for (uint32_t i = 0u; i < 3u; ++i) {
+        (void)message(packet, send, IOS27_MACH_COPY_SEND, 0u, 191u + i);
+        assert(ios27_mach_v2_send(s, 2u, packet, 24u, 0u) == IOS27_MACH_OK);
+    }
+    cap = 35u;
+    memset(out, 0x77, sizeof(out));
+    assert(ios27_mach_v2_receive_trailer(s, 1u, port, out, &cap, 0u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(cap == 36u && out[0] == 0x77u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_trailer(s, 1u, port, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(cap == 36u && rd32(out + 4u) == 24u);
+    assert(rd32(out + 20u) == 191u && rd32(out + 24u) == 0u);
+    assert(rd32(out + 28u) == 12u && rd32(out + 32u) == 0u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, port, out, &cap, 0u) ==
+           IOS27_MACH_OK && rd32(out + 20u) == 192u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_trailer(s, 1u, port, out, &cap, 0u) ==
+           IOS27_MACH_OK && rd32(out + 20u) == 193u);
+    assert(rd32(out + 32u) == 2u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive_trailer(s, 1u, port, out, &cap, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    ios27_mach_v2_free(s);
+}
+static void phase18c_portset_teardown_and_limit(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t port, send, set, event, sets[IOS27_MACH_V2_PORT_SETS];
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap = sizeof(out);
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &send) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_watch_dead_name(s, 2u, send) == IOS27_MACH_OK);
+    for (size_t i = 0u; i < IOS27_MACH_V2_PORT_SETS; ++i)
+        assert(ios27_mach_v2_set_allocate(s, 1u, &sets[i]) ==
+               IOS27_MACH_OK);
+    set = sets[0];
+    assert(ios27_mach_v2_set_allocate(s, 1u, &event) == IOS27_MACH_LIMIT);
+    assert(ios27_mach_v2_set_add(s, 1u, set, port) == IOS27_MACH_OK);
+    (void)message(p, send, IOS27_MACH_COPY_SEND, 0u, 199u);
+    assert(ios27_mach_v2_send(s, 2u, p, 24u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_receive_set(s, 1u, set, out, &cap, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &event) ==
+           IOS27_MACH_OK && event == send);
+    assert(ios27_mach_v2_set_allocate(s, 1u, &event) == IOS27_MACH_OK);
+    assert(event != sets[0]);
+    ios27_mach_v2_free(s);
+}
+
+static void phase18c_host_alias_isolation(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t owner, recipient, a = 0u, b = 0u;
+    unsigned recv = 0u;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, (uint32_t *)(void *)s) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_allocate(s, 1u, &owner) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, owner, 2u,
+                                    (uint32_t *)(void *)s) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_rights(s, 1u, owner, &a, &a, &recv) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_rights(s, 1u, owner,
+                                (uint32_t *)(void *)s, &b, &recv) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_make_send(s, 1u, owner, 2u, &recipient) ==
+           IOS27_MACH_OK);
+    check(s, 2u, recipient, 1u, 0u, 0u);
+    assert(ios27_mach_v2_validate_external(s, s, 1u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase18c_host_alias_isolation();
+    phase18c_port_sets_and_capacity();
+    phase18c_trailer_atomicity();
+    phase18c_portset_teardown_and_limit();
     phase17c_dead_name_capacity_and_lifecycle();
     phase17c_dead_name_multitask_teardown();
     phase17c_complex_multi_transfer();

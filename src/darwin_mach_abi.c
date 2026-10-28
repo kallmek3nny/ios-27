@@ -31,6 +31,12 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
         (uintptr_t)output % _Alignof(ios27_darwin_guest_registers) != 0u ||
         task > IOS27_MACH_TASK_MAX ||
         (!arena && arena_size) ||
+        ios27_mach_v2_validate_external(space, input, sizeof(*input)) !=
+            IOS27_MACH_OK ||
+        ios27_mach_v2_validate_external(space, output, sizeof(*output)) !=
+            IOS27_MACH_OK ||
+        ios27_mach_v2_validate_external(space, arena, arena_size) !=
+            IOS27_MACH_OK ||
         overlap(input, sizeof(*input), output, sizeof(*output)) ||
         (arena && (overlap(input, sizeof(*input), arena, arena_size) ||
                    overlap(output, sizeof(*output), arena, arena_size))))
@@ -38,7 +44,10 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
 
     switch (selector) {
         case IOS27_DARWIN_FIXTURE_ALLOCATE:
-            status = ios27_mach_v2_allocate(space, task, &a);
+        case IOS27_DARWIN_FIXTURE_SET_ALLOCATE:
+            status = (selector == IOS27_DARWIN_FIXTURE_ALLOCATE) ?
+                     ios27_mach_v2_allocate(space, task, &a) :
+                     ios27_mach_v2_set_allocate(space, task, &a);
             if (status == IOS27_MACH_OK) reply.x[0] = a;
             break;
         case IOS27_DARWIN_FIXTURE_MAKE_SEND:
@@ -49,9 +58,22 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
                                               (uint32_t)input->x[1], &a);
             if (status == IOS27_MACH_OK) reply.x[0] = a;
             break;
+        case IOS27_DARWIN_FIXTURE_SET_ADD:
+        case IOS27_DARWIN_FIXTURE_SET_REMOVE:
+            if (!checked32(input->x[0]) || !checked32(input->x[1]))
+                return IOS27_MACH_BAD_ARGUMENT;
+            status = (selector == IOS27_DARWIN_FIXTURE_SET_ADD) ?
+                     ios27_mach_v2_set_add(space, task,
+                                          (uint32_t)input->x[0],
+                                          (uint32_t)input->x[1]) :
+                     ios27_mach_v2_set_remove(space, task,
+                                             (uint32_t)input->x[0],
+                                             (uint32_t)input->x[1]);
+            break;
         case IOS27_DARWIN_FIXTURE_DROP_SEND:
         case IOS27_DARWIN_FIXTURE_DROP_ONCE:
         case IOS27_DARWIN_FIXTURE_DESTROY:
+        case IOS27_DARWIN_FIXTURE_SET_DESTROY:
         case IOS27_DARWIN_FIXTURE_RIGHTS:
             if (!checked32(input->x[0])) return IOS27_MACH_BAD_ARGUMENT;
             if (selector == IOS27_DARWIN_FIXTURE_DROP_SEND)
@@ -63,6 +85,9 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
             else if (selector == IOS27_DARWIN_FIXTURE_DESTROY)
                 status = ios27_mach_v2_destroy(space, task,
                                                 (uint32_t)input->x[0]);
+            else if (selector == IOS27_DARWIN_FIXTURE_SET_DESTROY)
+                status = ios27_mach_v2_set_destroy(space, task,
+                                                    (uint32_t)input->x[0]);
             else {
                 status = ios27_mach_v2_rights(space, task,
                                              (uint32_t)input->x[0],
@@ -95,10 +120,19 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
             if (status == IOS27_MACH_OK) reply.x[0] = bytes;
             break;
         case IOS27_DARWIN_FIXTURE_RECEIVE:
+        case IOS27_DARWIN_FIXTURE_RECEIVE_SET:
+        case IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER:
+        case IOS27_DARWIN_FIXTURE_RECEIVE_OOL:
             if (!checked32(input->x[0]) || !checked32(input->x[3]))
                 return IOS27_MACH_BAD_ARGUMENT;
             status = ios27_mach_guest_call(space, task,
-                                           IOS27_MACH_GUEST_RECEIVE,
+                selector == IOS27_DARWIN_FIXTURE_RECEIVE_SET ?
+                IOS27_MACH_GUEST_RECEIVE_SET :
+                selector == IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER ?
+                IOS27_MACH_GUEST_RECEIVE_TRAILER :
+                selector == IOS27_DARWIN_FIXTURE_RECEIVE_OOL ?
+                IOS27_MACH_GUEST_RECEIVE_OOL :
+                IOS27_MACH_GUEST_RECEIVE,
                                            (uint32_t)input->x[0],
                                            arena, arena_size, input->x[1],
                                            input->x[2],
