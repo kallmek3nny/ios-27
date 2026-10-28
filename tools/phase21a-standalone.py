@@ -31,7 +31,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21a-") as d:
         out = Path(d)
         for optimization in ("-O0", "-O2"):
-            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c", "phase21a-once.c", "phase21a-identity.c", "phase21a-tls.c", "phase21a-syncattr.c", "phase21a-relative.c", "phase21a-threadattr.c", "phase21a-adversarial.c", "phase21a-teardown-races.c", "phase21a-timedlocks.c"):
+            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c", "phase21a-once.c", "phase21a-identity.c", "phase21a-tls.c", "phase21a-syncattr.c", "phase21a-relative.c", "phase21a-threadattr.c", "phase21a-adversarial.c", "phase21a-teardown-races.c", "phase21a-timedlocks.c", "phase21a-threadid.c"):
                 executable = out / (name + optimization)
                 run([cc, *flags, optimization, str(SRC), str(ROOT / "tests" / name),
                      "-o", str(executable)])
@@ -40,7 +40,7 @@ def main():
                         print("phase21a: repeat", attempt + 1, "of", repeats, name, optimization)
                     run([str(executable)])
         if os.environ.get("PHASE21A_SANITIZE") == "1":
-            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c", "phase21a-once.c", "phase21a-identity.c", "phase21a-tls.c", "phase21a-syncattr.c", "phase21a-relative.c", "phase21a-threadattr.c", "phase21a-adversarial.c", "phase21a-teardown-races.c", "phase21a-timedlocks.c"):
+            for name in ("phase21a-native.c", "phase21a-boundaries.c", "phase21a-regions.c", "phase21a-conditions.c", "phase21a-once.c", "phase21a-identity.c", "phase21a-tls.c", "phase21a-syncattr.c", "phase21a-relative.c", "phase21a-threadattr.c", "phase21a-adversarial.c", "phase21a-teardown-races.c", "phase21a-timedlocks.c", "phase21a-threadid.c"):
                 executable = out / (name + "-sanitized")
                 run([cc, *flags, "-O1", "-g", "-fno-omit-frame-pointer",
                      "-fsanitize=address,undefined", str(SRC),
