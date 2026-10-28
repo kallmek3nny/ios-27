@@ -1,10 +1,14 @@
 #include "ios27/darwin_object.h"
+#include "ios27/macho.h"
 
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(__linux__)
+#include <sys/wait.h>
+#endif
 #if defined(__aarch64__) && defined(__linux__)
 #include <sys/mman.h>
 #include <unistd.h>
@@ -64,6 +68,108 @@ static void rejected(const uint8_t *bytes, size_t size) {
                                            error, sizeof(error)) == -1);
     assert(error[0] != '\0');
 }
+
+/*
+ * This test intentionally uses the existing CTest executable rather than
+ * editing CMakeLists.txt. Build a second genuine LLVM-linked ARM64 MH_EXECUTE
+ * from original source. Its program reads __DATA_CONST, initializes/writes
+ * __DATA and reads/writes a zero-filled __bss via compiler-generated ADRP.
+ */
+static void phase17a_compiler_linked_test(void) {
+#if defined(__linux__)
+    int status = system("timeout 75s python3 ../tools/phase17a-build.py "
+                        "phase17a-multisegment");
+    uint8_t *linked, *mutated;
+    size_t size, rocmd, datacmd, fixcmd, maincmd, bsscmd = 0u;
+    ios27_macho_info parsed;
+    ios27_exec_layout layout;
+    ios27_darwin_executable inspected;
+    char error[160] = {0};
+    int result = 999;
+    assert(status >= 0 && WIFEXITED(status));
+    if (WEXITSTATUS(status) == 77) {
+        puts("phase17a clang+lld integration skipped: linker unavailable");
+        return;
+    }
+    assert(WEXITSTATUS(status) == 0);
+    linked = read_file("phase17a-multisegment", &size);
+    mutated = malloc(size);
+    assert(mutated);
+    assert(ios27_macho_parse(linked, size, &parsed, error, sizeof(error)) == 0);
+    assert(ios27_darwin_executable_inspect(linked, size, &inspected,
+                                            error, sizeof(error)) == 0);
+    assert(parsed.segment_count >= 5u);
+    assert(ios27_macho_executable_layout(linked, size, &parsed, 4096u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(linked, size, &parsed, 16384u,
+                                         &layout, error, sizeof(error)) == 0);
+    rocmd = command(linked, size, 0x19u, "__DATA_CONST");
+    datacmd = command(linked, size, 0x19u, "__DATA");
+    fixcmd = command(linked, size, UINT32_C(0x80000034), NULL);
+    maincmd = command(linked, size, UINT32_C(0x80000028), NULL);
+    assert(rd32(linked + rocmd + 60u) == 1u);
+    assert(rd32(linked + datacmd + 60u) == 3u);
+    for (uint32_t i = 0u; i < rd32(linked + datacmd + 64u); ++i) {
+        size_t section = datacmd + 72u + (size_t)i * 80u;
+        if (strncmp((const char *)linked + section, "__bss", 16u) == 0) {
+            assert(!bsscmd);
+            bsscmd = section;
+        }
+    }
+    assert(bsscmd && (rd32(linked + bsscmd + 64u) & 0xffu) == 1u);
+    /* An actual ARM64 C compiler must produce page-relative addressing. */
+    {
+        int adrp_seen = 0;
+        for (size_t i = 0u; i + 4u <= (size_t)inspected.text_size; i += 4u) {
+            uint32_t opcode = rd32(linked + (size_t)inspected.text_file_offset + i);
+            if ((opcode & UINT32_C(0x9f000000)) == UINT32_C(0x90000000))
+                ++adrp_seen;
+        }
+        assert(adrp_seen >= 1);
+    }
+#if defined(__aarch64__)
+    assert(ios27_run_freestanding(linked, size, &parsed, &result,
+                                  error, sizeof(error)) == 0);
+    assert(result == 42);
+    result = 999;
+    assert(ios27_run_freestanding(linked, size, &parsed, &result,
+                                  error, sizeof(error)) == 0);
+    assert(result == 42); /* no leaked state across fresh reservations */
+#else
+    assert(ios27_run_freestanding(linked, size, &parsed, &result,
+                                  error, sizeof(error)) != 0);
+    assert(result == 999);
+#endif
+    memcpy(mutated, linked, size);
+    wr32(mutated + rocmd + 60u, 7u); /* read-only code/data must never W+X */
+    rejected(mutated, size);
+    memcpy(mutated, linked, size);
+    wr32(mutated + bsscmd + 64u, 0u); /* no file bytes back zero-fill */
+    rejected(mutated, size);
+    memcpy(mutated, linked, size);
+    wr64(mutated + maincmd + 8u, UINT64_MAX);
+    rejected(mutated, size);
+    memcpy(mutated, linked, size);
+    {
+        uint32_t offset = rd32(linked + fixcmd + 8u);
+        uint32_t starts = rd32(linked + offset + 4u);
+        uint32_t length = rd32(linked + fixcmd + 12u);
+        assert((uint64_t)offset + length <= size && length >= 28u);
+        if (starts < length && length - starts >= 8u &&
+            rd32(linked + offset + starts) != 0u) {
+            wr32(mutated + offset + starts + 4u, 1u);
+            rejected(mutated, size); /* an actual chained rebase needs dyld */
+            memcpy(mutated, linked, size);
+        }
+        wr32(mutated + offset + 16u, 1u);
+        rejected(mutated, size); /* an actual chained import needs dyld */
+    }
+    free(mutated);
+    free(linked);
+    puts("phase17a real compiler-linked multisegment/bss/adrp tests passed");
+#endif
+}
+
 int main(int argc, char **argv) {
     uint8_t *bytes, *bad;
     size_t length, textcmd, editcmd, pagecmd, maincmd;
@@ -194,6 +300,7 @@ int main(int argc, char **argv) {
 #endif
     free(bad);
     free(bytes);
+    phase17a_compiler_linked_test();
     puts("genuine Clang+LLD Darwin MH_EXECUTE fixture passed");
     return 0;
 }

@@ -22,6 +22,40 @@ static int protection(uint32_t p) {
            ((p & 2u) ? PROT_WRITE : 0) |
            ((p & 4u) ? PROT_EXEC : 0);
 }
+
+static uint32_t read32(const uint8_t *p) {
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8u) |
+           ((uint32_t)p[2] << 16u) | ((uint32_t)p[3] << 24u);
+}
+static uint64_t read64(const uint8_t *p) {
+    return (uint64_t)read32(p) | ((uint64_t)read32(p + 4u) << 32u);
+}
+
+/* S_ZEROFILL has no meaningful file bytes, even when the segment's
+ * filesize is rounded up across the BSS virtual range by ld64.lld. */
+static void initialize_zerofill(const uint8_t *file,
+                                const ios27_exec_layout *layout,
+                                uint8_t *mapping) {
+    size_t cursor = 32u;
+    uint32_t commands = read32(file + 16u);
+    for (uint32_t i = 0u; i < commands; ++i) {
+        const uint8_t *cmd = file + cursor;
+        if (read32(cmd) == 0x19u) {
+            uint32_t sections = read32(cmd + 64u);
+            for (uint32_t j = 0u; j < sections; ++j) {
+                const uint8_t *sec = cmd + 72u + (size_t)j * 80u;
+                if ((read32(sec + 64u) & 0xffu) == 1u) {
+                    uint64_t addr = read64(sec + 32u);
+                    uint64_t length = read64(sec + 40u);
+                    if (length)
+                        memset(mapping + (size_t)(addr - layout->min_vmaddr),
+                               0, (size_t)length);
+                }
+            }
+        }
+        cursor += (size_t)read32(cmd + 4u);
+    }
+}
 #endif
 
 int ios27_run_freestanding(const uint8_t *data, size_t size,
@@ -71,7 +105,25 @@ int ios27_run_freestanding(const uint8_t *data, size_t size,
         if (s->initprot & 4u)
             __builtin___clear_cache((char *)target,
                                     (char *)(target + (size_t)s->filesize));
-        if (mprotect(staging, bytes, protection(s->initprot)) != 0)
+    }
+    initialize_zerofill(data, &layout, mapping);
+    /*
+     * Commit the complete image only after every segment has been populated.
+     * No guest code is executable during staging, and all pages get their
+     * final protection before LC_MAIN is called. A failed seal unmaps the
+     * entire reservation, including any segments already made executable.
+     */
+    for (size_t i = 0u; i < info->segment_count; ++i) {
+        const ios27_segment *s = &info->segments[i];
+        uint64_t start, end;
+        if (!s->vmsize || strcmp(s->name, "__PAGEZERO") == 0)
+            continue;
+        start = s->vmaddr & ~((uint64_t)layout.page_size - 1u);
+        end = (s->vmaddr + s->vmsize +
+               (uint64_t)layout.page_size - 1u) &
+              ~((uint64_t)layout.page_size - 1u);
+        if (mprotect(mapping + (size_t)(start - layout.min_vmaddr),
+                     (size_t)(end - start), protection(s->initprot)) != 0)
             goto mapping_failed;
     }
     {
