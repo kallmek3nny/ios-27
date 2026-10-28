@@ -46,6 +46,17 @@ def main():
                      str(ROOT / "tests" / source),
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
+        # Fault injection must link the dedicated test backend INSTEAD of
+        # phase21c, allowing deterministic constructor/destructor failures.
+        for optimization in (("-O1",) if sanitizers else ("-O0", "-O2")):
+            injected = dest / ("fault-backend" + optimization)
+            run([cc, *flags, optimization,
+                 str(ROOT / "src/libsystem21i_abi.c"),
+                 str(ROOT / "src/libsystem21i_arm64.c"),
+                 str(ROOT / "src/libsystem21i_errno.c"),
+                 str(ROOT / "tests/phase21i-fault-backend.c"),
+                 "-o", str(injected)], 120)
+            run([str(injected)], 120)
         for optimize in ("-O0", "-O2"):
             target = dest / ("arm64-darwin" + optimize + ".o")
             run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
