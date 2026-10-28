@@ -55,8 +55,17 @@ static void cleanup(void *value) {
 static void lock_queue(run_state *r, unsigned actor) {
     int rc = ios27_21c_mutex_trylock(r->sync, r->mutex);
     if (rc == EBUSY) {
-        OK(ios27_21j_record(r->diag, IOS27_21J_CONTENTION, actor, rc, 0));
+        struct timespec before, after;
+        uint64_t start, end;
+        OK(clock_gettime(CLOCK_MONOTONIC, &before) ? errno : 0);
         OK(ios27_21c_mutex_lock(r->sync, r->mutex));
+        OK(clock_gettime(CLOCK_MONOTONIC, &after) ? errno : 0);
+        start = (uint64_t)before.tv_sec * UINT64_C(1000000000) +
+                (uint64_t)before.tv_nsec;
+        end = (uint64_t)after.tv_sec * UINT64_C(1000000000) +
+              (uint64_t)after.tv_nsec;
+        CHECK(end >= start);
+        OK(ios27_21j_note_contention(r->diag, actor, end - start));
     } else CHECK(rc == 0);
 }
 static void note_probe(run_state *r, unsigned actor,
@@ -269,6 +278,11 @@ static void run_once(unsigned round) {
     OK(ios27_21j_snapshot(r.diag, &info));
     CHECK(info.active == 0 && info.leases_created == WORKERS);
     CHECK(info.leases_released == WORKERS && info.timeouts >= 1);
+    CHECK(info.contention_ns_max <= info.contention_ns_total);
+    uint64_t measured = 0;
+    for (unsigned b = 0; b < 5u; ++b)
+        measured += info.contention_ns_buckets[b];
+    CHECK(measured == info.contention);
     CHECK(info.waits > 0 && info.next_sequence > IOS27_21J_TRACE_CAPACITY);
     CHECK(info.dropped > 0);
     ios27_21c_usage(r.sync, &used);
