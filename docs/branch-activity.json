@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "b1475c31bb571a285cb63186c4bb0722e29eb6c4",
+      "sha": "5f22e27aff80c1c106369b4f8c379ec62ea7b98a",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "pr_number": 77,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -20,13 +20,14 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 3,
-          "additions": 774,
+          "additions": 820,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21j_acquire",
             "ios27_21j_acquire_injected",
             "ios27_21j_create",
             "ios27_21j_destroy",
+            "ios27_21j_note_contention",
             "ios27_21j_probe",
             "ios27_21j_read",
             "ios27_21j_record",
@@ -38,6 +39,38 @@
             "src/libsystem21j_diagnostics.c",
             "tests/phase21j-diagnostics.c",
             "tests/phase21j-integration.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "abb8cb535104315040b636bbe51dc6379d44fb94",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "pr_number": 80,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 714,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21i_create",
+            "ios27_21i_destroy",
+            "ios27_21i_dispatch",
+            "ios27_21i_lookup",
+            "ios27_21i_verify"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21i_abi.h",
+            "src/libsystem21i_abi.c",
+            "tests/phase21i-darwin-client.c",
+            "tests/phase21i-native.c"
           ]
         }
       ]
@@ -74,38 +107,6 @@
             "src/libsystem21f_mutex.c",
             "tests/phase21f-adversarial.c",
             "tests/phase21f-darwin-calls.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "c0e965907aa71ca843144bd7cc1f3285f7611481",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "pr_number": 80,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 684,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21i_create",
-            "ios27_21i_destroy",
-            "ios27_21i_dispatch",
-            "ios27_21i_lookup",
-            "ios27_21i_verify"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21i_abi.h",
-            "src/libsystem21i_abi.c",
-            "tests/phase21i-darwin-client.c",
-            "tests/phase21i-native.c"
           ]
         }
       ]
@@ -242,6 +243,13 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/77",
         "source_files": 2,
         "fixture_files": 3,
+        "ci": "running"
+      },
+      {
+        "branch": "agent/phase21i-darwin-pthread-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+        "source_files": 2,
+        "fixture_files": 4,
         "ci": "passing_checks"
       },
       {
@@ -249,13 +257,6 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/78",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "agent/phase21i-darwin-pthread-abi",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-        "source_files": 2,
-        "fixture_files": 4,
         "ci": "passing_checks"
       },
       {
@@ -606,5 +607,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:19:27Z"
+  "observed_at": "2026-10-28T21:20:21Z"
 }
