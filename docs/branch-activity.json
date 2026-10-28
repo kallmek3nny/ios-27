@@ -3,24 +3,24 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 2,
-  "candidate_count": 2,
+  "candidates_checked": 3,
+  "candidate_count": 3,
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "c1a909e119c3b9b5265fcd0256758e5c6d4e522c",
+      "sha": "644319592dd0f7438c963eef132e704d3f0316df",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
+      "files_checked": 20,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 15,
-          "additions": 2443,
+          "fixture_files": 16,
+          "additions": 2544,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_attach_thread",
@@ -92,6 +92,43 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase21e-exit-cancellation-20261028",
+      "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 1,
+          "fixture_files": 4,
+          "additions": 282,
+          "deletions": 11,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/libsystem21e_tls.c",
+            "tests/phase21e-cross-runtime-thread-exit.c",
+            "tests/phase21e-exit-token-boundary.c",
+            "tests/phase21e-state-model.c"
+          ]
+        },
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 0,
+          "fixture_files": 1,
+          "additions": 76,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase21e-pthread-error-rollback.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -100,8 +137,8 @@
         "branch": "phase21a/darwin-pthread-abi-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
-        "fixture_files": 15,
-        "ci": "passing_checks"
+        "fixture_files": 16,
+        "ci": "running"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -109,6 +146,22 @@
         "source_files": 2,
         "fixture_files": 9,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21e-exit-cancellation-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
+        "source_files": 1,
+        "fixture_files": 4,
+        "ci": "not_checked"
+      }
+    ],
+    "libsystem-pthread": [
+      {
+        "branch": "phase21e-exit-cancellation-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
+        "source_files": 0,
+        "fixture_files": 1,
+        "ci": "not_checked"
       }
     ],
     "objc-host-model": [
@@ -433,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:18:04Z"
+  "observed_at": "2026-10-28T20:18:56Z"
 }
