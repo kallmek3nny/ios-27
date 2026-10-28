@@ -11,10 +11,19 @@
     {
       "number": 80,
       "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "1f1cadf4516715056a33993a7a9d316973d33f00",
+      "sha": "621ff5cf91eecd9739285da47fec15eaf6d2be10",
       "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:20:57Z",
+      "updated_at": "2026-10-28T21:21:27Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "85f4a5eb19372990503586eda836a3684cc6ecb7",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:21:25Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +33,6 @@
       "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
       "updated_at": "2026-10-28T21:20:22Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "5f22e27aff80c1c106369b4f8c379ec62ea7b98a",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:20:01Z",
       "status": "unmerged: not counted"
     },
     {
@@ -63,7 +63,17 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "9fa736ae1aa24e1b9c301a3627e1efc8fa9bbb66",
+      "ahead_by": 17,
+      "behind_by": 4,
+      "last_commit_at": "2026-10-28T21:21:41Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 81,
@@ -124,9 +134,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 35,
+    "branches_scanned": 36,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:21:21Z"
+  "observed_at": "2026-10-28T21:21:44Z"
 }
