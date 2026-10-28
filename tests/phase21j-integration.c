@@ -59,8 +59,10 @@ static void lock_queue(run_state *r, unsigned actor) {
         OK(ios27_21c_mutex_lock(r->sync, r->mutex));
     } else CHECK(rc == 0);
 }
-static void note_probe(run_state *r, unsigned actor, unsigned ordinal) {
-    int rc = ios27_21j_probe(r->diag, 31u + (actor & 1u), actor, ordinal);
+static void note_probe(run_state *r, unsigned actor,
+                       unsigned probe_actor, unsigned ordinal) {
+    int rc = ios27_21j_probe(r->diag, 31u + (probe_actor & 1u),
+                             probe_actor, ordinal);
     CHECK(rc == 0 || rc == ENOMEM);
     if ((ordinal & 127u) == 0)
         OK(ios27_21j_record(r->diag, IOS27_21J_CHECKPOINT, actor, rc, ordinal));
@@ -68,7 +70,7 @@ static void note_probe(run_state *r, unsigned actor, unsigned ordinal) {
 static void produce(worker_args *a) {
     run_state *r = a->run;
     for (unsigned i = 0; i < ITEMS; ++i) {
-        note_probe(r, a->actor, i);
+        note_probe(r, a->actor, a->actor, i);
         if ((i & 127u) == 0) CHECK(ios27_21e_cancel_checkpoint(r->tls) == 0);
         lock_queue(r, a->actor);
         while (r->size == QUEUE_CAP) {
@@ -114,13 +116,16 @@ static void consume(worker_args *a) {
             break;
         }
         CHECK(r->size != 0);
-        r->sum += r->queue[r->head];
+        uint32_t value = r->queue[r->head];
+        r->sum += value;
         r->head = (r->head + 1u) % QUEUE_CAP;
         --r->size;
         ++r->consumed;
         OK(ios27_21c_cond_signal(r->sync, r->not_full));
         OK(ios27_21c_mutex_unlock(r->sync, r->mutex));
-        note_probe(r, a->actor, ordinal);
+        /* Item identity, not scheduling-dependent consumer identity,
+           selects the failure tuple. */
+        note_probe(r, a->actor, WORKERS + 1u, value);
         if ((ordinal & 127u) == 0)
             CHECK(ios27_21e_cancel_checkpoint(r->tls) == 0);
         ++ordinal;
@@ -211,6 +216,35 @@ static void run_once(unsigned round) {
     CHECK(info.active == WORKERS && info.peak == WORKERS);
     CHECK(info.probes >= total * 2u + WORKERS &&
           info.probes <= total * 2u + WORKERS * 128u && info.injections != 0);
+    /* Recompute the exact same set of keyed fault decisions on a fresh
+       runtime. Thread scheduling may reorder events but cannot change this
+       probe count or which item ids produce ENOMEM. */
+    ios27_21j_diagnostics *replay = NULL;
+    ios27_21j_snapshot_data expected;
+    OK(ios27_21j_create(&replay, 1, r.seed, 1250));
+    for (unsigned actor = 0; actor < WORKERS; ++actor) {
+        int acquired = 0;
+        for (unsigned attempt = 0; attempt < 128u; ++attempt) {
+            int rc = ios27_21j_probe(replay, 13, actor, attempt);
+            CHECK(rc == 0 || rc == ENOMEM);
+            if (!rc) { acquired = 1; break; }
+        }
+        CHECK(acquired);
+    }
+    for (unsigned actor = 0; actor < PRODUCERS; ++actor)
+        for (unsigned i = 0; i < ITEMS; ++i)
+            CHECK(ios27_21j_probe(replay, 31u + (actor & 1u), actor, i) == 0 ||
+                  /* Same key gives same injected decision on a second call. */
+                  ios27_21j_probe(replay, 31u + (actor & 1u), actor, i) == ENOMEM);
+    for (unsigned value = 1; value <= total; ++value) {
+        int rc = ios27_21j_probe(replay, 31u + ((WORKERS + 1u) & 1u),
+                                 WORKERS + 1u, value);
+        CHECK(rc == 0 || rc == ENOMEM);
+    }
+    OK(ios27_21j_snapshot(replay, &expected));
+    CHECK(info.injections == expected.injections);
+    CHECK(info.probes == expected.probes);
+    OK(ios27_21j_destroy(replay));
     for (unsigned i = 0; i < WORKERS; ++i)
         OK(ios27_21e_cancel_request(r.tls, r.args[i].token));
     OK(pthread_mutex_lock(&r.gate));
