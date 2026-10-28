@@ -6,19 +6,19 @@
 
 candidate branches with mapped changes: **6** · audited base: `dd39b3167594`
 
-### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
-
-head: `d379716ee2a2` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 4 source files, 4 test/fixture files, +1136/-0 lines
-  - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_note_contention`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_schedule_create`, `ios27_21j_schedule_destroy`, `ios27_21j_schedule_snapshot`
-
 ### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
 
-head: `620f69913ed5` · ci: **running** · unmerged, not credited.
+head: `60dfc975c013` · ci: **running** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +771/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
+
+### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
+
+head: `d379716ee2a2` · ci: **passing_checks** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 4 source files, 4 test/fixture files, +1136/-0 lines
+  - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_note_contention`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_schedule_create`, `ios27_21j_schedule_destroy`, `ios27_21j_schedule_snapshot`
 
 ### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
 
