@@ -12,9 +12,9 @@ enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATT
                    KIND_CONDATTR = 6, KIND_RWLOCKATTR = 7,
                    KIND_THREADATTR = 8 };
 enum operation {
-    OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
+    OP_MI, OP_MD, OP_ML, OP_MT, OP_MTL, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW, OP_CREL,
-    OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
+    OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RTR, OP_RTW, OP_RU,
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
     OP_KC, OP_KD, OP_KS, OP_KG,
     OP_CAI, OP_CAD, OP_CAS, OP_CAG, OP_RAI, OP_RAD, OP_RAS, OP_RAG,
@@ -73,6 +73,7 @@ static const entry symbols[] = {
     {"pthread_mutex_destroy", OP_MD},
     {"pthread_mutex_lock", OP_ML},
     {"pthread_mutex_trylock", OP_MT},
+    {"pthread_mutex_timedlock", OP_MTL},
     {"pthread_mutex_unlock", OP_MU},
     {"pthread_cond_init", OP_CI},
     {"pthread_cond_destroy", OP_CD},
@@ -87,6 +88,8 @@ static const entry symbols[] = {
     {"pthread_rwlock_wrlock", OP_RWL},
     {"pthread_rwlock_tryrdlock", OP_RTL},
     {"pthread_rwlock_trywrlock", OP_RTWL},
+    {"pthread_rwlock_timedrdlock", OP_RTR},
+    {"pthread_rwlock_timedwrlock", OP_RTW},
     {"pthread_rwlock_unlock", OP_RU},
     {"pthread_mutexattr_init", OP_MAI},
     {"pthread_mutexattr_destroy", OP_MAD},
@@ -559,15 +562,18 @@ static int mutex_owned_unlock(ios27_21a_runtime *rt, object_slot *s) {
     return e;
 }
 static int call_native(ios27_21a_runtime *rt, uint64_t address,
-                       unsigned kind, enum operation op) {
+                       unsigned kind, enum operation op,
+                       const struct timespec *deadline) {
     object_slot *s = NULL;
     int e = slot_pin(rt, address, kind, &s);
     if (e) return e;
     switch (op) {
         case OP_ML:
         case OP_MT:
+        case OP_MTL:
             e = (op == OP_ML) ? pthread_mutex_lock(&s->native.mutex) :
-                               pthread_mutex_trylock(&s->native.mutex);
+                (op == OP_MT) ? pthread_mutex_trylock(&s->native.mutex) :
+                                pthread_mutex_timedlock(&s->native.mutex, deadline);
             if (!e) {
                 (void)pthread_mutex_lock(&rt->guard);
                 if (s->mutex_locked && s->mutex_type == 2u &&
@@ -588,15 +594,20 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
         case OP_RWL:
         case OP_RTL:
         case OP_RTWL:
+        case OP_RTR:
+        case OP_RTW:
             e = rw_self_deadlock(rt, s,
-                                 op == OP_RWL || op == OP_RTWL,
+                                 op == OP_RWL || op == OP_RTWL || op == OP_RTW,
                                  op == OP_RTL || op == OP_RTWL);
             if (e) break;
             if (op == OP_RL) e = pthread_rwlock_rdlock(&s->native.rwlock);
             else if (op == OP_RWL) e = pthread_rwlock_wrlock(&s->native.rwlock);
             else if (op == OP_RTL) e = pthread_rwlock_tryrdlock(&s->native.rwlock);
-            else e = pthread_rwlock_trywrlock(&s->native.rwlock);
-            if (!e) e = rw_record_acquire(rt, s, op == OP_RWL || op == OP_RTWL);
+            else if (op == OP_RTWL) e = pthread_rwlock_trywrlock(&s->native.rwlock);
+            else if (op == OP_RTR) e = pthread_rwlock_timedrdlock(&s->native.rwlock, deadline);
+            else e = pthread_rwlock_timedwrlock(&s->native.rwlock, deadline);
+            if (!e) e = rw_record_acquire(rt, s,
+                                     op == OP_RWL || op == OP_RTWL || op == OP_RTW);
             break;
         case OP_RU: e = rw_owned_unlock(rt, s); break;
         default: e = ENOTSUP; break;
@@ -988,6 +999,22 @@ static int attr_pshared_guest(ios27_21a_runtime *rt, uint64_t address,
     if (!setter) return guest_store_u32(rt, argument, value);
     return 0;
 }
+static int timed_native_guest(ios27_21a_runtime *rt, const uint64_t args[6],
+                              unsigned kind, enum operation op) {
+    unsigned char *p = NULL;
+    int64_t seconds, nanoseconds;
+    struct timespec deadline;
+    int e = guest_view_access(rt, args[1], 16u, 8u, IOS27_21A_READ, &p);
+    if (e) return e;
+    seconds = (int64_t)guest_load64(p);
+    nanoseconds = (int64_t)guest_load64(p + 8u);
+    if (seconds < 0 || nanoseconds < 0 ||
+        nanoseconds >= 1000000000LL ||
+        (int64_t)(time_t)seconds != seconds) return EINVAL;
+    deadline.tv_sec = (time_t)seconds;
+    deadline.tv_nsec = (long)nanoseconds;
+    return call_native(rt, args[0], kind, op, &deadline);
+}
 /* Host-side attr fields are independent of opaque Darwin memory layout. */
 static int thread_attr_guest(ios27_21a_runtime *rt, uint64_t address,
                              uint64_t argument, enum operation op) {
@@ -1097,6 +1124,9 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
         e = slot_destroy(rt, args[0], KIND_MUTEXATTR);
+    } else if (op == OP_MTL || op == OP_RTR || op == OP_RTW) {
+        e = timed_native_guest(rt, args,
+                               op == OP_MTL ? KIND_MUTEX : KIND_RWLOCK, op);
     } else if (op == OP_CW || op == OP_CTW || op == OP_CREL) {
         e = cond_wait_native(rt, args, op == OP_CTW ? 1 :
                                          op == OP_CREL ? 2 : 0);
@@ -1133,7 +1163,7 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
         } else if (op == OP_MD || op == OP_CD || op == OP_RD) {
         e = slot_destroy(rt, args[0], kind);
         } else {
-            e = call_native(rt, args[0], kind, op);
+            e = call_native(rt, args[0], kind, op, NULL);
         }
     }
 result:
