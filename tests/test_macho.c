@@ -93,6 +93,28 @@ static void executable_layout_tests(void) {
     assert(ios27_macho_executable_layout(file, sizeof(file), &image,
                                           16384u, &layout, err, sizeof(err)) == 0);
     assert(layout.span == 32768u);
+    /*
+     * A non-WX but executable data segment used to pass generic
+     * preflight; reject it at the mapping boundary, not only in the
+     * higher-level linked-image inspector.
+     */
+    put32(file + 160u, 5u);
+    put32(file + 164u, 5u);
+    assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(file, sizeof(file), &image,
+                                          4096u, &layout, err, sizeof(err)) != 0);
+    assert(layout.span == 0u);
+    put32(file + 160u, 3u);
+    put32(file + 164u, 3u);
+
+    /* LINKEDIT must stay read-only even when its VM pages are disjoint. */
+    memset(file + 112u, 0, 16u);
+    memcpy(file + 112u, "__LINKEDIT", 10u);
+    assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(file, sizeof(file), &image,
+                                          16384u, &layout, err, sizeof(err)) != 0);
+    memset(file + 112u, 0, 16u);
+    memcpy(file + 112u, "__DATA", 6u);
     {
         ios27_macho_info stale = image;
         stale.entryoff += 4u;
