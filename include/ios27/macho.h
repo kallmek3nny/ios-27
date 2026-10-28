@@ -71,6 +71,22 @@ int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address);
  * Requires ARM64 hardware and a trusted, specially constructed test image.
  * Does NOT implement iOS syscalls, dyld, ObjC, frameworks, or a sandbox.
  */
+/*
+ * Phase 18a: enter a trusted SDK-free ARM64 Darwin LC_MAIN via the Darwin C
+ * main ABI: int main(int argc, char **argv, char **envp, char **apple).
+ * The guest gets its own guarded stack and private copies of argv/envp.
+ * argc may be zero; envp is a NULL-terminated vector or NULL for empty.
+ * Limits: 128 arguments, 128 environment entries, 4095 bytes per string,
+ * 64 KiB aggregate payload, and 8 MiB maximum LC_MAIN stack request.
+ * No Darwin TLS, runtime, dyld, syscalls or process isolation is provided.
+ * Guest entry must return normally. Failure never updates exit_code.
+ */
+int ios27_run_executable_argv(const uint8_t *data, size_t size,
+                             const ios27_macho_info *info,
+                             int argc, const char *const argv[],
+                             const char *const envp[],
+                             int *exit_code, char *error, size_t error_size);
+
 int ios27_run_freestanding(const uint8_t *data, size_t size,
                           const ios27_macho_info *info,
                           int *exit_code, char *error, size_t error_size);
