@@ -2,9 +2,9 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "c52905479f50d0d1a74b67ea6947ae0d123aa937",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/c52905479f50d0d1a74b67ea6947ae0d123aa937",
-    "committed_at": "2026-10-28T18:03:43Z"
+    "sha": "bfb03ef8574b5d1495551672f2750f4b29ee4d22",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/bfb03ef8574b5d1495551672f2750f4b29ee4d22",
+    "committed_at": "2026-10-28T18:06:19Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
@@ -16,19 +16,17 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
       "updated_at": "2026-10-28T18:05:26Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 55,
-      "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "updated_at": "2026-10-28T18:05:06Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 55,
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "head_sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
+      "merged_at": "2026-10-28T18:06:20Z"
+    },
     {
       "number": 54,
       "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
@@ -77,20 +75,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/48",
       "head_sha": "d5ce7b309fd16e88b8e5fe01869020b4330fd2dc",
       "merged_at": "2026-10-28T17:40:35Z"
-    },
-    {
-      "number": 47,
-      "title": "style: GitHub-native transparent dashboards with clearer progress percentages",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/47",
-      "head_sha": "bae514000565c683d8d04ca903b1ed76f53549d2",
-      "merged_at": "2026-10-28T17:26:54Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 49,
+    "branches_scanned": 50,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:05:43Z"
+  "observed_at": "2026-10-28T18:06:53Z"
 }
