@@ -27,4 +27,14 @@ timeout 10s file "$tmp/entry.o" | timeout 10s grep -q 'Mach-O 64-bit arm64 objec
 # Check source itself with Clang in addition to the chosen host C compiler.
 timeout 120s "$clang" -std=c11 -Wall -Wextra -Werror -Wpedantic -O2 \
     -I"$root/include" -c "$root/src/objc20b_dispatch.c" -o "$tmp/dispatch.o"
-echo 'phase20b: native host tests + O0/O2 Darwin Clang ObjC2 + AArch64 entrypoints pass'
+# SDK-free ARM64 Darwin compile of the actual dispatcher, using strictly
+# declaration-only libc shims for unresolved guest libSystem dependencies.
+resource="$(timeout 5s "$clang" -print-resource-dir)"
+timeout 30s "$clang" --target=arm64-apple-darwin -std=c11 \
+    -ffreestanding -nostdinc -isystem "$resource/include" \
+    -I"$root/tools/phase20b-sysroot" -I"$root/include" \
+    -Wall -Wextra -Werror -Wpedantic -O2 \
+    -c "$root/src/objc20b_dispatch.c" -o "$tmp/arm64-dispatch.o"
+timeout 10s file "$tmp/arm64-dispatch.o" | timeout 10s grep -q 'Mach-O 64-bit arm64 object'
+timeout 10s strings "$tmp/arm64-dispatch.o" | timeout 10s grep -q '_ios27_objc20b_resolve_global'
+echo 'phase20b: host dispatch tests, ObjC2 fixtures, native ARM64 dispatcher and entrypoints pass' 
