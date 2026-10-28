@@ -2,51 +2,47 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "6fc645a385281c55f0f1f61787ed3da712385741",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/6fc645a385281c55f0f1f61787ed3da712385741",
-    "committed_at": "2026-10-28T19:20:17Z"
+    "sha": "b83af49cfca476f19c80b026b7b4f55ea12e76b7",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/b83af49cfca476f19c80b026b7b4f55ea12e76b7",
+    "committed_at": "2026-10-28T19:20:59Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 66,
       "branch": "fix/assign-agent-test-fixtures-by-source",
-      "sha": "2731e8165e64b9941bb948d6254a48dbcd0ea07f",
+      "sha": "63818f8893f292b70487ba83742be14de305319b",
       "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
       "url": "https://github.com/kallmek3nny/ios-27/pull/66",
-      "updated_at": "2026-10-28T19:20:04Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 64,
-      "branch": "phase20d-darwin-threading",
-      "sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
-      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
-      "updated_at": "2026-10-28T19:19:51Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 63,
-      "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
-      "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
-      "updated_at": "2026-10-28T19:19:26Z",
+      "updated_at": "2026-10-28T19:20:58Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 62,
       "branch": "phase20e-libsystem-userspace",
-      "sha": "b9fa9469596c3b5169dc6afd085b25e11bc24a75",
+      "sha": "a5fb78ea8af65d270b2b76d219e905cd183758bf",
       "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "updated_at": "2026-10-28T19:18:59Z",
+      "updated_at": "2026-10-28T19:20:34Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 63,
+      "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "head_sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
+      "merged_at": "2026-10-28T19:21:00Z"
+    },
+    {
+      "number": 64,
+      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "merged_at": "2026-10-28T19:20:45Z"
+    },
     {
       "number": 65,
       "title": "phase 20a: clang ARM64 ObjC2 metadata graphs and transactional registration",
@@ -88,27 +84,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/57",
       "head_sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
       "merged_at": "2026-10-28T18:10:37Z"
-    },
-    {
-      "number": 53,
-      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "head_sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
-      "merged_at": "2026-10-28T18:08:09Z"
-    },
-    {
-      "number": 55,
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "head_sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
-      "merged_at": "2026-10-28T18:06:20Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 23,
+    "branches_scanned": 25,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:20:25Z"
+  "observed_at": "2026-10-28T19:21:22Z"
 }
