@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **3** · audited base: `44b3774ace8e`
+candidate branches with mapped changes: **4** · audited base: `44b3774ace8e`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
@@ -15,7 +15,7 @@ head: `3722e00c306c` · ci: **running** · unmerged, not credited.
 
 ### [phase21e-hardening-20261028](https://github.com/kallmek3nny/ios-27/pull/74)
 
-head: `b12037d69592` · ci: **running** · unmerged, not credited.
+head: `b12037d69592` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +405/-22 lines
 
@@ -25,6 +25,13 @@ head: `1fd3dc09051a` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +1054/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`, `ios27_21d_wrlock`
+
+### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge)
+
+head: `913abc9a6bb6` · ci: **not_checked** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +1369/-0 lines
+  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
