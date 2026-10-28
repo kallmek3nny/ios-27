@@ -54,6 +54,8 @@ def main():
             arch = "arm64" if target.startswith("arm64") else "x86_64"
             run([sys.executable, str(ROOT / "tools/phase21f-macho-check.py"),
                  arch, str(obj)], 30)
+            run([sys.executable, str(ROOT / "tools/phase21f-macho-selftest.py"),
+                 arch, str(obj)], 30)
             print("phase21f: compiled genuine " + target + " pthread callsites")
     print("phase21f: all independent -Werror checks passed")
 

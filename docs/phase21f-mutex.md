@@ -44,6 +44,8 @@ bound by the bridge. It does not claim native iOS app compatibility.
    An independently runnable Mach-O parser validates architecture, load
    commands, bounds, external undefined symbol records, and actual callsite
    relocation references, not merely the presence of symbol-name strings.
+   Eleven malformed variants of each real compiled Mach-O object must fail
+   closed under independent bounds, architecture, header, and symbol checks.
 
 ## independent execution
 
