@@ -15,6 +15,29 @@ _Static_assert(sizeof(phase21i_lp64_cond) == 48, "Apple LP64 cond extent");
 _Static_assert(_Alignof(phase21i_lp64_mutex) == 8, "mutex alignment");
 _Static_assert(_Alignof(phase21i_lp64_cond) == 8, "cond alignment");
 _Static_assert(sizeof(phase21i_lp64_timespec) == 16, "LP64 deadline");
+/* Type + bitfield declarations reproduce the published LP64 source *shape*
+ * only, not an Apple SDK import or a claim about iOS 27 internal semantics. */
+typedef struct {
+    long signature;
+    int priority_ceiling;
+    unsigned int protocol:2, type:2, pshared:2, opt:3, unused:23;
+} phase21i_lp64_mutexattr;
+typedef struct { long signature; unsigned int pshared:2, other:30; }
+    phase21i_lp64_condattr;
+_Static_assert(sizeof(int) == 4, "arm64 Darwin int width");
+_Static_assert(sizeof(phase21i_lp64_mutexattr) == 16, "LP64 mutexattr size");
+_Static_assert(sizeof(phase21i_lp64_condattr) == 16, "LP64 condattr size");
+_Static_assert(_Alignof(phase21i_lp64_mutexattr) == 8, "LP64 attr alignment");
+_Static_assert(__builtin_offsetof(phase21i_lp64_mutexattr, priority_ceiling) == 8,
+               "Apple-published mutex priority field location");
+__attribute__((visibility("default")))
+int phase21i_published_apple_attr_fields(const phase21i_lp64_mutexattr *mutexattr,
+                                         const phase21i_lp64_condattr *condattr) {
+    if (!mutexattr || !condattr) return -1;
+    return mutexattr->protocol == 0 && mutexattr->type <= 2 &&
+           mutexattr->pshared == 2 && mutexattr->opt >= 1 &&
+           mutexattr->opt <= 2 && condattr->pshared == 2;
+}
 extern int pthread_mutex_init(phase21i_lp64_mutex *, const void *);
 extern int pthread_mutex_destroy(phase21i_lp64_mutex *);
 extern int pthread_mutex_lock(phase21i_lp64_mutex *);
