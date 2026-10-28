@@ -64,6 +64,7 @@ int ios27_21i_create(ios27_21i_runtime **out, const ios27_21i_guest *g,
                      size_t capacity) {
     ios27_21i_runtime *rt;
     int rc;
+    if (out) *out = NULL;
     if (!out || !g || !g->memory || !capacity || capacity > MAX_SLOTS ||
         !g->length || !g->mutex_extent || !g->cond_extent ||
         g->mutex_extent > g->length || g->cond_extent > g->length ||
@@ -107,9 +108,9 @@ static int create_object(ios27_21i_runtime *rt, uint64_t addr,
     size_t alignment = kind == IOS27_21I_MUTEX ? rt->guest.mutex_alignment :
                                                   rt->guest.cond_alignment;
     int rc;
-    if (attributes) return ENOTSUP; /* No unvalidated guest attr decoding. */
     rc = region(&rt->guest, addr, extent, alignment);
     if (rc) return rc;
+    if (attributes) return ENOTSUP; /* No unvalidated guest attr decoding. */
     (void)pthread_mutex_lock(&rt->guard);
     for (size_t i = 0; i < rt->capacity; ++i) {
         struct entry *current = &rt->entries[i];
