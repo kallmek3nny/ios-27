@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 56,
+      "branch": "phase19c-mach-task-exceptions",
+      "sha": "7e259c4f14bf4a2943d07c53e08616d71c50859f",
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "updated_at": "2026-10-28T17:57:00Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 55,
+      "branch": "phase19d-arm64-relocs-20261028",
+      "sha": "1ccfca0133374bc53da647c4d1dcd29f04851562",
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "updated_at": "2026-10-28T17:56:59Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
       "sha": "60f91eee3d8f9c2c61e1080e7ac5acfdff8264cb",
@@ -27,26 +45,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "cb94b22853a839c093affab4e9c85ca950aeddd6",
-      "ahead_by": 4,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:56:35Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19d-arm64-relocs-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase19c-mach-task-exceptions",
-      "sha": "a6e6bed68a99f12a72cf2bc29ffdf8fc1924196b",
-      "ahead_by": 6,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:56:25Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19c-mach-task-exceptions",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 52,
@@ -107,9 +106,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 48,
+    "branches_scanned": 46,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:56:44Z"
+  "observed_at": "2026-10-28T17:57:23Z"
 }
