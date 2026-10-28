@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 73,
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "dd0355350547a536f74100402a4b9474beacbef8",
+      "title": "phase 21d: fair reader-writer lock and safe once initialization",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "updated_at": "2026-10-28T20:14:26Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
       "sha": "bbf277a8e0becc86a13fd20eed7911a4205a549a",
@@ -16,28 +25,9 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "updated_at": "2026-10-28T20:14:11Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 73,
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "d4e67343ede027faaa429a1826ba139c94ff4b6a",
-      "title": "phase 21d: fair reader-writer lock and safe once initialization",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:07:22Z",
-      "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "dd0355350547a536f74100402a4b9474beacbef8",
-      "ahead_by": 4,
-      "behind_by": 58,
-      "last_commit_at": "2026-10-28T20:14:22Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 75,
@@ -98,9 +88,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 34,
+    "branches_scanned": 33,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:14:29Z"
+  "observed_at": "2026-10-28T20:14:54Z"
 }
