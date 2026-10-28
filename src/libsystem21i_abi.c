@@ -275,6 +275,57 @@ static int get_deadline(ios27_21i_runtime *rt, uint64_t guest_addr,
     if ((uint64_t)out->tv_sec != sec) return EINVAL;
     return 0;
 }
+static void write_le32(uint8_t *p, uint32_t v) {
+    for (unsigned i = 0; i < 4; ++i) p[i] = (uint8_t)(v >> (8u * i));
+}
+static void write_le64(uint8_t *p, uint64_t v) {
+    for (unsigned i = 0; i < 8; ++i) p[i] = (uint8_t)(v >> (8u * i));
+}
+/* Explicitly scoped to the Apple-published LP64 attr profile. These are not
+ * generic Darwin pthread functions for arbitrary SDKs. */
+static int dispatch_lp64_attr(ios27_21i_runtime *rt, const char *symbol,
+                               uint64_t address, uint64_t value) {
+    int mutex_attr = 0, operation = 0;
+    uint8_t *bytes;
+    uint64_t signature;
+    int rc;
+    if (!strcmp(symbol, "_pthread_mutexattr_init")) {
+        mutex_attr = 1; operation = 1;
+    } else if (!strcmp(symbol, "_pthread_mutexattr_destroy")) {
+        mutex_attr = 1; operation = 2;
+    } else if (!strcmp(symbol, "_pthread_mutexattr_settype")) {
+        mutex_attr = 1; operation = 3;
+    } else if (!strcmp(symbol, "_pthread_condattr_init")) {
+        operation = 1;
+    } else if (!strcmp(symbol, "_pthread_condattr_destroy")) {
+        operation = 2;
+    } else {
+        return ENOSYS;
+    }
+    if (!rt->apple_lp64_attrs) return ENOTSUP;
+    rc = region(&rt->guest, address, 16, 8);
+    if (rc) return rc;
+    bytes = rt->guest.memory + (size_t)(address - rt->guest.base);
+    signature = mutex_attr ? UINT64_C(0x4d545841) :
+                             UINT64_C(0x434e4441);
+    if (operation == 1) {
+        memset(bytes, 0, 16);
+        write_le64(bytes, signature);
+        if (mutex_attr) write_le32(bytes + 12u, (2u << 4u) | (2u << 6u));
+        else write_le32(bytes + 8u, 2u);
+        return 0;
+    }
+    if (read_le64(bytes) != signature) return EINVAL;
+    if (operation == 2) {
+        write_le64(bytes, 0);
+        return 0;
+    }
+    if ((uint32_t)value > 2u) return EINVAL;
+    uint32_t flags = read_le32(bytes + 12u);
+    write_le32(bytes + 12u, (flags & ~(3u << 2u)) |
+                             ((uint32_t)value << 2u));
+    return 0;
+}
 /* No host address is calculated until validated. No pthread host layout is
  * exposed in guest memory; all state lives in generation-checked sidecars. */
 int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
@@ -300,6 +351,12 @@ int ios27_21i_dispatch(ios27_21i_runtime *rt, const char *symbol,
     struct timespec deadline;
     int kind, rc;
     if (!rt || !symbol) return EINVAL;
+    /* Symbols with guest attribute storage are scoped to the explicit
+     * Apple LP64 constructor; unknown attr APIs remain ENOSYS. */
+    {
+        int attr_rc = dispatch_lp64_attr(rt, symbol, a0, a1);
+        if (attr_rc != ENOSYS) return attr_rc;
+    }
     for (size_t i = 0; i < sizeof(symbols)/sizeof(symbols[0]); ++i)
         if (!strcmp(symbol, symbols[i].name)) { action = symbols[i].action; break; }
     if (action == INVALID) return ENOSYS;
