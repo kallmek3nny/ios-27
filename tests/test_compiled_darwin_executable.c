@@ -270,6 +270,164 @@ static void phase18a_compiler_linked_test(void) {
 #endif
 }
 
+
+/* Phase 19a: real compiler-generated recursion and globals on fresh stacks,
+ * with process-scoped argv/envp/apple copies, lifecycle and invalid inputs. */
+static void phase19a_compiler_linked_test(void) {
+#if defined(__linux__)
+    int status = system("timeout 75s python3 ../tools/phase19a-build.py "
+                        "phase19a-process");
+    uint8_t *bytes, *mutated;
+    size_t length, maincmd, datacmd;
+    ios27_macho_info info;
+    ios27_exec_layout layout;
+    char error[160] = {0};
+    int result = 777;
+    const char *args[] = {"ios27", "oak", "pine", "cedar"};
+    const char *env[] = {"MODE=phase19a", "REPEAT=1", NULL};
+    const char *apple[] = {"executable_path=/ios27/phase19a",
+                           "ios27.mode=native", NULL};
+    ios27_startup_context context = {4, args, env, apple};
+    assert(status >= 0 && WIFEXITED(status));
+    /* CI must execute the new compiler-produced workload, not skip it. */
+    assert(WEXITSTATUS(status) == 0);
+    bytes = read_file("phase19a-process", &length);
+    mutated = malloc(length);
+    assert(mutated);
+    assert(ios27_macho_parse(bytes, length, &info, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(bytes, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(bytes, length, &info, 16384u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(info.segment_count >= 5u);
+    maincmd = command(bytes, length, UINT32_C(0x80000028), NULL);
+    datacmd = command(bytes, length, 0x19u, "__DATA");
+    {
+        /* A code-bearing RX segment may also contain non-code literals. */
+        size_t textcmd19 = command(bytes, length, 0x19u, "__TEXT");
+        size_t literal_section = 0u;
+        for (uint32_t i = 0u; i < rd32(bytes + textcmd19 + 64u); ++i) {
+            size_t sec = textcmd19 + 72u + (size_t)i * 80u;
+            if (strncmp((const char *)bytes + sec, "__cstring", 16u) == 0)
+                literal_section = sec;
+        }
+        assert(literal_section != 0u);
+        memcpy(mutated, bytes, length);
+        wr64(mutated + maincmd + 8u, rd32(bytes + literal_section + 48u));
+        assert(ios27_macho_parse(mutated, length, &info,
+                                 error, sizeof(error)) == 0);
+        assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                             &layout, error, sizeof(error)) != 0);
+        assert(layout.span == 0u);
+        assert(ios27_macho_executable_layout(mutated, length, &info, 16384u,
+                                             &layout, error, sizeof(error)) != 0);
+        memcpy(mutated, bytes, length);
+        assert(ios27_macho_parse(bytes, length, &info,
+                                 error, sizeof(error)) == 0);
+    }
+#if defined(__aarch64__)
+    for (unsigned i = 0u; i < 32u; ++i) {
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &context,
+                                             &result, error, sizeof(error)) == 0);
+        assert(result == 42);
+        assert(strcmp(args[1], "oak") == 0);
+        assert(strcmp(env[0], "MODE=phase19a") == 0);
+        assert(strcmp(apple[0], "executable_path=/ios27/phase19a") == 0);
+    }
+    {
+        ios27_startup_context empty = {0, NULL, NULL, NULL};
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &empty,
+                                             &result, error, sizeof(error)) == 0);
+        assert(result == 101);
+    }
+    {
+        const char *wrong[] = {"wrong=path", "ios27.mode=native", NULL};
+        ios27_startup_context altered = {4, args, env, wrong};
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &altered,
+                                             &result, error, sizeof(error)) == 0);
+        assert(result == 105); /* x3 apple data really reached the guest */
+    }
+#else
+    assert(ios27_run_executable_context(bytes, length, &info, &context,
+                                         &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+#endif
+    {
+        ios27_startup_context invalid = {-1, args, env, apple};
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &invalid,
+                                             &result, error, sizeof(error)) != 0);
+        assert(result == 777);
+    }
+    {
+        const char *overflow[130];
+        ios27_startup_context invalid = context;
+        for (size_t i = 0u; i < 129u; ++i)
+            overflow[i] = "value";
+        overflow[129] = NULL;
+        invalid.apple = overflow;
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &invalid,
+                                             &result, error, sizeof(error)) != 0);
+        assert(result == 777);
+    }
+    {
+        /* Both vectors and the combined payload are bounded before mapping. */
+        char huge[4096];
+        const char *repeated[22];
+        ios27_startup_context invalid = context;
+        memset(huge, 'A', sizeof(huge));
+        huge[sizeof(huge) - 1u] = '\0';
+        for (size_t i = 0u; i < 21u; ++i)
+            repeated[i] = huge;
+        repeated[21] = NULL;
+        invalid.envp = repeated;
+        result = 777;
+        assert(ios27_run_executable_context(bytes, length, &info, &invalid,
+                                             &result, error, sizeof(error)) != 0);
+        assert(result == 777);
+        huge[sizeof(huge) - 1u] = 'B';
+        invalid.envp = env;
+        invalid.apple = (const char *const *)repeated;
+        repeated[0] = huge;
+        repeated[1] = NULL;
+        assert(ios27_run_executable_context(bytes, length, &info, &invalid,
+                                             &result, error, sizeof(error)) != 0);
+        assert(result == 777);
+    }
+    memcpy(mutated, bytes, length);
+    wr64(mutated + maincmd + 16u, UINT64_C(8) * 1024u * 1024u + 1u);
+    assert(ios27_macho_parse(mutated, length, &info, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 16384u,
+                                         &layout, error, sizeof(error)) != 0);
+    result = 777;
+    assert(ios27_run_executable_context(mutated, length, &info, &context,
+                                         &result, error, sizeof(error)) != 0);
+    assert(result == 777);
+    memcpy(mutated, bytes, length);
+    wr32(mutated + datacmd + 60u, 7u);
+    assert(ios27_macho_parse(mutated, length, &info, error, sizeof(error)) == 0);
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u);
+    memcpy(mutated, bytes, length);
+    assert(ios27_macho_parse(mutated, length, &info, error, sizeof(error)) == 0);
+    mutated[maincmd + 8u] ^= 1u;
+    assert(ios27_macho_executable_layout(mutated, length, &info, 4096u,
+                                         &layout, error, sizeof(error)) != 0);
+    assert(layout.span == 0u); /* stale metadata, no executable page created */
+    free(mutated);
+    free(bytes);
+    puts("phase19a real recursive Darwin startup/teardown tests passed");
+#endif
+}
+
 int main(int argc, char **argv) {
     uint8_t *bytes, *bad;
     size_t length, textcmd, editcmd, pagecmd, maincmd;
@@ -462,6 +620,7 @@ int main(int argc, char **argv) {
     free(bytes);
     phase17a_compiler_linked_test();
     phase18a_compiler_linked_test();
+    phase19a_compiler_linked_test();
     puts("genuine Clang+LLD Darwin MH_EXECUTE fixture passed");
     return 0;
 }
