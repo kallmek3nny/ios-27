@@ -11,10 +11,10 @@
     {
       "number": 60,
       "branch": "feat/progress-live-branch-evidence",
-      "sha": "f1dd9058c2f080de1203e95482e04f2a12503499",
+      "sha": "a1127ea74a83c15a337b58d8d0a58782865025e0",
       "title": "feat: parse active agent branch diffs into live provisional progress blocks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/60",
-      "updated_at": "2026-10-28T19:10:31Z",
+      "updated_at": "2026-10-28T19:11:59Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -111,5 +111,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:11:15Z"
+  "observed_at": "2026-10-28T19:12:39Z"
 }
