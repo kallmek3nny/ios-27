@@ -134,9 +134,43 @@ static void races_and_quota(void) {
     CHECK(info.leases_created == ACTORS * LOOPS + RACES);
     CHECK(ios27_21j_destroy(d) == 0);
 }
+static void faulted_acquisition_replay(void) {
+    ios27_21j_diagnostics *a = NULL, *b = NULL;
+    ios27_21j_snapshot_data sa, sb;
+    unsigned refused = 0, accepted = 0;
+    CHECK(ios27_21j_create(&a, 1, 7001, 3500) == 0);
+    CHECK(ios27_21j_create(&b, 1, 7001, 3500) == 0);
+    for (uint64_t i = 0; i < 10000; ++i) {
+        ios27_21j_lease x = {0}, y = {0};
+        int ra = ios27_21j_acquire_injected(a, 77, (uint32_t)(i % 8), i, &x);
+        int rb = ios27_21j_acquire_injected(b, 77, (uint32_t)(i % 8), i, &y);
+        CHECK((ra == 0 || ra == ENOMEM) && ra == rb);
+        if (ra == ENOMEM) {
+            CHECK(!x.slot && !x.generation && !x.owner);
+            CHECK(!y.slot && !y.generation && !y.owner);
+            ++refused;
+        } else {
+            CHECK(x.slot && y.slot && x.generation == y.generation);
+            CHECK(ios27_21j_release(a, x) == 0);
+            CHECK(ios27_21j_release(b, y) == 0);
+            ++accepted;
+        }
+    }
+    CHECK(refused > 2500 && refused < 4500);
+    CHECK(accepted + refused == 10000);
+    CHECK(ios27_21j_snapshot(a, &sa) == 0);
+    CHECK(ios27_21j_snapshot(b, &sb) == 0);
+    CHECK(sa.active == 0 && sb.active == 0);
+    CHECK(sa.leases_created == accepted && sb.leases_created == accepted);
+    CHECK(sa.leases_released == accepted && sb.leases_released == accepted);
+    CHECK(sa.injections == refused && sb.injections == refused);
+    CHECK(ios27_21j_destroy(a) == 0);
+    CHECK(ios27_21j_destroy(b) == 0);
+}
 int main(void) {
     faults_and_overflow();
+    faulted_acquisition_replay();
     races_and_quota();
-    puts("phase21j diagnostics: 20k deterministic faults, 24k lease cycles, 256 release races; PASS");
+    puts("phase21j diagnostics: 30k deterministic fault probes, 24k lease cycles, 256 release races; PASS");
     return 0;
 }
