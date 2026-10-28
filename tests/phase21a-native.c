@@ -57,6 +57,9 @@ int main(void) {
     assert(ios27_21a_create(&rt, memory, sizeof(memory), BASE) == 0);
     assert(ios27_21a_validate(rt, mutex, sizeof(ios27_21a_mutex), 8) == 0);
     assert(call("pthread_mutex_init", mutex, 0) == 0);
+    assert(call("_pthread_mutex_lock", mutex, 0) == 0);
+    assert(call("_pthread_mutex_unlock", mutex, 0) == 0);
+    assert(call("__pthread_mutex_lock", mutex, 0) == ENOSYS);
     assert(call("pthread_mutex_init", mutex, 0) == EBUSY);
     assert(call("pthread_mutex_lock", mutex, 0) == 0);
     assert(call("pthread_mutex_trylock", mutex, 0) == EDEADLK ||
