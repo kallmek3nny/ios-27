@@ -149,4 +149,37 @@ if(IOS27_BUILD_TESTS)
     add_test(NAME compiled-darwin-got-load COMMAND test_compiled_darwin_got
              "${IOS27_DARWIN_DATA_CONSUMER}" "${IOS27_DARWIN_DATA_PROVIDER}")
 
+    # Phase 15a: link original freestanding Darwin Clang MH_OBJECTs into a
+    # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
+    find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
+    if(NOT IOS27_DARWIN_LD64_LLD)
+        message(FATAL_ERROR "Phase15a needs the open-source ld64.lld linker")
+    endif()
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    set(IOS27_PHASE15A_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/phase15a-executable")
+    add_custom_command(
+        OUTPUT "${IOS27_PHASE15A_EXECUTABLE}"
+        COMMAND timeout 115s "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase15a-build.py"
+            --clang "${IOS27_DARWIN_CLANG}"
+            --linker "${IOS27_DARWIN_LD64_LLD}"
+            --main "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-main.c"
+            --helper "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-helper.c"
+            --out "${IOS27_PHASE15A_EXECUTABLE}"
+        DEPENDS
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase15a-build.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-main.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-helper.c"
+        VERBATIM
+        COMMENT "Link genuine SDK-free ARM64 Mach-O MH_EXECUTE")
+    add_custom_target(ios27_phase15a_executable ALL
+        DEPENDS "${IOS27_PHASE15A_EXECUTABLE}")
+    add_executable(test_compiled_darwin_executable
+        tests/test_compiled_darwin_executable.c)
+    target_link_libraries(test_compiled_darwin_executable PRIVATE ios27_core)
+    target_compile_options(test_compiled_darwin_executable PRIVATE
+        -Wall -Wextra -Werror -Wpedantic)
+    add_dependencies(test_compiled_darwin_executable ios27_phase15a_executable)
+    add_test(NAME compiled-darwin-real-mh-execute
+        COMMAND test_compiled_darwin_executable "${IOS27_PHASE15A_EXECUTABLE}")
 endif()

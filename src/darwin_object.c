@@ -150,3 +150,183 @@ int ios27_darwin_object_inspect(const uint8_t *file, size_t file_size,
     if (error && cap) error[0] = '\0';
     return 0;
 }
+
+/* Phase 15a does not reuse the MH_OBJECT interpretation for linked files.
+ * The API only accepts the narrow, link-complete, SDK-free fixture profile.
+ */
+int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
+                                    ios27_darwin_executable *out,
+                                    char *error, size_t cap) {
+    ios27_macho_info info;
+    size_t cursor = 32u;
+    uint64_t textoff = 0u, textlen = 0u;
+    uint32_t symbols = 0u;
+    unsigned saw_text = 0u, saw_symtab = 0u, saw_dysymtab = 0u;
+    unsigned saw_fixups = 0u, saw_entry_cmd = 0u;
+    unsigned saw_pagezero = 0u, saw_linkedit = 0u, saw_text_seg = 0u;
+    if (!file || !out || size < 32u || size > 2u * 1024u * 1024u)
+        return fail(error, cap, "invalid or oversized linked executable");
+    memset(out, 0, sizeof(*out));
+    if (ios27_macho_parse(file, size, &info, error, cap))
+        return -1;
+    if (info.filetype != IOS27_MH_EXECUTE ||
+        (info.cpusubtype & 0xffu) != 0u || info.platform != PLATFORM_MACOS ||
+        !info.has_main || info.encrypted || info.has_dylibs ||
+        !info.segment_count || !info.needs_dyld)
+        return fail(error, cap, "requires linked ARM64-all Darwin MH_EXECUTE");
+
+    for (size_t i = 0u; i < info.segment_count; ++i) {
+        const ios27_segment *s = &info.segments[i];
+        int is_pagezero = strcmp(s->name, "__PAGEZERO") == 0;
+        int is_text = strcmp(s->name, "__TEXT") == 0;
+        int is_linkedit = strcmp(s->name, "__LINKEDIT") == 0;
+        int is_data = strcmp(s->name, "__DATA") == 0 ||
+                      strcmp(s->name, "__DATA_CONST") == 0;
+        if ((!is_pagezero && !is_text && !is_linkedit && !is_data) ||
+            (s->initprot & ~s->maxprot) || (s->maxprot & ~7u) ||
+            (s->initprot & ~7u) ||
+            ((s->maxprot & 6u) == 6u) ||
+            ((s->initprot & 6u) == 6u) ||
+            (!s->vmsize && !is_pagezero))
+            return fail(error, cap, "invalid segment permissions or name");
+        if (is_pagezero) {
+            if (saw_pagezero++ || s->filesize || s->initprot || s->maxprot)
+                return fail(error, cap, "invalid __PAGEZERO");
+        } else if (is_text) {
+            if (saw_text_seg++ || s->fileoff != 0u ||
+                s->initprot != 5u || s->maxprot != 5u || !s->filesize)
+                return fail(error, cap, "invalid __TEXT protections");
+        } else if (is_linkedit) {
+            if (saw_linkedit++ || s->initprot != 1u ||
+                s->maxprot != 1u || !s->filesize)
+                return fail(error, cap, "invalid __LINKEDIT protections");
+        } else if (s->initprot & 4u) {
+            return fail(error, cap, "executable data segment");
+        }
+        for (size_t j = 0u; j < i; ++j) {
+            const ios27_segment *t = &info.segments[j];
+            if (s->vmsize && t->vmsize &&
+                s->vmaddr < t->vmaddr + t->vmsize &&
+                t->vmaddr < s->vmaddr + s->vmsize)
+                return fail(error, cap, "overlapping segment virtual ranges");
+            if (s->filesize && t->filesize &&
+                s->fileoff < t->fileoff + t->filesize &&
+                t->fileoff < s->fileoff + s->filesize)
+                return fail(error, cap, "overlapping segment file ranges");
+        }
+    }
+    if (saw_pagezero != 1u || saw_text_seg != 1u || saw_linkedit != 1u)
+        return fail(error, cap, "missing required bounded segments");
+
+    for (uint32_t i = 0u; i < u32(file + 16u); ++i) {
+        const uint8_t *cmd = file + cursor;
+        uint32_t op = u32(cmd), len = u32(cmd + 4u);
+        if (op == LC_SEGMENT_64) {
+            const ios27_segment *segment = NULL;
+            uint32_t sections = u32(cmd + 64u);
+            char name[17];
+            if (len < 72u || sections > (len - 72u) / 80u)
+                return fail(error, cap, "truncated linked segment");
+            memcpy(name, cmd + 8u, 16u);
+            name[16] = '\0';
+            for (size_t j = 0u; j < info.segment_count; ++j) {
+                if (strcmp(name, info.segments[j].name) == 0) {
+                    segment = &info.segments[j];
+                    break;
+                }
+            }
+            if (!segment)
+                return fail(error, cap, "unrecognized linked segment");
+            for (uint32_t j = 0u; j < sections; ++j) {
+                const uint8_t *sec = cmd + 72u + (size_t)j * 80u;
+                uint64_t addr = u64(sec + 32u);
+                uint64_t bytes = u64(sec + 40u);
+                uint32_t offset = u32(sec + 48u);
+                uint32_t nreloc = u32(sec + 60u);
+                if (memcmp(sec + 16u, cmd + 8u, 16u) ||
+                    nreloc || !bytes || addr < segment->vmaddr ||
+                    bytes > segment->vmsize ||
+                    addr - segment->vmaddr > segment->vmsize - bytes ||
+                    offset < segment->fileoff ||
+                    bytes > segment->filesize ||
+                    (uint64_t)offset - segment->fileoff >
+                        segment->filesize - bytes ||
+                    !within(offset, bytes, size) ||
+                    addr - segment->vmaddr !=
+                        (uint64_t)offset - segment->fileoff)
+                    return fail(error, cap, "unresolved relocation or invalid section");
+                if (memcmp(sec, "__text\0", 7u) == 0 &&
+                    strcmp(name, "__TEXT") == 0) {
+                    if (saw_text++ || (u32(sec + 64u) & 0xffu) != 0u ||
+                        (u32(sec + 64u) & UINT32_C(0x80000000)) == 0u ||
+                        bytes > 65536u)
+                        return fail(error, cap, "invalid linked __text section");
+                    textoff = offset;
+                    textlen = bytes;
+                }
+            }
+        } else if (op == LC_SYMTAB) {
+            uint32_t symoff, stroff, strsize;
+            if (saw_symtab++ || len < 24u)
+                return fail(error, cap, "invalid linked LC_SYMTAB");
+            symoff = u32(cmd + 8u);
+            symbols = u32(cmd + 12u);
+            stroff = u32(cmd + 16u);
+            strsize = u32(cmd + 20u);
+            if (symbols > 512u || !within(symoff, (uint64_t)symbols * 16u, size) ||
+                !within(stroff, strsize, size) || !strsize)
+                return fail(error, cap, "invalid linked symbol-table bounds");
+            for (uint32_t j = 0u; j < symbols; ++j) {
+                const uint8_t *sym = file + symoff + (size_t)j * 16u;
+                uint32_t strx = u32(sym);
+                if (strx >= strsize ||
+                    !memchr(file + stroff + strx, '\0', strsize - strx) ||
+                    ((sym[4u] & N_STAB) == 0u &&
+                     (sym[4u] & N_TYPE) == 0u))
+                    return fail(error, cap, "undefined or invalid linked symbol");
+            }
+        } else if (op == 0x0bu) { /* LC_DYSYMTAB */
+            if (saw_dysymtab++ || len < 80u || u32(cmd + 28u) != 0u)
+                return fail(error, cap, "undefined symbols in linked image");
+        } else if (op == UINT32_C(0x80000034)) { /* LC_DYLD_CHAINED_FIXUPS */
+            uint32_t offset, bytes;
+            if (saw_fixups++ || len < 16u)
+                return fail(error, cap, "invalid chained-fixup load command");
+            offset = u32(cmd + 8u);
+            bytes = u32(cmd + 12u);
+            if (bytes < 28u || !within(offset, bytes, size) ||
+                u32(file + offset + 16u) != 0u)
+                return fail(error, cap, "unresolved chained-fixup imports");
+        } else if (op == UINT32_C(0x80000033) || op == 0x26u ||
+                   op == 0x29u || op == 0x1du) {
+            if (len < 16u ||
+                !within(u32(cmd + 8u), u32(cmd + 12u), size))
+                return fail(error, cap, "out of bounds linkedit data command");
+        } else if (op == UINT32_C(0x80000028)) {
+            if (saw_entry_cmd++ || len != 24u)
+                return fail(error, cap, "invalid LC_MAIN");
+        } else if (op == LC_BUILD_VERSION || op == 0x0eu || op == 0x1bu) {
+            /* Already parsed by ios27_macho_parse, or fixed-size LC_UUID. */
+            if (op == 0x1bu && len != 24u)
+                return fail(error, cap, "invalid LC_UUID");
+        } else {
+            return fail(error, cap, "unexpected linked load command");
+        }
+        cursor += len;
+    }
+    if (saw_text != 1u || saw_symtab != 1u || saw_dysymtab != 1u ||
+        saw_entry_cmd != 1u || saw_fixups != 1u ||
+        info.entryoff < textoff || (uint64_t)info.entryoff - textoff > textlen ||
+        textlen - ((uint64_t)info.entryoff - textoff) < 4u ||
+        ((info.entryoff - textoff) & 3u))
+        return fail(error, cap, "invalid or missing linked entrypoint metadata");
+    out->entry_file_offset = info.entryoff;
+    out->text_file_offset = textoff;
+    out->text_size = textlen;
+    out->platform = info.platform;
+    out->minos = info.minos;
+    out->segment_count = (uint32_t)info.segment_count;
+    out->symbol_count = symbols;
+    if (error && cap) error[0] = '\0';
+    return 0;
+}
