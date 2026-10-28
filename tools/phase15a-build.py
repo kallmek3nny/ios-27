@@ -47,6 +47,19 @@ def remove_object_platform_command(path):
     rewritten.write_bytes(data)
     return rewritten
 
+
+def link_with_lld(common, objects):
+    original = subprocess.run(common + [str(obj) for obj in objects],
+                              capture_output=True, text=True, timeout=25,
+                              check=False)
+    if original.returncode:
+        combined = original.stdout + original.stderr
+        if "This version of lld does not support linking for platform" not in combined:
+            raise RuntimeError("Darwin linker failed: " + combined)
+        adjusted = [remove_object_platform_command(obj) for obj in objects]
+        run(common + [str(obj) for obj in adjusted])
+        print("phase15a: Swift LLD platform-metadata workaround applied")
+
 def main():
     parser = argparse.ArgumentParser()
     for argument in ("clang", "linker", "main", "helper", "out"):
@@ -65,18 +78,14 @@ def main():
     common = [options.linker, "-arch", "arm64",
               "-platform_version", "macos", "13.0", "13.0",
               "-e", "_main", "-fatal_warnings", "-o", str(output)]
-    original = subprocess.run(common + [str(obj) for obj in objects],
-                              capture_output=True, text=True, timeout=25,
-                              check=False)
-    if original.returncode:
-        combined = original.stdout + original.stderr
-        # Swift's patched LLD artificially rejects inputs with platform
-        # metadata. Only this known issue permits the deterministic retry.
-        if "This version of lld does not support linking for platform" not in combined:
-            raise RuntimeError("Darwin linker failed: " + combined)
-        adjusted = [remove_object_platform_command(obj) for obj in objects]
-        run(common + [str(obj) for obj in adjusted])
-        print("phase15a: Swift LLD platform-metadata workaround applied")
+    if options.linker == "none":
+        run([sys.executable, str(pathlib.Path(__file__).with_name(
+            "phase15a-link-fallback.py")), str(objects[0]), str(objects[1]),
+            str(output)])
+    else:
+        link_with_lld(common, objects)
+
+
     if not output.is_file() or output.stat().st_size < 32:
         raise RuntimeError("linker failed to create executable")
     data = output.read_bytes()

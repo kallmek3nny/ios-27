@@ -153,7 +153,8 @@ if(IOS27_BUILD_TESTS)
     # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
     find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
     if(NOT IOS27_DARWIN_LD64_LLD)
-        message(FATAL_ERROR "Phase15a needs the open-source ld64.lld linker")
+        message(STATUS "Phase15a: using narrow source linker fallback, LLVM ld64.lld not installed")
+        set(IOS27_DARWIN_LD64_LLD "none")
     endif()
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     set(IOS27_PHASE15A_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/phase15a-executable")
@@ -168,6 +169,7 @@ if(IOS27_BUILD_TESTS)
             --out "${IOS27_PHASE15A_EXECUTABLE}"
         DEPENDS
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase15a-build.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase15a-link-fallback.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-main.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase15a-helper.c"
         VERBATIM

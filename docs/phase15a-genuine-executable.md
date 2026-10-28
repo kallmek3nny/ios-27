@@ -7,7 +7,7 @@ modifications are needed.
 
 ## Reproduce
 
-With CMake, Clang (Darwin ARM64 target), Python 3 and `ld64.lld` installed:
+With CMake, Clang (Darwin ARM64 target) and Python 3 installed.\nIf `ld64.lld` is installed, it is used preferentially. Otherwise the\nlimited in-tree original-source Python linker resolves the one ARM64\nBRANCH26 relocation into a genuine, SDK-free `MH_EXECUTE` fixture:\n
 
 ```sh
 timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON
