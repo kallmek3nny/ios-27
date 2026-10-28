@@ -11,10 +11,10 @@
     {
       "number": 71,
       "branch": "feat/phase21b-native-lifecycle-20261028",
-      "sha": "34e3ff0d94214535a46f27b1307e3fa869cd6d5f",
+      "sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
       "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/71",
-      "updated_at": "2026-10-28T19:52:49Z",
+      "updated_at": "2026-10-28T19:53:05Z",
       "status": "unmerged: not counted"
     },
     {
@@ -38,21 +38,21 @@
   ],
   "ahead_branches": [
     {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "db322a8c4493f1dad81aae858d40eac443c49be3",
+      "ahead_by": 2,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:53:19Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
+      "status": "unmerged: not counted"
+    },
+    {
       "branch": "phase21e-tls-cancel-20261028",
       "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
       "ahead_by": 1,
       "behind_by": 0,
       "last_commit_at": "2026-10-28T19:34:29Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-tls-cancel-20261028",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T19:34:29Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
       "status": "unmerged: not counted"
     }
   ],
@@ -120,5 +120,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:53:02Z"
+  "observed_at": "2026-10-28T19:53:26Z"
 }
