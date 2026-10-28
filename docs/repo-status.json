@@ -2,12 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "4c4667700fdb5d716c934f0d577c858caaf042b2",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/4c4667700fdb5d716c934f0d577c858caaf042b2",
-    "committed_at": "2026-10-28T19:54:07Z"
+    "sha": "1f951ef63b55b979654d85c24408b1a396f25875",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/1f951ef63b55b979654d85c24408b1a396f25875",
+    "committed_at": "2026-10-28T19:56:53Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
+    {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "1c3b84eeff25a01ca5c9dec6b57823711096dc07",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T19:56:58Z",
+      "status": "unmerged: not counted"
+    },
     {
       "number": 73,
       "branch": "feat/phase21d-fair-rwlock-once",
@@ -18,15 +27,6 @@
       "status": "unmerged: not counted"
     },
     {
-      "number": 69,
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "4a87c1fb9155f829d400ee09e86789c51baf25d5",
-      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:56:17Z",
-      "status": "unmerged: not counted"
-    },
-    {
       "number": 70,
       "branch": "phase21c-pthread-sync-20261028",
       "sha": "60849e53d4a6e9919413df9a142c809ae3a1142d",
@@ -34,19 +34,17 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
       "updated_at": "2026-10-28T19:56:11Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 72,
-      "branch": "phase21e-tls-cancel-20261028",
-      "sha": "86645688a035874587739102189f9a8014a6e3e1",
-      "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/72",
-      "updated_at": "2026-10-28T19:55:44Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 72,
+      "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/72",
+      "head_sha": "86645688a035874587739102189f9a8014a6e3e1",
+      "merged_at": "2026-10-28T19:56:54Z"
+    },
     {
       "number": 71,
       "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
@@ -95,20 +93,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/64",
       "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
       "merged_at": "2026-10-28T19:20:45Z"
-    },
-    {
-      "number": 65,
-      "title": "phase 20a: clang ARM64 ObjC2 metadata graphs and transactional registration",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
-      "head_sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
-      "merged_at": "2026-10-28T19:20:17Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 29,
+    "branches_scanned": 30,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:56:42Z"
+  "observed_at": "2026-10-28T19:57:04Z"
 }
