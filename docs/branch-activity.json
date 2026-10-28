@@ -1,13 +1,12 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "760954f96010288b674d64686473a2f572a35b39",
+  "main_source_sha": "5b35123eb11f45fca6ccc8d61893d4f4bada0716",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 1,
+  "candidates_checked": 0,
   "candidate_count": 0,
   "candidates": [],
   "groups": {},
-  "observed_at": "2026-10-28T19:32:24Z",
   "recent_merged_count": 5,
   "recent_merged": [
     {
@@ -248,5 +247,6 @@
         "status": "merged source, not necessarily compatible"
       }
     ]
-  }
+  },
+  "observed_at": "2026-10-28T19:34:29Z"
 }

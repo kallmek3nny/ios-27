@@ -2,24 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "760954f96010288b674d64686473a2f572a35b39",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/760954f96010288b674d64686473a2f572a35b39",
-    "committed_at": "2026-10-28T19:24:38Z"
+    "sha": "5b35123eb11f45fca6ccc8d61893d4f4bada0716",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/5b35123eb11f45fca6ccc8d61893d4f4bada0716",
+    "committed_at": "2026-10-28T19:33:52Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
-    {
-      "number": 68,
-      "branch": "fix/show-merged-agent-work-in-blocks",
-      "sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
-      "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/68",
-      "updated_at": "2026-10-28T19:33:06Z",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "open_pull_requests": [],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 68,
+      "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/68",
+      "head_sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
+      "merged_at": "2026-10-28T19:33:53Z"
+    },
     {
       "number": 67,
       "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
@@ -68,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/61",
       "head_sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
       "merged_at": "2026-10-28T19:18:52Z"
-    },
-    {
-      "number": 60,
-      "title": "feat: parse active agent branch diffs into live provisional progress blocks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/60",
-      "head_sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
-      "merged_at": "2026-10-28T19:14:10Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 27,
+    "branches_scanned": 28,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:33:36Z"
+  "observed_at": "2026-10-28T19:34:25Z"
 }
