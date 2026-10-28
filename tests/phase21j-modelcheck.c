@@ -15,7 +15,7 @@ static uint64_t scramble(uint64_t x) {
     x = (x ^ (x >> 27)) * UINT64_C(0x94d049bb133111eb);
     return x ^ (x >> 31);
 }
-static int reference_path(const unsigned char edges[LOCKS][LOCKS],
+static int reference_path(unsigned char edges[LOCKS][LOCKS],
                           uint32_t src, uint32_t target) {
     unsigned char visited[LOCKS] = {0};
     uint32_t queue[LOCKS];
