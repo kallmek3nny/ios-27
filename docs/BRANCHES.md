@@ -8,9 +8,9 @@ candidate branches with mapped changes: **2** · audited base: `2a1f8af8f814`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `913abc9a6bb6` · ci: **running** · unmerged, not credited.
+head: `b766e4a0e235` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +1369/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 8 test/fixture files, +1478/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
