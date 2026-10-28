@@ -6,9 +6,16 @@
 
 candidate branches with mapped changes: **3** · audited base: `d8c08c2ebb80`
 
+### [phase20b-native-objc-dispatch-20261028](https://github.com/kallmek3nny/ios-27/pull/63)
+
+head: `b88b1adbf96b` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 2 test/fixture files, +581/-0 lines
+  - candidate declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
+
 ### [phase20e-libsystem-userspace](https://github.com/kallmek3nny/ios-27/pull/62)
 
-head: `f9c32e904074` · ci: **running** · unmerged, not credited.
+head: `87dadf9419ce` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +558/-0 lines
   - candidate declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
@@ -19,13 +26,6 @@ head: `d821203a5c42` · ci: **not_checked** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 4 test/fixture files, +983/-0 lines
   - candidate declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
-
-### [phase20b-native-objc-dispatch-20261028](https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028)
-
-head: `1e28eebda685` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 2 test/fixture files, +581/-0 lines
-  - candidate declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
 
 ## verification policy
 

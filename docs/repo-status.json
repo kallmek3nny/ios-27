@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 63,
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "b88b1adbf96b13696ff492fdadc92290f036ce1c",
+      "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "updated_at": "2026-10-28T19:18:14Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 62,
       "branch": "phase20e-libsystem-userspace",
-      "sha": "f9c32e904074e3dc8d37a30a9a1dfa56f6c941ff",
+      "sha": "87dadf9419ceecfdd1a7d6ecbdef909829239ec8",
       "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "updated_at": "2026-10-28T19:17:14Z",
+      "updated_at": "2026-10-28T19:17:57Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 61,
       "branch": "fix/phase20-live-branch-classification",
-      "sha": "b5426b59b512011e8e635d5fad17c6547d8fab29",
+      "sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
       "title": "fix: recognize new phase-numbered agent sources in live progress map",
       "url": "https://github.com/kallmek3nny/ios-27/pull/61",
-      "updated_at": "2026-10-28T19:16:10Z",
+      "updated_at": "2026-10-28T19:17:49Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -35,15 +44,6 @@
       "behind_by": 4,
       "last_commit_at": "2026-10-28T19:17:35Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "1e28eebda685e160cfbcec0b1023b4e9a81f6908",
-      "ahead_by": 9,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T19:17:32Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
       "status": "unmerged: not counted"
     },
     {
@@ -116,9 +116,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 24,
+    "branches_scanned": 23,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:17:51Z"
+  "observed_at": "2026-10-28T19:18:33Z"
 }

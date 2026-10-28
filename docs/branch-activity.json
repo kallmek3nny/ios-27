@@ -7,11 +7,50 @@
   "candidate_count": 3,
   "candidates": [
     {
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "b88b1adbf96b13696ff492fdadc92290f036ce1c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "pr_number": 63,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 581,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20b_alloc",
+            "ios27_objc20b_bind",
+            "ios27_objc20b_create",
+            "ios27_objc20b_destroy",
+            "ios27_objc20b_register",
+            "ios27_objc20b_release",
+            "ios27_objc20b_replace",
+            "ios27_objc20b_resolve",
+            "ios27_objc20b_resolve_global",
+            "ios27_objc20b_resolve_super_global",
+            "ios27_objc20b_selector",
+            "ios27_objc20b_send_words"
+          ],
+          "example_paths": [
+            "include/ios27/objc20b_dispatch.h",
+            "src/objc20b_dispatch.c",
+            "tests/phase20b-clang.m",
+            "tests/phase20b-dispatch.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase20e-libsystem-userspace",
-      "sha": "f9c32e904074e3dc8d37a30a9a1dfa56f6c941ff",
+      "sha": "87dadf9419ceecfdd1a7d6ecbdef909829239ec8",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "pr_number": 62,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -83,55 +122,23 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "1e28eebda685e160cfbcec0b1023b4e9a81f6908",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 2,
-          "additions": 581,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_objc20b_alloc",
-            "ios27_objc20b_bind",
-            "ios27_objc20b_create",
-            "ios27_objc20b_destroy",
-            "ios27_objc20b_register",
-            "ios27_objc20b_release",
-            "ios27_objc20b_replace",
-            "ios27_objc20b_resolve",
-            "ios27_objc20b_resolve_global",
-            "ios27_objc20b_resolve_super_global",
-            "ios27_objc20b_selector",
-            "ios27_objc20b_send_words"
-          ],
-          "example_paths": [
-            "include/ios27/objc20b_dispatch.h",
-            "src/objc20b_dispatch.c",
-            "tests/phase20b-clang.m",
-            "tests/phase20b-dispatch.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
     "unclassified": [
       {
+        "branch": "phase20b-native-objc-dispatch-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+        "source_files": 2,
+        "fixture_files": 2,
+        "ci": "running"
+      },
+      {
         "branch": "phase20e-libsystem-userspace",
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase20d-darwin-threading",
@@ -139,15 +146,8 @@
         "source_files": 2,
         "fixture_files": 4,
         "ci": "not_checked"
-      },
-      {
-        "branch": "phase20b-native-objc-dispatch-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
-        "source_files": 2,
-        "fixture_files": 2,
-        "ci": "not_checked"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:17:56Z"
+  "observed_at": "2026-10-28T19:18:36Z"
 }
