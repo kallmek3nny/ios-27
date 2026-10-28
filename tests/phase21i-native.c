@@ -87,7 +87,9 @@ static void test_bridge(void) {
     struct timespec now;
     CHECK(ios27_21i_create(NULL, &guest, 4) == EINVAL);
     guest.mutex_alignment = 3;
+    rt = (ios27_21i_runtime *)(uintptr_t)1;
     CHECK(ios27_21i_create(&rt, &guest, 4) == EINVAL);
+    CHECK(rt == NULL);
     guest.mutex_alignment = 8;
     guest.base = UINT64_MAX - 10u;
     CHECK(ios27_21i_create(&rt, &guest, 4) == EINVAL);
@@ -101,6 +103,7 @@ static void test_bridge(void) {
     CHECK(CALL(rt, "mutex_init", BASE + 4080, 0, 0) == EFAULT);
     CHECK(CALL(rt, "mutex_init", UINT64_MAX, 0, 0) == EINVAL);
     CHECK(CALL(rt, "mutex_init", MUTEX, BASE + 1024, 0) == ENOTSUP);
+    CHECK(CALL(rt, "mutex_init", MUTEX + 1, BASE + 1024, 0) == EINVAL);
     CHECK(CALL(rt, "bad_symbol", MUTEX, 0, 0) == ENOSYS);
     CHECK(CALL(rt, "mutex_lock", MUTEX, 0, 0) == EINVAL);
     OK(CALL(rt, "mutex_init", MUTEX, 0, 0));
@@ -114,7 +117,9 @@ static void test_bridge(void) {
     CHECK(stats.mutexes == 2 && stats.conditions == 2 && !stats.in_flight);
     CHECK(ios27_21i_destroy(rt) == EBUSY);
     OK(ios27_21i_lookup(rt, MUTEX, IOS27_21I_MUTEX, &old));
+    newer = (ios27_21i_token){UINT32_MAX, UINT32_MAX};
     CHECK(ios27_21i_lookup(rt, MUTEX, IOS27_21I_CONDITION, &newer) == EINVAL);
+    CHECK(newer.slot == 0 && newer.generation == 0);
     OK(ios27_21i_verify(rt, MUTEX, IOS27_21I_MUTEX, old));
     CHECK(CALL(rt, "cond_signal", MUTEX, 0, 0) == EINVAL);
     CHECK(CALL(rt, "mutex_lock", READY, 0, 0) == EINVAL);
