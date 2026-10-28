@@ -3,6 +3,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(__cplusplus)
+#define IOS27_21A_STATIC_ASSERT static_assert
+#define IOS27_21A_ALIGNOF alignof
+extern "C" {
+#else
+#define IOS27_21A_STATIC_ASSERT _Static_assert
+#define IOS27_21A_ALIGNOF _Alignof
+#endif
+
 /* Arm64 Darwin LP64 object envelopes, not host pthread types.
  * Opaque contents belong to this bridge, NOT Apple's libpthread. */
 typedef struct { uint64_t sig; unsigned char opaque[56]; } ios27_21a_mutex;
@@ -16,15 +25,15 @@ typedef struct { uint64_t sig; unsigned char opaque[16]; } ios27_21a_rwlockattr;
 typedef uint64_t ios27_21a_thread; /* Darwin pthread_t is a guest pointer. */
 typedef uint64_t ios27_21a_key;
 
-_Static_assert(sizeof(ios27_21a_mutex) == 64, "Darwin mutex size");
-_Static_assert(sizeof(ios27_21a_cond) == 48, "Darwin cond size");
-_Static_assert(sizeof(ios27_21a_rwlock) == 200, "Darwin rwlock size");
-_Static_assert(sizeof(ios27_21a_once) == 16, "Darwin once size");
-_Static_assert(sizeof(ios27_21a_attr) == 64, "Darwin attr size");
-_Static_assert(sizeof(ios27_21a_mutexattr) == 16, "Darwin mutexattr size");
-_Static_assert(sizeof(ios27_21a_condattr) == 16, "Darwin condattr size");
-_Static_assert(sizeof(ios27_21a_rwlockattr) == 24, "Darwin rwlockattr size");
-_Static_assert(_Alignof(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_mutex) == 64, "Darwin mutex size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_cond) == 48, "Darwin cond size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_rwlock) == 200, "Darwin rwlock size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_once) == 16, "Darwin once size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_attr) == 64, "Darwin attr size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_mutexattr) == 16, "Darwin mutexattr size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_condattr) == 16, "Darwin condattr size");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_rwlockattr) == 24, "Darwin rwlockattr size");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
 
 /* Documented Darwin static-initializer signatures, not runtime signatures. */
 #define IOS27_21A_MUTEX_STATIC_SIG UINT64_C(0x32aaaba7)
@@ -76,4 +85,10 @@ int ios27_21a_validate(ios27_21a_runtime *rt, uint64_t guest_addr,
  * arguments; scalar return goes in x0. No guest callback execution. */
 int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                    const uint64_t args[6], uint64_t *x0);
+
+#if defined(__cplusplus)
+} /* extern "C" */
+#endif
+#undef IOS27_21A_STATIC_ASSERT
+#undef IOS27_21A_ALIGNOF
 #endif
