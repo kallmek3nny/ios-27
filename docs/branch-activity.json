@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "7e518cad94e762da82c8ef6367a724747dc76dbe",
+      "sha": "3088d3d9e383b27fd1d6c058ed50557bf1d046af",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
-      "ci": "running",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 23,
       "possibly_truncated": false,
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 18,
-          "additions": 2841,
+          "additions": 2858,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_attach_thread",
@@ -138,7 +138,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 18,
-        "ci": "running"
+        "ci": "not_checked"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -486,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:24:53Z"
+  "observed_at": "2026-10-28T20:25:40Z"
 }
