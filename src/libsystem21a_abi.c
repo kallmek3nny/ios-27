@@ -318,6 +318,25 @@ int ios27_21a_destroy(ios27_21a_runtime *rt) {
 }
 /* Ownership is recorded separately from host lock memory. Invalid unlock
  * is rejected before calling pthread_rwlock_unlock (undefined otherwise). */
+static int rw_self_deadlock(ios27_21a_runtime *rt, object_slot *s,
+                             int wants_writer, int try_only) {
+    pthread_t self = pthread_self();
+    unsigned i;
+    int conflicting;
+    (void)pthread_mutex_lock(&rt->guard);
+    conflicting = s->rw_writer_locked && pthread_equal(s->rw_writer, self);
+    if (wants_writer && !conflicting) {
+        for (i = 0; i < 32u; ++i) {
+            if (s->rw_reader_counts[i] &&
+                pthread_equal(s->rw_reader_ids[i], self)) {
+                conflicting = 1;
+                break;
+            }
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return conflicting ? (try_only ? EBUSY : EDEADLK) : 0;
+}
 static int rw_record_acquire(ios27_21a_runtime *rt, object_slot *s,
                              int writer) {
     pthread_t self = pthread_self();
@@ -410,6 +429,10 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
         case OP_RWL:
         case OP_RTL:
         case OP_RTWL:
+            e = rw_self_deadlock(rt, s,
+                                 op == OP_RWL || op == OP_RTWL,
+                                 op == OP_RTL || op == OP_RTWL);
+            if (e) break;
             if (op == OP_RL) e = pthread_rwlock_rdlock(&s->native.rwlock);
             else if (op == OP_RWL) e = pthread_rwlock_wrlock(&s->native.rwlock);
             else if (op == OP_RTL) e = pthread_rwlock_tryrdlock(&s->native.rwlock);
