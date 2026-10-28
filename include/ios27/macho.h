@@ -40,6 +40,24 @@ typedef struct {
 int ios27_macho_parse(const uint8_t *data, size_t size,
                      ios27_macho_info *out, char *error, size_t error_size);
 
+
+/* Host-independent preflight for 4 KiB / 16 KiB native mapping granules.
+ * Must be called with metadata freshly produced by ios27_macho_parse.
+ * This validates a *trusted* SDK-free executable, not sandboxing untrusted code.
+ * On failure the layout is cleared and no memory is mapped.
+ */
+typedef struct {
+    uint64_t min_vmaddr;
+    uint64_t entry_vmaddr;
+    size_t span;
+    size_t page_size;
+} ios27_exec_layout;
+
+int ios27_macho_executable_layout(const uint8_t *data, size_t size,
+                                  const ios27_macho_info *info,
+                                  size_t page_size, ios27_exec_layout *layout,
+                                  char *error, size_t error_size);
+
 /*
  * Experimental in-process execution of freestanding ARM64 images only.
  * Requires ARM64 hardware and a trusted, specially constructed test image.
