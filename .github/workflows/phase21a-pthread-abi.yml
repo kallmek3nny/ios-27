@@ -37,3 +37,12 @@ jobs:
           ASAN_OPTIONS: 'detect_leaks=1:halt_on_error=1'
           UBSAN_OPTIONS: 'halt_on_error=1'
         run: timeout 180s python3 tools/phase21a-standalone.py
+  repeated-contention:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: repeated native contention, allocation and teardown races
+        env:
+          PHASE21A_STRESS_REPEATS: '12'
+        run: timeout 240s python3 tools/phase21a-standalone.py
