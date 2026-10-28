@@ -23,6 +23,22 @@ struct ios27_21i_runtime {
     size_t capacity;
     struct entry entries[MAX_SLOTS];
 };
+int ios27_21i_get_stats(ios27_21i_runtime *rt, ios27_21i_stats *out) {
+    ios27_21i_stats stats = {0};
+    if (!rt || !out) return EINVAL;
+    (void)pthread_mutex_lock(&rt->guard);
+    stats.capacity = rt->capacity;
+    for (size_t i = 0; i < rt->capacity; ++i) {
+        const struct entry *e = &rt->entries[i];
+        if (e->kind == IOS27_21I_MUTEX) ++stats.mutexes;
+        if (e->kind == IOS27_21I_CONDITION) ++stats.conditions;
+        if (e->retired) ++stats.retired_slots;
+        stats.in_flight += e->refs;
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    *out = stats;
+    return 0;
+}
 static int power_of_two(size_t n) { return n && !(n & (n - 1u)); }
 static int region(const ios27_21i_guest *g, uint64_t addr,
                   size_t length, size_t alignment) {
