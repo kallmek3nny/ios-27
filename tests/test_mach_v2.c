@@ -752,7 +752,160 @@ static void host_alias_rejection_preserves_queued_message(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* Phase 17c: distinct objects, duplicate names, mixed COPY/MOVE and
+ * send-once replies are one all-or-nothing multi-task transaction. */
+static void phase17c_complex_multi_transfer(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t inbox, reply, item, dst, item_alias, received_item, once;
+    uint32_t sends, pending_once;
+    unsigned receive;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t n, cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 2u, &reply) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, inbox, 2u, &dst) == IOS27_MACH_OK);
+    for (unsigned i = 0u; i < 3u; ++i)
+        assert(ios27_mach_v2_make_send(s, 3u, item, 2u,
+                                       &item_alias) == IOS27_MACH_OK);
+    n = message(p, dst, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND |
+                (IOS27_MACH_MAKE_SEND_ONCE << 8u), reply, 1701u);
+    wr32(p + 4u, 76u);
+    wr32(p + 24u, 4u);
+    for (unsigned i = 0u; i < 4u; ++i) {
+        size_t off = 28u + 12u * i;
+        wr32(p + off, item_alias);
+        p[off + 10u] = i == 3u ? IOS27_MACH_COPY_SEND :
+                                 IOS27_MACH_MOVE_SEND;
+        p[off + 11u] = IOS27_MACH_PORT_DESCRIPTOR;
+    }
+    /* Four descriptors request three debits; preserve the fourth copy. */
+    assert(ios27_mach_v2_send(s, 2u, p, 76u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_rights(s, 2u, item_alias, &sends,
+                                 &pending_once, &receive) == IOS27_MACH_BAD_RIGHT);
+    cap = 75u;
+    memset(out, 0x79, sizeof(out));
+    assert(ios27_mach_v2_receive(s, 1u, inbox, out, &cap, 0u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(cap == 76u && out[0] == 0x79u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, inbox, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 24u) == 4u);
+    once = rd32(out + 8u);
+    received_item = rd32(out + 28u);
+    for (unsigned i = 0u; i < 4u; ++i) {
+        size_t off = 28u + 12u * i;
+        assert(rd32(out + off) == received_item);
+        assert(out[off + 10u] == IOS27_MACH_MOVE_SEND);
+    }
+    check(s, 1u, received_item, 4u, 0u, 0u);
+    check(s, 1u, once, 0u, 1u, 0u);
+    n = message(p, once, IOS27_MACH_MOVE_SEND_ONCE, 0u, 1702u);
+    assert(ios27_mach_v2_send(s, 1u, p, n, 0u) == IOS27_MACH_OK);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, reply, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 1702u);
+    for (unsigned i = 0u; i < 4u; ++i)
+        assert(ios27_mach_v2_drop_send(s, 1u, received_item) ==
+               IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+/* Repeated MOVE_SEND transfers sharing the remote destination require
+ * aggregate urefs, and rejected attempts never leak credits or aliases. */
+static void phase17c_overlapping_debits_and_discard(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t inbox, remote, fresh, sends, once;
+    unsigned receive;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, inbox, 2u, &remote) ==
+           IOS27_MACH_OK);
+    (void)message(p, remote, IOS27_MACH_COMPLEX | IOS27_MACH_MOVE_SEND,
+                  0u, 1703u);
+    wr32(p + 4u, 64u);
+    wr32(p + 24u, 3u);
+    for (unsigned i = 0u; i < 3u; ++i) {
+        size_t off = 28u + 12u * i;
+        wr32(p + off, remote);
+        p[off + 10u] = IOS27_MACH_MOVE_SEND;
+        p[off + 11u] = IOS27_MACH_PORT_DESCRIPTOR;
+    }
+    assert(ios27_mach_v2_send(s, 2u, p, 64u, 0u) == IOS27_MACH_BAD_RIGHT);
+    check(s, 2u, remote, 1u, 0u, 0u);
+    for (unsigned i = 0u; i < 2u; ++i)
+        assert(ios27_mach_v2_make_send(s, 1u, inbox, 2u, &remote) ==
+               IOS27_MACH_OK);
+    assert(ios27_mach_v2_send(s, 2u, p, 64u, 0u) == IOS27_MACH_BAD_RIGHT);
+    check(s, 2u, remote, 3u, 0u, 0u);
+    assert(ios27_mach_v2_make_send(s, 1u, inbox, 2u, &remote) ==
+           IOS27_MACH_OK);
+    p[51u] = 99u;
+    assert(ios27_mach_v2_send(s, 2u, p, 64u, 0u) ==
+           IOS27_MACH_UNSUPPORTED);
+    p[51u] = IOS27_MACH_PORT_DESCRIPTOR;
+    assert(ios27_mach_v2_send(s, 2u, p, 64u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_rights(s, 2u, remote, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_destroy(s, 1u, inbox) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_receive(s, 1u, inbox, out, &cap, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_allocate(s, 1u, &fresh) == IOS27_MACH_OK);
+    assert(fresh != inbox);
+    ios27_mach_v2_free(s);
+}
+
+/* Pending credits in a foreign-owned object must block destruction and
+ * task retirement until the destination queue consumes or discards them. */
+static void phase17c_multitask_rollback(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t server, item, dest, alias, delivered, a, b;
+    unsigned receive;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &server) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, server, 2u, &dest) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 3u, item, 2u, &alias) ==
+           IOS27_MACH_OK);
+    (void)message(p, dest, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND,
+                  0u, 1704u);
+    wr32(p + 4u, 52u);
+    wr32(p + 24u, 2u);
+    for (unsigned i = 0u; i < 2u; ++i) {
+        size_t off = 28u + 12u * i;
+        wr32(p + off, alias);
+        p[off + 10u] = IOS27_MACH_COPY_SEND;
+        p[off + 11u] = IOS27_MACH_PORT_DESCRIPTOR;
+    }
+    assert(ios27_mach_v2_send(s, 2u, p, 52u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_rights(s, 2u, dest, &a, &b, &receive) ==
+           IOS27_MACH_OK && a == 1u);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, server, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    delivered = rd32(out + 28u);
+    check(s, 1u, delivered, 2u, 0u, 0u);
+    assert(ios27_mach_v2_destroy(s, 3u, item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase17c_complex_multi_transfer();
+    phase17c_overlapping_debits_and_discard();
+    phase17c_multitask_rollback();
     local_names_and_reply();
     descriptor_and_collision();
     atomic_full_queue_and_validation();
@@ -770,6 +923,6 @@ int main(void) {
     host_alias_rejection_preserves_queued_message();
     forward_send_once_three_tasks();
     once_double_debit_is_atomic();
-    puts("phase 16c mach send-once forwarding/atomicity tests passed");
+    puts("phase 17c mach multi-descriptor atomicity tests passed");
     return 0;
 }
