@@ -1,17 +1,56 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "b83af49cfca476f19c80b026b7b4f55ea12e76b7",
+  "main_source_sha": "c7166b2d754b8315907c0604265782f44f776e09",
   "method": "diff-based provisional activity, no automatic completion promotion",
   "candidates_checked": 2,
-  "candidate_count": 1,
+  "candidate_count": 2,
   "candidates": [
+    {
+      "branch": "phase20c-native-objc-ownership",
+      "sha": "31782fb7ddcc0d4180ac3a453bcf93810abb0bd2",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "pr_number": 67,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 938,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20c_alloc",
+            "ios27_objc20c_autorelease",
+            "ios27_objc20c_create",
+            "ios27_objc20c_destroy",
+            "ios27_objc20c_get_stats",
+            "ios27_objc20c_pool_pop",
+            "ios27_objc20c_pool_push",
+            "ios27_objc20c_release",
+            "ios27_objc20c_retain",
+            "ios27_objc20c_retain_count",
+            "ios27_objc20c_strong_store",
+            "ios27_objc20c_validate"
+          ],
+          "example_paths": [
+            "include/ios27/objc20c_lifetime.h",
+            "src/objc20c_lifetime.c",
+            "tests/phase20c-compiled-host.c",
+            "tests/phase20c-compiled.m"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase20e-libsystem-userspace",
       "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "pr_number": 62,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -19,8 +58,8 @@
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 0,
-          "additions": 360,
+          "fixture_files": 3,
+          "additions": 558,
           "deletions": 0,
           "symbols_preview": [
             "ios27_20e_advance_time",
@@ -38,20 +77,9 @@
           ],
           "example_paths": [
             "include/ios27/libsystem20e_services.h",
-            "src/libsystem20e_services.c"
-          ]
-        },
-        {
-          "group_id": "unclassified",
-          "source_files": 0,
-          "fixture_files": 3,
-          "additions": 198,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
+            "src/libsystem20e_services.c",
             "tests/phase20e-darwin-fixture.c",
-            "tests/phase20e-standalone.c",
-            "tools/phase20e-standalone.py"
+            "tests/phase20e-standalone.c"
           ]
         }
       ]
@@ -63,19 +91,19 @@
         "branch": "phase20e-libsystem-userspace",
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
         "source_files": 2,
-        "fixture_files": 0,
-        "ci": "running"
+        "fixture_files": 3,
+        "ci": "passing_checks"
       }
     ],
-    "unclassified": [
+    "objc-host-model": [
       {
-        "branch": "phase20e-libsystem-userspace",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-        "source_files": 0,
-        "fixture_files": 3,
+        "branch": "phase20c-native-objc-ownership",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+        "source_files": 2,
+        "fixture_files": 4,
         "ci": "running"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:21:44Z"
+  "observed_at": "2026-10-28T19:22:16Z"
 }

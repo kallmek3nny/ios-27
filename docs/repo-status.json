@@ -2,12 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "b83af49cfca476f19c80b026b7b4f55ea12e76b7",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/b83af49cfca476f19c80b026b7b4f55ea12e76b7",
-    "committed_at": "2026-10-28T19:20:59Z"
+    "sha": "c7166b2d754b8315907c0604265782f44f776e09",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/c7166b2d754b8315907c0604265782f44f776e09",
+    "committed_at": "2026-10-28T19:22:02Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
+    {
+      "number": 67,
+      "branch": "phase20c-native-objc-ownership",
+      "sha": "31782fb7ddcc0d4180ac3a453bcf93810abb0bd2",
+      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "updated_at": "2026-10-28T19:22:08Z",
+      "status": "unmerged: not counted"
+    },
     {
       "number": 62,
       "branch": "phase20e-libsystem-userspace",
@@ -16,19 +25,17 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "updated_at": "2026-10-28T19:21:24Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 66,
-      "branch": "fix/assign-agent-test-fixtures-by-source",
-      "sha": "63818f8893f292b70487ba83742be14de305319b",
-      "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/66",
-      "updated_at": "2026-10-28T19:20:58Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 66,
+      "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/66",
+      "head_sha": "63818f8893f292b70487ba83742be14de305319b",
+      "merged_at": "2026-10-28T19:22:03Z"
+    },
     {
       "number": 63,
       "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
@@ -77,13 +84,6 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/58",
       "head_sha": "6167c8a3fa848b39e2aa36cb84a5f3bc60446594",
       "merged_at": "2026-10-28T18:49:37Z"
-    },
-    {
-      "number": 57,
-      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
-      "head_sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
-      "merged_at": "2026-10-28T18:10:37Z"
     }
   ],
   "scan_limits": {
@@ -92,5 +92,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:21:42Z"
+  "observed_at": "2026-10-28T19:22:14Z"
 }
