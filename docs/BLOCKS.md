@@ -58,6 +58,16 @@ the purple dashed outlines identify components with new source or test changes o
 [Live branch diff inventory and CI evidence](BRANCHES.md) · 0 active candidate(s) with recognized code changes.
 
 
+## recently merged source changes awaiting audit
+
+blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
+
+latest scanned merged PRs: **5** · [source diffs](BRANCHES.md).
+
+- **libsystem_pthread**: 1 recently merged code PR(s), compatibility review pending
+- **ObjC host prototype (not Apple libobjc)**: 3 recently merged code PR(s), compatibility review pending
+- **libSystem guest model (not dylib)**: 1 recently merged code PR(s), compatibility review pending
+
 ## realistic ceilings for every tracked area
 
 [Why these ceilings are not numerical guarantees](CEILINGS.md).

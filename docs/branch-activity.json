@@ -2,10 +2,251 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "760954f96010288b674d64686473a2f572a35b39",
-  "method": "diff-based provisional activity, no automatic completion promotion",
+  "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
   "candidates_checked": 1,
   "candidate_count": 0,
   "candidates": [],
   "groups": {},
-  "observed_at": "2026-10-28T19:32:24Z"
+  "observed_at": "2026-10-28T19:32:24Z",
+  "recent_merged_count": 5,
+  "recent_merged": [
+    {
+      "branch": "merged-pr-67",
+      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "pr_number": 67,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 938,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20c_alloc",
+            "ios27_objc20c_autorelease",
+            "ios27_objc20c_create",
+            "ios27_objc20c_destroy",
+            "ios27_objc20c_get_stats",
+            "ios27_objc20c_pool_pop",
+            "ios27_objc20c_pool_push",
+            "ios27_objc20c_release",
+            "ios27_objc20c_retain",
+            "ios27_objc20c_retain_count",
+            "ios27_objc20c_strong_store",
+            "ios27_objc20c_validate"
+          ],
+          "example_paths": [
+            "include/ios27/objc20c_lifetime.h",
+            "src/objc20c_lifetime.c",
+            "tests/phase20c-compiled-host.c",
+            "tests/phase20c-compiled.m"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:24:38Z"
+    },
+    {
+      "branch": "merged-pr-62",
+      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "pr_number": 62,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 558,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20e_advance_time",
+            "ios27_20e_calloc",
+            "ios27_20e_close",
+            "ios27_20e_free",
+            "ios27_20e_getenv",
+            "ios27_20e_gettimeofday",
+            "ios27_20e_guest_ptr",
+            "ios27_20e_init",
+            "ios27_20e_lseek",
+            "ios27_20e_malloc",
+            "ios27_20e_mmap",
+            "ios27_20e_mprotect"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h",
+            "src/libsystem20e_services.c",
+            "tests/phase20e-darwin-fixture.c",
+            "tests/phase20e-standalone.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:22:22Z"
+    },
+    {
+      "branch": "merged-pr-63",
+      "sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "pr_number": 63,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 596,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20b_alloc",
+            "ios27_objc20b_bind",
+            "ios27_objc20b_create",
+            "ios27_objc20b_destroy",
+            "ios27_objc20b_register",
+            "ios27_objc20b_release",
+            "ios27_objc20b_replace",
+            "ios27_objc20b_resolve",
+            "ios27_objc20b_resolve_global",
+            "ios27_objc20b_resolve_super_global",
+            "ios27_objc20b_selector",
+            "ios27_objc20b_send_words"
+          ],
+          "example_paths": [
+            "include/ios27/objc20b_dispatch.h",
+            "src/objc20b_dispatch.c",
+            "tests/phase20b-clang.m",
+            "tests/phase20b-dispatch.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:21:00Z"
+    },
+    {
+      "branch": "merged-pr-64",
+      "sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "pr_number": 64,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 983,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20d_cancel_point",
+            "ios27_20d_cancel_request",
+            "ios27_20d_cond_signal",
+            "ios27_20d_cond_wait",
+            "ios27_20d_create",
+            "ios27_20d_destroy",
+            "ios27_20d_getspecific",
+            "ios27_20d_key_create",
+            "ios27_20d_key_delete",
+            "ios27_20d_mutex_lock",
+            "ios27_20d_mutex_trylock",
+            "ios27_20d_mutex_unlock"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20d_threads.h",
+            "src/libsystem20d_threads.c",
+            "tests/phase20d-arm64-abi.c",
+            "tests/phase20d-edge.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:20:45Z"
+    },
+    {
+      "branch": "merged-pr-65",
+      "sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "pr_number": 65,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 3,
+          "fixture_files": 5,
+          "additions": 1002,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20a_counts",
+            "ios27_objc20a_find_class",
+            "ios27_objc20a_inspect",
+            "ios27_objc20a_register",
+            "ios27_objc20a_register_image",
+            "ios27_objc20a_registry_create",
+            "ios27_objc20a_registry_destroy"
+          ],
+          "example_paths": [
+            "include/ios27/objc20a_metadata.h",
+            "src/objc20a_reader.c",
+            "src/objc20a_registry.c",
+            "tests/phase20a-category.m"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:20:17Z"
+    }
+  ],
+  "merged_groups": {
+    "libsystem-host-model": [
+      {
+        "pr_number": 62,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+        "source_files": 2,
+        "fixture_files": 3,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
+    "libsystem-pthread": [
+      {
+        "pr_number": 64,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+        "source_files": 2,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
+    "objc-host-model": [
+      {
+        "pr_number": 67,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+        "source_files": 2,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 63,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+        "source_files": 2,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 65,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+        "source_files": 3,
+        "fixture_files": 5,
+        "status": "merged source, not necessarily compatible"
+      }
+    ]
+  }
 }

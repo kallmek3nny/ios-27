@@ -17,8 +17,11 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
     '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e">component area = tracked targets · color = test evidence</text>'
   ];
   const pending = activity && activity.groups ? activity.groups : {};
+  const merged = activity && activity.merged_groups ? activity.merged_groups : {};
   const pendingCount = activity ? activity.candidate_count : 0;
-  svg.push('<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#a371f7">'+pendingCount+' source-diff candidate(s) · not verified</text>');
+  const mergedCount = activity && activity.recent_merged_count ? activity.recent_merged_count : 0;
+  svg.push('<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e">'+
+    pendingCount+' WIP · '+mergedCount+' merged source PRs (review pending)</text>');
   const rect=(x,y,w,h,color,r)=>{
     if(![x,y,w,h].every(Number.isFinite)||w<0||h<0)throw Error("invalid rectangle");
     return '<rect x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="'+(r||0)+'" fill="'+color+'"/>';
@@ -89,7 +92,10 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
       if(box.x<margin-0.01||box.y<mapY-0.01||box.x+box.w>margin+mapW+0.01||box.y+box.h>mapY+p.h+0.01)throw Error("component bounds failed");
       const g=box.group,x=box.x+2,y0=box.y+2,w=Math.max(0,box.w-4),h=Math.max(0,box.h-4);
       const wip = Array.isArray(pending[g.id]) ? pending[g.id].length : 0;
-      svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' tracked targets · '+g.ceiling+' ceiling · '+wip+' incoming branches, not counted as compatibility')+'</title>');
+      const mergedWork = Array.isArray(merged[g.id]) ? merged[g.id].length : 0;
+      svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' tracked targets · '+g.ceiling+
+        ' ceiling · '+wip+' unmerged branches · '+mergedWork+
+        ' recently merged source PRs awaiting compatibility review')+'</title>');
       svg.push(rect(x,y0,w,h,"#161b22",3));
       const labelH=(w>82&&h>43)?29:0;
       const iw=Math.max(0,w-4),ih=Math.max(0,h-4-labelH);
@@ -108,9 +114,15 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
       }
       if(index!==g.targets.length)throw Error("target count mismatch "+g.id);
       rendered+=index;
+      if(mergedWork){
+        svg.push('<rect x="'+x.toFixed(2)+'" y="'+y0.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="3" fill="none" stroke="#58a6ff" stroke-width="2"/>');
+      }
       if(wip){
-        svg.push('<rect x="'+x.toFixed(2)+'" y="'+y0.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>');
-        if(w>110)svg.push('<text x="'+(x+w-7).toFixed(2)+'" y="'+(y0+h-7).toFixed(2)+'" text-anchor="end" font-family="sans-serif" font-size="11" fill="#c9a7ff">'+wip+' WIP branch'+(wip===1?'':'es')+'</text>');
+        svg.push('<rect x="'+(x+2).toFixed(2)+'" y="'+(y0+2).toFixed(2)+'" width="'+Math.max(0,w-4).toFixed(2)+'" height="'+Math.max(0,h-4).toFixed(2)+'" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>');
+      }
+      if(w>112 && (wip||mergedWork)){
+        const tag=(wip?wip+' WIP':'')+(wip&&mergedWork?' · ':'')+(mergedWork?mergedWork+' merged':'');
+        svg.push('<text x="'+(x+w-7).toFixed(2)+'" y="'+(y0+h-7).toFixed(2)+'" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="600" fill="'+(wip?'#c9a7ff':'#79b8ff')+'">'+esc(tag)+'</text>');
       }
       if(labelH){
         const evidence=g.targets.filter(t=>t.status==="native-fixture"||t.status==="synthetic").length;
@@ -207,6 +219,14 @@ const render = function render(data,live,activity){
     const work=activity&&activity.groups?activity.groups[g.id]:null;
     if(Array.isArray(work)&&work.length)md.push("- **"+g.label+"**: "+work.length+" unmerged candidate branch(es), not counted");
   }
+  md.push("","## recently merged source changes awaiting audit","",
+    "blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. "+
+    "this can include passing CI; CI is not an Apple ABI conformance test.","",
+    "latest scanned merged PRs: **"+(activity&&activity.recent_merged_count?activity.recent_merged_count:0)+"** · [source diffs](BRANCHES.md).","");
+  for(const g of data.groups){
+    const work=activity&&activity.merged_groups?activity.merged_groups[g.id]:null;
+    if(Array.isArray(work)&&work.length)md.push("- **"+g.label+"**: "+work.length+" recently merged code PR(s), compatibility review pending");
+  }
   md.push("","## realistic ceilings for every tracked area","","[Why these ceilings are not numerical guarantees](CEILINGS.md).","");
   for(const item of totals){
     md.push("### "+item.panel.title,"");
@@ -232,7 +252,7 @@ const render = function render(data,live,activity){
     '</head><body><h1>ios-27 / block compatibility explorer</h1>',
     '<p class="lead">anyps5-style visualization for deliberately enumerated target api functions and contracts. representative target sample, not all iOS exports. native means a restricted ARM64 test fixture; synthetic means a limited parser/probe/model. neither proves a working Apple app. no exact completion ceiling can be derived for Apple framework layers.</p>',
     '<img class="map" src="blocks.svg" alt="system libraries and iOS runtime target block map">',
-    '<p class="lead">purple dashed outlines mark active unmerged source diffs, not validated API translations. <a href="BRANCHES.md">inspect agent branches and changed files</a>. expand components for details.</p>',
+    '<p class="lead">purple dashed = unmerged source work; blue = recently merged source pending compatibility audit. neither adds verified API progress. <a href="BRANCHES.md">view real changed code and PRs</a>.</p>',
     '<div class="panels">'
   ];
   for(const it of totals){
@@ -241,7 +261,12 @@ const render = function render(data,live,activity){
     for(const g of it.groups){
       const c=count(g.targets);
       const work=activity && activity.groups && Array.isArray(activity.groups[g.id]) ? activity.groups[g.id] : [];
-      html.push('<details class="group"><summary><strong>'+esc(g.label)+'</strong> <span class="tag">'+esc(g.ceiling)+' ceiling</span> <span class="stats">'+c["native-fixture"]+' native, '+c.synthetic+' synthetic, '+g.targets.length+' targets</span>'+(work.length?' <span style="color:#a371f7">'+work.length+' incoming</span>':'')+'</summary>');
+      const reviewed=activity && activity.merged_groups && Array.isArray(activity.merged_groups[g.id]) ? activity.merged_groups[g.id] : [];
+      html.push('<details class="group"><summary><strong>'+esc(g.label)+'</strong> <span class="tag">'+esc(g.ceiling)+' ceiling</span> <span class="stats">'+c["native-fixture"]+' native, '+c.synthetic+' synthetic, '+g.targets.length+' targets</span>'+(work.length?' <span style="color:#a371f7">'+work.length+' incoming</span>':'')+(reviewed.length?' <span style="color:#58a6ff">'+reviewed.length+' merged, review needed</span>':'')+'</summary>');
+      for(const entry of reviewed){
+        const n=Number(entry.pr_number);
+        if(Number.isSafeInteger(n)&&n>0)html.push('<p><a href="https://github.com/kallmek3nny/ios-27/pull/'+n+'">merged PR #'+n+'</a> · '+entry.source_files+' source files · compatibility review pending</p>');
+      }
       for(const candidate of work){
         const href=String(candidate.url);
         if(href.startsWith('https://github.com/kallmek3nny/ios-27/'))html.push('<p class="description"><a href="'+esc(href)+'">'+esc(candidate.branch)+'</a> · '+candidate.source_files+' source, '+candidate.fixture_files+' fixture files · CI: '+esc(candidate.ci)+' · not yet merged</p>');
@@ -257,9 +282,9 @@ const render = function render(data,live,activity){
   html.push('</div><p class="lead">snapshot '+esc(data.as_of)+'. no real Apple frameworks, SpringBoard, or UI demonstrated. <a href="PROGRESS.md">research milestone progress</a>.</p></body></html>');
   const branches=[
     "# ios-27 | live agent branch source diffs","",
-    "![proportional API blocks with purple WIP markers](blocks.svg)","",
-    "**purple outlines = changed source or test files on an unmerged branch.** "+
-    "these are *provisional change signals*, not implementations that passed an Apple ABI conformance test. "+
+    "![proportional compatibility blocks with unmerged and merged-source markers](blocks.svg)","",
+    "**purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** "+
+    "neither is a verified Apple ABI function or application. "+
     "the verified green/amber counts remain strictly controlled by reviewed main catalogs.","",
     "candidate branches with mapped changes: **"+(activity?activity.candidate_count:0)+"** · "+
     "audited base: `"+(activity?activity.main_source_sha.slice(0,12):"unknown")+"`",""
@@ -279,6 +304,25 @@ const render = function render(data,live,activity){
       if(item.symbols_preview.length)branches.push("  - candidate declarations: `"+item.symbols_preview.join("`, `")+"`");
     }
     branches.push("");
+  }
+  branches.push("## recently merged agent source changes · not yet compatibility-reviewed","",
+    "recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.","",
+    "recent merged PRs with source changes: **"+(activity&&activity.recent_merged_count?activity.recent_merged_count:0)+"**","");
+  if(activity && Array.isArray(activity.recent_merged)){
+    for(const merged of activity.recent_merged){
+      const n=Number(merged.pr_number);
+      if(!Number.isSafeInteger(n)||n<=0)continue;
+      branches.push("### [merged PR #"+n+"](https://github.com/kallmek3nny/ios-27/pull/"+n+")","",
+        "merged: "+String(merged.merged_at||"unknown")+" · source changes awaiting function-level audit.","");
+      for(const component of merged.groups){
+        const g=data.groups.find(x=>x.id===component.group_id);
+        branches.push("- **"+(g?g.label:component.group_id)+"**: "+component.source_files+
+          " source files, "+component.fixture_files+" fixtures, +"+component.additions+"/-"+component.deletions+" lines");
+        if(component.symbols_preview.length)branches.push("  - added declarations: `"+
+          component.symbols_preview.join("`, `")+"`");
+      }
+      branches.push("");
+    }
   }
   branches.push("## verification policy","",
     "changed paths and added declarations are parsed from GitHub PR file patches or main-vs-branch diffs, not commit messages. "+
@@ -305,7 +349,9 @@ const live=fs.existsSync(liveFile)?JSON.parse(fs.readFileSync(liveFile,"utf8")):
 if(live&&(live.schema!==1||!live.main_source||!/^[0-9a-f]{40}$/.test(live.main_source.sha)||!Array.isArray(live.open_pull_requests)))throw Error("invalid repo provenance");
 const activityPath=path.join(root,"docs/branch-activity.json");
 const activity=JSON.parse(fs.readFileSync(activityPath,"utf8"));
-if(activity.schema!==1||!Array.isArray(activity.candidates)||!activity.groups||typeof activity.candidate_count!=="number"||!/^[a-f0-9]{40}$/.test(activity.main_source_sha))throw Error("invalid candidate branch snapshot");
+if(activity.schema!==1||!Array.isArray(activity.candidates)||!activity.groups||
+  typeof activity.candidate_count!=="number"||!/^[a-f0-9]{40}$/.test(activity.main_source_sha)||
+  (activity.recent_merged!==undefined&&(!Array.isArray(activity.recent_merged)||!activity.merged_groups)))throw Error("invalid branch activity snapshot");
 const result=render(data,live,activity);
 const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md],["docs/BRANCHES.md",result.branches]];
 if(process.argv.includes("--check")){const stale=files.filter(([name,content])=>{const file=path.join(root,name);return !fs.existsSync(file)||fs.readFileSync(file,"utf8")!==content;}).map(([name])=>name);if(stale.length){process.stderr.write("stale block outputs: "+stale.join(", ")+"\n");process.exit(1);}}

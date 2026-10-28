@@ -226,10 +226,43 @@ def audit(repo, provenance, get, groups):
                     {"branch": cand["branch"], "url": cand["url"],
                      "source_files": entry["source_files"],
                      "fixture_files": entry["fixture_files"], "ci": result["ci"]})
+    # Source changes do not vanish from the dashboard at merge time. Keep a
+    # separate ledger of RECENTLY MERGED code that still needs a compatibility
+    # audit. This never turns green/amber API tiles on its own.
+    merged = []
+    merged_groups = defaultdict(list)
+    for item in provenance.get("recent_merged_pull_requests", [])[:12]:
+        number = int(item["number"])
+        merge_sha = item.get("head_sha", "")
+        if number < 1 or not SHA.fullmatch(merge_sha):
+            raise ValueError("invalid merged PR record")
+        changed = get("/pulls/" + str(number) + "/files?per_page=100")
+        if not isinstance(changed, list):
+            raise ValueError("invalid merged PR file diff")
+        merged_cand = {"branch": "merged-pr-" + str(number), "sha": merge_sha,
+                       "url": item["url"], "number": number}
+        summary = summarize(merged_cand, changed, "merged_not_compat_verified",
+                            set(groups) | {"unclassified"})
+        # Source files, not documentation, CI config or test-only PRs,
+        # make a subsystem eligible for a recently-merged activity marker.
+        summary["groups"] = [g for g in summary["groups"] if g["source_files"]]
+        if not summary["groups"]:
+            continue
+        summary["status"] = "merged source; compatibility review pending"
+        summary["merged_at"] = item.get("merged_at", "")
+        merged.append(summary)
+        for g in summary["groups"]:
+            merged_groups[g["group_id"]].append(
+                {"pr_number": number, "url": item["url"],
+                 "source_files": g["source_files"],
+                 "fixture_files": g["fixture_files"],
+                 "status": "merged source, not necessarily compatible"})
     return {"schema": 1, "repository": repo, "main_source_sha": sha,
-            "method": "diff-based provisional activity, no automatic completion promotion",
+            "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
             "candidates_checked": len(candidates), "candidate_count": len(mapped),
-            "candidates": mapped, "groups": dict(sorted(by_group.items()))}
+            "candidates": mapped, "groups": dict(sorted(by_group.items())),
+            "recent_merged_count": len(merged), "recent_merged": merged,
+            "merged_groups": dict(sorted(merged_groups.items()))}
 
 
 def same(previous, current):
@@ -292,6 +325,16 @@ def self_test():
     assert r["candidates"][0]["groups"][0]["symbols_preview"] == ["ios27_objc_create"]
     assert r["candidates"][0]["ci"] == "passing_checks"
     assert len(r["groups"]["objc-host-model"]) == 1
+    merged_provenance = {"main_source": {"sha": "a" * 40},
+                         "recent_merged_pull_requests": [
+                             {"number": 4, "head_sha": "c" * 40,
+                              "url": "https://github.com/example/repo/pull/4",
+                              "merged_at": "2026-10-28T19:00:00Z"}]}
+    merged = audit("example/repo", merged_provenance, fake, ["objc-host-model"])
+    assert merged["candidate_count"] == 0 and merged["recent_merged_count"] == 1
+    assert merged["merged_groups"]["objc-host-model"][0]["pr_number"] == 4
+    assert merged["recent_merged"][0]["status"] == "merged source; compatibility review pending"
+
     assert same(dict(r, observed_at="previous"), r)
     assert audit("example/repo", {"main_source": {"sha": "a" * 40}}, fake, ["objc-host-model"])["candidate_count"] == 0
     print("branch diff parser: fixture tests passed")
