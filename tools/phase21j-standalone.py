@@ -21,7 +21,7 @@ INTEGRATION = (
 TEST_NAMES = (
     "diagnostics", "rules", "rule-races", "export", "identities", "boundaries",
     "schedule", "schedule-races", "replay", "handoff",
-    "timed-handoff", "broadcast", "lockorder", "modelcheck", "wait-model",
+    "timed-handoff", "timeout-races", "broadcast", "lockorder", "modelcheck", "wait-model",
     "deadlock-integration", "large-cycle", "integration",
     "trace-cli",
 )
@@ -94,7 +94,7 @@ def main():
                         ROOT / "src/libsystem21c_sync.c",
                         ROOT / "src/libsystem21j_schedule.c",
                     ])
-                if test == "broadcast":
+                if test in ("broadcast", "timeout-races"):
                     sources.append(ROOT / "src/libsystem21c_sync.c")
                 if test == "trace-cli":
                     sources.append(ROOT / "src/libsystem21j_schedule.c")
