@@ -6,6 +6,9 @@ import os
 import platform
 import runpy
 
+# The negative fixture suite needs a real expected head to reject another
+# syntactically valid SHA, even when launched outside GitHub Actions.
+os.environ.setdefault("PHASE21J_HEAD_SHA", "f" * 40)
 ROOT = Path(__file__).resolve().parents[1]
 module = runpy.run_path(str(ROOT / "tools/phase21j-verify-evidence.py"),
                         run_name="phase21j_embedded_tests")
@@ -74,6 +77,12 @@ def test_mode(mode):
     wrong_sha = deepcopy(good)
     wrong_sha["head_sha"] = "not-a-head-sha"
     corruptions.append(("unverified revision", wrong_sha))
+    wrong_but_valid_sha = deepcopy(good)
+    wrong_but_valid_sha["head_sha"] = (
+        "e" * 40 if good["head_sha"] != "e" * 40 else "d" * 40
+    )
+    corruptions.append(("valid-format but mismatched frozen SHA",
+                        wrong_but_valid_sha))
     negative_elapsed = deepcopy(good)
     negative_elapsed["tests"][0]["elapsed_s"] = -3.0
     corruptions.append(("negative duration", negative_elapsed))
