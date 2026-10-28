@@ -35,7 +35,7 @@ def main():
             for source in ("phase21i-native.c", "phase21i-recycle.c",
                            "phase21i-arm64-args.c", "phase21i-fuzz.c",
                            "phase21i-attrs.c", "phase21i-capacity.c",
-                           "phase21i-access.c"):
+                           "phase21i-access.c", "phase21i-destroy-races.c"):
                 exe = dest / (source + optimization)
                 run([cc, *flags, optimization,
                      str(ROOT / "src/libsystem21c_sync.c"),
