@@ -338,6 +338,38 @@ static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
     return 0;
 }
 
+/* A non-code literal section can share an RX __TEXT page with __text.
+ * Do not allow LC_MAIN to start in a string, padding, or const data merely
+ * because the containing segment is RX. Sectionless synthetic fixtures are
+ * retained for backwards-compatible layout tests, never for trusted loading.
+ */
+static int main_is_code_section(const uint8_t *data, uint64_t entry) {
+    size_t cursor = 32u;
+    unsigned has_sections = 0u, found = 0u;
+    for (uint32_t i = 0u; i < u32(data + 16u); ++i) {
+        const uint8_t *p = data + cursor;
+        uint32_t length = u32(p + 4u);
+        if (u32(p) == LC_SEGMENT_64 && (u32(p + 60u) & 4u)) {
+            uint32_t sections = u32(p + 64u);
+            if (sections != 0u)
+                has_sections = 1u;
+            for (uint32_t j = 0u; j < sections; ++j) {
+                const uint8_t *sec = p + 72u + (size_t)j * 80u;
+                uint64_t addr = u64(sec + 32u), bytes = u64(sec + 40u);
+                uint32_t flags = u32(sec + 64u);
+                if (memcmp(sec, "__text\0", 7u) == 0 &&
+                    (flags & UINT32_C(0x80000000)) != 0u &&
+                    (flags & 0xffu) == 0u &&
+                    entry >= addr && bytes >= 4u &&
+                    entry - addr <= bytes - 4u)
+                    ++found;
+            }
+        }
+        cursor += length;
+    }
+    return !has_sections || found == 1u;
+}
+
 /*
  * Preflight a freestanding executable against the *actual mapping granule*.
  * The same check runs on x86_64, without ever making guest pages executable.
@@ -465,6 +497,8 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                 return bad(error, error_size, "ambiguous LC_MAIN entry");
         }
     }
+    if (!main_is_code_section(data, entry))
+        return bad(error, error_size, "LC_MAIN is outside a code section");
     if (!entry_found || low == UINT64_MAX || high <= low ||
         low < pagezero_end ||
         high - low > (256ull * 1024ull * 1024ull) ||
