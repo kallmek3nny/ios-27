@@ -156,6 +156,27 @@ int ios27_21j_record(ios27_21j_diagnostics *d, uint32_t kind,
     (void)pthread_mutex_unlock(&d->mutex);
     return 0;
 }
+int ios27_21j_note_contention(ios27_21j_diagnostics *d,
+                              uint32_t actor, uint64_t duration_ns) {
+    size_t bucket;
+    if (!d) return EINVAL;
+    if (duration_ns < 1000u) bucket = 0;
+    else if (duration_ns < 10000u) bucket = 1;
+    else if (duration_ns < 100000u) bucket = 2;
+    else if (duration_ns < 1000000u) bucket = 3;
+    else bucket = 4;
+    (void)pthread_mutex_lock(&d->mutex);
+    if (UINT64_MAX - d->counters.contention_ns_total < duration_ns)
+        d->counters.contention_ns_total = UINT64_MAX;
+    else d->counters.contention_ns_total += duration_ns;
+    if (duration_ns > d->counters.contention_ns_max)
+        d->counters.contention_ns_max = duration_ns;
+    ++d->counters.contention_ns_buckets[bucket];
+    append(d, IOS27_21J_CONTENTION, actor, 0,
+           (uint32_t)(duration_ns > UINT32_MAX ? UINT32_MAX : duration_ns));
+    (void)pthread_mutex_unlock(&d->mutex);
+    return 0;
+}
 int ios27_21j_snapshot(ios27_21j_diagnostics *d,
                        ios27_21j_snapshot_data *out) {
     if (!d || !out) return EINVAL;
