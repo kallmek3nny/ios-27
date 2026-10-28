@@ -4,7 +4,21 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **7** · audited base: `dd39b3167594`
+candidate branches with mapped changes: **6** · audited base: `dd39b3167594`
+
+### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
+
+head: `e550b043ddba` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +932/-0 lines
+  - candidate declarations: `ios27_21f_mutex_create`, `ios27_21f_mutex_destroy`, `ios27_21f_mutex_info`, `ios27_21f_mutex_lock`, `ios27_21f_mutex_trylock`, `ios27_21f_mutex_unlock`, `ios27_21f_runtime_create`, `ios27_21f_runtime_destroy`, `ios27_21f_runtime_stats`
+
+### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
+
+head: `ea6dffd970b3` · ci: **passing_checks** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +774/-0 lines
+  - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_snapshot`
 
 ### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
 
@@ -12,20 +26,6 @@ head: `c0e965907aa7` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +684/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_lookup`, `ios27_21i_verify`
-
-### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
-
-head: `3d65b8502016` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +904/-0 lines
-  - candidate declarations: `ios27_21f_mutex_create`, `ios27_21f_mutex_destroy`, `ios27_21f_mutex_info`, `ios27_21f_mutex_lock`, `ios27_21f_mutex_trylock`, `ios27_21f_mutex_unlock`, `ios27_21f_runtime_create`, `ios27_21f_runtime_destroy`, `ios27_21f_runtime_stats`
-
-### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
-
-head: `42ba575a0935` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +765/-0 lines
-  - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_snapshot`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -48,13 +48,6 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 1 source files, 4 test/fixture files, +282/-11 lines
 - **libsystem_pthread**: 0 source files, 1 test/fixture files, +76/-0 lines
-
-### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics)
-
-head: `e654f346ed36` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +766/-0 lines
-  - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_snapshot`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

@@ -9,30 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 78,
+      "branch": "phase21f-fifo-mutex-20261028",
+      "sha": "e550b043ddba5c3f82a7ddc773dc6c6556f0ff92",
+      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
+      "updated_at": "2026-10-28T21:18:09Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "ea6dffd970b3e4fedce22d98c6bfa50892c0f18d",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:17:48Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 80,
       "branch": "agent/phase21i-darwin-pthread-abi",
       "sha": "c0e965907aa71ca843144bd7cc1f3285f7611481",
       "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:16:35Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 78,
-      "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "3d65b8502016eea0ba0a0edb38e18b163730991c",
-      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
-      "updated_at": "2026-10-28T21:16:18Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "42ba575a09350d7eb4390f0c8cc8acf04c9c047f",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:16:16Z",
       "status": "unmerged: not counted"
     },
     {
@@ -63,17 +63,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "e654f346ed364dbe424b098e9e4920047c17e5be",
-      "ahead_by": 14,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:17:39Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 81,
@@ -134,9 +124,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 36,
+    "branches_scanned": 35,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:17:44Z"
+  "observed_at": "2026-10-28T21:18:28Z"
 }
