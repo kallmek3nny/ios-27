@@ -334,6 +334,63 @@ const render = function render(data,live,activity){
           branches:branches.join("\n")+"\n",
           counts:totals.map(x=>({id:x.panel.id,total:x.total,...x.c}))};
 };
+function engineeringDashboard(data, live, activity) {
+  const escape = x => String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  const width=680, height=461;
+  const verified=data.groups.flatMap(g=>g.targets).filter(t=>t.status==="native-fixture"||t.status==="synthetic").length;
+  const total=data.groups.reduce((n,g)=>n+g.targets.length,0);
+  const merged=Array.isArray(activity.recent_merged)?activity.recent_merged:[];
+  const incoming=Array.isArray(activity.candidates)?activity.candidates:[];
+  const verifiedCount=verified+"/"+total;
+  const proof="sample fixture/probe targets";
+  const mergedPRs=Array.isArray(live?.recent_merged_pull_requests)?live.recent_merged_pull_requests:[];
+  const prTitles=new Map(mergedPRs.map(p=>[Number(p.number),String(p.title)]));
+  const groupName=new Map(data.groups.map(g=>[g.id,g.label]));
+  const trim=(s,n)=>s.length>n?s.slice(0,n-1)+"…":s;
+  const text=(x,y,size,value,color="#c9d1d9",weight=400,other="")=>
+    '<text x="'+x+'" y="'+y+'" fill="'+color+'" font-family="sans-serif" font-size="'+size+'" font-weight="'+weight+'" '+other+'>'+escape(value)+'</text>';
+  const rect=(x,y,w,h,color,r=4,other="")=>
+    '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+color+'" '+other+'/>';
+  const svg=[
+    '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="recent merged and active Darwin engineering work, separate from verified API coverage">',
+    '<style>@media(prefers-color-scheme:light){.surface{fill:#f6f8fa;stroke:#d1d9e0}.text{fill:#1f2328}.muted{fill:#59636e}.bar{fill:#d1d9e0}}</style>',
+    text(12,29,24,"engineering activity","#e6edf3",650,'class="text"'),
+    text(12,49,12,"live code changes · not a percentage of full iOS compatibility","#8b949e",400,'class="muted"')
+  ];
+  const stats=[
+    {value:merged.length,label:"recent merged source PRs",color:"#58a6ff"},
+    {value:incoming.length,label:"active branch candidates",color:"#a371f7"},
+    {value:verifiedCount,label:proof,color:"#3fb950"}
+  ];
+  for(let i=0;i<3;i++){
+    const x=12+i*222, info=stats[i];
+    svg.push(rect(x,66,212,86,"#161b22",8,'stroke="#30363d" class="surface"'),
+      rect(x+12,79,4,24,info.color,2),
+      text(x+24,105,26,info.value,info.color,700),
+      text(x+12,132,11.5,info.label,"#8b949e",400,'class="muted"'));
+  }
+  svg.push(text(12,184,17,"recently merged engineering","#e6edf3",600,'class="text"'),
+    text(668,183,11,"code present on main · awaiting API audit","#8b949e",400,'text-anchor="end" class="muted"'));
+  svg.push(rect(12,194,656,245,"#161b22",8,'stroke="#30363d" class="surface"'));
+  const rows=merged.slice(0,6);
+  if(!rows.length)svg.push(text(26,236,13,"no recently merged source changes in the current scan","#8b949e",400,'class="muted"'));
+  for(let i=0;i<rows.length;i++){
+    const item=rows[i],y=226+36*i;
+    if(i)svg.push('<line x1="25" y1="'+(y-17)+'" x2="655" y2="'+(y-17)+'" stroke="#30363d" stroke-width="1"/>');
+    const n=Number(item.pr_number);
+    const full=prTitles.get(n)||("source changes in PR #"+n);
+    const label=trim(full,56);
+    const groups=[...new Set((item.groups||[]).map(g=>groupName.get(g.group_id)||g.group_id))];
+    const details=groups.length?trim(groups.join(", "),32):"unclassified source";
+    svg.push(rect(26,y-16,7,7,"#58a6ff",2),
+      text(45,y-5,13,label,"#e6edf3",550,'class="text"'),
+      text(654,y-5,11,"#"+n,"#58a6ff",600,'text-anchor="end"'),
+      text(45,y+12,10.5,details+" · review pending","#8b949e",400,'class="muted"'));
+  }
+  svg.push(text(12,455,11,"blue = merged source · purple = unmerged work · green/yellow = audited sample evidence","#8b949e",400,'class="muted"'),
+    '</svg>');
+  return svg.join("\n")+"\n";
+}
 const root=path.resolve(__dirname,"..");
 const raw=fs.readFileSync(path.join(root,"docs/compat-targets.json"),"utf8");
 const data=JSON.parse(raw);
@@ -353,7 +410,8 @@ if(activity.schema!==1||!Array.isArray(activity.candidates)||!activity.groups||
   typeof activity.candidate_count!=="number"||!/^[a-f0-9]{40}$/.test(activity.main_source_sha)||
   (activity.recent_merged!==undefined&&(!Array.isArray(activity.recent_merged)||!activity.merged_groups)))throw Error("invalid branch activity snapshot");
 const result=render(data,live,activity);
-const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md],["docs/BRANCHES.md",result.branches]];
+const engineering=engineeringDashboard(data,live,activity);
+const files=[["docs/blocks.svg",result.svg],["docs/blocks.html",result.html],["docs/BLOCKS.md",result.md],["docs/BRANCHES.md",result.branches],["docs/engineering.svg",engineering]];
 if(process.argv.includes("--check")){const stale=files.filter(([name,content])=>{const file=path.join(root,name);return !fs.existsSync(file)||fs.readFileSync(file,"utf8")!==content;}).map(([name])=>name);if(stale.length){process.stderr.write("stale block outputs: "+stale.join(", ")+"\n");process.exit(1);}}
 else {for(const [name,content] of files)fs.writeFileSync(path.join(root,name),content,"utf8");}
 process.stdout.write("compat blocks verified: "+result.counts.map(c=>c.id+" "+c.total).join(", ")+"\n");
