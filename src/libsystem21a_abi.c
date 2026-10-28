@@ -28,9 +28,9 @@ typedef struct {
     } native;
 } object_slot;
 struct ios27_21a_runtime {
-    unsigned char *arena;
-    size_t size;
-    uint64_t base, next_token;
+    ios27_21a_region regions[IOS27_21A_MAX_REGIONS];
+    size_t region_count;
+    uint64_t next_token;
     pthread_mutex_t guard;
     object_slot objects[IOS27_21A_MAX_OBJECTS];
 };
@@ -81,42 +81,86 @@ static size_t object_size(unsigned kind) {
 static uint64_t bridge_sig(unsigned kind) {
     return UINT64_C(0x213a0000) + (uint64_t)kind;
 }
+static int guest_view_access(ios27_21a_runtime *rt, uint64_t address,
+                             size_t span, size_t alignment, unsigned access,
+                             unsigned char **out) {
+    size_t i;
+    if (!rt || !out || !address || !alignment ||
+        (alignment & (alignment - 1u)) ||
+        !access || (access & ~(IOS27_21A_READ | IOS27_21A_WRITE))) return EINVAL;
+    *out = NULL;
+    if (address & (uint64_t)(alignment - 1u)) return EFAULT;
+    for (i = 0; i < rt->region_count; ++i) {
+        const ios27_21a_region *r = &rt->regions[i];
+        uint64_t offset;
+        if (address < r->guest_base) continue;
+        offset = address - r->guest_base;
+        if (offset > (uint64_t)r->size ||
+            span > r->size - (size_t)offset) continue;
+        if ((r->permissions & access) != access) return EFAULT;
+        *out = r->host + (size_t)offset;
+        return 0;
+    }
+    return EFAULT;
+}
 static int guest_view(ios27_21a_runtime *rt, uint64_t address, size_t span,
                       size_t alignment, unsigned char **out) {
-    uint64_t offset;
-    if (!rt || !out || !address || !alignment ||
-        (alignment & (alignment - 1u))) return EINVAL;
-    *out = NULL;
-    if ((address & (uint64_t)(alignment - 1u)) || address < rt->base)
-        return EFAULT;
-    offset = address - rt->base;
-    if (offset > (uint64_t)rt->size ||
-        span > rt->size - (size_t)offset) return EFAULT;
-    *out = rt->arena + (size_t)offset;
-    return 0;
+    return guest_view_access(rt, address, span, alignment,
+                             IOS27_21A_READ | IOS27_21A_WRITE, out);
+}
+int ios27_21a_validate_access(ios27_21a_runtime *rt, uint64_t address,
+                              size_t span, size_t alignment, unsigned access) {
+    unsigned char *p = NULL;
+    return guest_view_access(rt, address, span, alignment, access, &p);
 }
 int ios27_21a_validate(ios27_21a_runtime *rt, uint64_t address,
                        size_t span, size_t alignment) {
-    unsigned char *p = NULL;
-    return guest_view(rt, address, span, alignment, &p);
+    return ios27_21a_validate_access(rt, address, span, alignment,
+                                     IOS27_21A_READ | IOS27_21A_WRITE);
 }
-int ios27_21a_create(ios27_21a_runtime **out, unsigned char *arena,
-                     size_t arena_size, uint64_t guest_base) {
+int ios27_21a_create_regions(ios27_21a_runtime **out,
+                             const ios27_21a_region *regions, size_t count) {
     ios27_21a_runtime *rt;
+    size_t i, j;
     int error;
-    if (!out || !arena || !guest_base || !arena_size ||
-        guest_base > UINT64_MAX - (uint64_t)arena_size) return EINVAL;
+    if (!out) return EINVAL;
     *out = NULL;
+    if (!regions || count == 0u || count > IOS27_21A_MAX_REGIONS)
+        return EINVAL;
+    for (i = 0; i < count; ++i) {
+        const ios27_21a_region *a = &regions[i];
+        uintptr_t ha = (uintptr_t)a->host;
+        if (!a->host || !a->size || !a->guest_base ||
+            a->guest_base > UINT64_MAX - (uint64_t)a->size ||
+            ha > UINTPTR_MAX - a->size ||
+            !(a->permissions & IOS27_21A_READ) ||
+            (a->permissions & ~(IOS27_21A_READ | IOS27_21A_WRITE)))
+            return EINVAL;
+        for (j = 0; j < i; ++j) {
+            const ios27_21a_region *b = &regions[j];
+            uintptr_t hb = (uintptr_t)b->host;
+            if ((a->guest_base < b->guest_base + (uint64_t)b->size &&
+                 b->guest_base < a->guest_base + (uint64_t)a->size) ||
+                (ha < hb + b->size && hb < ha + a->size))
+                return EINVAL;
+        }
+    }
     rt = calloc(1, sizeof(*rt));
     if (!rt) return ENOMEM;
-    rt->arena = arena;
-    rt->size = arena_size;
-    rt->base = guest_base;
+    memcpy(rt->regions, regions, count * sizeof(regions[0]));
+    rt->region_count = count;
     rt->next_token = 1u;
     error = pthread_mutex_init(&rt->guard, NULL);
     if (error) { free(rt); return error; }
     *out = rt;
     return 0;
+}
+int ios27_21a_create(ios27_21a_runtime **out, unsigned char *arena,
+                     size_t arena_size, uint64_t guest_base) {
+    const ios27_21a_region region = {
+        arena, arena_size, guest_base, IOS27_21A_READ | IOS27_21A_WRITE
+    };
+    return ios27_21a_create_regions(out, &region, 1u);
 }
 static object_slot *find_slot(ios27_21a_runtime *rt, uint64_t address) {
     size_t i;
