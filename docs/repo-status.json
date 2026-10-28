@@ -11,10 +11,19 @@
     {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "4b20015f4c7e1be5d294252a72499481bd2e6ebb",
+      "sha": "3a9339eaa5e697e0c15579fc7d95c219e6a3221d",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:55:07Z",
+      "updated_at": "2026-10-28T19:55:45Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 72,
+      "branch": "phase21e-tls-cancel-20261028",
+      "sha": "86645688a035874587739102189f9a8014a6e3e1",
+      "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/72",
+      "updated_at": "2026-10-28T19:55:44Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +33,6 @@
       "title": "phase 21c: bounded native pthread synchronization and stress coverage",
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
       "updated_at": "2026-10-28T19:55:05Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 72,
-      "branch": "phase21e-tls-cancel-20261028",
-      "sha": "396e20c32030754aa91ae82dde8103315293b9f0",
-      "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/72",
-      "updated_at": "2026-10-28T19:53:58Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -111,5 +111,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:55:29Z"
+  "observed_at": "2026-10-28T19:55:56Z"
 }

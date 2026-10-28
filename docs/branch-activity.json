@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "4b20015f4c7e1be5d294252a72499481bd2e6ebb",
+      "sha": "3a9339eaa5e697e0c15579fc7d95c219e6a3221d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 4,
-          "additions": 883,
+          "additions": 885,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_call",
@@ -38,50 +38,11 @@
       ]
     },
     {
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "6bbe94566cfac9d6dc96d15bb26eeb793687c12e",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "pr_number": 70,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 925,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21c_cond_broadcast",
-            "ios27_21c_cond_signal",
-            "ios27_21c_cond_timedwait",
-            "ios27_21c_cond_wait",
-            "ios27_21c_mutex_lock",
-            "ios27_21c_mutex_trylock",
-            "ios27_21c_mutex_unlock",
-            "ios27_21c_runtime_create",
-            "ios27_21c_runtime_destroy",
-            "ios27_21c_sync_create",
-            "ios27_21c_sync_destroy",
-            "ios27_21c_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21c_sync.h",
-            "src/libsystem21c_sync.c",
-            "tests/phase21c-cancel.c",
-            "tests/phase21c-darwin-abi.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase21e-tls-cancel-20261028",
-      "sha": "396e20c32030754aa91ae82dde8103315293b9f0",
+      "sha": "86645688a035874587739102189f9a8014a6e3e1",
       "url": "https://github.com/kallmek3nny/ios-27/pull/72",
       "pr_number": 72,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 8,
       "possibly_truncated": false,
@@ -111,6 +72,45 @@
             "src/libsystem21e_tls.c",
             "tests/phase21e-arm64-darwin.c",
             "tests/phase21e-stress.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "6bbe94566cfac9d6dc96d15bb26eeb793687c12e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "pr_number": 70,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 925,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21c_cond_broadcast",
+            "ios27_21c_cond_signal",
+            "ios27_21c_cond_timedwait",
+            "ios27_21c_cond_wait",
+            "ios27_21c_mutex_lock",
+            "ios27_21c_mutex_trylock",
+            "ios27_21c_mutex_unlock",
+            "ios27_21c_runtime_create",
+            "ios27_21c_runtime_destroy",
+            "ios27_21c_sync_create",
+            "ios27_21c_sync_destroy",
+            "ios27_21c_usage"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21c_sync.h",
+            "src/libsystem21c_sync.c",
+            "tests/phase21c-cancel.c",
+            "tests/phase21c-darwin-abi.c"
           ]
         }
       ]
@@ -164,17 +164,17 @@
         "ci": "running"
       },
       {
-        "branch": "phase21c-pthread-sync-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "running"
-      },
-      {
         "branch": "phase21e-tls-cancel-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/72",
         "source_files": 2,
         "fixture_files": 4,
+        "ci": "running"
+      },
+      {
+        "branch": "phase21c-pthread-sync-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+        "source_files": 2,
+        "fixture_files": 5,
         "ci": "passing_checks"
       },
       {
@@ -474,5 +474,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:55:38Z"
+  "observed_at": "2026-10-28T19:56:04Z"
 }
