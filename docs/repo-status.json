@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "d2d8c14e4efaaf4923ffe294b53f717ce8cb2d0f",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T20:15:04Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 73,
       "branch": "feat/phase21d-fair-rwlock-once",
       "sha": "dd0355350547a536f74100402a4b9474beacbef8",
       "title": "phase 21d: fair reader-writer lock and safe once initialization",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "updated_at": "2026-10-28T20:14:26Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 69,
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "bbf277a8e0becc86a13fd20eed7911a4205a549a",
-      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T20:14:11Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -92,5 +92,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:14:54Z"
+  "observed_at": "2026-10-28T20:15:17Z"
 }

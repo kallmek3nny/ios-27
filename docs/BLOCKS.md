@@ -49,8 +49,8 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `e84a0f2ca216`
 
-- [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 - [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
+- [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 

@@ -7,11 +7,48 @@
   "candidate_count": 2,
   "candidates": [
     {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "d2d8c14e4efaaf4923ffe294b53f717ce8cb2d0f",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "pr_number": 69,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 17,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 13,
+          "additions": 2269,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_attach_thread",
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_create_regions",
+            "ios27_21a_destroy",
+            "ios27_21a_detach_thread",
+            "ios27_21a_register_once",
+            "ios27_21a_release_once",
+            "ios27_21a_validate",
+            "ios27_21a_validate_access"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-arm64-darwin.c",
+            "tests/phase21a-boundaries.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "feat/phase21d-fair-rwlock-once",
       "sha": "dd0355350547a536f74100402a4b9474beacbef8",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "pr_number": 73,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -55,59 +92,22 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "bbf277a8e0becc86a13fd20eed7911a4205a549a",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "pr_number": 69,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 17,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 13,
-          "additions": 2259,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21a_attach_thread",
-            "ios27_21a_call",
-            "ios27_21a_create",
-            "ios27_21a_create_regions",
-            "ios27_21a_destroy",
-            "ios27_21a_detach_thread",
-            "ios27_21a_register_once",
-            "ios27_21a_release_once",
-            "ios27_21a_validate",
-            "ios27_21a_validate_access"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21a_abi.h",
-            "src/libsystem21a_abi.c",
-            "tests/phase21a-arm64-darwin.c",
-            "tests/phase21a-boundaries.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
     "libsystem-host-model": [
       {
-        "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-        "source_files": 2,
-        "fixture_files": 9,
-        "ci": "running"
-      },
-      {
         "branch": "phase21a/darwin-pthread-abi-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/69",
         "source_files": 2,
         "fixture_files": 13,
+        "ci": "running"
+      },
+      {
+        "branch": "feat/phase21d-fair-rwlock-once",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+        "source_files": 2,
+        "fixture_files": 9,
         "ci": "passing_checks"
       }
     ],
@@ -117,7 +117,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -433,5 +433,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:15:01Z"
+  "observed_at": "2026-10-28T20:15:21Z"
 }
