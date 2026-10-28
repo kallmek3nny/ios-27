@@ -47,8 +47,11 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `e84a0f2ca216`
+main source: `dd39b3167594`
 
+- [PR #77](https://github.com/kallmek3nny/ios-27/pull/77) · incoming, not counted
+- [PR #80](https://github.com/kallmek3nny/ios-27/pull/80) · incoming, not counted
+- [PR #78](https://github.com/kallmek3nny/ios-27/pull/78) · incoming, not counted
 - [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 - [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
 - [PR #76](https://github.com/kallmek3nny/ios-27/pull/76) · incoming, not counted
@@ -57,11 +60,11 @@ main source: `e84a0f2ca216`
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 3 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 8 active candidate(s) with recognized code changes.
 
 - **libsystem_pthread**: 1 unmerged candidate branch(es), not counted
 - **ObjC host prototype (not Apple libobjc)**: 1 unmerged candidate branch(es), not counted
-- **libSystem guest model (not dylib)**: 3 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 8 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
@@ -69,8 +72,7 @@ blue outlines mark merged source code that is not yet credited by a specific evi
 
 latest scanned merged PRs: **7** · [source diffs](BRANCHES.md).
 
-- **ObjC host prototype (not Apple libobjc)**: 1 recently merged code PR(s), compatibility review pending
-- **libSystem guest model (not dylib)**: 6 recently merged code PR(s), compatibility review pending
+- **libSystem guest model (not dylib)**: 7 recently merged code PR(s), compatibility review pending
 
 ## realistic ceilings for every tracked area
 

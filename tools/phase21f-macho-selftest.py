@@ -6,6 +6,7 @@ from pathlib import Path
 import struct
 import sys
 
+sys.dont_write_bytecode = True
 MODULE = Path(__file__).with_name("phase21f-macho-check.py")
 spec = importlib.util.spec_from_file_location("phase21f_macho_check", MODULE)
 if spec is None or spec.loader is None:
