@@ -141,6 +141,8 @@ static int valid_layout(image_node *node, size_t page,
             continue;
         }
         if (!s->vmsize || s->vmaddr % page || s->vmsize % page ||
+            (s->maxprot & ~7u) != 0u ||
+            (s->initprot & ~s->maxprot) != 0u ||
             (s->initprot != 1u && s->initprot != 3u &&
              s->initprot != 5u) ||
             (s->maxprot & ~7u) || (s->maxprot & 6u) == 6u ||
