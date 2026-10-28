@@ -9,6 +9,7 @@
  * ONLY in one caller-owned in-process fixture. NOT an XNU trap or sandbox.
  */
 #define IOS27_MACH_V2_NAMES 64u
+#define IOS27_MACH_V2_DESCRIPTORS 4u
 #define IOS27_MACH_MOVE_SEND_ONCE 18u
 #define IOS27_MACH_MAKE_SEND_ONCE 21u
 
@@ -40,6 +41,16 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *space, uint32_t owner,
  * This is not OS task termination or an authentication boundary. */
 int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
 
+/* Optional synthetic dead-name observation. Subscribes an existing local
+ * send/send-once alias. Destruction or task teardown queues the retired
+ * name for surviving watchers, with bounded FIFO capacity. Saturated
+ * event queues reject retirement atomically with LIMIT; polling an empty
+ * queue returns TIMEOUT without modifying the output. Not XNU notify RPC. */
+int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *space, uint32_t task,
+                                  uint32_t local_name);
+int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *space, uint32_t task,
+                                 uint32_t *local_name);
+
 /*
  * Header bits: remote disposition MOVE_SEND(17), MOVE_SEND_ONCE(18),
  * or COPY_SEND(19). MOVE_SEND consumes one local send uref only after
@@ -51,7 +62,9 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
  * in the received remote disposition bits. MOVE_SEND_ONCE transfers its
  * existing right only after successful enqueue, including when it is
  * also the destination right (which requires two send-once urefs).
- * Optionally one port descriptor carries COPY_SEND or MOVE_SEND.
+ * Up to four port descriptors carry COPY_SEND or MOVE_SEND; they may
+ * repeat the same task-local name. All source debits, receiver credits,
+ * fresh aliases, and queued grants are reserved as one transaction.
  * On receive, both are normalized to MOVE_SEND, describing the delivered
  * send right rather than the sender's transfer instruction.
  * Caller-owned receive buffers must not overlap the length result or this

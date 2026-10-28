@@ -16,13 +16,14 @@ typedef struct {
     uint16_t pending_once;
     uint8_t object; /* port index + 1, zero is an unused slot */
     uint8_t receive;
+    uint8_t watch_dead;
 } local_right;
 
 typedef struct {
     uint8_t bytes[IOS27_MACH_MSG_MAX];
     uint16_t length;
-    uint8_t descriptor_object;
-    uint8_t descriptor_move;
+    uint8_t descriptor_count;
+    uint8_t descriptor_objects[IOS27_MACH_V2_DESCRIPTORS];
     uint8_t reply_object;
 } queued_wire;
 
@@ -38,6 +39,9 @@ struct ios27_mach_v2 {
     uint32_t next_name[IOS27_MACH_TASK_MAX];
     local_right names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
     port_object ports[IOS27_MACH_PORT_MAX];
+    uint32_t dead_events[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
+    uint8_t dead_head[IOS27_MACH_TASK_MAX];
+    uint8_t dead_count[IOS27_MACH_TASK_MAX];
 };
 
 _Static_assert(sizeof(ios27_mach_header) == 24u, "Mach wire header");
@@ -198,6 +202,40 @@ int ios27_mach_v2_drop_send_once(ios27_mach_v2 *s, uint32_t task,
     prune(r);
     return IOS27_MACH_OK;
 }
+/* A bounded fixture event queue, not a kernel notification message. */
+int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t local_name) {
+    local_right *r;
+    if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
+    r = by_name(s, task, local_name);
+    if (!r || (!r->sends && !r->once) || !object_for(s, r))
+        return IOS27_MACH_BAD_RIGHT;
+    r->watch_dead = 1u;
+    return IOS27_MACH_OK;
+}
+int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t *local_name) {
+    size_t t;
+    if (!s || !valid_task(task) || !local_name ||
+        ranges_overlap(local_name, sizeof(*local_name), s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    t = TASK_INDEX(task);
+    if (!s->dead_count[t]) return IOS27_MACH_TIMEOUT;
+    *local_name = s->dead_events[t][s->dead_head[t]];
+    s->dead_events[t][s->dead_head[t]] = 0u;
+    s->dead_head[t] =
+        (uint8_t)((s->dead_head[t] + 1u) % IOS27_MACH_V2_NAMES);
+    --s->dead_count[t];
+    return IOS27_MACH_OK;
+}
+static void enqueue_dead_name(ios27_mach_v2 *s, uint32_t task,
+                              uint32_t name) {
+    size_t t = TASK_INDEX(task);
+    size_t tail = (s->dead_head[t] + s->dead_count[t]) %
+                  IOS27_MACH_V2_NAMES;
+    s->dead_events[t][tail] = name;
+    ++s->dead_count[t];
+}
 int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
                          uint32_t name, uint32_t *send, uint32_t *send_once,
                          unsigned *receive) {
@@ -219,7 +257,8 @@ static void discarded_credits(const port_object *port,
     for (size_t i = 0u; i < port->count; ++i) {
         const queued_wire *m =
             &port->queue[(port->head + i) % IOS27_MACH_QUEUE_MAX];
-        if (m->descriptor_object) ++sends[m->descriptor_object - 1u];
+        for (size_t j = 0u; j < m->descriptor_count; ++j)
+            ++sends[m->descriptor_objects[j] - 1u];
         if (m->reply_object) ++once[m->reply_object - 1u];
     }
 }
@@ -252,6 +291,9 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     discarded_credits(obj, canceled_sends, canceled_once);
     for (uint32_t task = 1u; task <= IOS27_MACH_TASK_MAX; ++task) {
         const local_right *r = by_object(s, task, index);
+        if (r && r->watch_dead &&
+            s->dead_count[TASK_INDEX(task)] == IOS27_MACH_V2_NAMES)
+            return IOS27_MACH_LIMIT;
         if (r && (r->pending_sends !=
                   (task == owner ? canceled_sends[index - 1u] : 0u) ||
                   r->pending_once !=
@@ -260,15 +302,18 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
     }
     for (size_t i = 0u; i < obj->count; ++i) {
         queued_wire *m = &obj->queue[(obj->head + i) % IOS27_MACH_QUEUE_MAX];
-        if (m->descriptor_object)
-            cancel_pending(s, owner, m->descriptor_object, 0);
+        for (size_t j = 0u; j < m->descriptor_count; ++j)
+            cancel_pending(s, owner, m->descriptor_objects[j], 0);
         if (m->reply_object)
             cancel_pending(s, owner, m->reply_object, 1);
     }
     memset(obj, 0, sizeof(*obj));
     for (uint32_t task = 1u; task <= IOS27_MACH_TASK_MAX; ++task) {
         local_right *r = by_object(s, task, index);
-        if (r) memset(r, 0, sizeof(*r));
+        if (r) {
+            if (r->watch_dead) enqueue_dead_name(s, task, r->name);
+            memset(r, 0, sizeof(*r));
+        }
     }
     return IOS27_MACH_OK;
 }
@@ -314,6 +359,18 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
                 return IOS27_MACH_BAD_RIGHT;
         }
     }
+    /* Preflight event capacity across all affected namespaces. */
+    for (uint32_t other = 1u; other <= IOS27_MACH_TASK_MAX; ++other) {
+        uint32_t needed = 0u;
+        if (other == task) continue;
+        for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+            const local_right *r = by_object(s, other, (uint8_t)(i + 1u));
+            if (owned[i] && r && r->watch_dead) ++needed;
+        }
+        if ((uint32_t)s->dead_count[TASK_INDEX(other)] + needed >
+            IOS27_MACH_V2_NAMES)
+            return IOS27_MACH_LIMIT;
+    }
     /* From here on there is no possible failure: cancel queued grants
      * to foreign ports, then revoke all rights to destroyed objects. */
     for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
@@ -322,8 +379,8 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
         for (size_t j = 0u; j < obj->count; ++j) {
             const queued_wire *m =
                 &obj->queue[(obj->head + j) % IOS27_MACH_QUEUE_MAX];
-            if (m->descriptor_object)
-                cancel_pending(s, task, m->descriptor_object, 0);
+            for (size_t k = 0u; k < m->descriptor_count; ++k)
+                cancel_pending(s, task, m->descriptor_objects[k], 0);
             if (m->reply_object)
                 cancel_pending(s, task, m->reply_object, 1);
         }
@@ -332,23 +389,33 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
     for (uint32_t owner = 1u; owner <= IOS27_MACH_TASK_MAX; ++owner) {
         for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
             local_right *r = &s->names[TASK_INDEX(owner)][i];
+            if (owner != task && r->object && owned[r->object - 1u] &&
+                r->watch_dead)
+                enqueue_dead_name(s, owner, r->name);
             if ((owner == task) ||
                 (r->object && owned[r->object - 1u]))
                 memset(r, 0, sizeof(*r));
         }
     }
+    memset(s->dead_events[TASK_INDEX(task)], 0,
+           sizeof(s->dead_events[TASK_INDEX(task)]));
+    s->dead_head[TASK_INDEX(task)] = 0u;
+    s->dead_count[TASK_INDEX(task)] = 0u;
     return IOS27_MACH_OK;
 }
+
 
 int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
                        const void *wire, size_t size, uint32_t timeout_ms) {
     const uint8_t *p = wire;
     uint32_t bits, dest_name, reply_name, remote_disposition, local_disposition;
-    local_right *dest_right, *reply_right = NULL, *descriptor_right = NULL;
-    local_right *pending_reply, *pending_descriptor;
+    local_right *dest_right, *reply_right = NULL;
+    local_right *descriptors[IOS27_MACH_V2_DESCRIPTORS] = {0};
+    uint8_t desc_objects[IOS27_MACH_V2_DESCRIPTORS] = {0};
+    uint8_t desc_moves[IOS27_MACH_V2_DESCRIPTORS] = {0};
     port_object *dest;
-    uint8_t reply_obj = 0u, reply_move = 0u, desc_obj = 0u, desc_move = 0u;
-    uint32_t receiver;
+    uint8_t reply_obj = 0u, reply_move = 0u;
+    uint32_t receiver, count = 0u;
     size_t tail;
     unsigned additional = 0u;
     (void)timeout_ms;
@@ -392,74 +459,99 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
             return IOS27_MACH_LIMIT;
     }
     if (bits & IOS27_MACH_COMPLEX) {
-        uint32_t name;
-        if (size < 40u) return IOS27_MACH_BAD_ARGUMENT;
-        if (rd32(p + 24u) != 1u || rd32(p + 32u) ||
-            rd16(p + 36u) || p[39u] != IOS27_MACH_PORT_DESCRIPTOR ||
-            (p[38u] != IOS27_MACH_COPY_SEND &&
-             p[38u] != IOS27_MACH_MOVE_SEND))
+        if (size < 28u) return IOS27_MACH_BAD_ARGUMENT;
+        count = rd32(p + 24u);
+        if (!count || count > IOS27_MACH_V2_DESCRIPTORS ||
+            size < 28u + 12u * count)
             return IOS27_MACH_UNSUPPORTED;
-        name = rd32(p + 28u);
-        descriptor_right = by_name(s, task, name);
-        if (!object_for(s, descriptor_right) || !descriptor_right->sends)
-            return IOS27_MACH_BAD_RIGHT;
-        desc_obj = descriptor_right->object;
-        desc_move = (uint8_t)(p[38u] == IOS27_MACH_MOVE_SEND);
-        if (!may_arrive(s, receiver, desc_obj, 0))
-            return IOS27_MACH_LIMIT;
+        for (uint32_t i = 0u; i < count; ++i) {
+            size_t offset = 28u + 12u * i;
+            uint8_t disposition = p[offset + 10u];
+            if (rd32(p + offset + 4u) || rd16(p + offset + 8u) ||
+                p[offset + 11u] != IOS27_MACH_PORT_DESCRIPTOR ||
+                (disposition != IOS27_MACH_COPY_SEND &&
+                 disposition != IOS27_MACH_MOVE_SEND))
+                return IOS27_MACH_UNSUPPORTED;
+            descriptors[i] = by_name(s, task, rd32(p + offset));
+            if (!object_for(s, descriptors[i]) || !descriptors[i]->sends)
+                return IOS27_MACH_BAD_RIGHT;
+            desc_objects[i] = descriptors[i]->object;
+            desc_moves[i] = (uint8_t)(disposition == IOS27_MACH_MOVE_SEND);
+        }
     }
-    /*
-     * Both the destination and its descriptor can MOVE_SEND the *same*
-     * task-local name. A single uref cannot satisfy two moves; check the
-     * combined debit before touching the queue, pending credit or sender.
-     */
-    if (desc_move && remote_disposition == IOS27_MACH_MOVE_SEND &&
-        descriptor_right == dest_right && dest_right->sends < 2u)
-        return IOS27_MACH_BAD_RIGHT;
-    /* The reply's MOVE_SEND_ONCE and the remote MOVE_SEND_ONCE can debit
-     * the same uref. Preflight both debits before reserving a grant. */
+
+    /* Every source debit is counted before mutating any rights. In
+     * particular, the destination and several descriptors may name the
+     * same send right. A single uref cannot satisfy repeated MOVE_SEND. */
+    for (uint32_t i = 0u; i < count; ++i) {
+        uint32_t needed = 0u;
+        if (!desc_moves[i]) continue;
+        for (uint32_t j = 0u; j < count; ++j)
+            if (desc_moves[j] && descriptors[j] == descriptors[i])
+                ++needed;
+        if (remote_disposition == IOS27_MACH_MOVE_SEND &&
+            dest_right == descriptors[i])
+            ++needed;
+        if (descriptors[i]->sends < needed)
+            return IOS27_MACH_BAD_RIGHT;
+    }
     if (reply_move && remote_disposition == IOS27_MACH_MOVE_SEND_ONCE &&
         reply_right == dest_right && dest_right->once < 2u)
         return IOS27_MACH_BAD_RIGHT;
     if (dest->count == IOS27_MACH_QUEUE_MAX)
         return IOS27_MACH_TIMEOUT;
-    /* Preflight capacity for up to two distinct *new* local aliases. */
+
+    /* Aggregate arrival credits for repeated references to one object.
+     * Checking each independently would overbook the right limit. */
+    for (uint32_t i = 0u; i < count; ++i) {
+        uint32_t arriving = 0u;
+        local_right *r = by_object(s, receiver, desc_objects[i]);
+        for (uint32_t j = 0u; j < count; ++j)
+            if (desc_objects[j] == desc_objects[i]) ++arriving;
+        if (r && (uint32_t)r->sends + r->pending_sends + arriving >
+                 IOS27_MACH_RIGHT_MAX)
+            return IOS27_MACH_LIMIT;
+    }
+    /* Reserve one local name per *distinct* object, whether the new
+     * credits are send, send-once, or both. */
     if (reply_obj && !by_object(s, receiver, reply_obj)) ++additional;
-    if (desc_obj && desc_obj != reply_obj &&
-        !by_object(s, receiver, desc_obj)) ++additional;
+    for (uint32_t i = 0u; i < count; ++i) {
+        int previous = desc_objects[i] == reply_obj;
+        for (uint32_t j = 0u; j < i; ++j)
+            if (desc_objects[j] == desc_objects[i]) previous = 1;
+        if (!previous && !by_object(s, receiver, desc_objects[i]))
+            ++additional;
+    }
     if (empty_names(s, receiver) < additional ||
-        (additional && s->next_name[TASK_INDEX(receiver)] >=
-         UINT32_MAX - (additional - 1u)))
+        (additional && (uint64_t)s->next_name[TASK_INDEX(receiver)] +
+                       additional > UINT32_MAX))
         return IOS27_MACH_LIMIT;
 
-    /* No more error paths after this point; all allocations are preflighted. */
-    pending_reply = reply_obj ? reserve_name(s, receiver, reply_obj) : NULL;
-    pending_descriptor = desc_obj ? reserve_name(s, receiver, desc_obj) : NULL;
-    if (pending_reply) ++pending_reply->pending_once;
-    if (pending_descriptor) ++pending_descriptor->pending_sends;
-    if (reply_move) {
-        --reply_right->once;
-        prune(reply_right);
-    }
-    if (desc_move) {
-        --descriptor_right->sends;
-        prune(descriptor_right);
-    }
-    if (remote_disposition == IOS27_MACH_MOVE_SEND) {
+    /* The transaction cannot fail after reservation preflight. */
+    if (reply_obj)
+        ++reserve_name(s, receiver, reply_obj)->pending_once;
+    for (uint32_t i = 0u; i < count; ++i)
+        ++reserve_name(s, receiver, desc_objects[i])->pending_sends;
+    if (reply_move) --reply_right->once;
+    for (uint32_t i = 0u; i < count; ++i)
+        if (desc_moves[i]) --descriptors[i]->sends;
+    if (remote_disposition == IOS27_MACH_MOVE_SEND)
         --dest_right->sends;
-        prune(dest_right);
-    } else if (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE) {
+    else if (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE)
         --dest_right->once;
-        prune(dest_right);
-    }
+    if (reply_move) prune(reply_right);
+    for (uint32_t i = 0u; i < count; ++i)
+        if (desc_moves[i]) prune(descriptors[i]);
+    prune(dest_right);
+
     tail = (dest->head + dest->count) % IOS27_MACH_QUEUE_MAX;
     queued_wire *slot = &dest->queue[tail];
     memset(slot, 0, sizeof(*slot));
     memcpy(slot->bytes, p, size);
     slot->length = (uint16_t)size;
     slot->reply_object = reply_obj;
-    slot->descriptor_object = desc_obj;
-    slot->descriptor_move = desc_move;
+    slot->descriptor_count = (uint8_t)count;
+    memcpy(slot->descriptor_objects, desc_objects, count);
     ++dest->count;
     return IOS27_MACH_OK;
 }
@@ -469,7 +561,8 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
     local_right *right;
     port_object *obj;
     queued_wire *msg;
-    local_right *reply, *descriptor;
+    local_right *reply;
+    local_right *descriptors[IOS27_MACH_V2_DESCRIPTORS] = {0};
     uint8_t *output = out;
     (void)timeout_ms;
     if (!s || !valid_task(task) || !out || !inout_size ||
@@ -489,24 +582,28 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
         return IOS27_MACH_TOO_LARGE;
     }
     reply = msg->reply_object ? by_object(s, task, msg->reply_object) : NULL;
-    descriptor = msg->descriptor_object ?
-        by_object(s, task, msg->descriptor_object) : NULL;
-    if ((msg->reply_object && (!reply || !reply->pending_once)) ||
-        (msg->descriptor_object && (!descriptor || !descriptor->pending_sends)))
+    if (msg->reply_object && (!reply || !reply->pending_once))
         return IOS27_MACH_BAD_RIGHT;
+    for (size_t i = 0u; i < msg->descriptor_count; ++i) {
+        uint32_t needed = 0u;
+        descriptors[i] = by_object(s, task, msg->descriptor_objects[i]);
+        for (size_t j = 0u; j < msg->descriptor_count; ++j)
+            if (msg->descriptor_objects[i] == msg->descriptor_objects[j])
+                ++needed;
+        if (!descriptors[i] || descriptors[i]->pending_sends < needed)
+            return IOS27_MACH_BAD_RIGHT;
+    }
     memcpy(output, msg->bytes, msg->length);
-    /* The received remote name carries the granted send-once disposition. */
     wr32(output, (rd32(output) & IOS27_MACH_COMPLEX) |
                  (reply ? IOS27_MACH_MOVE_SEND_ONCE : 0u));
     wr32(output + 8u, reply ? reply->name : 0u);
     wr32(output + 12u, receive_name);
-    if (descriptor) {
-        wr32(output + 28u, descriptor->name);
-        /* The receiver owns a send right, even if the sender supplied
-         * COPY_SEND. Wire disposition describes the received right. */
-        output[38u] = IOS27_MACH_MOVE_SEND;
-        --descriptor->pending_sends;
-        ++descriptor->sends;
+    for (size_t i = 0u; i < msg->descriptor_count; ++i) {
+        size_t offset = 28u + 12u * i;
+        wr32(output + offset, descriptors[i]->name);
+        output[offset + 10u] = IOS27_MACH_MOVE_SEND;
+        --descriptors[i]->pending_sends;
+        ++descriptors[i]->sends;
     }
     if (reply) {
         --reply->pending_once;

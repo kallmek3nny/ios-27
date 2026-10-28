@@ -31,7 +31,10 @@ void ios27_darwin_dispatch(uint64_t x16, uint64_t x0,
     *new_x0 = (uint64_t)ENOSYS;
     *carry = 1u;
     *exited = 0u;
-    if (class_id != 0u && class_id != IOS27_SYSCALL_CLASS_BSD)
+    /* XNU selector fields are 32-bit. Reject high-bit aliases instead of
+     * treating an untrusted 64-bit number as a valid host-backed service. */
+    if (x16 > UINT32_MAX ||
+        (class_id != 0u && class_id != IOS27_SYSCALL_CLASS_BSD))
         return;
     switch (number) {
         case 1u: /* Virtual guest exit, never exits the host process. */

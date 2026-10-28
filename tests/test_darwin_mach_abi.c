@@ -370,7 +370,45 @@ static void abi_complex_descriptor_round_trip(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* An ABI caller never receives a notification unless explicitly subscribed,
+ * and failed polls leave the output register file untouched. */
+static void phase17c_dead_name_fixture_dispatch(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    uint32_t owner, alias, other;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &owner) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, owner, 2u, &alias) ==
+           IOS27_MACH_OK);
+    out.x[0] = 0xabcd1234u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_POLL_DEAD,
+                                     &in, &out, NULL, 0u) ==
+           IOS27_MACH_TIMEOUT);
+    assert(out.x[0] == 0xabcd1234u);
+    in.x[0] = UINT64_MAX;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_WATCH_DEAD,
+                                     &in, &out, NULL, 0u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    in.x[0] = alias;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_WATCH_DEAD,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 1u, owner) == IOS27_MACH_OK);
+    in.x[0] = 0u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_POLL_DEAD,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    assert(out.x[0] == alias);
+    out.x[0] = 991u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_POLL_DEAD,
+                                     &in, &out, NULL, 0u) ==
+           IOS27_MACH_TIMEOUT && out.x[0] == 991u);
+    assert(ios27_mach_v2_allocate(s, 1u, &other) == IOS27_MACH_OK);
+    assert(other != owner);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase17c_dead_name_fixture_dispatch();
     abi_complex_descriptor_round_trip();
     reject_unaligned_darwin_regs();
     forwarded_reply_via_darwin_fixture();

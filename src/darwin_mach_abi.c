@@ -74,6 +74,15 @@ int ios27_darwin_fixture_call(ios27_mach_v2 *space, uint32_t task,
                 }
             }
             break;
+        case IOS27_DARWIN_FIXTURE_WATCH_DEAD:
+            if (!checked32(input->x[0])) return IOS27_MACH_BAD_ARGUMENT;
+            status = ios27_mach_v2_watch_dead_name(space, task,
+                                                    (uint32_t)input->x[0]);
+            break;
+        case IOS27_DARWIN_FIXTURE_POLL_DEAD:
+            status = ios27_mach_v2_poll_dead_name(space, task, &a);
+            if (status == IOS27_MACH_OK) reply.x[0] = a;
+            break;
         case IOS27_DARWIN_FIXTURE_TEARDOWN:
             status = ios27_mach_v2_task_teardown(space, task);
             break;

@@ -85,6 +85,15 @@ int main(void) {
                           &retval, &carry, &exited); /* write */
     assert(retval == (uint64_t)ENOSYS && carry == 1u);
 
+    /* A malicious 64-bit selector must not alias a recognized BSD getter. */
+    ios27_darwin_dispatch(UINT64_C(0x100000000) |
+                          IOS27_SYSCALL_CLASS_BSD | 20u, 0u,
+                          &retval, &carry, &exited);
+    assert(retval == (uint64_t)ENOSYS && carry == 1u && exited == 0u);
+    ios27_darwin_dispatch(UINT64_C(0xffffffff00000000) | 1u, 9u,
+                          &retval, &carry, &exited);
+    assert(retval == (uint64_t)ENOSYS && carry == 1u && exited == 0u);
+
     fixture(b);
     put32(b + ENTRY_OFF, 0x14000000u); /* unsupported branch */
     assert(ios27_macho_parse(b, sizeof(b), &info, error, sizeof(error)) == 0);
