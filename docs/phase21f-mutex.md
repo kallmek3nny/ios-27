@@ -1,0 +1,50 @@
+# phase 21f: fair and bounded pthread mutex bridge
+
+This independent original-source host-native synchronization component provides
+three mutex policies with generation-checked handles. Its handle values are NOT
+Darwin's opaque pthread mutex ABI, and compiled Darwin callsites are not run or
+bound by the bridge. It does not claim native iOS app compatibility.
+
+## milestones
+
+1. Own/recursion tracking: normal and error-checking self lock return
+   `EDEADLK`, recursive self lock increases a checked depth, trylock returns
+   `EBUSY` rather than blocking, and non-owner unlock returns `EPERM`.
+2. FIFO handoff: contending threads are enqueued in arrival order under one
+   internal POSIX guard. Releasing the final recursion level transfers logical
+   ownership to the oldest queued waiter BEFORE waking it. Arriving threads
+   cannot barge ahead of queued threads; an ordinary mutex holder can still
+   starve waiters by never releasing, and OS scheduling latency is unbounded.
+3. Bounded wait-for graph: when a thread requests an owned mutex, follow
+   existing same-runtime blocking edges to reject cycles with `EDEADLK`.
+   Cancellation removes queued nodes or retransfers a granted mutex atomically.
+   Slots, waiters, and generation rollover are bounded, with deterministic
+   `EAGAIN`, `EINVAL`, and `EBUSY` failures for exhaustion/invalid state.
+4. Compiler-produced native executable suites exercise FIFO ordering,
+   ownership errors, recursive calls, invalid handles, two-lock cycles,
+   100,000 contended increments, 250 cancellation/handoff races, and capacity
+   exhaustion at `-O0` and `-O2` with `-Werror`. An SDK-free fixture builds real
+   Darwin Mach-O pthread callsites for ARM64 and x86_64, without executing them.
+
+## independent execution
+
+`timeout 300s python3 tools/phase21f-standalone.py`
+
+The phase-specific workflow covers Linux x86_64 and ARM64 runners and builds
+Darwin-target objects on each. Shared CMake/entrypoint files are unchanged.
+
+## contract and known limitations
+
+- API is an explicit bridge interface rather than Apple pthread symbol/ABI
+  compatibility. No Apple implementation was copied or embedded.
+- Only deferred cancellation is supported during blocked lock operations.
+  Owners are responsible for cleanup handlers when canceled after acquisition.
+  Asynchronous cancellation and thread termination while owning a mutex are
+  unsupported; a non-releasing owner can block indefinitely.
+- FIFO fairness is defined by arrival at the internal mutex queue, not by
+  OS thread start ordering. FIFO does not establish strict real-time progress.
+- Deadlock detection covers lock-order cycles for waiters of this same runtime;
+  it does not discover deadlocks through other APIs or across runtimes.
+- Runtime destruction requires all users to be quiescent. Clients may not use
+  handles or runtime addresses after destruction. The bridge does not protect
+  calls racing with destruction of the runtime object itself.
