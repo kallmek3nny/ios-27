@@ -56,6 +56,17 @@ static uint32_t rd32(const uint8_t *p) {
 static void wr32(uint8_t *p, uint32_t v) {
     for (unsigned i = 0u; i < 4u; ++i) p[i] = (uint8_t)(v >> (8u * i));
 }
+/* Reject overlapping caller buffers before mutating a queue or right.
+ * Invalid/overflowing host ranges fail closed; the guest ABI separately
+ * enforces its bounded, non-aliasing offset-based arena. */
+static int ranges_overlap(const void *a, size_t n,
+                          const void *b, size_t m) {
+    uintptr_t x = (uintptr_t)a;
+    uintptr_t y = (uintptr_t)b;
+    if (n > UINTPTR_MAX - x || m > UINTPTR_MAX - y)
+        return 1;
+    return n && m && x < y + m && y < x + n;
+}
 static local_right *by_name(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
     if (!s || !valid_task(task) || !name) return NULL;
     for (size_t i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
@@ -342,7 +353,8 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     unsigned additional = 0u;
     (void)timeout_ms;
     if (!s || !valid_task(task) || !p || size < 24u ||
-        size > IOS27_MACH_MSG_MAX || (size & 3u))
+        size > IOS27_MACH_MSG_MAX || (size & 3u) ||
+        ranges_overlap(p, size, s, sizeof(*s)))
         return IOS27_MACH_BAD_ARGUMENT;
     bits = rd32(p);
     remote_disposition = bits & 0xffu;
@@ -446,13 +458,18 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
     local_right *reply, *descriptor;
     uint8_t *output = out;
     (void)timeout_ms;
-    if (!s || !valid_task(task) || !out || !inout_size)
+    if (!s || !valid_task(task) || !out || !inout_size ||
+        ranges_overlap(inout_size, sizeof(*inout_size), s, sizeof(*s)))
         return IOS27_MACH_BAD_ARGUMENT;
     right = receive_right(s, task, receive_name);
     obj = object_for(s, right);
     if (!obj) return IOS27_MACH_BAD_RIGHT;
     if (!obj->count) return IOS27_MACH_TIMEOUT;
     msg = &obj->queue[obj->head];
+    if (ranges_overlap(output, msg->length, s, sizeof(*s)) ||
+        ranges_overlap(output, msg->length,
+                       inout_size, sizeof(*inout_size)))
+        return IOS27_MACH_BAD_ARGUMENT;
     if (*inout_size < msg->length) {
         *inout_size = msg->length;
         return IOS27_MACH_TOO_LARGE;
@@ -471,6 +488,9 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
     wr32(output + 12u, receive_name);
     if (descriptor) {
         wr32(output + 28u, descriptor->name);
+        /* The receiver owns a send right, even if the sender supplied
+         * COPY_SEND. Wire disposition describes the received right. */
+        output[38u] = IOS27_MACH_MOVE_SEND;
         --descriptor->pending_sends;
         ++descriptor->sends;
     }

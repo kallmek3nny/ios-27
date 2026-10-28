@@ -555,6 +555,95 @@ static void rejected_wire_fuzz_is_side_effect_free(void) {
     assert(rd32(out + 20u) == 4242u);
     ios27_mach_v2_free(s);
 }
+
+/* Phase 16C: COPY_SEND transfers a send uref, so the descriptor returned
+ * to the receiver must carry MOVE_SEND, not the sender's disposition.
+ * Failed validation and TOO_LARGE leave the rights and queue intact. */
+static void descriptor_normalization_with_send_once_reply(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t service, item, reply, service_alias, item_alias;
+    uint32_t received_item, reply_once;
+    uint8_t p[IOS27_MACH_MSG_MAX], out[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &service) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 2u, &reply) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, service, 2u, &service_alias) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 3u, item, 2u, &item_alias) ==
+           IOS27_MACH_OK);
+    (void)message(p, service_alias, IOS27_MACH_COPY_SEND, reply, 1600u);
+    descriptor(p, item_alias, IOS27_MACH_COPY_SEND);
+    wr32(p, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND |
+         (IOS27_MACH_MAKE_SEND_ONCE << 8u));
+    p[36u] = 1u;
+    assert(ios27_mach_v2_send(s, 2u, p, 40u, 0u) ==
+           IOS27_MACH_UNSUPPORTED);
+    p[36u] = 0u;
+    check(s, 2u, item_alias, 1u, 0u, 0u);
+    assert(ios27_mach_v2_send(s, 2u, p, 40u, 0u) == IOS27_MACH_OK);
+    cap = 39u;
+    memset(out, 0x7c, sizeof(out));
+    assert(ios27_mach_v2_receive(s, 1u, service, out, &cap, 0u) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(cap == 40u && out[38u] == 0x7cu);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 1u, service, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(cap == 40u && out[38u] == IOS27_MACH_MOVE_SEND);
+    assert(rd32(out) == (IOS27_MACH_COMPLEX | IOS27_MACH_MOVE_SEND_ONCE));
+    received_item = rd32(out + 28u);
+    reply_once = rd32(out + 8u);
+    check(s, 2u, item_alias, 1u, 0u, 0u);
+    check(s, 1u, received_item, 1u, 0u, 0u);
+    check(s, 1u, reply_once, 0u, 1u, 0u);
+    (void)message(p, reply_once, IOS27_MACH_MOVE_SEND_ONCE, 0u, 1601u);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_send(s, 1u, p, 24u, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    cap = sizeof(out);
+    assert(ios27_mach_v2_receive(s, 2u, reply, out, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(rd32(out + 20u) == 1601u);
+    ios27_mach_v2_free(s);
+}
+
+/* The raw host fixture must never permit queue bytes or lengths to overwrite
+ * one another or its private state, even if the caller forges the pointers. */
+static void host_alias_rejection_preserves_queued_message(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t server, sender;
+    _Alignas(size_t) uint8_t buffer[IOS27_MACH_MSG_MAX];
+    size_t cap;
+    uint32_t a, b;
+    unsigned receive;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &server) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, server, 2u, &sender) ==
+           IOS27_MACH_OK);
+    (void)message(buffer, sender, IOS27_MACH_MOVE_SEND, 0u, 1602u);
+    assert(ios27_mach_v2_send(s, 2u, (const uint8_t *)(const void *)s,
+                              24u, 0u) == IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_send(s, 2u, buffer, 24u, 0u) == IOS27_MACH_OK);
+    cap = sizeof(buffer);
+    assert(ios27_mach_v2_receive(s, 1u, server, buffer,
+                     (size_t *)(void *)buffer, 0u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_receive(s, 1u, server, s, &cap, 0u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_receive(s, 1u, server, buffer,
+                     (size_t *)(void *)s, 0u) ==
+           IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_mach_v2_rights(s, 2u, sender, &a, &b, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    cap = sizeof(buffer);
+    assert(ios27_mach_v2_receive(s, 1u, server, buffer, &cap, 0u) ==
+           IOS27_MACH_OK);
+    assert(cap == 24u && rd32(buffer + 20u) == 1602u);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
     local_names_and_reply();
     descriptor_and_collision();
@@ -569,6 +658,8 @@ int main(void) {
     move_send_queue_rollback_and_wrap();
     teardown_and_exhaustion_stress();
     rejected_wire_fuzz_is_side_effect_free();
+    descriptor_normalization_with_send_once_reply();
+    host_alias_rejection_preserves_queued_message();
     puts("phase 14b task-local mach rights/teardown/atomicity tests passed");
     return 0;
 }

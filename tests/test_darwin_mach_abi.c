@@ -219,11 +219,61 @@ static void fixture_abi(void) {
             NULL, 0u) == IOS27_MACH_OK);
     ios27_mach_v2_free(space);
 }
+
+/* Exercise the same descriptor translation through the bounded guest arena
+ * and AArch64 register facade, not only through the raw Mach fixture. */
+static void abi_complex_descriptor_round_trip(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    uint8_t arena[256], before[256];
+    uint32_t server, item, remote, item_alias, transferred;
+    uint32_t sends, once;
+    unsigned receive;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &server) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, server, 2u, &remote) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 3u, item, 2u, &item_alias) ==
+           IOS27_MACH_OK);
+    memset(arena, 0xa8, sizeof(arena));
+    complex(arena + 32u, remote, item_alias);
+    arena[32u + 38u] = IOS27_MACH_COPY_SEND;
+    in.x[0] = 32u;
+    in.x[1] = 40u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_SEND,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    assert(out.x[0] == 40u);
+    assert(ios27_mach_v2_rights(s, 2u, item_alias, &sends, &once,
+                                &receive) == IOS27_MACH_OK && sends == 1u);
+    memcpy(before, arena, sizeof(arena));
+    memset(&in, 0, sizeof(in));
+    in.x[0] = server;
+    in.x[1] = 128u;
+    in.x[2] = 39u;
+    assert(ios27_darwin_fixture_call(s, 1u, IOS27_DARWIN_FIXTURE_RECEIVE,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_TOO_LARGE);
+    assert(out.x[0] == 40u && !memcmp(arena, before, sizeof(arena)));
+    in.x[2] = 40u;
+    assert(ios27_darwin_fixture_call(s, 1u, IOS27_DARWIN_FIXTURE_RECEIVE,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    assert(out.x[0] == 40u);
+    assert(arena[128u + 38u] == IOS27_MACH_MOVE_SEND);
+    transferred = rd32(arena + 128u + 28u);
+    assert(ios27_mach_v2_rights(s, 1u, transferred, &sends, &once,
+                                &receive) == IOS27_MACH_OK && sends == 1u);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
     teardown_inflight();
     teardown_queued_reply();
     teardown_drops_messages();
     fixture_abi();
+    abi_complex_descriptor_round_trip();
     puts("phase11 task teardown and bounded Darwin register facade passed");
     return 0;
 }
