@@ -43,14 +43,15 @@ def main():
                      str(ROOT / "tests" / source),
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
-        target = dest / "arm64-darwin.o"
-        run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
-             "-fno-builtin", "-fno-stack-protector", "-Werror", "-Wall",
-             "-Wextra", "-Wpedantic", "-O2", "-c",
-             str(ROOT / "tests/phase21i-darwin-client.c"),
-             "-o", str(target)], 60)
-        run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
-             str(target)], 30)
+        for optimize in ("-O0", "-O2"):
+            target = dest / ("arm64-darwin" + optimize + ".o")
+            run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
+                 "-fno-builtin", "-fno-stack-protector", "-Werror", "-Wall",
+                 "-Wextra", "-Wpedantic", optimize, "-c",
+                 str(ROOT / "tests/phase21i-darwin-client.c"),
+                 "-o", str(target)], 60)
+            run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
+                 str(target)], 30)
     print("phase21i: standalone checks passed", flush=True)
 
 if __name__ == "__main__":
