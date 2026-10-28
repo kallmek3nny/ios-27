@@ -33,6 +33,9 @@ extern int pthread_setspecific(ios27_21a_key, const void *);
 extern void *pthread_getspecific(ios27_21a_key);
 extern ios27_21a_thread pthread_self(void);
 extern int pthread_equal(ios27_21a_thread, ios27_21a_thread);
+extern int pthread_threadid_np(ios27_21a_thread, unsigned long long *);
+extern int pthread_main_np(void);
+extern int pthread_is_threaded_np(void);
 static ios27_21a_mutex guarded;
 static ios27_21a_cond notice;
 static ios27_21a_rwlock transfer;
@@ -47,6 +50,7 @@ static void prepare(void) { total = 19; }
 int phase21a_real_compiler_call_graph(unsigned n) {
     unsigned i;
     unsigned long stacksize = 0;
+    unsigned long long threadid = 0;
     if (pthread_attr_init(&thread_attrs)) return -10;
     if (pthread_attr_setstacksize(&thread_attrs, 512u * 1024u)) return -11;
     if (pthread_attr_getstacksize(&thread_attrs, &stacksize)) return -12;
@@ -61,6 +65,8 @@ int phase21a_real_compiler_call_graph(unsigned n) {
     if (pthread_setspecific(tls_key, &guarded)) return -18;
     if (pthread_getspecific(tls_key) != &guarded) return -19;
     if (!pthread_equal(pthread_self(), pthread_self())) return -20;
+    if (pthread_threadid_np(pthread_self(), &threadid)) return -21;
+    if (!pthread_main_np() && !pthread_is_threaded_np()) return -22;
     for (i = 0; i < n; ++i) {
         (void)pthread_once(&once_guard, prepare);
         if (pthread_mutex_lock(&guarded)) return -4;
@@ -83,5 +89,5 @@ int phase21a_real_compiler_call_graph(unsigned n) {
     (void)pthread_condattr_destroy(&cond_attrs);
     (void)pthread_mutexattr_destroy(&mutex_attrs);
     (void)pthread_attr_destroy(&thread_attrs);
-    return (int)(total + stacksize / (512u * 1024u) - 1u);
+    return (int)(total + stacksize / (512u * 1024u) - 1u + (threadid & 1u));
 }
