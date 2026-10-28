@@ -2,9 +2,9 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "44b3774ace8ee487734efe86c7e6182f525c9920",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/44b3774ace8ee487734efe86c7e6182f525c9920",
-    "committed_at": "2026-10-28T19:59:37Z"
+    "sha": "2a1f8af8f814fce750dab39a1baea2695acdc256",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/2a1f8af8f814fce750dab39a1baea2695acdc256",
+    "committed_at": "2026-10-28T20:05:33Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
@@ -15,15 +15,6 @@
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "updated_at": "2026-10-28T20:05:00Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 74,
-      "branch": "phase21e-hardening-20261028",
-      "sha": "b12037d69592a5561d7b9828f068d3a36c007e35",
-      "title": "phase21e follow-up: runtime identity and deterministic cleanup lifetimes",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/74",
-      "updated_at": "2026-10-28T20:04:22Z",
       "status": "unmerged: not counted"
     },
     {
@@ -38,6 +29,13 @@
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 74,
+      "title": "phase21e follow-up: runtime identity and deterministic cleanup lifetimes",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/74",
+      "head_sha": "b12037d69592a5561d7b9828f068d3a36c007e35",
+      "merged_at": "2026-10-28T20:05:34Z"
+    },
     {
       "number": 70,
       "title": "phase 21c: bounded native pthread synchronization and stress coverage",
@@ -86,20 +84,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/66",
       "head_sha": "63818f8893f292b70487ba83742be14de305319b",
       "merged_at": "2026-10-28T19:22:03Z"
-    },
-    {
-      "number": 63,
-      "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
-      "head_sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
-      "merged_at": "2026-10-28T19:21:00Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 31,
+    "branches_scanned": 32,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:05:24Z"
+  "observed_at": "2026-10-28T20:05:46Z"
 }

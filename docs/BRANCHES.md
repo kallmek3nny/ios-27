@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **3** · audited base: `44b3774ace8e`
+candidate branches with mapped changes: **2** · audited base: `2a1f8af8f814`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
@@ -12,12 +12,6 @@ head: `913abc9a6bb6` · ci: **running** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +1369/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
-
-### [phase21e-hardening-20261028](https://github.com/kallmek3nny/ios-27/pull/74)
-
-head: `b12037d69592` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +405/-22 lines
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -31,6 +25,12 @@ head: `1fd3dc09051a` · ci: **passing_checks** · unmerged, not credited.
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
 recent merged PRs with source changes: **6**
+
+### [merged PR #74](https://github.com/kallmek3nny/ios-27/pull/74)
+
+merged: 2026-10-28T20:05:34Z · source changes awaiting function-level audit.
+
+- **libSystem guest model (not dylib)**: 2 source files, 6 fixtures, +405/-22 lines
 
 ### [merged PR #70](https://github.com/kallmek3nny/ios-27/pull/70)
 
@@ -66,13 +66,6 @@ merged: 2026-10-28T19:22:22Z · source changes awaiting function-level audit.
 
 - **libSystem guest model (not dylib)**: 2 source files, 3 fixtures, +558/-0 lines
   - added declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
-
-### [merged PR #63](https://github.com/kallmek3nny/ios-27/pull/63)
-
-merged: 2026-10-28T19:21:00Z · source changes awaiting function-level audit.
-
-- **ObjC host prototype (not Apple libobjc)**: 2 source files, 4 fixtures, +596/-0 lines
-  - added declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
 
 ## verification policy
 
