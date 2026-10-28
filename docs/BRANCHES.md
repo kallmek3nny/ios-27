@@ -8,7 +8,7 @@ candidate branches with mapped changes: **6** · audited base: `dd39b3167594`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
-head: `b1475c31bb57` · ci: **running** · unmerged, not credited.
+head: `b1475c31bb57` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +774/-0 lines
   - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_snapshot`

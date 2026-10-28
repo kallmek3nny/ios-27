@@ -11,7 +11,7 @@
       "sha": "b1475c31bb571a285cb63186c4bb0722e29eb6c4",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "pr_number": 77,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -242,7 +242,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/77",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase21f-fifo-mutex-20261028",
@@ -606,5 +606,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:19:05Z"
+  "observed_at": "2026-10-28T21:19:27Z"
 }
