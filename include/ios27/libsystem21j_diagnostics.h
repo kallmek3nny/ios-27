@@ -39,6 +39,10 @@ int ios27_21j_probe(ios27_21j_diagnostics *diag, uint32_t stage,
                     uint32_t actor, uint64_t ordinal);
 int ios27_21j_acquire(ios27_21j_diagnostics *diag,
                        ios27_21j_lease *out);
+/* Fault-injected acquisition leaves out invalid and consumes no lease on ENOMEM. */
+int ios27_21j_acquire_injected(ios27_21j_diagnostics *diag,
+                              uint32_t stage, uint32_t actor,
+                              uint64_t ordinal, ios27_21j_lease *out);
 int ios27_21j_release(ios27_21j_diagnostics *diag, ios27_21j_lease lease);
 int ios27_21j_record(ios27_21j_diagnostics *diag, uint32_t kind,
                       uint32_t actor, int32_t result, uint32_t detail);
