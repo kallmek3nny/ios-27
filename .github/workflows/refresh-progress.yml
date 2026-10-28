@@ -5,7 +5,7 @@ on:
     workflows: ["native tests"]
     types: [completed]
   schedule:
-    - cron: '31 */6 * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +26,7 @@ jobs:
         (github.event.workflow_run.event == 'push' &&
          github.event.workflow_run.head_branch == 'main')))
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,13 +37,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           timeout 120s python3 tools/refresh_repo_status.py --repo "$GITHUB_REPOSITORY" --output docs/repo-status.json
+          timeout 150s python3 tools/scan_branch_activity.py --repo "$GITHUB_REPOSITORY"
           timeout 15s python3 tools/progress.py
           timeout 15s node tools/compat_blocks.cjs
+          timeout 15s python3 tools/scan_branch_activity.py --self-test
           timeout 15s python3 tools/progress.py --check
           timeout 15s node tools/compat_blocks.cjs --check
       - name: publish only if main has not moved
         run: |
-          timeout 15s git add docs/repo-status.json docs/PROGRESS.md docs/progress.svg docs/blocks.svg docs/BLOCKS.md docs/blocks.html
+          timeout 15s git add docs/repo-status.json docs/branch-activity.json docs/PROGRESS.md docs/progress.svg docs/blocks.svg docs/BLOCKS.md docs/BRANCHES.md docs/blocks.html
           if ! timeout 15s git diff --cached --quiet; then
             timeout 15s git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore(progress): refresh merged main and branch evidence'
             if ! timeout 30s git push origin HEAD:main; then

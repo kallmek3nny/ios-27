@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""Read PR/branch FILE DIFFS and map work-in-progress to ios-27 subsystems.
+
+Candidate source changes are NEVER promoted to verified Apple-compatible APIs.
+Only the reviewed compatibility catalog controls completed/verified squares.
+"""
+import argparse
+from collections import defaultdict
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import re
+import sys
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+SHA = re.compile(r"^[0-9a-f]{40}$")
+REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+SYMBOL = re.compile(r"\bios27_[A-Za-z0-9_]{3,80}\s*\(")
+GROUPS = [
+    ("objc-host-model", r"^(src/objc_|include/ios27/objc_|tests/phase19e-|tests/fixtures/phase19e-objc)"),
+    ("libsystem-host-model", r"^(src/libsystem_|include/ios27/libsystem_)"),
+    ("mach-ipc", r"^(src/(mach_|darwin_mach_abi)|include/ios27/(mach_|darwin_mach_abi)|tests/test_(mach_|darwin_mach_abi))"),
+    ("bsd-calls", r"^(src/darwin_probe|include/ios27/darwin_probe|tests/test_darwin_probe)"),
+    ("dyld-engine", r"^(src/(images|chained|binds|exports|dyld_paths)\.c|include/ios27/(images|chained|binds|exports|dyld_paths)\.h|tests/test_(images|chained|binds|exports|dyld_paths)\.c|tests/fixtures/phase19b-|tools/phase19b-)"),
+    ("mach-o", r"^(src/(macho|runner|darwin_object|darwin_branch26|darwin_got|inventory)\.c|include/ios27/(macho|runner|darwin_object|darwin_branch26|darwin_got|inventory)\.h|tests/test_(macho|compiled_darwin)|tests/fixtures/(phase19a-|phase19d-)|tools/(phase19a-|phase19d-))"),
+]
+GROUPS = [(name, re.compile(regex)) for name, regex in GROUPS]
+ALLOWED_CI = ("native tests", "capability progress", "phase19b real linked darwin dylibs")
+
+
+def get_group(filename):
+    return next((name for name, regex in GROUPS if regex.search(filename)), None)
+
+
+def is_source(filename):
+    return filename.startswith(("src/", "include/")) and filename.endswith((".c", ".h", ".m", ".mm"))
+
+
+def is_fixture(filename):
+    return filename.startswith(("tests/", "tools/phase")) and filename.endswith((".c", ".h", ".m", ".py"))
+
+
+def extract_symbols(patch):
+    found = set()
+    if not isinstance(patch, str):
+        return found
+    for line in patch.splitlines():
+        if not line.startswith("+") or line.startswith("+++"):
+            continue
+        line = line[1:].strip()
+        if line.startswith(("//", "*", "#", "return ", "if ", "for ", "assert(", "while ")):
+            continue
+        if re.match(r"^(static |extern |inline |const |void |int |char |size_t |uint\d+_t |int\d+_t |ios27_[A-Za-z_0-9]+ )", line):
+            match = SYMBOL.search(line)
+            if match:
+                found.add(match.group(0)[:-1].strip())
+    return found
+
+
+def http_get(repo, endpoint, token):
+    if not REPO.fullmatch(repo) or not endpoint.startswith("/") or endpoint.startswith("//"):
+        raise ValueError("invalid GitHub API path")
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "ios27-progress",
+               "X-GitHub-Api-Version": "2022-11-28"}
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    with urlopen(Request("https://api.github.com/repos/" + repo + endpoint, headers=headers),
+                 timeout=8) as response:
+        return json.load(response)
+
+
+def check_runs(sha, get):
+    runs = get("/actions/runs?head_sha=" + sha + "&per_page=20").get("workflow_runs", [])
+    latest = {}
+    for r in sorted(runs, key=lambda x: (x.get("created_at", ""), x.get("id", 0)), reverse=True):
+        if r.get("head_sha") == sha and r.get("name") in ALLOWED_CI:
+            latest.setdefault(r["name"], r)
+    if not latest:
+        return "not_checked"
+    if any(r.get("conclusion") == "failure" for r in latest.values()):
+        return "failing"
+    if any(r.get("status") != "completed" for r in latest.values()):
+        return "running"
+    return "passing_checks" if all(r.get("conclusion") == "success" for r in latest.values()) else "not_checked"
+
+
+def summarize(candidate, files, ci, allowed):
+    groups = defaultdict(lambda: {"source_files": 0, "fixture_files": 0,
+                                   "additions": 0, "deletions": 0, "symbols": set(), "paths": []})
+    for item in files[:100]:
+        path = item.get("filename", "")
+        if not isinstance(path, str) or len(path) > 255:
+            continue
+        group = get_group(path)
+        if group not in allowed:
+            continue
+        source, fixture = is_source(path), is_fixture(path)
+        if not (source or fixture):
+            continue
+        g = groups[group]
+        g["source_files"] += int(source)
+        g["fixture_files"] += int(fixture)
+        g["additions"] += max(0, min(100000, int(item.get("additions") or 0)))
+        g["deletions"] += max(0, min(100000, int(item.get("deletions") or 0)))
+        if len(g["paths"]) < 4:
+            g["paths"].append(path)
+        if source:
+            g["symbols"].update(extract_symbols(item.get("patch")))
+    mapped = []
+    for name, g in sorted(groups.items()):
+        if g["additions"] + g["deletions"] <= 0:
+            continue
+        mapped.append({"group_id": name, "source_files": g["source_files"],
+                       "fixture_files": g["fixture_files"], "additions": g["additions"],
+                       "deletions": g["deletions"], "symbols_preview": sorted(g["symbols"])[:12],
+                       "example_paths": g["paths"]})
+    return {"branch": candidate["branch"], "sha": candidate["sha"], "url": candidate["url"],
+            "pr_number": candidate.get("number"), "ci": ci,
+            "status": "candidate changes, NOT verified API support",
+            "files_checked": min(100, len(files)),
+            "possibly_truncated": len(files) >= 100, "groups": mapped}
+
+
+def audit(repo, provenance, get, groups):
+    sha = provenance.get("main_source", {}).get("sha", "")
+    if not SHA.fullmatch(sha):
+        raise ValueError("invalid main source hash")
+    candidates = []
+    seen = set()
+    for item in provenance.get("open_pull_requests", []):
+        cand = {"branch": item["branch"], "sha": item["sha"], "url": item["url"],
+                "number": item["number"]}
+        if cand["sha"] not in seen:
+            candidates.append(cand)
+            seen.add(cand["sha"])
+    for item in provenance.get("ahead_branches", []):
+        cand = {"branch": item["branch"], "sha": item["sha"], "url": item["url"]}
+        if cand["sha"] not in seen:
+            candidates.append(cand)
+            seen.add(cand["sha"])
+    candidates = candidates[:16]
+    mapped = []
+    by_group = defaultdict(list)
+    for cand in candidates:
+        if not SHA.fullmatch(cand["sha"]):
+            raise ValueError("invalid candidate hash")
+        if cand.get("number"):
+            number = int(cand["number"])
+            if number <= 0:
+                raise ValueError("invalid PR ID")
+            files = get("/pulls/" + str(number) + "/files?per_page=100")
+        else:
+            result = get("/compare/" + sha + "..." + quote(cand["branch"], safe=""))
+            if result.get("status") not in ("ahead", "diverged"):
+                continue
+            files = result.get("files", [])
+        if not isinstance(files, list):
+            raise ValueError("bad diff response")
+        result = summarize(cand, files, check_runs(cand["sha"], get), set(groups))
+        if result["groups"]:
+            mapped.append(result)
+            for entry in result["groups"]:
+                by_group[entry["group_id"]].append(
+                    {"branch": cand["branch"], "url": cand["url"],
+                     "source_files": entry["source_files"],
+                     "fixture_files": entry["fixture_files"], "ci": result["ci"]})
+    return {"schema": 1, "repository": repo, "main_source_sha": sha,
+            "method": "diff-based provisional activity, no automatic completion promotion",
+            "candidates_checked": len(candidates), "candidate_count": len(mapped),
+            "candidates": mapped, "groups": dict(sorted(by_group.items()))}
+
+
+def same(previous, current):
+    return isinstance(previous, dict) and {k: v for k, v in previous.items()
+                                            if k != "observed_at"} == current
+
+
+def self_test():
+    assert get_group("src/objc_runtime.c") == "objc-host-model"
+    assert get_group("src/libsystem_user.c") == "libsystem-host-model"
+    assert get_group("src/mach_v2.c") == "mach-ipc"
+    assert get_group("src/runner.c") == "mach-o"
+    assert get_group("README.md") is None
+    assert extract_symbols("+int ios27_objc_create(void) {\n+return ios27_objc_fake();\n") == {"ios27_objc_create"}
+    provenance = {"main_source": {"sha": "a" * 40},
+                  "open_pull_requests": [{"branch": "phase19e", "sha": "b" * 40,
+                                          "url": "https://github.com/example/repo/pull/1", "number": 1}],
+                  "ahead_branches": [{"branch": "phase19e", "sha": "b" * 40,
+                                      "url": "https://github.com/example/repo/tree/phase19e"}]}
+    def fake(endpoint):
+        if endpoint.startswith("/pulls/"):
+            return [{"filename": "src/objc_runtime.c", "additions": 9, "deletions": 0,
+                     "patch": "+int ios27_objc_create(void) {"},
+                    {"filename": "tests/phase19e-standalone.c", "additions": 8, "deletions": 0}]
+        if endpoint.startswith("/actions/runs"):
+            return {"workflow_runs": [{"head_sha": "b" * 40, "name": "native tests",
+                                        "status": "completed", "conclusion": "success",
+                                        "created_at": "2026-10-28", "id": 1}]}
+        raise AssertionError(endpoint)
+    r = audit("example/repo", provenance, fake, ["objc-host-model"])
+    assert r["candidate_count"] == 1 and r["candidates_checked"] == 1
+    assert r["candidates"][0]["groups"][0]["symbols_preview"] == ["ios27_objc_create"]
+    assert r["candidates"][0]["ci"] == "passing_checks"
+    assert len(r["groups"]["objc-host-model"]) == 1
+    assert same(dict(r, observed_at="previous"), r)
+    assert audit("example/repo", {"main_source": {"sha": "a" * 40}}, fake, ["objc-host-model"])["candidate_count"] == 0
+    print("branch diff parser: fixture tests passed")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", default="kallmek3nny/ios-27")
+    parser.add_argument("--output", default="docs/branch-activity.json")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
+    root = Path(__file__).resolve().parents[1]
+    provenance = json.loads((root / "docs/repo-status.json").read_text())
+    catalog = json.loads((root / "docs/compat-targets.json").read_text())
+    if provenance.get("repository") != args.repo:
+        raise ValueError("wrong repository snapshot")
+    target = root / args.output
+    previous = json.loads(target.read_text()) if target.is_file() else None
+    info = audit(args.repo, provenance, lambda endpoint: http_get(args.repo, endpoint,
+                os.environ.get("GITHUB_TOKEN")), [g["id"] for g in catalog["groups"]])
+    if same(previous, info):
+        print("no new branch source activity")
+        return
+    info["observed_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    target.write_text(json.dumps(info, indent=2) + "\n")
+    print("branch activity:", info["candidate_count"], "candidates,",
+          len(info["groups"]), "affected subsystems")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, KeyError, HTTPError, URLError, TypeError) as exc:
+        sys.exit("branch diff audit failed closed: " + str(exc))

@@ -4,7 +4,7 @@
 
 ![system library and runtime capability blocks](docs/blocks.svg)
 
-[api block explorer and technical ceilings](docs/BLOCKS.md) · [interactive detailed breakdown](docs/blocks.html)
+[api block explorer and technical ceilings](docs/BLOCKS.md) · [live agent branch diffs](docs/BRANCHES.md) · [interactive detailed breakdown](docs/blocks.html)
 
 ![evidence-backed subsystem progress](docs/progress.svg)
 
