@@ -7,6 +7,7 @@
 #define LC_DYLD_CHAINED_FIXUPS 0x80000034u
 #define DYLD_CHAINED_PTR_64_OFFSET 6u
 #define DYLD_CHAINED_IMPORT 1u
+#define DYLD_CHAINED_IMPORT_ADDEND 2u
 #define DYLD_CHAINED_PTR_START_NONE 0xffffu
 #define DYLD_CHAINED_PTR_START_MULTI 0x8000u
 
@@ -57,10 +58,36 @@ static int vm_base(const ios27_macho_info *info, uint64_t *out) {
     }
     return found ? 0 : -1;
 }
+static int rebase_inside_image(const ios27_macho_info *info,
+                               uint64_t base, uint64_t target) {
+    for (size_t i = 0u; i < info->segment_count; ++i) {
+        const ios27_segment *s = &info->segments[i];
+        if (!strcmp(s->name, "__PAGEZERO") || !s->vmsize ||
+            s->vmaddr < base || target < s->vmaddr - base)
+            continue;
+        if (target - (s->vmaddr - base) < s->vmsize)
+            return 1;
+    }
+    return 0;
+}
+static int add_signed(uint64_t *value, int64_t addend) {
+    uint64_t magnitude;
+    if (addend >= 0) {
+        magnitude = (uint64_t)addend;
+        if (*value > UINT64_MAX - magnitude) return -1;
+        *value += magnitude;
+    } else {
+        magnitude = (uint64_t)(-(addend + 1)) + 1u;
+        if (*value < magnitude) return -1;
+        *value -= magnitude;
+    }
+    return 0;
+}
 static int add_patch(const uint8_t *file, size_t size,
                      const ios27_macho_info *info,
                      ios27_chained_plan *plan, size_t seg_index,
-                     uint64_t offset, char *error, size_t cap,
+                     uint64_t offset, uint64_t base,
+                      char *error, size_t cap,
                      uint32_t *next) {
     const ios27_segment *seg = &info->segments[seg_index];
     uint64_t file_off, raw;
@@ -93,6 +120,8 @@ static int add_patch(const uint8_t *file, size_t size,
         if (((raw >> 36u) & 0x7fffu) != 0u)
             return fail(error, cap, "unsupported tagged/reserved rebase bits");
         patch->rebase_target = raw & ((UINT64_C(1) << 36u) - 1u);
+        if (!rebase_inside_image(info, base, patch->rebase_target))
+            return fail(error, cap, "chained rebase outside mapped image");
     }
     ++plan->count;
     return 0;
@@ -106,6 +135,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
     uint32_t dataoff = 0u, datasize = 0u;
     uint32_t starts_off, imports_off, symbols_off, imports_count;
     uint32_t import_format, symbol_format, seg_count;
+    uint32_t import_stride;
     size_t cursor, cmd_end;
     unsigned seen = 0u;
     const uint8_t *payload;
@@ -145,15 +175,18 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
     imports_count = rd32(payload + 16u);
     import_format = rd32(payload + 20u);
     symbol_format = rd32(payload + 24u);
-    if (import_format != DYLD_CHAINED_IMPORT || symbol_format != 0u ||
+    import_stride = import_format == DYLD_CHAINED_IMPORT ? 4u :
+                    import_format == DYLD_CHAINED_IMPORT_ADDEND ? 8u : 0u;
+    if (!import_stride || symbol_format != 0u ||
         imports_count > IOS27_CHAINED_MAX_IMPORTS ||
         !fits(starts_off, 4u, datasize) ||
-        !fits(imports_off, (uint64_t)imports_count * 4u, datasize) ||
-        symbols_off >= datasize)
+        !fits(imports_off, (uint64_t)imports_count * import_stride, datasize) ||
+        symbols_off > datasize ||
+        (imports_count && symbols_off == datasize))
         return fail(error, cap, "unsupported or invalid chained header");
     out->import_count = imports_count;
     for (uint32_t i = 0u; i < imports_count; ++i) {
-        uint32_t bits = rd32(payload + imports_off + (size_t)i * 4u);
+        uint32_t bits = rd32(payload + imports_off + (size_t)i * import_stride);
         uint32_t name_off = bits >> 9u;
         uint32_t name_start;
         size_t max_length, length;
@@ -173,6 +206,8 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
             return fail(error, cap, "unterminated/oversized chained symbol");
         memcpy(entry->symbol, payload + name_start, length);
         entry->ordinal = ordinal;
+        if (import_stride == 8u)
+            entry->addend = (int32_t)rd32(payload + imports_off + (size_t)i * 8u + 4u);
     }
     seg_count = rd32(payload + starts_off);
     if (seg_count != verified.segment_count ||
@@ -197,6 +232,8 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
         if (format != DYLD_CHAINED_PTR_64_OFFSET ||
             (pagesize != 4096u && pagesize != 16384u) ||
             pagecount > 4096u ||
+            (uint64_t)pagecount > seg->vmsize / pagesize +
+                                  (seg->vmsize % pagesize != 0u) ||
             segsize < 22u + (uint32_t)pagecount * 2u ||
             !fits(soff, segsize, datasize) ||
             seg->vmaddr < base ||
@@ -218,7 +255,7 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
                 uint64_t off;
                 if (plus(pageoff, chainoff, &off) ||
                     add_patch(file, size, &verified, out, i, off,
-                              error, cap, &next))
+                              base, error, cap, &next))
                     return -1;
                 if (!next) break;
                 if (next > ((uint32_t)pagesize - 8u - chainoff) / 4u)
@@ -241,12 +278,14 @@ int ios27_chained_apply(uint8_t *copy, size_t size,
                         char *error, size_t cap) {
     struct staged_patch { size_t offset; uint64_t value; } staged[IOS27_CHAINED_MAX_PATCHES];
     ios27_macho_info verified;
+    uint64_t base;
     if (!copy || !info || !plan ||
         plan->count > IOS27_CHAINED_MAX_PATCHES ||
         plan->import_count > IOS27_CHAINED_MAX_IMPORTS)
         return fail(error, cap, "invalid chained apply arguments");
     if (ios27_macho_parse(copy, size, &verified, error, cap) ||
-        verified.encrypted || !same_segments(info, &verified))
+        verified.encrypted || !same_segments(info, &verified) ||
+        vm_base(&verified, &base))
         return fail(error, cap, "chained application image changed");
     for (size_t i = 0u; i < plan->count; ++i) {
         const ios27_chained_patch *patch = &plan->patches[i];
@@ -270,18 +309,13 @@ int ios27_chained_apply(uint8_t *copy, size_t size,
                 !memchr(imp->symbol, '\0', sizeof(imp->symbol)) ||
                 resolver(context, imp->symbol, imp->ordinal, &value))
                 return fail(error, cap, "unresolved chained import");
-            if (patch->addend >= 0) {
-                if ((uint64_t)patch->addend > UINT64_MAX - value)
-                    return fail(error, cap, "chained bind addend overflow");
-                value += (uint64_t)patch->addend;
-            } else {
-                uint64_t negative = (uint64_t)(-(int32_t)patch->addend);
-                if (value < negative)
-                    return fail(error, cap, "chained bind addend underflow");
-                value -= negative;
-            }
-        } else if (plus(load_base, patch->rebase_target, &value)) {
-            return fail(error, cap, "chained rebase overflow");
+            if (add_signed(&value, imp->addend) ||
+                add_signed(&value, patch->addend))
+                return fail(error, cap, "chained bind addend overflow/underflow");
+        } else {
+            if (!rebase_inside_image(&verified, base, patch->rebase_target) ||
+                plus(load_base, patch->rebase_target, &value))
+                return fail(error, cap, "chained rebase outside image/overflow");
         }
         staged[i].offset = (size_t)off;
         staged[i].value = value;
