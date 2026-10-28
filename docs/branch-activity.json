@@ -3,9 +3,48 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "dd39b31675943da242866870fa133461c8bade3b",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 6,
-  "candidate_count": 6,
+  "candidates_checked": 7,
+  "candidate_count": 7,
   "candidates": [
+    {
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "8cbf96974e0617cf775c9208c64dbcc61515ab56",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "pr_number": 77,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 15,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 6,
+          "fixture_files": 7,
+          "additions": 1745,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21j_acquire",
+            "ios27_21j_acquire_injected",
+            "ios27_21j_create",
+            "ios27_21j_destroy",
+            "ios27_21j_lockorder_acquire",
+            "ios27_21j_lockorder_cancel_wait",
+            "ios27_21j_lockorder_create",
+            "ios27_21j_lockorder_destroy",
+            "ios27_21j_lockorder_edge",
+            "ios27_21j_lockorder_release",
+            "ios27_21j_lockorder_reset",
+            "ios27_21j_lockorder_snapshot"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21j_diagnostics.h",
+            "include/ios27/libsystem21j_lockorder.h",
+            "include/ios27/libsystem21j_schedule.h",
+            "src/libsystem21j_diagnostics.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "agent/phase21i-darwin-pthread-abi",
       "sha": "42721d346266f2579d3ce471c0fa3a4498d5c6d9",
@@ -41,59 +80,20 @@
       ]
     },
     {
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "45d1ec5f0df9642fa8a2a1560af95c5e6edcde74",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "pr_number": 77,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 15,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 6,
-          "fixture_files": 7,
-          "additions": 1736,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21j_acquire",
-            "ios27_21j_acquire_injected",
-            "ios27_21j_create",
-            "ios27_21j_destroy",
-            "ios27_21j_lockorder_acquire",
-            "ios27_21j_lockorder_create",
-            "ios27_21j_lockorder_destroy",
-            "ios27_21j_lockorder_edge",
-            "ios27_21j_lockorder_release",
-            "ios27_21j_lockorder_reset",
-            "ios27_21j_lockorder_snapshot",
-            "ios27_21j_note_contention"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21j_diagnostics.h",
-            "include/ios27/libsystem21j_lockorder.h",
-            "include/ios27/libsystem21j_schedule.h",
-            "src/libsystem21j_diagnostics.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase21f-fifo-mutex-20261028",
       "sha": "852760eef1526a92f8153bab75d9382f143d49d4",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
       "pr_number": 78,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 11,
+      "files_checked": 12,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 7,
-          "additions": 1017,
+          "fixture_files": 8,
+          "additions": 1135,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21f_mutex_create",
@@ -238,17 +238,46 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase21f-fifo-mutex-20261028",
+      "sha": "a501970f33dad845ae826049cc935cb891146607",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21f-fifo-mutex-20261028",
+      "pr_number": null,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 8,
+          "additions": 1135,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21f_mutex_create",
+            "ios27_21f_mutex_destroy",
+            "ios27_21f_mutex_info",
+            "ios27_21f_mutex_lock",
+            "ios27_21f_mutex_trylock",
+            "ios27_21f_mutex_unlock",
+            "ios27_21f_runtime_create",
+            "ios27_21f_runtime_destroy",
+            "ios27_21f_runtime_stats"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21f_mutex.h",
+            "src/libsystem21f_mutex.c",
+            "tests/phase21f-adversarial.c",
+            "tests/phase21f-darwin-calls.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
     "libsystem-host-model": [
-      {
-        "branch": "agent/phase21i-darwin-pthread-abi",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-        "source_files": 4,
-        "fixture_files": 7,
-        "ci": "running"
-      },
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
         "url": "https://github.com/kallmek3nny/ios-27/pull/77",
@@ -257,10 +286,17 @@
         "ci": "running"
       },
       {
+        "branch": "agent/phase21i-darwin-pthread-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+        "source_files": 4,
+        "fixture_files": 7,
+        "ci": "running"
+      },
+      {
         "branch": "phase21f-fifo-mutex-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/78",
         "source_files": 2,
-        "fixture_files": 7,
+        "fixture_files": 8,
         "ci": "passing_checks"
       },
       {
@@ -283,6 +319,13 @@
         "source_files": 1,
         "fixture_files": 4,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21f-fifo-mutex-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21f-fifo-mutex-20261028",
+        "source_files": 2,
+        "fixture_files": 8,
+        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -611,5 +654,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:27:10Z"
+  "observed_at": "2026-10-28T21:27:39Z"
 }
