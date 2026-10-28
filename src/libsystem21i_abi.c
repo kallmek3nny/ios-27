@@ -159,8 +159,10 @@ static int destroy_object(ios27_21i_runtime *rt, uint64_t addr, int kind) {
 int ios27_21i_lookup(ios27_21i_runtime *rt, uint64_t addr,
                      int kind, ios27_21i_token *out) {
     struct entry *e;
-    if (!rt || !out || (kind != IOS27_21I_MUTEX &&
-                       kind != IOS27_21I_CONDITION)) return EINVAL;
+    if (!out) return EINVAL;
+    *out = (ios27_21i_token){0, 0};
+    if (!rt || (kind != IOS27_21I_MUTEX &&
+                kind != IOS27_21I_CONDITION)) return EINVAL;
     (void)pthread_mutex_lock(&rt->guard);
     e = find(rt, addr, kind);
     if (e) *out = (ios27_21i_token){(uint32_t)(e - rt->entries + 1),
