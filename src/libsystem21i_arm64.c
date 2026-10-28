@@ -1,4 +1,5 @@
 #include "ios27/libsystem21i_arm64.h"
+#include "ios27/libsystem21i_errno.h"
 #include <errno.h>
 #include <stdint.h>
 
@@ -12,6 +13,6 @@ int ios27_21i_dispatch_arm64(ios27_21i_runtime *runtime,
                            registers->x[2]);
     /* An integer ABI return occupies w0; do not expose arbitrary host int
      * width, errno storage, or pthread pointer representation to the guest. */
-    registers->x[0] = (uint32_t)rc;
+    registers->x[0] = (uint32_t)ios27_21i_errno_to_darwin(rc);
     return 0;
 }
