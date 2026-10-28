@@ -95,7 +95,7 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>abort</span></div>
 </div></details>
 <details class="group"><summary><strong>libsystem_pthread</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 21 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
-<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/64">phase20d-darwin-threading</a> · 2 source, 0 fixture files · CI: running · not yet merged</p>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/64">phase20d-darwin-threading</a> · 2 source, 0 fixture files · CI: passing_checks · not yet merged</p>
 <p>darwin thread startup, tls, signals, cancellation and workqueues require more than linux pthread wrappers.</p>
 <div class="chips">
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>pthread_create</span></div>
@@ -287,10 +287,9 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>TLS trust bridge</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>Network sandbox policy</span></div>
 </div></details>
-<details class="group"><summary><strong>ObjC host prototype (not Apple libobjc)</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 7 synthetic, 8 targets</span> <span style="color:#a371f7">3 incoming</span></summary>
+<details class="group"><summary><strong>ObjC host prototype (not Apple libobjc)</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 7 synthetic, 8 targets</span> <span style="color:#a371f7">2 incoming</span></summary>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/63">phase20b-native-objc-dispatch-20261028</a> · 2 source, 0 fixture files · CI: running · not yet merged</p>
-<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/65">agent/phase20a-objc-metadata-20261028</a> · 3 source, 0 fixture files · CI: running · not yet merged</p>
-<p class="description"><a href="https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028">phase20b-native-objc-dispatch-20261028</a> · 2 source, 0 fixture files · CI: not_checked · not yet merged</p>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/65">agent/phase20a-objc-metadata-20261028</a> · 3 source, 0 fixture files · CI: passing_checks · not yet merged</p>
 <p>Standalone ObjC2 parser and trusted host-callback runtime, not Apple objc_msgSend ABI, guest IMP bindings, categories, arm64e or UIKit.</p>
 <p>evidence: <a href="../docs/phase19e-architecture.md">docs/phase19e-architecture.md</a> · test: undefined</p>
 <div class="chips">
@@ -304,7 +303,7 @@
 <div class="chip" title="native arm64 fixture"><span class="sq" style="background:#3fb950"></span><span>single relocation-free compiler ObjC method execution</span></div>
 </div></details>
 <details class="group"><summary><strong>libSystem guest model (not dylib)</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 8 synthetic, 8 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
-<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/62">phase20e-libsystem-userspace</a> · 2 source, 0 fixture files · CI: running · not yet merged</p>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/62">phase20e-libsystem-userspace</a> · 2 source, 0 fixture files · CI: passing_checks · not yet merged</p>
 <p>Standalone bounded guest trap dispatcher. Not real linked libSystem API exports, Darwin kernel traps, or host filesystem integration.</p>
 <p>evidence: <a href="../docs/phase19e-architecture.md">docs/phase19e-architecture.md</a> · test: undefined</p>
 <div class="chips">
