@@ -109,9 +109,7 @@ def main():
     if not compiler:
         print("phase19a: clang unavailable")
         return 77
-    if not linker:
-        print("phase19a: advanced original-source fixture requires ld64.lld")
-        return 77
+
     obj = output.with_suffix(".o")
     command([compiler, "--target=arm64-apple-darwin",
              "-ffreestanding", "-fno-builtin", "-fno-stack-protector",
@@ -121,12 +119,16 @@ def main():
               "13.0", "13.0", "-e", "_main", "-fatal_warnings",
               "-segprot", "__DATA_CONST", "r--", "r--",
               "-o", str(output)]
-    try:
-        command(common + [str(obj)])
-    except RuntimeError as exc:
-        if "This version of lld does not support linking for platform" not in str(exc):
-            raise
-        command(common + [str(no_platform_command(obj))])
+    if linker:
+        try:
+            command(common + [str(obj)])
+        except RuntimeError as exc:
+            if "This version of lld does not support linking for platform" not in str(exc):
+                raise
+            command(common + [str(no_platform_command(obj))])
+    else:
+        command([sys.executable, str(ROOT / "tools/phase19a-link-fallback.py"),
+                 str(obj), str(output)])
     inspect(output)
     print(f"phase19a: compiler-linked advanced startup fixture: {output}")
     return 0
