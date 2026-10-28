@@ -8,11 +8,19 @@
 #include <time.h>
 
 typedef struct { uint32_t generation; int used, retired; } lease_slot;
+typedef struct {
+    uint32_t stage, actor;
+    uint64_t ordinal;
+    int inject;
+} exact_rule;
 struct ios27_21j_diagnostics {
     pthread_mutex_t mutex;
     size_t capacity;
     uint64_t id, seed;
     unsigned failure_per_10000;
+    exact_rule rules[IOS27_21J_MAX_FAULT_RULES];
+    size_t nrules;
+    int rules_frozen;
     lease_slot slots[IOS27_21J_MAX_LEASES];
     ios27_21j_event events[IOS27_21J_TRACE_CAPACITY];
     ios27_21j_snapshot_data counters;
@@ -79,6 +87,40 @@ int ios27_21j_destroy(ios27_21j_diagnostics *d) {
     free(d);
     return 0;
 }
+int ios27_21j_rule_add(ios27_21j_diagnostics *d, uint32_t stage,
+                      uint32_t actor, uint64_t ordinal, int inject) {
+    int rc = 0;
+    if (!d || !stage || (inject != 0 && inject != 1)) return EINVAL;
+    (void)pthread_mutex_lock(&d->mutex);
+    if (d->rules_frozen) rc = EBUSY;
+    else {
+        for (size_t i = 0; i < d->nrules; ++i) {
+            const exact_rule *rule = &d->rules[i];
+            if (rule->stage == stage && rule->actor == actor &&
+                rule->ordinal == ordinal) {
+                rc = EEXIST;
+                break;
+            }
+        }
+        if (!rc && d->nrules == IOS27_21J_MAX_FAULT_RULES)
+            rc = ENOSPC;
+        if (!rc)
+            d->rules[d->nrules++] = (exact_rule){stage, actor, ordinal, inject};
+    }
+    (void)pthread_mutex_unlock(&d->mutex);
+    return rc;
+}
+int ios27_21j_rules_clear(ios27_21j_diagnostics *d) {
+    if (!d) return EINVAL;
+    (void)pthread_mutex_lock(&d->mutex);
+    if (d->rules_frozen) {
+        (void)pthread_mutex_unlock(&d->mutex);
+        return EBUSY;
+    }
+    d->nrules = 0;
+    (void)pthread_mutex_unlock(&d->mutex);
+    return 0;
+}
 int ios27_21j_probe(ios27_21j_diagnostics *d, uint32_t stage,
                     uint32_t actor, uint64_t ordinal) {
     uint64_t value;
@@ -87,6 +129,15 @@ int ios27_21j_probe(ios27_21j_diagnostics *d, uint32_t stage,
     value = mix(d->seed ^ mix(((uint64_t)stage << 32) | actor) ^ mix(ordinal));
     inject = (unsigned)(value % 10000u) < d->failure_per_10000;
     (void)pthread_mutex_lock(&d->mutex);
+    d->rules_frozen = 1;
+    for (size_t i = 0; i < d->nrules; ++i) {
+        const exact_rule *rule = &d->rules[i];
+        if (rule->stage == stage && rule->actor == actor &&
+            rule->ordinal == ordinal) {
+            inject = rule->inject;
+            break;
+        }
+    }
     ++d->counters.probes;
     if (inject) {
         ++d->counters.injections;
