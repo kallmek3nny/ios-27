@@ -6,12 +6,19 @@
 
 candidate branches with mapped changes: **3** · audited base: `1f951ef63b55`
 
+### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
+
+head: `b51ef1227f71` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +1004/-0 lines
+  - candidate declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
+
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `1c3b84eeff25` · ci: **running** · unmerged, not credited.
+head: `1c3b84eeff25` · ci: **passing_checks** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +922/-0 lines
-  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +936/-0 lines
+  - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -19,13 +26,6 @@ head: `1fd3dc09051a` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +1054/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`, `ios27_21d_wrlock`
-
-### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
-
-head: `60849e53d4a6` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +927/-0 lines
-  - candidate declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

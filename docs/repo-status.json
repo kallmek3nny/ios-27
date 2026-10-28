@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 70,
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "b51ef1227f71f96217a389314e09f5ca158cf519",
+      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "updated_at": "2026-10-28T19:57:35Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
       "sha": "1c3b84eeff25a01ca5c9dec6b57823711096dc07",
@@ -24,15 +33,6 @@
       "title": "phase 21d: fair reader-writer lock and safe once initialization",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "updated_at": "2026-10-28T19:56:31Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 70,
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "60849e53d4a6e9919413df9a142c809ae3a1142d",
-      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "updated_at": "2026-10-28T19:56:11Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -101,5 +101,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:57:04Z"
+  "observed_at": "2026-10-28T19:57:45Z"
 }
