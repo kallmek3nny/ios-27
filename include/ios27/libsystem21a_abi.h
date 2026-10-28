@@ -34,6 +34,23 @@ IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_mutexattr) == 16, "Darwin mutexattr siz
 IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_condattr) == 16, "Darwin condattr size");
 IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_rwlockattr) == 24, "Darwin rwlockattr size");
 IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_thread) == 8, "Darwin pthread_t width");
+IOS27_21A_STATIC_ASSERT(sizeof(ios27_21a_key) == 8, "Darwin pthread_key_t width");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_mutex) == 8, "mutex alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_cond) == 8, "cond alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_once) == 8, "once alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_attr) == 8, "attr alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_mutexattr) == 8, "mutexattr alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_condattr) == 8, "condattr alignment");
+IOS27_21A_STATIC_ASSERT(IOS27_21A_ALIGNOF(ios27_21a_rwlockattr) == 8, "rwlockattr alignment");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_mutex, opaque) == 8, "mutex sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_cond, opaque) == 8, "cond sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_rwlock, opaque) == 8, "rwlock sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_once, opaque) == 8, "once sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_attr, opaque) == 8, "attr sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_mutexattr, opaque) == 8, "mutexattr sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_condattr, opaque) == 8, "condattr sig boundary");
+IOS27_21A_STATIC_ASSERT(offsetof(ios27_21a_rwlockattr, opaque) == 8, "rwlockattr sig boundary");
 
 /* Documented Darwin static-initializer signatures, not runtime signatures. */
 #define IOS27_21A_MUTEX_STATIC_SIG UINT64_C(0x32aaaba7)
