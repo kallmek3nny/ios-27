@@ -60,11 +60,18 @@ int ios27_21j_create(ios27_21j_diagnostics **out, size_t capacity,
     if (!d) return ENOMEM;
     error = pthread_mutex_init(&d->mutex, NULL);
     if (error) { free(d); return error; }
-    id = atomic_fetch_add_explicit(&next_identity, 1, memory_order_relaxed);
-    if (!id || id == UINT64_MAX) {
-        (void)pthread_mutex_destroy(&d->mutex);
-        free(d);
-        return EAGAIN;
+    id = atomic_load_explicit(&next_identity, memory_order_relaxed);
+    for (;;) {
+        if (!id || id == UINT64_MAX) {
+            (void)pthread_mutex_destroy(&d->mutex);
+            free(d);
+            return EAGAIN;
+        }
+        /* Never wrap the runtime identity allocator: a wrapped ID could
+           validate a lease from a destroyed, different runtime. */
+        if (atomic_compare_exchange_weak_explicit(
+                &next_identity, &id, id + 1u,
+                memory_order_relaxed, memory_order_relaxed)) break;
     }
     d->id = id;
     d->seed = seed;
