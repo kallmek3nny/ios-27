@@ -189,9 +189,12 @@ static int find_symbol(const image_node *node, const char *symbol,
         uint64_t offset;
         if (strcmp(s->name, "__PAGEZERO") == 0) continue;
         offset = s->vmaddr - node->min_vm;
-        if ((s->initprot & 4u) &&
+        /* Export tries may expose code, read-only constants, or writable
+         * data, including zero-filled globals. Resolve only within a
+         * readable, mapped segment, never __PAGEZERO or a VM hole. */
+        if ((s->initprot & 1u) &&
             entry->address >= offset &&
-            entry->address - offset < s->filesize) {
+            entry->address - offset < s->vmsize) {
             *address = (uintptr_t)node->mapping + (uintptr_t)entry->address;
             return 0;
         }
