@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "32701ded7df77806c10afd8360a60c4ce543d6f9",
+      "sha": "f18307a799b772e5da088f49360956cc95b0b773",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
@@ -379,5 +379,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:09:06Z"
+  "observed_at": "2026-10-28T20:09:25Z"
 }
