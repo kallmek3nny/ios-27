@@ -9,30 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "e4b221fbc807dd367bcda3ea45c4bb74260d155d",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:28:12Z",
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "300e7cabce06362a02fba5388dd81b3c698cbced",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:28:44Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 80,
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "7db0b0a50053dab7c15b0fdf7b4b1bf0e03d6414",
-      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:28:07Z",
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "503a74a12900b53c58dcb3219b6dee2d3a8f19f7",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:28:43Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 78,
       "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "a501970f33dad845ae826049cc935cb891146607",
+      "sha": "03eb75ad79642ba09e9bd720c61be224966fb357",
       "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
-      "updated_at": "2026-10-28T21:27:23Z",
+      "updated_at": "2026-10-28T21:28:31Z",
       "status": "unmerged: not counted"
     },
     {
@@ -63,17 +63,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "3316a9aaf11ed2b0f1b157e496cda63130ed9de4",
-      "ahead_by": 34,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:28:19Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 81,
@@ -134,9 +124,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 36,
+    "branches_scanned": 35,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:28:24Z"
+  "observed_at": "2026-10-28T21:28:59Z"
 }
