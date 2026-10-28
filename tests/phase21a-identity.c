@@ -64,6 +64,12 @@ int main(void) {
     assert(pthread_barrier_destroy(&barrier) == 0);
     assert(abi_equal(addresses[0], addresses[0], &eq) == ESRCH);
     assert(ios27_21a_attach_thread(rt, BASE + 1024u) == 0);
+    {
+        uint64_t args[6] = {BASE + 1024u, 0, 0, 0, 0, 0};
+        uint64_t x0 = UINT64_MAX;
+        assert(ios27_21a_call(rt, "pthread_mutex_init", args, &x0) == EBUSY);
+        assert(x0 == (uint64_t)EBUSY);
+    }
     assert(abi_self(&self) == 0 && self == BASE + 1024u);
     assert(ios27_21a_destroy(rt) == EBUSY);
     assert(ios27_21a_detach_thread(rt) == 0);
