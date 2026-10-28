@@ -7,14 +7,33 @@
     "committed_at": "2026-10-28T19:14:10Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
+  "open_pull_requests": [
+    {
+      "number": 61,
+      "branch": "fix/phase20-live-branch-classification",
+      "sha": "b5426b59b512011e8e635d5fad17c6547d8fab29",
+      "title": "fix: recognize new phase-numbered agent sources in live progress map",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/61",
+      "updated_at": "2026-10-28T19:16:10Z",
+      "status": "unmerged: not counted"
+    }
+  ],
   "ahead_branches": [
     {
-      "branch": "phase20d-darwin-threading",
-      "sha": "39658bc7098a3613d0fbee6a57aadf031fec4f42",
-      "ahead_by": 1,
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "1abf00a81340f7b344af315b476ad73919f2cd1a",
+      "ahead_by": 5,
       "behind_by": 4,
-      "last_commit_at": "2026-10-28T19:14:38Z",
+      "last_commit_at": "2026-10-28T19:16:27Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase20d-darwin-threading",
+      "sha": "05200605523eae8581b1e2c2b3fc8672cdeddb48",
+      "ahead_by": 6,
+      "behind_by": 4,
+      "last_commit_at": "2026-10-28T19:16:20Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
       "status": "unmerged: not counted"
     }
@@ -83,5 +102,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:14:46Z"
+  "observed_at": "2026-10-28T19:16:51Z"
 }
