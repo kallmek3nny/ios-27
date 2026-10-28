@@ -89,6 +89,13 @@ int main(void) {
     assert(call("pthread_cond_signal", cond, 0) == 0);
     assert(call("pthread_cond_broadcast", cond, 0) == 0);
     assert(call("pthread_rwlock_init", rwlock, 0) == 0);
+    assert(call("pthread_rwlock_rdlock", rwlock, 0) == 0);
+    assert(call("pthread_rwlock_wrlock", rwlock, 0) == EDEADLK);
+    assert(call("pthread_rwlock_trywrlock", rwlock, 0) == EBUSY);
+    assert(call("pthread_rwlock_unlock", rwlock, 0) == 0);
+    assert(call("pthread_rwlock_wrlock", rwlock, 0) == 0);
+    assert(call("pthread_rwlock_rdlock", rwlock, 0) == EDEADLK);
+    assert(call("pthread_rwlock_unlock", rwlock, 0) == 0);
     {
         uint64_t addresses[2] = {mutex, rwlock};
         assert(call("pthread_mutex_lock", mutex, 0) == 0);
