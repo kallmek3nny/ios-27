@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase20e-libsystem-userspace",
-      "sha": "a5fb78ea8af65d270b2b76d219e905cd183758bf",
+      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "pr_number": 62,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -64,7 +64,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ],
     "unclassified": [
@@ -73,9 +73,9 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
         "source_files": 0,
         "fixture_files": 3,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:21:24Z"
+  "observed_at": "2026-10-28T19:21:44Z"
 }

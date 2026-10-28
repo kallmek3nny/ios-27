@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 62,
+      "branch": "phase20e-libsystem-userspace",
+      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "updated_at": "2026-10-28T19:21:24Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 66,
       "branch": "fix/assign-agent-test-fixtures-by-source",
       "sha": "63818f8893f292b70487ba83742be14de305319b",
       "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
       "url": "https://github.com/kallmek3nny/ios-27/pull/66",
       "updated_at": "2026-10-28T19:20:58Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 62,
-      "branch": "phase20e-libsystem-userspace",
-      "sha": "a5fb78ea8af65d270b2b76d219e905cd183758bf",
-      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "updated_at": "2026-10-28T19:20:34Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -92,5 +92,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:21:22Z"
+  "observed_at": "2026-10-28T19:21:42Z"
 }

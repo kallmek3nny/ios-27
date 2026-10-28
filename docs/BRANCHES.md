@@ -8,7 +8,7 @@ candidate branches with mapped changes: **1** · audited base: `b83af49cfca4`
 
 ### [phase20e-libsystem-userspace](https://github.com/kallmek3nny/ios-27/pull/62)
 
-head: `a5fb78ea8af6` · ci: **passing_checks** · unmerged, not credited.
+head: `5b41efa301cc` · ci: **running** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 0 test/fixture files, +360/-0 lines
   - candidate declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
