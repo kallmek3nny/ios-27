@@ -156,6 +156,18 @@ def summarize(candidate, files, ci, allowed):
             g["paths"].append(path)
         if source:
             g["symbols"].update(extract_symbols(item.get("patch")))
+    # An agent may name tests only by phase (e.g. phase20d-edge.c).
+    # Associate unmapped TEST fixtures with the branch's single clearly
+    # identified source subsystem. Never guess the owner of unknown source.
+    known = [name for name, g in groups.items()
+             if name != "unclassified" and g["source_files"] > 0]
+    unknown = groups.get("unclassified")
+    if len(known) == 1 and unknown and unknown["source_files"] == 0:
+        dest = groups[known[0]]
+        for key in ("fixture_files", "additions", "deletions"):
+            dest[key] += unknown[key]
+        dest["paths"] = (dest["paths"] + unknown["paths"])[:4]
+        del groups["unclassified"]
     mapped = []
     for name, g in sorted(groups.items()):
         if g["additions"] + g["deletions"] <= 0:
@@ -237,6 +249,28 @@ def self_test():
     assert get_group("src/libsystem20d_threads.c") == "libsystem-pthread"
     assert get_group("tests/phase20d_threads.c") == "libsystem-pthread"
     assert get_group("src/objc20e_metadata.c") == "objc-host-model"
+    phase20d = summarize(
+        {"branch": "phase20d-darwin-threading", "sha": "b" * 40,
+         "url": "https://github.com/example/repo/tree/phase20d"},
+        [{"filename": "include/ios27/libsystem20d_threads.h",
+          "additions": 10, "deletions": 0},
+         {"filename": "tests/phase20d-arm64-abi.c",
+          "additions": 15, "deletions": 0},
+         {"filename": "tests/phase20d-edge.c",
+          "additions": 12, "deletions": 0}],
+        "not_checked", {"libsystem-pthread", "unclassified"})
+    assert len(phase20d["groups"]) == 1
+    assert phase20d["groups"][0]["group_id"] == "libsystem-pthread"
+    assert phase20d["groups"][0]["fixture_files"] == 2
+    # An unknown NEW source file is never silently assigned to an existing block.
+    unknown = summarize(
+        {"branch": "other", "sha": "b" * 40,
+         "url": "https://github.com/example/repo/tree/other"},
+        [{"filename": "src/unknown20f.c", "additions": 2, "deletions": 0},
+         {"filename": "src/objc20e_metadata.c", "additions": 2, "deletions": 0}],
+        "not_checked", {"objc-host-model", "unclassified"})
+    assert len(unknown["groups"]) == 2
+
     assert extract_symbols("+int ios27_objc_create(void) {\n+return ios27_objc_fake();\n") == {"ios27_objc_create"}
     provenance = {"main_source": {"sha": "a" * 40},
                   "open_pull_requests": [{"branch": "phase19e", "sha": "b" * 40,
