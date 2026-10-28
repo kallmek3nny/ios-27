@@ -162,6 +162,7 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
     ios27_macho_info parsed;
     uint64_t low = UINT64_MAX, high = 0u, text_vm = 0u, entry;
     int text_found = 0, entry_found = 0;
+    uint64_t pagezero_end = 0u;
 
     if (layout) memset(layout, 0, sizeof(*layout));
     if (!data || !info || !layout ||
@@ -191,11 +192,16 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
             (s->maxprot & 6u) == 6u)
             return bad(error, error_size, "invalid or W+X protections");
         if (strcmp(s->name, "__PAGEZERO") == 0) {
-            if (s->filesize || s->initprot || s->maxprot)
-                return bad(error, error_size, "invalid __PAGEZERO protections/data");
+            if (s->vmaddr != 0u || s->filesize || s->initprot ||
+                s->maxprot || pagezero_end != 0u)
+                return bad(error, error_size, "invalid __PAGEZERO range/protections");
+            pagezero_end = s->vmsize;
             continue;
         }
         if (!s->vmsize) continue;
+        /* Reject malformed 4K Mach-O VM/file page phase relationships. */
+        if (s->filesize && ((s->vmaddr ^ s->fileoff) & 4095u) != 0u)
+            return bad(error, error_size, "misaligned file/VM segment offset");
         last = s->vmaddr + s->vmsize; /* parser checked overflow */
         if (last > UINT64_MAX - (uint64_t)(page_size - 1u))
             return bad(error, error_size, "segment page rounding overflow");
@@ -227,11 +233,19 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
         if ((s->initprot & 4u) && entry >= s->vmaddr &&
             entry - s->vmaddr <= s->filesize &&
             s->filesize - (entry - s->vmaddr) >= 4u) {
+            /*
+             * Even if mapped RX, Mach-O load commands are not ARM64 code.
+             * Reject LC_MAIN offsets which point into the file header.
+             */
+            if (s->fileoff + (entry - s->vmaddr) <
+                32u + (uint64_t)u32(data + 20u))
+                return bad(error, error_size, "entry in Mach-O load commands");
             if (entry_found++)
                 return bad(error, error_size, "ambiguous LC_MAIN entry");
         }
     }
     if (!entry_found || low == UINT64_MAX || high <= low ||
+        low < pagezero_end ||
         high - low > (256ull * 1024ull * 1024ull) ||
         high - low > (uint64_t)SIZE_MAX)
         return bad(error, error_size, "unmapped LC_MAIN or invalid span");

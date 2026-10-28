@@ -298,6 +298,12 @@ int main(void) {
     le32(consumer_bytes + 104u + 60u, 7u); /* RWX data segment */
     expect_failure(specs, 2u);
     classic_consumer(consumer_bytes);
+    le32(consumer_bytes + 104u + 56u, 1u); /* maxprot lacks WRITE */
+    expect_failure(specs, 2u);
+    classic_consumer(consumer_bytes);
+    le32(consumer_bytes + 104u + 56u, 11u); /* unknown maxprot bits */
+    expect_failure(specs, 2u);
+    classic_consumer(consumer_bytes);
     le64(consumer_bytes + 104u + 24u, UINT64_C(0x100000000));
     expect_failure(specs, 2u); /* overlapping VM ranges */
     classic_consumer(consumer_bytes);

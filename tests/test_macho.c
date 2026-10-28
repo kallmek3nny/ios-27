@@ -122,6 +122,29 @@ static void executable_layout_tests(void) {
     assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
     assert(ios27_macho_executable_layout(file, sizeof(file), &image,
                                           16384u, &layout, err, sizeof(err)) != 0);
+
+    /* A malformed __PAGEZERO must not swallow a RW mapping at a nonzero VM. */
+    put32(file + 160u, 0u);
+    put32(file + 164u, 0u);
+    put64(file + 152u, 0u);
+    assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(file, sizeof(file), &image,
+                                          4096u, &layout, err, sizeof(err)) != 0);
+
+    memset(file + 112u, 0, 16u);
+    memcpy(file + 112u, "__DATA", 6u);
+    put32(file + 160u, 3u);
+    put32(file + 164u, 3u);
+    put64(file + 152u, 4096u);
+    put64(file + 184u, 32u); /* entry points into Mach-O command header */
+    assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(file, sizeof(file), &image,
+                                          4096u, &layout, err, sizeof(err)) != 0);
+    put64(file + 184u, 256u);
+    put64(file + 144u, 4095u); /* in-file segment offset, but wrong VM phase */
+    assert(ios27_macho_parse(file, sizeof(file), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(file, sizeof(file), &image,
+                                          4096u, &layout, err, sizeof(err)) != 0);
 }
 
 int main(void) {

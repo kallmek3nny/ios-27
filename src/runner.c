@@ -41,6 +41,8 @@ int ios27_run_freestanding(const uint8_t *data, size_t size,
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
         return -1;
+    if (info->stacksize != 0u)
+        return fail(error, error_size, "nonzero LC_MAIN stacksize not implemented");
     mapping = mmap(NULL, layout.span, PROT_NONE,
                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (mapping == MAP_FAILED)
