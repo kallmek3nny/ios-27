@@ -57,4 +57,11 @@ int ios27_21j_snapshot(ios27_21j_diagnostics *diag,
 /* ERANGE means an event was overwritten in the fixed-size ring. */
 int ios27_21j_read(ios27_21j_diagnostics *diag, uint64_t sequence,
                     ios27_21j_event *out);
+/* Copy an ordered, internally coherent journal snapshot under one lock.
+   ENOSPC returns the needed count without a partial copy. A zero-event
+   snapshot reports first/last as zero. */
+int ios27_21j_export(ios27_21j_diagnostics *diag,
+                      ios27_21j_event *out, size_t capacity,
+                      size_t *count, uint64_t *first, uint64_t *last);
+
 #endif
