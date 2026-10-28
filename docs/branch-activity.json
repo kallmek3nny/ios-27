@@ -8,19 +8,19 @@
   "candidates": [
     {
       "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "f3a8ae787162decfe9ed8defe73c21869c567bbc",
+      "sha": "beba6636c5c95df336720c3d37323261119d30b7",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "pr_number": 73,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 15,
+      "files_checked": 16,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
-          "fixture_files": 10,
-          "additions": 2244,
+          "fixture_files": 11,
+          "additions": 2362,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21d_create",
@@ -137,7 +137,7 @@
         "branch": "feat/phase21d-fair-rwlock-once",
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 2,
-        "fixture_files": 10,
+        "fixture_files": 11,
         "ci": "passing_checks"
       },
       {
@@ -486,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:28:51Z"
+  "observed_at": "2026-10-28T20:31:04Z"
 }

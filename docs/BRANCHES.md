@@ -8,9 +8,9 @@ candidate branches with mapped changes: **3** · audited base: `e84a0f2ca216`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
-head: `f3a8ae787162` · ci: **passing_checks** · unmerged, not credited.
+head: `beba6636c5c9` · ci: **passing_checks** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 10 test/fixture files, +2244/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 11 test/fixture files, +2362/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
 
