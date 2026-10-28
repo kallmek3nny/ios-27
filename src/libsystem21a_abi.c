@@ -7,17 +7,17 @@
 #include <string.h>
 
 /* Host locks never occupy the Darwin opaque bytes. All slots are bounded. */
-enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3 };
+enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4 };
 enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
-    OP_UNSUPPORTED
+    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
     unsigned kind, pins;
-    unsigned mutex_locked, rw_writer_locked;
+    unsigned mutex_locked, rw_writer_locked, mutex_type, mutex_depth;
     pthread_t mutex_owner, rw_writer;
     pthread_t rw_reader_ids[32];
     unsigned rw_reader_counts[32];
@@ -52,6 +52,10 @@ static const entry symbols[] = {
     {"pthread_rwlock_tryrdlock", OP_RTL},
     {"pthread_rwlock_trywrlock", OP_RTWL},
     {"pthread_rwlock_unlock", OP_RU},
+    {"pthread_mutexattr_init", OP_MAI},
+    {"pthread_mutexattr_destroy", OP_MAD},
+    {"pthread_mutexattr_settype", OP_MAS},
+    {"pthread_mutexattr_gettype", OP_MAG},
     {"pthread_once", OP_UNSUPPORTED},
     {"pthread_create", OP_UNSUPPORTED},
     {"pthread_join", OP_UNSUPPORTED},
@@ -70,6 +74,7 @@ static size_t object_size(unsigned kind) {
         case KIND_MUTEX: return sizeof(ios27_21a_mutex);
         case KIND_COND: return sizeof(ios27_21a_cond);
         case KIND_RWLOCK: return sizeof(ios27_21a_rwlock);
+        case KIND_MUTEXATTR: return sizeof(ios27_21a_mutexattr);
         default: return 0u;
     }
 }
@@ -120,20 +125,23 @@ static object_slot *find_slot(ios27_21a_runtime *rt, uint64_t address) {
             return &rt->objects[i];
     return NULL;
 }
-static int native_init(object_slot *s, unsigned kind) {
+static int native_init(object_slot *s, unsigned kind, unsigned mutex_type) {
     switch (kind) {
         case KIND_MUTEX: {
             /* Error-checking avoids deadlock on accidental re-lock. */
             pthread_mutexattr_t attr;
             int e = pthread_mutexattr_init(&attr);
             if (e) return e;
-            e = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+            e = pthread_mutexattr_settype(&attr, mutex_type == 2u ?
+                                            PTHREAD_MUTEX_RECURSIVE :
+                                            PTHREAD_MUTEX_ERRORCHECK);
             if (!e) e = pthread_mutex_init(&s->native.mutex, &attr);
             (void)pthread_mutexattr_destroy(&attr);
             return e;
         }
         case KIND_COND: return pthread_cond_init(&s->native.cond, NULL);
         case KIND_RWLOCK: return pthread_rwlock_init(&s->native.rwlock, NULL);
+        case KIND_MUTEXATTR: return 0;
         default: return EINVAL;
     }
 }
@@ -142,11 +150,12 @@ static int native_destroy(object_slot *s) {
         case KIND_MUTEX: return pthread_mutex_destroy(&s->native.mutex);
         case KIND_COND: return pthread_cond_destroy(&s->native.cond);
         case KIND_RWLOCK: return pthread_rwlock_destroy(&s->native.rwlock);
+        case KIND_MUTEXATTR: return 0;
         default: return EINVAL;
     }
 }
 static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
-                     int static_initializer) {
+                     int static_initializer, unsigned mutex_type) {
     unsigned char *p;
     object_slot *s = NULL;
     uint64_t sig, token;
@@ -167,9 +176,16 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     }
     memcpy(&sig, p, sizeof(sig));
     if (static_initializer) {
-        uint64_t expected = kind == KIND_MUTEX ? IOS27_21A_MUTEX_STATIC_SIG :
-                            kind == KIND_COND ? IOS27_21A_COND_STATIC_SIG : 0;
-        if (!expected || sig != expected) { e = EINVAL; goto done; }
+        int accepted = kind == KIND_MUTEX ?
+                (sig == IOS27_21A_MUTEX_STATIC_SIG ||
+                 sig == IOS27_21A_MUTEX_ERRORCHECK_SIG ||
+                 sig == IOS27_21A_MUTEX_RECURSIVE_SIG) :
+                kind == KIND_COND ? sig == IOS27_21A_COND_STATIC_SIG :
+                kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG : 0;
+        if (!accepted) { e = EINVAL; goto done; }
+        if (kind == KIND_MUTEX)
+            mutex_type = sig == IOS27_21A_MUTEX_RECURSIVE_SIG ? 2u :
+                         sig == IOS27_21A_MUTEX_ERRORCHECK_SIG ? 1u : 0u;
         for (i = sizeof(sig); i < sz; ++i)
             if (p[i]) { e = EINVAL; goto done; }
     } else if (sig != 0) { e = EBUSY; goto done; }
@@ -178,7 +194,7 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     }
     if (!s) { e = EAGAIN; goto done; }
     if (rt->next_token == UINT64_MAX) { e = EAGAIN; goto done; }
-    e = native_init(s, kind);
+    e = native_init(s, kind, mutex_type);
     if (e) goto done;
     token = rt->next_token++;
     memset(p, 0, sz);
@@ -190,6 +206,8 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     s->pins = 0;
     s->mutex_locked = 0;
     s->rw_writer_locked = 0;
+    s->mutex_depth = 0;
+    s->mutex_type = mutex_type;
     memset(s->rw_reader_counts, 0, sizeof(s->rw_reader_counts));
     s->kind = kind;
 done:
@@ -211,12 +229,16 @@ static int slot_pin(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
         if (!s) {
             memcpy(&sig, p, sizeof(sig));
             (void)pthread_mutex_unlock(&rt->guard);
-            expected = kind == KIND_MUTEX ? IOS27_21A_MUTEX_STATIC_SIG :
-                       kind == KIND_COND ? IOS27_21A_COND_STATIC_SIG : 0u;
-            if (pass == 0u && expected && sig == expected) {
+            expected = kind == KIND_MUTEX ?
+                       (sig == IOS27_21A_MUTEX_STATIC_SIG ||
+                        sig == IOS27_21A_MUTEX_ERRORCHECK_SIG ||
+                        sig == IOS27_21A_MUTEX_RECURSIVE_SIG) :
+                       kind == KIND_COND ? sig == IOS27_21A_COND_STATIC_SIG :
+                       kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG : 0u;
+            if (pass == 0u && expected) {
                 /* One winner initializes the static Darwin object; races
                  * observe the committed bridge record on second pass. */
-                e = slot_init(rt, address, kind, 1);
+                e = slot_init(rt, address, kind, 1, 0u);
                 if (e != 0 && e != EBUSY) return e;
                 continue;
             }
@@ -353,7 +375,7 @@ static int mutex_owned_unlock(ios27_21a_runtime *rt, object_slot *s) {
     (void)pthread_mutex_lock(&rt->guard);
     if (s->mutex_locked && pthread_equal(s->mutex_owner, pthread_self())) {
         e = pthread_mutex_unlock(&s->native.mutex);
-        if (!e) s->mutex_locked = 0u;
+        if (!e && --s->mutex_depth == 0u) s->mutex_locked = 0u;
     }
     (void)pthread_mutex_unlock(&rt->guard);
     return e;
@@ -370,8 +392,14 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
                                pthread_mutex_trylock(&s->native.mutex);
             if (!e) {
                 (void)pthread_mutex_lock(&rt->guard);
-                s->mutex_locked = 1u;
-                s->mutex_owner = pthread_self();
+                if (s->mutex_locked && s->mutex_type == 2u &&
+                    pthread_equal(s->mutex_owner, pthread_self()))
+                    ++s->mutex_depth;
+                else {
+                    s->mutex_locked = 1u;
+                    s->mutex_depth = 1u;
+                    s->mutex_owner = pthread_self();
+                }
                 (void)pthread_mutex_unlock(&rt->guard);
             }
             break;
@@ -394,6 +422,18 @@ static int call_native(ios27_21a_runtime *rt, uint64_t address,
     slot_unpin(rt, s);
     return e;
 }
+static int attr_value(ios27_21a_runtime *rt, uint64_t address,
+                      int setter, unsigned *value) {
+    object_slot *s = NULL;
+    int e = slot_pin(rt, address, KIND_MUTEXATTR, &s);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    if (setter) s->mutex_type = *value;
+    else *value = s->mutex_type;
+    (void)pthread_mutex_unlock(&rt->guard);
+    slot_unpin(rt, s);
+    return 0;
+}
 int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                    const uint64_t args[6], uint64_t *x0) {
     size_t i;
@@ -410,16 +450,44 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
     }
     if (!matched) return ENOSYS;
     if (op == OP_UNSUPPORTED) { *x0 = ENOTSUP; return ENOTSUP; }
-    kind = (op <= OP_MU) ? KIND_MUTEX :
-           (op <= OP_CB) ? KIND_COND : KIND_RWLOCK;
-    if (op == OP_MI || op == OP_CI || op == OP_RI) {
-        /* Null attributes only. Never interpret host attribute layouts. */
-        e = args[1] ? ENOTSUP : slot_init(rt, args[0], kind, 0);
-    } else if (op == OP_MD || op == OP_CD || op == OP_RD) {
-        e = slot_destroy(rt, args[0], kind);
+    if (op == OP_MAI) {
+        e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
+    } else if (op == OP_MAD) {
+        e = slot_destroy(rt, args[0], KIND_MUTEXATTR);
+    } else if (op == OP_MAS || op == OP_MAG) {
+        unsigned type = (unsigned)args[1];
+        if (op == OP_MAS && args[1] > 2u) e = EINVAL;
+        else if (op == OP_MAG) {
+            unsigned char *output = NULL;
+            e = guest_view(rt, args[1], sizeof(uint32_t), 4u, &output);
+            if (!e) {
+                e = attr_value(rt, args[0], 0, &type);
+                if (!e) {
+                    uint32_t result = (uint32_t)type;
+                    memcpy(output, &result, sizeof(result));
+                }
+            }
+        } else e = attr_value(rt, args[0], 1, &type);
     } else {
-        e = call_native(rt, args[0], kind, op);
+        kind = (op <= OP_MU) ? KIND_MUTEX :
+               (op <= OP_CB) ? KIND_COND : KIND_RWLOCK;
+        if (op == OP_MI || op == OP_CI || op == OP_RI) {
+            unsigned type = 0u;
+            if (op == OP_MI && args[1]) {
+                e = attr_value(rt, args[1], 0, &type);
+                if (e) goto result;
+            } else if (args[1]) {
+                e = ENOTSUP;
+                goto result;
+            }
+            e = slot_init(rt, args[0], kind, 0, type);
+        } else if (op == OP_MD || op == OP_CD || op == OP_RD) {
+        e = slot_destroy(rt, args[0], kind);
+        } else {
+            e = call_native(rt, args[0], kind, op);
+        }
     }
+result:
     *x0 = (uint64_t)e;
     return e;
 }
