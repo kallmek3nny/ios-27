@@ -8,11 +8,16 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
                           uint8_t *guest, size_t guest_size,
                           uint64_t guest_offset, uint64_t length,
                           uint32_t timeout_ms, uint32_t *actual) {
-    uint8_t staging[IOS27_MACH_MSG_MAX];
+    uint8_t staging[IOS27_MACH_MSG_MAX + IOS27_MACH_OOL_MAX];
     size_t n;
     uintptr_t arena_start, result_start;
     int result;
-    if (!space || !guest || !actual) return IOS27_MACH_BAD_ARGUMENT;
+    if (!space || !guest || !actual ||
+        ios27_mach_v2_validate_external(space, guest, guest_size) !=
+            IOS27_MACH_OK ||
+        ios27_mach_v2_validate_external(space, actual, sizeof(*actual)) !=
+            IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
     arena_start = (uintptr_t)guest;
     result_start = (uintptr_t)actual;
     /* Never dereference an unaligned host result pointer on ARM64. */
@@ -27,9 +32,16 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
     if (
         guest_offset > (uint64_t)guest_size ||
         length > (uint64_t)guest_size - guest_offset ||
-        length > IOS27_MACH_MSG_MAX ||
+        length > IOS27_MACH_MSG_MAX +
+                 (operation == IOS27_MACH_GUEST_RECEIVE_TRAILER ?
+                  IOS27_MACH_SEQNO_TRAILER_SIZE :
+                  operation == IOS27_MACH_GUEST_RECEIVE_OOL ?
+                  IOS27_MACH_OOL_MAX : 0u) ||
         (operation != IOS27_MACH_GUEST_SEND &&
-         operation != IOS27_MACH_GUEST_RECEIVE))
+         operation != IOS27_MACH_GUEST_RECEIVE &&
+         operation != IOS27_MACH_GUEST_RECEIVE_SET &&
+         operation != IOS27_MACH_GUEST_RECEIVE_TRAILER &&
+         operation != IOS27_MACH_GUEST_RECEIVE_OOL))
         return IOS27_MACH_BAD_ARGUMENT;
     n = (size_t)length;
     if (operation == IOS27_MACH_GUEST_SEND) {
@@ -37,13 +49,24 @@ int ios27_mach_guest_call(ios27_mach_v2 *space, uint32_t task,
             return IOS27_MACH_BAD_ARGUMENT;
         /* Even a malformed guest wire never aliases host queue bytes. */
         memcpy(staging, guest + (size_t)guest_offset, n);
-        result = ios27_mach_v2_send(space, task, staging, n, timeout_ms);
+        result = ios27_mach_v2_send_guest_ool(space, task, staging, n,
+                                               timeout_ms, guest, guest_size);
         if (result == IOS27_MACH_OK) *actual = (uint32_t)n;
         return result;
     }
     /* Preflighted, private temporary receive; commit only after success. */
-    result = ios27_mach_v2_receive(space, task, receive_name,
-                                   staging, &n, timeout_ms);
+    if (operation == IOS27_MACH_GUEST_RECEIVE_OOL)
+        result = ios27_mach_v2_receive_guest_ool(
+            space, task, receive_name, staging, &n, timeout_ms, guest_offset);
+    else if (operation == IOS27_MACH_GUEST_RECEIVE_SET)
+        result = ios27_mach_v2_receive_set(space, task, receive_name,
+                                           staging, &n, timeout_ms);
+    else if (operation == IOS27_MACH_GUEST_RECEIVE_TRAILER)
+        result = ios27_mach_v2_receive_trailer(space, task, receive_name,
+                                               staging, &n, timeout_ms);
+    else
+        result = ios27_mach_v2_receive(space, task, receive_name,
+                                       staging, &n, timeout_ms);
     if (result == IOS27_MACH_TOO_LARGE) {
         *actual = (uint32_t)n;
         return result;
@@ -72,7 +95,11 @@ int ios27_mach_guest_call_offset(ios27_mach_v2 *space, uint32_t task,
         (uint64_t)guest_size - actual_offset < sizeof(actual) ||
         guest_offset > (uint64_t)guest_size ||
         length > (uint64_t)guest_size - guest_offset ||
-        length > IOS27_MACH_MSG_MAX)
+        length > IOS27_MACH_MSG_MAX +
+                 (operation == IOS27_MACH_GUEST_RECEIVE_TRAILER ?
+                  IOS27_MACH_SEQNO_TRAILER_SIZE :
+                  operation == IOS27_MACH_GUEST_RECEIVE_OOL ?
+                  IOS27_MACH_OOL_MAX : 0u))
         return IOS27_MACH_BAD_ARGUMENT;
     /* No guest result store may overwrite the wire input or output span. */
     if (guest_offset < actual_offset + sizeof(actual) &&

@@ -407,7 +407,149 @@ static void phase17c_dead_name_fixture_dispatch(void) {
     ios27_mach_v2_free(s);
 }
 
+
+static void phase18c_abi_port_set_dispatch(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    uint8_t arena[512] = {0};
+    uint32_t port, set, sender;
+    assert(s);
+    assert(ios27_darwin_fixture_call(s, 1u, IOS27_DARWIN_FIXTURE_ALLOCATE,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    port = (uint32_t)out.x[0];
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_SET_ALLOCATE,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    set = (uint32_t)out.x[0];
+    in.x[0] = set;
+    in.x[1] = port;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_SET_ADD,
+                                     &in, &out, NULL, 0u) ==
+           IOS27_MACH_BAD_RIGHT);
+    assert(ios27_darwin_fixture_call(s, 1u, IOS27_DARWIN_FIXTURE_SET_ADD,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    in.x[0] = port;
+    in.x[1] = 2u;
+    assert(ios27_darwin_fixture_call(s, 1u, IOS27_DARWIN_FIXTURE_MAKE_SEND,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    sender = (uint32_t)out.x[0];
+    message(arena + 32u, sender, IOS27_MACH_COPY_SEND, 0u, 1871u);
+    in.x[0] = 32u;
+    in.x[1] = 24u;
+    in.x[2] = 0u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_SEND,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    in.x[0] = set;
+    in.x[1] = 128u;
+    in.x[2] = 24u;
+    in.x[3] = 0u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_RECEIVE_SET,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    assert(out.x[0] == 24u && rd32(arena + 148u) == 1871u);
+    message(arena + 32u, sender, IOS27_MACH_COPY_SEND, 0u, 1872u);
+    in.x[0] = 32u;
+    in.x[1] = 24u;
+    in.x[2] = 0u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_SEND,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    in.x[0] = port;
+    in.x[1] = 128u;
+    in.x[2] = 35u;
+    in.x[3] = 0u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_TOO_LARGE && out.x[0] == 36u);
+    in.x[2] = 36u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK && out.x[0] == 36u);
+    assert(rd32(arena + 148u) == 1872u);
+    assert(rd32(arena + 156u) == 12u && rd32(arena + 160u) == 1u);
+    in.x[0] = set;
+    in.x[1] = port;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_SET_REMOVE,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    in.x[0] = set;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_SET_DESTROY,
+                                     &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+static void phase18c_reject_abi_state_alias(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    assert(s);
+    assert(ios27_darwin_fixture_call(s, 1u,
+            IOS27_DARWIN_FIXTURE_ALLOCATE, &in,
+            (ios27_darwin_guest_registers *)(void *)s,
+            NULL, 0u) == IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_darwin_fixture_call(s, 1u,
+            IOS27_DARWIN_FIXTURE_ALLOCATE, &in, &out,
+            (uint8_t *)(void *)s, 64u) == IOS27_MACH_BAD_ARGUMENT);
+    assert(ios27_darwin_fixture_call(s, 1u,
+            IOS27_DARWIN_FIXTURE_ALLOCATE, &in, &out,
+            NULL, 0u) == IOS27_MACH_OK);
+    ios27_mach_v2_free(s);
+}
+
+
+static void phase18c_abi_bounded_ool(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}};
+    uint8_t arena[512] = {0};
+    uint32_t port, sender;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &port) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, port, 2u, &sender) ==
+           IOS27_MACH_OK);
+    message(arena + 32u, sender,
+            IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND, 0u, 1891u);
+    wr32(arena + 36u, 44u);
+    wr32(arena + 56u, 1u);
+    wr32(arena + 60u, 300u);
+    arena[71u] = IOS27_MACH_OOL_DESCRIPTOR;
+    wr32(arena + 72u, 4u);
+    arena[300u] = 0x11u;
+    arena[301u] = 0x22u;
+    arena[302u] = 0x33u;
+    arena[303u] = 0x44u;
+    in.x[0] = 32u;
+    in.x[1] = 44u;
+    in.x[2] = 0u;
+    assert(ios27_darwin_fixture_call(s, 2u, IOS27_DARWIN_FIXTURE_SEND,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK);
+    in.x[0] = port;
+    in.x[1] = 128u;
+    in.x[2] = 47u;
+    in.x[3] = 0u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_RECEIVE_OOL,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_TOO_LARGE && out.x[0] == 48u);
+    in.x[2] = 48u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+                                     IOS27_DARWIN_FIXTURE_RECEIVE_OOL,
+                                     &in, &out, arena, sizeof(arena)) ==
+           IOS27_MACH_OK && out.x[0] == 48u);
+    assert(rd32(arena + 148u) == 1891u);
+    assert(rd32(arena + 156u) == 172u);
+    assert(rd32(arena + 172u) == 0x44332211u);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase18c_abi_bounded_ool();
+    phase18c_reject_abi_state_alias();
+    phase18c_abi_port_set_dispatch();
     phase17c_dead_name_fixture_dispatch();
     abi_complex_descriptor_round_trip();
     reject_unaligned_darwin_regs();

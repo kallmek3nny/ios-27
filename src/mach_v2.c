@@ -24,6 +24,11 @@ typedef struct {
     uint16_t length;
     uint8_t descriptor_count;
     uint8_t descriptor_objects[IOS27_MACH_V2_DESCRIPTORS];
+    uint16_t descriptor_offsets[IOS27_MACH_V2_DESCRIPTORS];
+    uint16_t ool_offset;
+    uint16_t ool_size;
+    uint8_t ool_present;
+    uint8_t ool_bytes[IOS27_MACH_OOL_MAX];
     uint8_t reply_object;
 } queued_wire;
 
@@ -32,10 +37,19 @@ typedef struct {
     uint8_t owner;
     uint8_t head;
     uint8_t count;
+    uint8_t set_id; /* owner-local set slot + 1, zero = detached */
+    uint32_t seqno; /* successful receives, including direct receive */
     queued_wire queue[IOS27_MACH_QUEUE_MAX];
 } port_object;
 
+typedef struct {
+    uint32_t name;
+    uint8_t active;
+    uint8_t cursor; /* next port index for round-robin receive */
+} port_set;
+
 struct ios27_mach_v2 {
+    port_set sets[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_PORT_SETS];
     uint32_t next_name[IOS27_MACH_TASK_MAX];
     local_right names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
     port_object ports[IOS27_MACH_PORT_MAX];
@@ -60,6 +74,13 @@ static uint32_t rd32(const uint8_t *p) {
 static void wr32(uint8_t *p, uint32_t v) {
     for (unsigned i = 0u; i < 4u; ++i) p[i] = (uint8_t)(v >> (8u * i));
 }
+static uint64_t rd64(const uint8_t *p) {
+    return (uint64_t)rd32(p) | ((uint64_t)rd32(p + 4u) << 32u);
+}
+static void wr64(uint8_t *p, uint64_t v) {
+    wr32(p, (uint32_t)v);
+    wr32(p + 4u, (uint32_t)(v >> 32u));
+}
 /* Reject overlapping caller buffers before mutating a queue or right.
  * Invalid/overflowing host ranges fail closed; the guest ABI separately
  * enforces its bounded, non-aliasing offset-based arena. */
@@ -70,6 +91,13 @@ static int ranges_overlap(const void *a, size_t n,
     if (n > UINTPTR_MAX - x || m > UINTPTR_MAX - y)
         return 1;
     return n && m && x < y + m && y < x + n;
+}
+int ios27_mach_v2_validate_external(const ios27_mach_v2 *s,
+                                     const void *ptr, size_t length) {
+    if (!s || (!ptr && length) ||
+        ranges_overlap(ptr, length, s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    return IOS27_MACH_OK;
 }
 static local_right *by_name(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
     if (!s || !valid_task(task) || !name) return NULL;
@@ -114,6 +142,18 @@ static local_right *reserve_name(ios27_mach_v2 *s, uint32_t task,
     }
     return NULL;
 }
+static port_set *lookup_set(ios27_mach_v2 *s, uint32_t task,
+                            uint32_t name, uint8_t *id) {
+    if (!s || !valid_task(task) || !name) return NULL;
+    for (size_t i = 0u; i < IOS27_MACH_V2_PORT_SETS; ++i) {
+        port_set *set = &s->sets[TASK_INDEX(task)][i];
+        if (set->active && set->name == name) {
+            if (id) *id = (uint8_t)(i + 1u);
+            return set;
+        }
+    }
+    return NULL;
+}
 static void prune(local_right *r) {
     if (r && r->object && !r->receive && !r->sends && !r->once &&
         !r->pending_sends && !r->pending_once)
@@ -153,7 +193,9 @@ void ios27_mach_v2_free(ios27_mach_v2 *s) {
 }
 int ios27_mach_v2_allocate(ios27_mach_v2 *s, uint32_t owner,
                            uint32_t *local_name) {
-    if (!s || !valid_task(owner) || !local_name)
+    if (!s || !valid_task(owner) || !local_name ||
+        ios27_mach_v2_validate_external(s, local_name,
+                                         sizeof(*local_name)) != IOS27_MACH_OK)
         return IOS27_MACH_BAD_ARGUMENT;
     for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i)
         if (!s->ports[i].alive) {
@@ -169,11 +211,71 @@ int ios27_mach_v2_allocate(ios27_mach_v2 *s, uint32_t owner,
         }
     return IOS27_MACH_LIMIT;
 }
+/* Port sets are task-local, do not own receive rights, and never
+ * grant a right to a different task. All changes are preflighted. */
+int ios27_mach_v2_set_allocate(ios27_mach_v2 *s, uint32_t owner,
+                               uint32_t *set_name) {
+    if (!s || !valid_task(owner) || !set_name ||
+        ranges_overlap(set_name, sizeof(*set_name), s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (s->next_name[TASK_INDEX(owner)] == UINT32_MAX)
+        return IOS27_MACH_LIMIT;
+    for (size_t i = 0u; i < IOS27_MACH_V2_PORT_SETS; ++i) {
+        port_set *set = &s->sets[TASK_INDEX(owner)][i];
+        if (!set->active) {
+            memset(set, 0, sizeof(*set));
+            set->name = s->next_name[TASK_INDEX(owner)]++;
+            set->active = 1u;
+            *set_name = set->name;
+            return IOS27_MACH_OK;
+        }
+    }
+    return IOS27_MACH_LIMIT;
+}
+int ios27_mach_v2_set_add(ios27_mach_v2 *s, uint32_t owner,
+                          uint32_t set_name, uint32_t receive_name) {
+    uint8_t id = 0u;
+    port_set *set = lookup_set(s, owner, set_name, &id);
+    local_right *right = receive_right(s, owner, receive_name);
+    port_object *obj = object_for(s, right);
+    if (!s || !valid_task(owner)) return IOS27_MACH_BAD_ARGUMENT;
+    if (!set || !obj || (obj->set_id && obj->set_id != id))
+        return IOS27_MACH_BAD_RIGHT;
+    obj->set_id = id;
+    return IOS27_MACH_OK;
+}
+int ios27_mach_v2_set_remove(ios27_mach_v2 *s, uint32_t owner,
+                             uint32_t set_name, uint32_t receive_name) {
+    uint8_t id = 0u;
+    port_set *set = lookup_set(s, owner, set_name, &id);
+    local_right *right = receive_right(s, owner, receive_name);
+    port_object *obj = object_for(s, right);
+    if (!s || !valid_task(owner)) return IOS27_MACH_BAD_ARGUMENT;
+    if (!set || !obj || obj->set_id != id)
+        return IOS27_MACH_BAD_RIGHT;
+    obj->set_id = 0u;
+    return IOS27_MACH_OK;
+}
+int ios27_mach_v2_set_destroy(ios27_mach_v2 *s, uint32_t owner,
+                              uint32_t set_name) {
+    uint8_t id = 0u;
+    port_set *set = lookup_set(s, owner, set_name, &id);
+    if (!s || !valid_task(owner)) return IOS27_MACH_BAD_ARGUMENT;
+    if (!set) return IOS27_MACH_BAD_RIGHT;
+    for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i)
+        if (s->ports[i].alive && s->ports[i].owner == owner &&
+            s->ports[i].set_id == id)
+            s->ports[i].set_id = 0u;
+    memset(set, 0, sizeof(*set));
+    return IOS27_MACH_OK;
+}
 int ios27_mach_v2_make_send(ios27_mach_v2 *s, uint32_t owner,
                             uint32_t receive_name, uint32_t recipient,
                             uint32_t *recipient_name) {
     local_right *origin, *recipient_right;
-    if (!s || !valid_task(owner) || !valid_task(recipient) || !recipient_name)
+    if (!s || !valid_task(owner) || !valid_task(recipient) || !recipient_name ||
+        ios27_mach_v2_validate_external(s, recipient_name,
+                                      sizeof(*recipient_name)) != IOS27_MACH_OK)
         return IOS27_MACH_BAD_ARGUMENT;
     origin = receive_right(s, owner, receive_name);
     if (!origin) return IOS27_MACH_BAD_RIGHT;
@@ -240,7 +342,16 @@ int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
                          uint32_t name, uint32_t *send, uint32_t *send_once,
                          unsigned *receive) {
     const local_right *r = by_name_const(s, task, name);
-    if (!s || !valid_task(task) || !send || !send_once || !receive)
+    if (!s || !valid_task(task) || !send || !send_once || !receive ||
+        ios27_mach_v2_validate_external(s, send, sizeof(*send)) != IOS27_MACH_OK ||
+        ios27_mach_v2_validate_external(s, send_once,
+                                         sizeof(*send_once)) != IOS27_MACH_OK ||
+        ios27_mach_v2_validate_external(s, receive,
+                                         sizeof(*receive)) != IOS27_MACH_OK ||
+        ranges_overlap(send, sizeof(*send), send_once, sizeof(*send_once)) ||
+        ranges_overlap(send, sizeof(*send), receive, sizeof(*receive)) ||
+        ranges_overlap(send_once, sizeof(*send_once),
+                       receive, sizeof(*receive)))
         return IOS27_MACH_BAD_ARGUMENT;
     if (!r) return IOS27_MACH_BAD_RIGHT;
     *send = r->sends;
@@ -397,6 +508,8 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
                 memset(r, 0, sizeof(*r));
         }
     }
+    memset(s->sets[TASK_INDEX(task)], 0,
+           sizeof(s->sets[TASK_INDEX(task)]));
     memset(s->dead_events[TASK_INDEX(task)], 0,
            sizeof(s->dead_events[TASK_INDEX(task)]));
     s->dead_head[TASK_INDEX(task)] = 0u;
@@ -405,23 +518,31 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
 }
 
 
-int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
-                       const void *wire, size_t size, uint32_t timeout_ms) {
+static int send_impl(ios27_mach_v2 *s, uint32_t task,
+                     const void *wire, size_t size, uint32_t timeout_ms,
+                     const uint8_t *arena, size_t arena_size) {
     const uint8_t *p = wire;
     uint32_t bits, dest_name, reply_name, remote_disposition, local_disposition;
     local_right *dest_right, *reply_right = NULL;
     local_right *descriptors[IOS27_MACH_V2_DESCRIPTORS] = {0};
     uint8_t desc_objects[IOS27_MACH_V2_DESCRIPTORS] = {0};
     uint8_t desc_moves[IOS27_MACH_V2_DESCRIPTORS] = {0};
+    uint16_t desc_offsets[IOS27_MACH_V2_DESCRIPTORS] = {0};
+    uint8_t ool_bytes[IOS27_MACH_OOL_MAX] = {0};
+    uint16_t ool_size = 0u, ool_offset = 0u;
+    uint8_t ool_present = 0u;
     port_object *dest;
     uint8_t reply_obj = 0u, reply_move = 0u;
-    uint32_t receiver, count = 0u;
+    uint32_t receiver, count = 0u, port_count = 0u;
     size_t tail;
     unsigned additional = 0u;
     (void)timeout_ms;
     if (!s || !valid_task(task) || !p || size < 24u ||
         size > IOS27_MACH_MSG_MAX || (size & 3u) ||
-        ranges_overlap(p, size, s, sizeof(*s)))
+        ranges_overlap(p, size, s, sizeof(*s)) ||
+        (!arena && arena_size) ||
+        (arena && ios27_mach_v2_validate_external(s, arena, arena_size) !=
+                      IOS27_MACH_OK))
         return IOS27_MACH_BAD_ARGUMENT;
     bits = rd32(p);
     remote_disposition = bits & 0xffu;
@@ -464,29 +585,61 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
         if (!count || count > IOS27_MACH_V2_DESCRIPTORS ||
             size < 28u + 12u * count)
             return IOS27_MACH_UNSUPPORTED;
+        size_t offset = 28u;
         for (uint32_t i = 0u; i < count; ++i) {
-            size_t offset = 28u + 12u * i;
+            uint8_t type;
+            if (offset > size || size - offset < 12u)
+                return IOS27_MACH_UNSUPPORTED;
+            type = p[offset + 11u];
+            if (type == IOS27_MACH_OOL_DESCRIPTOR) {
+                uint64_t guest_address;
+                uint32_t guest_length;
+                if (!arena || ool_present || size - offset < 16u ||
+                    p[offset + 8u] != 0u || p[offset + 9u] > 1u ||
+                    p[offset + 10u] != 0u)
+                    return IOS27_MACH_UNSUPPORTED;
+                guest_address = rd64(p + offset);
+                guest_length = rd32(p + offset + 12u);
+                if (guest_length > IOS27_MACH_OOL_MAX ||
+                    guest_address > (uint64_t)arena_size ||
+                    guest_length > (uint64_t)arena_size - guest_address)
+                    return IOS27_MACH_BAD_ARGUMENT;
+                if (guest_length)
+                    memcpy(ool_bytes, arena + (size_t)guest_address,
+                           guest_length);
+                ool_present = 1u;
+                ool_offset = (uint16_t)offset;
+                ool_size = (uint16_t)guest_length;
+                offset += 16u;
+                continue;
+            }
+            if (type != IOS27_MACH_PORT_DESCRIPTOR)
+                return IOS27_MACH_UNSUPPORTED;
             uint8_t disposition = p[offset + 10u];
             if (rd32(p + offset + 4u) || rd16(p + offset + 8u) ||
-                p[offset + 11u] != IOS27_MACH_PORT_DESCRIPTOR ||
                 (disposition != IOS27_MACH_COPY_SEND &&
                  disposition != IOS27_MACH_MOVE_SEND))
                 return IOS27_MACH_UNSUPPORTED;
-            descriptors[i] = by_name(s, task, rd32(p + offset));
-            if (!object_for(s, descriptors[i]) || !descriptors[i]->sends)
+            descriptors[port_count] = by_name(s, task, rd32(p + offset));
+            if (!object_for(s, descriptors[port_count]) ||
+                !descriptors[port_count]->sends)
                 return IOS27_MACH_BAD_RIGHT;
-            desc_objects[i] = descriptors[i]->object;
-            desc_moves[i] = (uint8_t)(disposition == IOS27_MACH_MOVE_SEND);
+            desc_objects[port_count] = descriptors[port_count]->object;
+            desc_moves[port_count] =
+                (uint8_t)(disposition == IOS27_MACH_MOVE_SEND);
+            desc_offsets[port_count] = (uint16_t)offset;
+            ++port_count;
+            offset += 12u;
         }
     }
 
     /* Every source debit is counted before mutating any rights. In
      * particular, the destination and several descriptors may name the
      * same send right. A single uref cannot satisfy repeated MOVE_SEND. */
-    for (uint32_t i = 0u; i < count; ++i) {
+    for (uint32_t i = 0u; i < port_count; ++i) {
         uint32_t needed = 0u;
         if (!desc_moves[i]) continue;
-        for (uint32_t j = 0u; j < count; ++j)
+        for (uint32_t j = 0u; j < port_count; ++j)
             if (desc_moves[j] && descriptors[j] == descriptors[i])
                 ++needed;
         if (remote_disposition == IOS27_MACH_MOVE_SEND &&
@@ -503,10 +656,10 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
 
     /* Aggregate arrival credits for repeated references to one object.
      * Checking each independently would overbook the right limit. */
-    for (uint32_t i = 0u; i < count; ++i) {
+    for (uint32_t i = 0u; i < port_count; ++i) {
         uint32_t arriving = 0u;
         local_right *r = by_object(s, receiver, desc_objects[i]);
-        for (uint32_t j = 0u; j < count; ++j)
+        for (uint32_t j = 0u; j < port_count; ++j)
             if (desc_objects[j] == desc_objects[i]) ++arriving;
         if (r && (uint32_t)r->sends + r->pending_sends + arriving >
                  IOS27_MACH_RIGHT_MAX)
@@ -515,7 +668,7 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     /* Reserve one local name per *distinct* object, whether the new
      * credits are send, send-once, or both. */
     if (reply_obj && !by_object(s, receiver, reply_obj)) ++additional;
-    for (uint32_t i = 0u; i < count; ++i) {
+    for (uint32_t i = 0u; i < port_count; ++i) {
         int previous = desc_objects[i] == reply_obj;
         for (uint32_t j = 0u; j < i; ++j)
             if (desc_objects[j] == desc_objects[i]) previous = 1;
@@ -530,17 +683,17 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     /* The transaction cannot fail after reservation preflight. */
     if (reply_obj)
         ++reserve_name(s, receiver, reply_obj)->pending_once;
-    for (uint32_t i = 0u; i < count; ++i)
+    for (uint32_t i = 0u; i < port_count; ++i)
         ++reserve_name(s, receiver, desc_objects[i])->pending_sends;
     if (reply_move) --reply_right->once;
-    for (uint32_t i = 0u; i < count; ++i)
+    for (uint32_t i = 0u; i < port_count; ++i)
         if (desc_moves[i]) --descriptors[i]->sends;
     if (remote_disposition == IOS27_MACH_MOVE_SEND)
         --dest_right->sends;
     else if (remote_disposition == IOS27_MACH_MOVE_SEND_ONCE)
         --dest_right->once;
     if (reply_move) prune(reply_right);
-    for (uint32_t i = 0u; i < count; ++i)
+    for (uint32_t i = 0u; i < port_count; ++i)
         if (desc_moves[i]) prune(descriptors[i]);
     prune(dest_right);
 
@@ -550,20 +703,39 @@ int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
     memcpy(slot->bytes, p, size);
     slot->length = (uint16_t)size;
     slot->reply_object = reply_obj;
-    slot->descriptor_count = (uint8_t)count;
-    memcpy(slot->descriptor_objects, desc_objects, count);
+    slot->descriptor_count = (uint8_t)port_count;
+    memcpy(slot->descriptor_objects, desc_objects, port_count);
+    memcpy(slot->descriptor_offsets, desc_offsets,
+           port_count * sizeof(desc_offsets[0]));
+    slot->ool_present = ool_present;
+    slot->ool_offset = ool_offset;
+    slot->ool_size = ool_size;
+    if (ool_present && ool_size)
+        memcpy(slot->ool_bytes, ool_bytes, ool_size);
     ++dest->count;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
-                          uint32_t receive_name, void *out,
-                          size_t *inout_size, uint32_t timeout_ms) {
+int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
+                       const void *wire, size_t size, uint32_t timeout_ms) {
+    return send_impl(s, task, wire, size, timeout_ms, NULL, 0u);
+}
+int ios27_mach_v2_send_guest_ool(ios27_mach_v2 *s, uint32_t task,
+                                 const void *wire, size_t size,
+                                 uint32_t timeout_ms,
+                                 const uint8_t *arena, size_t arena_size) {
+    return send_impl(s, task, wire, size, timeout_ms, arena, arena_size);
+}
+static int receive_impl(ios27_mach_v2 *s, uint32_t task,
+                        uint32_t receive_name, void *out,
+                        size_t *inout_size, uint32_t timeout_ms,
+                        int allow_ool, uint64_t guest_offset) {
     local_right *right;
     port_object *obj;
     queued_wire *msg;
     local_right *reply;
     local_right *descriptors[IOS27_MACH_V2_DESCRIPTORS] = {0};
     uint8_t *output = out;
+    size_t required;
     (void)timeout_ms;
     if (!s || !valid_task(task) || !out || !inout_size ||
         ranges_overlap(inout_size, sizeof(*inout_size), s, sizeof(*s)))
@@ -573,12 +745,17 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
     if (!obj) return IOS27_MACH_BAD_RIGHT;
     if (!obj->count) return IOS27_MACH_TIMEOUT;
     msg = &obj->queue[obj->head];
-    if (ranges_overlap(output, msg->length, s, sizeof(*s)) ||
-        ranges_overlap(output, msg->length,
+    if (msg->ool_present && !allow_ool)
+        return IOS27_MACH_UNSUPPORTED; /* preserve queue for OOL-aware API */
+    required = msg->length + (msg->ool_present ? msg->ool_size : 0u);
+    if (msg->ool_present && guest_offset > UINT64_MAX - msg->length)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (ranges_overlap(output, required, s, sizeof(*s)) ||
+        ranges_overlap(output, required,
                        inout_size, sizeof(*inout_size)))
         return IOS27_MACH_BAD_ARGUMENT;
-    if (*inout_size < msg->length) {
-        *inout_size = msg->length;
+    if (*inout_size < required) {
+        *inout_size = required;
         return IOS27_MACH_TOO_LARGE;
     }
     reply = msg->reply_object ? by_object(s, task, msg->reply_object) : NULL;
@@ -599,7 +776,7 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
     wr32(output + 8u, reply ? reply->name : 0u);
     wr32(output + 12u, receive_name);
     for (size_t i = 0u; i < msg->descriptor_count; ++i) {
-        size_t offset = 28u + 12u * i;
+        size_t offset = msg->descriptor_offsets[i];
         wr32(output + offset, descriptors[i]->name);
         output[offset + 10u] = IOS27_MACH_MOVE_SEND;
         --descriptors[i]->pending_sends;
@@ -609,9 +786,96 @@ int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
         --reply->pending_once;
         ++reply->once;
     }
-    *inout_size = msg->length;
+    if (msg->ool_present) {
+        wr64(output + msg->ool_offset, guest_offset + msg->length);
+        if (msg->ool_size)
+            memcpy(output + msg->length, msg->ool_bytes, msg->ool_size);
+    }
+    *inout_size = required;
     memset(msg, 0, sizeof(*msg));
     obj->head = (uint8_t)((obj->head + 1u) % IOS27_MACH_QUEUE_MAX);
     --obj->count;
+    ++obj->seqno;
+    return IOS27_MACH_OK;
+}
+
+int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
+                          uint32_t receive_name, void *out,
+                          size_t *inout_size, uint32_t timeout_ms) {
+    return receive_impl(s, task, receive_name, out, inout_size,
+                        timeout_ms, 0, 0u);
+}
+int ios27_mach_v2_receive_guest_ool(ios27_mach_v2 *s, uint32_t task,
+                                    uint32_t receive_name, void *out,
+                                    size_t *inout_size, uint32_t timeout_ms,
+                                    uint64_t guest_offset) {
+    return receive_impl(s, task, receive_name, out, inout_size,
+                        timeout_ms, 1, guest_offset);
+}
+/* No set receive can mutate the selected port, rights, or cursor before
+ * the underlying direct receive has committed successfully. */
+int ios27_mach_v2_receive_set(ios27_mach_v2 *s, uint32_t task,
+                              uint32_t set_name, void *out,
+                              size_t *inout_size, uint32_t timeout_ms) {
+    port_set *set;
+    uint8_t id = 0u;
+    if (!s || !valid_task(task) || !out || !inout_size ||
+        ranges_overlap(inout_size, sizeof(*inout_size), s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    set = lookup_set(s, task, set_name, &id);
+    if (!set) return IOS27_MACH_BAD_RIGHT;
+    for (size_t i = 0u; i < IOS27_MACH_PORT_MAX; ++i) {
+        size_t index = (set->cursor + i) % IOS27_MACH_PORT_MAX;
+        port_object *obj = &s->ports[index];
+        local_right *right;
+        int status;
+        if (!obj->alive || obj->owner != task || obj->set_id != id ||
+            !obj->count)
+            continue;
+        right = by_object(s, task, (uint8_t)(index + 1u));
+        if (!right || !right->receive) return IOS27_MACH_BAD_RIGHT;
+        status = ios27_mach_v2_receive(s, task, right->name,
+                                       out, inout_size, timeout_ms);
+        if (status == IOS27_MACH_OK)
+            set->cursor = (uint8_t)((index + 1u) % IOS27_MACH_PORT_MAX);
+        return status;
+    }
+    return IOS27_MACH_TIMEOUT;
+}
+
+int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t receive_name, void *out,
+                                  size_t *inout_size, uint32_t timeout_ms) {
+    local_right *right;
+    port_object *obj;
+    size_t wire_len, needed, wire_capacity;
+    uint32_t sequence;
+    uint8_t *bytes = out;
+    int status;
+    if (!s || !valid_task(task) || !out || !inout_size ||
+        ranges_overlap(inout_size, sizeof(*inout_size), s, sizeof(*s)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    right = receive_right(s, task, receive_name);
+    obj = object_for(s, right);
+    if (!obj) return IOS27_MACH_BAD_RIGHT;
+    if (!obj->count) return IOS27_MACH_TIMEOUT;
+    wire_len = obj->queue[obj->head].length;
+    needed = wire_len + IOS27_MACH_SEQNO_TRAILER_SIZE;
+    if (ranges_overlap(out, needed, s, sizeof(*s)) ||
+        ranges_overlap(out, needed, inout_size, sizeof(*inout_size)))
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (*inout_size < needed) {
+        *inout_size = needed;
+        return IOS27_MACH_TOO_LARGE;
+    }
+    sequence = obj->seqno;
+    wire_capacity = *inout_size;
+    status = ios27_mach_v2_receive(s, task, receive_name, out,
+                                   &wire_capacity, timeout_ms);
+    if (status != IOS27_MACH_OK) return status;
+    wr32(bytes + wire_len, 0u); /* MACH_MSG_TRAILER_FORMAT_0 */
+    wr32(bytes + wire_len + 4u, IOS27_MACH_SEQNO_TRAILER_SIZE);
+    wr32(bytes + wire_len + 8u, sequence);
+    *inout_size = needed;
     return IOS27_MACH_OK;
 }

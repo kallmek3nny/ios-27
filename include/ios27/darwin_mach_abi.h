@@ -24,6 +24,13 @@
 #define IOS27_DARWIN_FIXTURE_TEARDOWN   UINT32_C(0x49530109)
 #define IOS27_DARWIN_FIXTURE_WATCH_DEAD UINT32_C(0x4953010a)
 #define IOS27_DARWIN_FIXTURE_POLL_DEAD  UINT32_C(0x4953010b)
+#define IOS27_DARWIN_FIXTURE_SET_ALLOCATE UINT32_C(0x4953010c)
+#define IOS27_DARWIN_FIXTURE_SET_ADD      UINT32_C(0x4953010d)
+#define IOS27_DARWIN_FIXTURE_SET_REMOVE   UINT32_C(0x4953010e)
+#define IOS27_DARWIN_FIXTURE_SET_DESTROY  UINT32_C(0x4953010f)
+#define IOS27_DARWIN_FIXTURE_RECEIVE_SET  UINT32_C(0x49530110)
+#define IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER UINT32_C(0x49530111)
+#define IOS27_DARWIN_FIXTURE_RECEIVE_OOL UINT32_C(0x49530112)
 
 typedef struct {
     uint64_t x[8];
@@ -39,6 +46,13 @@ typedef struct {
  *   RECEIVE: x0 local port, x1 offset, x2 capacity, x3 timeout
  *   TEARDOWN/POLL_DEAD: no arguments (POLL_DEAD -> out.x0 local name)
  *   WATCH_DEAD: x0 existing send/send-once name
+ *   SET_ALLOCATE: no args -> out.x0 = set name
+ *   SET_ADD/SET_REMOVE: x0 set, x1 owned receive name
+ *   SET_DESTROY: x0 set
+ *   RECEIVE_SET: x0 set, x1 arena offset, x2 capacity, x3 timeout
+ *   RECEIVE_TRAILER: x0 receive name, x1 offset, x2 capacity, x3 timeout
+ *   RECEIVE_OOL: x0 receive name, x1 offset, x2 wire+OOL capacity,
+ *                x3 timeout. Returned OOL address is a guest-arena offset.
  *
  * SEND/RECEIVE success: out.x[0] = transferred bytes.
  * RECEIVE TOO_LARGE: out.x[0] = required bytes; the message remains queued.
