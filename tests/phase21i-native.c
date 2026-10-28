@@ -80,6 +80,7 @@ static void test_bridge(void) {
     ios27_21i_guest guest = {memory, sizeof(memory), BASE, 64, 48, 8, 8};
     ios27_21i_runtime *rt = NULL;
     ios27_21i_token old, newer;
+    ios27_21i_stats stats;
     pthread_t threads[12];
     counter_state counter_state_value = {0};
     condition_state condition = {0};
@@ -92,6 +93,10 @@ static void test_bridge(void) {
     CHECK(ios27_21i_create(&rt, &guest, 4) == EINVAL);
     guest.base = BASE;
     OK(ios27_21i_create(&rt, &guest, 4));
+    CHECK(ios27_21i_get_stats(rt, NULL) == EINVAL);
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(stats.capacity == 4 && !stats.mutexes && !stats.conditions &&
+          !stats.in_flight && !stats.retired_slots);
     CHECK(CALL(rt, "mutex_init", MUTEX + 1, 0, 0) == EINVAL);
     CHECK(CALL(rt, "mutex_init", BASE + 4080, 0, 0) == EFAULT);
     CHECK(CALL(rt, "mutex_init", UINT64_MAX, 0, 0) == EINVAL);
@@ -105,6 +110,8 @@ static void test_bridge(void) {
     OK(CALL(rt, "cond_init", RELEASE, 0, 0));
     OK(CALL(rt, "mutex_init", OTHER, 0, 0));
     CHECK(CALL(rt, "cond_init", BASE + 608, 0, 0) == EAGAIN);
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(stats.mutexes == 2 && stats.conditions == 2 && !stats.in_flight);
     CHECK(ios27_21i_destroy(rt) == EBUSY);
     OK(ios27_21i_lookup(rt, MUTEX, IOS27_21I_MUTEX, &old));
     CHECK(ios27_21i_lookup(rt, MUTEX, IOS27_21I_CONDITION, &newer) == EINVAL);
@@ -129,6 +136,9 @@ static void test_bridge(void) {
     OK(CALL(rt, "mutex_lock", MUTEX, 0, 0));
     while (condition.started != 12)
         OK(CALL(rt, "cond_wait", READY, MUTEX, 0));
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(stats.mutexes == 2 && stats.conditions == 2 &&
+          stats.in_flight == 24);
     CHECK(CALL(rt, "cond_destroy", RELEASE, 0, 0) == EBUSY);
     OK(clock_gettime(CLOCK_REALTIME, &now) ? errno : 0);
     write_le64(memory + 1024, (uint64_t)(now.tv_sec - 2));
@@ -143,6 +153,8 @@ static void test_bridge(void) {
     OK(CALL(rt, "mutex_unlock", MUTEX, 0, 0));
     for (int i = 0; i < 12; ++i) OK(pthread_join(threads[i], NULL));
     CHECK(condition.finished == 12);
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(!stats.in_flight);
     /* Cancellation of a contended mutex must drop bridge in-flight refs. */
     cancel_state cancel = {0};
     pthread_t cancelled_thread;
@@ -170,6 +182,8 @@ static void test_bridge(void) {
     OK(pthread_join(cancelled_thread, &cancel_result));
     CHECK(cancel_result == PTHREAD_CANCELED);
     OK(pthread_barrier_destroy(&cancel.ready));
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(!stats.in_flight);
     OK(CALL(rt, "mutex_destroy", OTHER, 0, 0));
     OK(CALL(rt, "cond_destroy", READY, 0, 0));
     OK(CALL(rt, "cond_destroy", RELEASE, 0, 0));
@@ -184,7 +198,9 @@ static void test_bridge(void) {
         OK(CALL(rt, "mutex_init", MUTEX, 0, 0));
     }
     OK(CALL(rt, "mutex_destroy", MUTEX, 0, 0));
+    OK(ios27_21i_get_stats(rt, &stats));
+    CHECK(!stats.mutexes && !stats.conditions && !stats.in_flight);
     OK(ios27_21i_destroy(rt));
-    puts("phase21i: guest bounds, overlap, 48k contested ops, 12 waiters, cancellation cleanup, timed waits, 300 recycling cycles, and teardown passed");
+    puts("phase21i: guest bounds, overlap, 48k contested ops, 12 waiters, cancellation cleanup, timed waits, 300 recycling cycles, zero leaked references, and teardown passed");
 }
 int main(void) { test_bridge(); return 0; }
