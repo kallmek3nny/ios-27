@@ -130,7 +130,16 @@ static void *worker(void *value) {
     worker_args *a = value;
     run_state *r = a->run;
     uint64_t scope = 0;
-    OK(ios27_21j_acquire(r->diag, &a->lease));
+    /* Injected ENOMEM must not consume a lease; retry deterministically. */
+    int acquired = 0;
+    for (unsigned attempt = 0; attempt < 128u; ++attempt) {
+        int rc = ios27_21j_acquire_injected(r->diag, 13, a->actor,
+                                            attempt, &a->lease);
+        CHECK(rc == 0 || rc == ENOMEM);
+        if (!rc) { acquired = 1; break; }
+        CHECK(a->lease.slot == 0 && a->lease.generation == 0);
+    }
+    CHECK(acquired);
     OK(ios27_21e_cancel_register(r->tls, &a->token));
     OK(ios27_21e_setspecific(r->tls, r->key, a));
     OK(ios27_21e_cleanup_push(r->tls, cleanup, a, &scope));
@@ -198,7 +207,7 @@ static void run_once(unsigned round) {
     CHECK(active == WORKERS && keys == 1 && tokens == WORKERS);
     OK(ios27_21j_snapshot(r.diag, &info));
     CHECK(info.active == WORKERS && info.peak == WORKERS);
-    CHECK(info.probes == total * 2u && info.injections != 0);
+    CHECK(info.probes >= total * 2u + WORKERS &&\n          info.probes <= total * 2u + WORKERS * 128u && info.injections != 0);
     for (unsigned i = 0; i < WORKERS; ++i)
         OK(ios27_21e_cancel_request(r.tls, r.args[i].token));
     OK(pthread_mutex_lock(&r.gate));
