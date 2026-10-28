@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 56,
+      "branch": "phase19c-mach-task-exceptions",
+      "sha": "681fef8b390096eb7253c4029e491e59e0446389",
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "updated_at": "2026-10-28T17:59:56Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "1af9777731d4edaabc2a2f9f864ef8dd62311a90",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T17:59:47Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 55,
       "branch": "phase19d-arm64-relocs-20261028",
       "sha": "e68d5e9a0dbd8ec501c27321b323f56d3ccaad89",
@@ -18,30 +36,12 @@
       "status": "unmerged: not counted"
     },
     {
-      "number": 56,
-      "branch": "phase19c-mach-task-exceptions",
-      "sha": "6456726c2d5751e4d54d27fc5afdab0eef7c0d8a",
-      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
-      "updated_at": "2026-10-28T17:59:12Z",
-      "status": "unmerged: not counted"
-    },
-    {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
       "sha": "63f49b1ac3a9e4cfc2a5567911f79c5a05d3517d",
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
       "updated_at": "2026-10-28T17:59:11Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 54,
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "a1c5064ca1921a124f2e7fc9cb5aeaf2d97d4d02",
-      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
-      "updated_at": "2026-10-28T17:58:53Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -110,5 +110,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:59:44Z"
+  "observed_at": "2026-10-28T18:00:01Z"
 }
