@@ -45,29 +45,39 @@ def load():
     return data
 
 def svg(data):
-    width, height = 930, 115 + 50 * len(data["groups"])
+    width, height = 760, 105 + 66 * len(data["groups"]) + 40
+    completed = sum(sum(g["done"] for g in group["gates"]) for group in data["groups"])
+    declared = sum(len(group["gates"]) for group in data["groups"])
     lines = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="ios-27 evidence-backed milestone gate progress">',
-        '<rect width="100%" height="100%" fill="#101827"/>',
-        '<text x="28" y="38" fill="#f9fafb" font-family="sans-serif" font-size="23" font-weight="bold">ios-27 | capability gates</text>',
-        '<text x="28" y="62" fill="#a5b4c7" font-family="sans-serif" font-size="13">measured research milestones, NOT percentage of iOS 27 compatibility</text>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-label="ios-27 selected research milestone gate coverage">',
+        '<style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-track{fill:#d1d9e0}}</style>',
+        '<text x="18" y="33" fill="#e6edf3" class="gh-text" font-family="sans-serif" font-size="24" font-weight="600">capability milestones</text>',
+        '<text x="18" y="55" fill="#8b949e" class="gh-muted" font-family="sans-serif" font-size="12">documented research gates · not full ios 27 compatibility</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#e6edf3" class="gh-text" font-family="sans-serif" font-size="21" font-weight="700">{completed}/{declared}</text>',
+        '<text x="742" y="51" text-anchor="end" fill="#8b949e" class="gh-muted" font-family="sans-serif" font-size="12">gates with evidence</text>',
     ]
     for i, group in enumerate(data["groups"]):
         done = sum(g["done"] for g in group["gates"])
         total = len(group["gates"])
-        y = 104 + i * 50
+        y = 92 + 66 * i
         label = html.escape(group["label"])
+        shown_percent = percent(done, total) if done else "0%"
+        text_class = "gh-text" if done else "gh-muted"
+        color = "#e6edf3" if done else "#8b949e"
         lines.extend([
-            f'<text x="28" y="{y}" fill="#e5e7eb" font-family="sans-serif" font-size="15">{label}</text>',
-            f'<rect x="375" y="{y-15}" width="405" height="17" rx="5" fill="#374151"/>',
-            f'<rect x="375" y="{y-15}" width="{int(405 * done / total)}" height="17" rx="5" fill="#3dbba4"/>',
-            f'<text x="804" y="{y}" fill="#f3f4f6" font-family="sans-serif" font-size="14">{done}/{total} ({percent(done, total)})</text>',
+            f'<text x="18" y="{y + 7}" fill="#c9d1d9" class="gh-text" font-family="sans-serif" font-size="15" font-weight="500">{label}</text>',
+            f'<text x="742" y="{y + 12}" text-anchor="end" fill="{color}" class="{text_class}" font-family="sans-serif" font-size="22" font-weight="700">{shown_percent}</text>',
+            f'<rect x="18" y="{y + 22}" width="724" height="9" rx="4.5" fill="#30363d" class="gh-track"/>',
+            f'<text x="18" y="{y + 49}" fill="#8b949e" class="gh-muted" font-family="sans-serif" font-size="12">{done} / {total} tested gates</text>',
         ])
+        if done:
+            lines.append(f'<rect x="18" y="{y + 22}" width="{int(724 * done / total)}" height="9" rx="4.5" fill="#3fb950"/>')
     lines.extend([
-        f'<text x="28" y="{height-21}" fill="#a5b4c7" font-family="sans-serif" font-size="12">0 official Apple UI / app gates demonstrated; no Android device run confirmed</text>',
+        f'<text x="18" y="{height - 21}" fill="#8b949e" class="gh-muted" font-family="sans-serif" font-size="12">selected gate coverage only · apple frameworks, system ui and apps remain unproven</text>',
         '</svg>',
     ])
     return "\n".join(lines) + "\n"
+
 
 def markdown(data):
     lines = [

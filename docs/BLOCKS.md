@@ -6,6 +6,8 @@
 
 [Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md)
 
+The displayed percentages are **sample evidence coverage**: native fixtures plus synthetic probes divided by explicitly tracked targets, not real iOS framework compatibility.
+
 ## counted target samples
 
 | layer | native fixtures | synthetic/probe | unimplemented | excluded | sampled targets |
