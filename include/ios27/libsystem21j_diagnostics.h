@@ -27,6 +27,9 @@ typedef struct {
     size_t active, peak, capacity;
     uint64_t next_sequence, dropped, injections, probes;
     uint64_t contention, waits, timeouts, leases_created, leases_released;
+    uint64_t contention_ns_total, contention_ns_max;
+    /* [0,1us), [1,10us), [10,100us), [100us,1ms), [1ms,+inf). */
+    uint64_t contention_ns_buckets[5];
 } ios27_21j_snapshot_data;
 
 /* Caller must join all users before destroy, even if active == 0. */
@@ -46,6 +49,9 @@ int ios27_21j_acquire_injected(ios27_21j_diagnostics *diag,
 int ios27_21j_release(ios27_21j_diagnostics *diag, ios27_21j_lease lease);
 int ios27_21j_record(ios27_21j_diagnostics *diag, uint32_t kind,
                       uint32_t actor, int32_t result, uint32_t detail);
+/* Records a measured contended wait, with saturating duration accumulation. */
+int ios27_21j_note_contention(ios27_21j_diagnostics *diag,
+                              uint32_t actor, uint64_t duration_ns);
 int ios27_21j_snapshot(ios27_21j_diagnostics *diag,
                         ios27_21j_snapshot_data *out);
 /* ERANGE means an event was overwritten in the fixed-size ring. */
