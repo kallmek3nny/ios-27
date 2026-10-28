@@ -17,6 +17,12 @@ typedef struct {
 typedef struct { uint32_t slot, generation; } ios27_21i_token;
 enum { IOS27_21I_MUTEX = 1, IOS27_21I_CONDITION = 2 };
 
+/* Host-only introspection for leak and lifecycle verification. */
+typedef struct {
+    size_t capacity, mutexes, conditions, in_flight, retired_slots;
+} ios27_21i_stats;
+int ios27_21i_get_stats(ios27_21i_runtime *runtime, ios27_21i_stats *out);
+
 int ios27_21i_create(ios27_21i_runtime **out, const ios27_21i_guest *guest,
                      size_t capacity);
 int ios27_21i_destroy(ios27_21i_runtime *runtime);
