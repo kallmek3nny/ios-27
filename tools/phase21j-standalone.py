@@ -19,7 +19,7 @@ INTEGRATION = (
     ROOT / "src/libsystem21e_tls.c",
 )
 TEST_NAMES = (
-    "diagnostics", "rules", "rule-races", "export", "identities", "boundaries",
+    "diagnostics", "audit", "rules", "rule-races", "export", "identities", "boundaries",
     "schedule", "schedule-races", "replay", "handoff",
     "timed-handoff", "timeout-races", "broadcast", "lockorder", "modelcheck", "wait-model",
     "deadlock-integration", "large-cycle", "integration",
