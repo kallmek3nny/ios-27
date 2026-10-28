@@ -596,7 +596,8 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
     unsigned kind;
     if (!rt || !symbol || !args || !x0) return EINVAL;
     *x0 = (uint64_t)ENOSYS;
-    /* Mach-O leading underscore is stripped by the trusted resolver. */
+    /* Accept public Mach-O external names or their ABI-neutral spelling. */
+    if (symbol[0] == '_' && symbol[1] != '_') ++symbol;
     for (i = 0; i < sizeof(symbols) / sizeof(symbols[0]); ++i) {
         if (strcmp(symbol, symbols[i].symbol) == 0) {
             matched = 1; op = symbols[i].op; break;
