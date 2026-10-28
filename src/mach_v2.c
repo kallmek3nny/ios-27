@@ -33,6 +33,11 @@ typedef struct {
 } queued_wire;
 
 typedef struct {
+    uint32_t id;
+    uint8_t active;
+} thread_record;
+
+typedef struct {
     uint8_t alive;
     uint8_t owner;
     uint8_t head;
@@ -49,6 +54,9 @@ typedef struct {
 } port_set;
 
 struct ios27_mach_v2 {
+    uint32_t next_thread_id;
+    thread_record threads[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_THREADS];
+    uint32_t exception_names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_EXCEPTION_SLOTS];
     port_set sets[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_PORT_SETS];
     uint32_t next_name[IOS27_MACH_TASK_MAX];
     local_right names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
@@ -183,9 +191,11 @@ static int may_arrive(ios27_mach_v2 *s, uint32_t task, uint8_t obj,
 
 ios27_mach_v2 *ios27_mach_v2_new(void) {
     ios27_mach_v2 *s = calloc(1u, sizeof(*s));
-    if (s)
+    if (s) {
+        s->next_thread_id = 1u;
         for (size_t i = 0u; i < IOS27_MACH_TASK_MAX; ++i)
             s->next_name[i] = FIRST_NAME;
+    }
     return s;
 }
 void ios27_mach_v2_free(ios27_mach_v2 *s) {
@@ -514,6 +524,10 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
            sizeof(s->dead_events[TASK_INDEX(task)]));
     s->dead_head[TASK_INDEX(task)] = 0u;
     s->dead_count[TASK_INDEX(task)] = 0u;
+    memset(s->threads[TASK_INDEX(task)], 0,
+           sizeof(s->threads[TASK_INDEX(task)]));
+    memset(s->exception_names[TASK_INDEX(task)], 0,
+           sizeof(s->exception_names[TASK_INDEX(task)]));
     return IOS27_MACH_OK;
 }
 
@@ -878,4 +892,121 @@ int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
     wr32(bytes + wire_len + 8u, sequence);
     *inout_size = needed;
     return IOS27_MACH_OK;
+}
+
+/* Phase 19c: independently owned, never-recycled fixture thread identities. */
+static const thread_record *thread_lookup(const ios27_mach_v2 *s,
+                                           uint32_t task, uint32_t id) {
+    if (!s || !valid_task(task) || !id) return NULL;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        const thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (r->active && r->id == id) return r;
+    }
+    return NULL;
+}
+
+int ios27_mach_v2_thread_create(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t *thread_id) {
+    if (!s || !valid_task(task) || !thread_id ||
+        ios27_mach_v2_validate_external(s, thread_id,
+                                         sizeof(*thread_id)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (s->next_thread_id == UINT32_MAX) return IOS27_MACH_LIMIT;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (!r->active) {
+            r->id = s->next_thread_id++;
+            r->active = 1u;
+            *thread_id = r->id;
+            return IOS27_MACH_OK;
+        }
+    }
+    return IOS27_MACH_LIMIT;
+}
+
+int ios27_mach_v2_thread_destroy(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t thread_id) {
+    if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (r->active && r->id == thread_id) {
+            memset(r, 0, sizeof(*r));
+            return IOS27_MACH_OK;
+        }
+    }
+    return IOS27_MACH_BAD_RIGHT;
+}
+
+int ios27_mach_v2_thread_identity(const ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t *owner) {
+    if (!s || !valid_task(task) || !owner ||
+        ios27_mach_v2_validate_external(s, owner,
+                                         sizeof(*owner)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (!thread_lookup(s, task, thread_id)) return IOS27_MACH_BAD_RIGHT;
+    *owner = task;
+    return IOS27_MACH_OK;
+}
+
+/* No ownership transfer is implicit: a registered name remains a send right
+ * in the registering task's local namespace. Stale names never get reused. */
+static uint32_t live_exception_name(const ios27_mach_v2 *s,
+                                     uint32_t task, uint32_t slot) {
+    uint32_t name = s->exception_names[TASK_INDEX(task)][slot];
+    const local_right *r = by_name_const(s, task, name);
+    if (!r || !r->sends || !r->object ||
+        r->object > IOS27_MACH_PORT_MAX ||
+        !s->ports[r->object - 1u].alive)
+        return 0u;
+    return name;
+}
+
+int ios27_mach_v2_exception_set(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t mask, uint32_t send_name) {
+    const uint32_t supported = (UINT32_C(1) << IOS27_MACH_V2_EXCEPTION_SLOTS) - 1u;
+    if (!s || !valid_task(task) || !mask || (mask & ~supported))
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (send_name) {
+        const local_right *r = by_name_const(s, task, send_name);
+        if (!r || !r->sends || !r->object ||
+            r->object > IOS27_MACH_PORT_MAX ||
+            !s->ports[r->object - 1u].alive)
+            return IOS27_MACH_BAD_RIGHT;
+    }
+    for (uint32_t bit = 0u; bit < IOS27_MACH_V2_EXCEPTION_SLOTS; ++bit)
+        if (mask & (UINT32_C(1) << bit))
+            s->exception_names[TASK_INDEX(task)][bit] = send_name;
+    return IOS27_MACH_OK;
+}
+
+int ios27_mach_v2_exception_get(const ios27_mach_v2 *s, uint32_t task,
+                                uint32_t slot, uint32_t *send_name) {
+    if (!s || !valid_task(task) || slot >= IOS27_MACH_V2_EXCEPTION_SLOTS ||
+        !send_name ||
+        ios27_mach_v2_validate_external(s, send_name,
+                                         sizeof(*send_name)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    *send_name = live_exception_name(s, task, slot);
+    return IOS27_MACH_OK;
+}
+
+int ios27_mach_v2_exception_raise(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t slot,
+                                  uint32_t code) {
+    uint8_t wire[40] = {0};
+    uint32_t name;
+    if (!s || !valid_task(task) || slot >= IOS27_MACH_V2_EXCEPTION_SLOTS)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (!thread_lookup(s, task, thread_id)) return IOS27_MACH_BAD_RIGHT;
+    name = live_exception_name(s, task, slot);
+    if (!name) return IOS27_MACH_BAD_RIGHT;
+    wr32(wire, IOS27_MACH_COPY_SEND);
+    wr32(wire + 4u, sizeof(wire));
+    wr32(wire + 8u, name);
+    wr32(wire + 20u, IOS27_MACH_V2_EXCEPTION_MSG_ID);
+    wr32(wire + 24u, thread_id);
+    wr32(wire + 28u, task);
+    wr32(wire + 32u, slot);
+    wr32(wire + 36u, code);
+    return ios27_mach_v2_send(s, task, wire, sizeof(wire), 0u);
 }
