@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static void put32(uint8_t *p, uint32_t v) {
@@ -201,8 +202,157 @@ static void executable_extra_rejections(void) {
                                           16384u, &layout, err, sizeof(err)) == 0);
 }
 
+
+/* This is the actual phase15a Clang-produced, linked MH_EXECUTE from the
+ * existing ALL build target, not a synthetic replacement for the executable.
+ * CTest runs in the build directory; no new CMake ownership is required. */
+static size_t linked_command(const uint8_t *file, size_t size, uint32_t op,
+                             const char *name) {
+    size_t cursor = 32u;
+    assert(size >= 32u && 32u + (size_t)
+           ((uint32_t)file[20u] | ((uint32_t)file[21u] << 8u) |
+            ((uint32_t)file[22u] << 16u) | ((uint32_t)file[23u] << 24u))
+           <= size);
+    for (uint32_t i = 0u; i < ((uint32_t)file[16u] |
+             ((uint32_t)file[17u] << 8u) |
+             ((uint32_t)file[18u] << 16u) |
+             ((uint32_t)file[19u] << 24u)); ++i) {
+        uint32_t cmd, bytes;
+        assert(cursor <= size && size - cursor >= 8u);
+        cmd = (uint32_t)file[cursor] |
+              ((uint32_t)file[cursor + 1u] << 8u) |
+              ((uint32_t)file[cursor + 2u] << 16u) |
+              ((uint32_t)file[cursor + 3u] << 24u);
+        bytes = (uint32_t)file[cursor + 4u] |
+                ((uint32_t)file[cursor + 5u] << 8u) |
+                ((uint32_t)file[cursor + 6u] << 16u) |
+                ((uint32_t)file[cursor + 7u] << 24u);
+        assert(bytes >= 8u && bytes <= size - cursor);
+        if (cmd == op && (!name || (bytes >= 72u &&
+              strncmp((const char *)file + cursor + 8u, name, 16u) == 0)))
+            return cursor;
+        cursor += bytes;
+    }
+    assert(!"required linked Mach-O command missing");
+    return 0u;
+}
+
+static void linked_rejected(const uint8_t *bytes, size_t size) {
+    ios27_macho_info parsed;
+    ios27_exec_layout layout;
+    char error[160] = {0};
+    int result = 12345;
+    if (ios27_macho_parse(bytes, size, &parsed, error, sizeof(error)) == 0) {
+        assert(ios27_macho_executable_layout(bytes, size, &parsed, 4096u,
+                                             &layout, error, sizeof(error)) != 0);
+        assert(layout.span == 0u);
+    }
+    assert(ios27_run_freestanding(bytes, size, &parsed, &result,
+                                  error, sizeof(error)) != 0);
+    assert(result == 12345);
+    assert(error[0] != '\0');
+}
+
+static void linked_phase15a_tests(void) {
+    FILE *f = fopen("phase15a-executable", "rb");
+    uint8_t *linked, *mutated;
+    long length;
+    size_t size, maincmd, textcmd, fixcmd, dyldcmd, dysymcmd, symcmd;
+    ios27_macho_info info;
+    ios27_exec_layout layout;
+    char error[160];
+    int result = -1;
+    if (!f) {
+        puts("phase15a linked fixture not present in cwd; optional integration skipped");
+        return;
+    }
+    assert(fseek(f, 0L, SEEK_END) == 0);
+    length = ftell(f);
+    assert(length >= 32L && length <= 2L * 1024L * 1024L);
+    assert(fseek(f, 0L, SEEK_SET) == 0);
+    size = (size_t)length;
+    linked = malloc(size);
+    mutated = malloc(size);
+    assert(linked && mutated);
+    assert(fread(linked, 1u, size, f) == size);
+    assert(fclose(f) == 0);
+    assert(ios27_macho_parse(linked, size, &info, error, sizeof(error)) == 0);
+    assert(info.filetype == IOS27_MH_EXECUTE && info.has_main);
+    assert(info.needs_dyld && info.has_fixups && !info.has_dylibs);
+    assert(ios27_macho_executable_layout(linked, size, &info, 4096u,
+                                         &layout, error, sizeof(error)) == 0);
+    assert(layout.entry_vmaddr != 0u && layout.span >= 4096u);
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+    assert(ios27_run_freestanding(linked, size, &info, &result,
+                                  error, sizeof(error)) == 0);
+    assert(result == 43);
+#else
+    assert(ios27_run_freestanding(linked, size, &info, &result,
+                                  error, sizeof(error)) != 0);
+    assert(result == -1);
+#endif
+    maincmd = linked_command(linked, size, 0x80000028u, NULL);
+    textcmd = linked_command(linked, size, 0x19u, "__TEXT");
+    fixcmd = linked_command(linked, size, 0x80000034u, NULL);
+    dyldcmd = linked_command(linked, size, 0x0eu, NULL);
+    dysymcmd = linked_command(linked, size, 0x0bu, NULL);
+    symcmd = linked_command(linked, size, 0x02u, NULL);
+
+    memcpy(mutated, linked, size);
+    put64(mutated + maincmd + 8u, 0u);
+    linked_rejected(mutated, size); /* header is never an entry */
+    memcpy(mutated, linked, size);
+    put64(mutated + maincmd + 8u, UINT64_MAX);
+    linked_rejected(mutated, size); /* overflow */
+    memcpy(mutated, linked, size);
+    put32(mutated + textcmd + 60u, 7u);
+    linked_rejected(mutated, size); /* W+X */
+    memcpy(mutated, linked, size);
+    put32(mutated + 8u, 2u);
+    linked_rejected(mutated, size); /* arm64e/PAC profile denied */
+    memcpy(mutated, linked, size);
+    put32(mutated + dysymcmd + 28u, 1u);
+    linked_rejected(mutated, size); /* unresolved dynamic symbol */
+    memcpy(mutated, linked, size);
+    {
+        size_t offset = (size_t)((uint32_t)linked[fixcmd + 8u] |
+              ((uint32_t)linked[fixcmd + 9u] << 8u) |
+              ((uint32_t)linked[fixcmd + 10u] << 16u) |
+              ((uint32_t)linked[fixcmd + 11u] << 24u));
+        assert(offset <= size && size - offset >= 28u);
+        put32(mutated + offset + 16u, 1u);
+    }
+    linked_rejected(mutated, size); /* chained import now needs dyld */
+    memcpy(mutated, linked, size);
+    mutated[dyldcmd + 12u] = 'X';
+    linked_rejected(mutated, size); /* unexpected interpreter */
+    memcpy(mutated, linked, size);
+    {
+        size_t off = (size_t)((uint32_t)linked[symcmd + 8u] |
+            ((uint32_t)linked[symcmd + 9u] << 8u) |
+            ((uint32_t)linked[symcmd + 10u] << 16u) |
+            ((uint32_t)linked[symcmd + 11u] << 24u));
+        assert(off <= size && size - off >= 16u);
+        mutated[off + 4u] = 1u; /* N_UNDF */
+    }
+    linked_rejected(mutated, size);
+    memcpy(mutated, linked, size);
+    {
+        size_t sec = textcmd + 72u;
+        uint32_t sections = (uint32_t)linked[textcmd + 64u];
+        assert(sections >= 1u);
+        put32(mutated + sec + 60u, 1u); /* unlinked relocation */
+    }
+    linked_rejected(mutated, size);
+
+    free(mutated);
+    free(linked);
+    puts("phase15a linked native execution/layout tests passed");
+}
+
 int main(void) {
     executable_layout_tests();
+    linked_phase15a_tests();
     executable_extra_rejections();
     uint8_t b[264], scratch[264];
     ios27_macho_info image;

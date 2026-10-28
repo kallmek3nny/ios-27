@@ -20,6 +20,14 @@
 #define LC_DYLD_EXPORTS_TRIE 0x80000033u
 #define LC_ENCRYPTION_INFO_64 0x2cu
 #define LC_BUILD_VERSION 0x32u
+#define LC_SYMTAB 0x02u
+#define LC_DYSYMTAB 0x0bu
+#define LC_UUID 0x1bu
+#define LC_CODE_SIGNATURE 0x1du
+#define LC_VERSION_MIN_MACOSX 0x24u
+#define LC_FUNCTION_STARTS 0x26u
+#define LC_DATA_IN_CODE 0x29u
+#define LC_SOURCE_VERSION 0x2au
 
 static uint32_t u32(const uint8_t *p) {
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
@@ -152,11 +160,125 @@ int ios27_macho_parse(const uint8_t *data, size_t size,
     return 0;
 }
 
+
+/*
+ * A linked executable may declare /usr/lib/dyld and carry empty chained
+ * fixup metadata even though its original-source code has no imports or
+ * rebases. Treat those commands as inert only after inspecting their payloads.
+ * No dynamic linker, import resolver, or relocation engine is invoked.
+ */
+static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
+                                     char *error, size_t capacity) {
+    size_t cursor = 32u;
+    uint32_t count = u32(data + 16u);
+    for (uint32_t i = 0u; i < count; ++i) {
+        const uint8_t *p = data + cursor;
+        uint32_t cmd = u32(p), bytes = u32(p + 4u);
+        if (cmd == LC_SEGMENT_64) {
+            uint32_t sections = u32(p + 64u);
+            for (uint32_t j = 0u; j < sections; ++j) {
+                const uint8_t *section = p + 72u + (size_t)j * 80u;
+                if (u32(section + 60u) != 0u)
+                    return bad(error, capacity, "unlinked section relocations");
+            }
+        } else if (cmd == LC_MAIN) {
+            if (bytes != 24u)
+                return bad(error, capacity, "unsupported LC_MAIN size");
+        } else if (cmd == LC_LOAD_DYLINKER) {
+            static const char dyld[] = "/usr/lib/dyld";
+            uint32_t path = u32(p + 8u);
+            if (bytes < 12u || path > bytes ||
+                (size_t)(bytes - path) < sizeof(dyld) ||
+                memcmp(p + path, dyld, sizeof(dyld)) != 0)
+                return bad(error, capacity, "unsupported dynamic linker");
+        } else if (cmd == LC_DYLD_CHAINED_FIXUPS) {
+            uint32_t offset, length, starts, imports, symbols;
+            if (bytes != 16u)
+                return bad(error, capacity, "invalid chained fixup command");
+            offset = u32(p + 8u);
+            length = u32(p + 12u);
+            if (length < 28u || !within(offset, length, size))
+                return bad(error, capacity, "truncated chained fixup payload");
+            /* dyld_chained_fixups_header: version, three offsets, count,
+             * imports format, symbols format. Reject all actual fixup starts. */
+            starts = u32(data + offset + 4u);
+            imports = u32(data + offset + 8u);
+            symbols = u32(data + offset + 12u);
+            if (u32(data + offset) != 0u ||
+                starts < 28u || starts > length ||
+                imports < 28u || imports > length ||
+                symbols < 28u || symbols > length ||
+                u32(data + offset + 16u) != 0u ||
+                u32(data + offset + 20u) != 0u ||
+                u32(data + offset + 24u) != 0u)
+                return bad(error, capacity, "unsupported chained fixup metadata");
+            if (starts < length &&
+                (length - starts < 4u || u32(data + offset + starts) != 0u))
+                return bad(error, capacity, "chained rebases require dyld");
+        } else if (cmd == LC_DYLD_INFO || cmd == LC_DYLD_INFO_ONLY) {
+            if (bytes != 48u)
+                return bad(error, capacity, "invalid dyld info command");
+            for (unsigned j = 0u; j < 4u; ++j) {
+                if (u32(p + 12u + j * 8u) != 0u)
+                    return bad(error, capacity, "dyld bind/rebase not supported");
+            }
+            if (!within(u32(p + 40u), u32(p + 44u), size))
+                return bad(error, capacity, "invalid dyld export bounds");
+        } else if (cmd == LC_SYMTAB) {
+            uint32_t offset, count_symbols, strings, string_bytes;
+            if (bytes != 24u)
+                return bad(error, capacity, "invalid linked symbol table");
+            offset = u32(p + 8u);
+            count_symbols = u32(p + 12u);
+            strings = u32(p + 16u);
+            string_bytes = u32(p + 20u);
+            if (count_symbols > 4096u ||
+                !within(offset, (uint64_t)count_symbols * 16u, size) ||
+                !within(strings, string_bytes, size))
+                return bad(error, capacity, "invalid linked symbol bounds");
+            for (uint32_t j = 0u; j < count_symbols; ++j) {
+                const uint8_t *symbol = data + offset + (size_t)j * 16u;
+                uint8_t kind = symbol[4u];
+                if (u32(symbol) >= string_bytes ||
+                    !memchr(data + strings + u32(symbol), '\0',
+                           string_bytes - u32(symbol)) ||
+                    ((kind & 0xe0u) == 0u &&
+                     (kind & 0x0eu) != 0x0eu &&
+                     (kind & 0x0eu) != 0x02u))
+                    return bad(error, capacity, "unresolved or malformed symbol");
+            }
+        } else if (cmd == LC_DYSYMTAB) {
+            if (bytes != 80u || u32(p + 28u) != 0u ||
+                u32(p + 60u) != 0u)
+                return bad(error, capacity, "unresolved dynamic symbols");
+        } else if (cmd == LC_DYLD_EXPORTS_TRIE ||
+                   cmd == LC_CODE_SIGNATURE || cmd == LC_FUNCTION_STARTS ||
+                   cmd == LC_DATA_IN_CODE) {
+            if (bytes != 16u ||
+                !within(u32(p + 8u), u32(p + 12u), size))
+                return bad(error, capacity, "invalid linkedit command");
+        } else if (cmd == LC_UUID) {
+            if (bytes != 24u)
+                return bad(error, capacity, "invalid uuid command");
+        } else if (cmd == LC_SOURCE_VERSION) {
+            if (bytes != 16u)
+                return bad(error, capacity, "invalid source version command");
+        } else if (cmd == LC_BUILD_VERSION ||
+                   cmd == LC_VERSION_MIN_MACOSX) {
+            /* Parsed and bounded by the Mach-O load-command walker. */
+        } else {
+            return bad(error, capacity, "unsupported executable load command");
+        }
+        cursor += (size_t)bytes;
+    }
+    return 0;
+}
+
 /*
  * Preflight a freestanding executable against the *actual mapping granule*.
  * The same check runs on x86_64, without ever making guest pages executable.
- * LC_MAIN.entryoff is a VM-relative offset from __TEXT, not an arbitrary
- * file offset. No syscall/dyld/ObjC execution is supported by this path.
+ * LC_MAIN.entryoff is a file offset relative to __TEXT's fileoff.
+ * No syscall/dyld/ObjC execution is supported by this path.
  */
 int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                                   const ios27_macho_info *info,
@@ -176,11 +298,14 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
     /* Reject stale or hand-edited metadata, including protection overrides. */
     if (memcmp(info, &parsed, sizeof(parsed)) != 0)
         return bad(error, error_size, "image metadata differs from source");
-    if (parsed.filetype != IOS27_MH_EXECUTE || !parsed.has_main ||
-        parsed.needs_dyld || parsed.has_dylibs || parsed.has_fixups ||
+    if (parsed.filetype != IOS27_MH_EXECUTE ||
+        (parsed.cpusubtype & 0xffu) != 0u || !parsed.has_main ||
+        parsed.has_dylibs ||
         parsed.encrypted || parsed.unsupported_required ||
         parsed.segment_count == 0u)
         return bad(error, error_size, "not a freestanding LC_MAIN executable");
+    if (freestanding_linkedit_safe(data, size, error, error_size) != 0)
+        return -1;
 
     for (size_t i = 0u; i < parsed.segment_count; ++i) {
         const ios27_segment *s = &parsed.segments[i];
@@ -223,6 +348,11 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
             if (!p->vmsize || strcmp(p->name, "__PAGEZERO") == 0) continue;
             p_end = (p->vmaddr + p->vmsize + (uint64_t)(page_size - 1u)) &
                     ~((uint64_t)page_size - 1u);
+            /* Disjoint VM mappings may not alias the same file-backed bytes. */
+            if (s->filesize && p->filesize &&
+                s->fileoff < p->fileoff + p->filesize &&
+                p->fileoff < s->fileoff + s->filesize)
+                return bad(error, error_size, "overlapping segment file ranges");
             if ((p->vmaddr & ~((uint64_t)page_size - 1u)) < aligned_last &&
                 (s->vmaddr & ~((uint64_t)page_size - 1u)) < p_end)
                 return bad(error, error_size, "overlapping host mapping pages");
