@@ -11,10 +11,10 @@
     {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "32cd0c2cf23c28842af58f777696b1d7cbe728a7",
+      "sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T18:05:26Z",
+      "updated_at": "2026-10-28T18:07:16Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -83,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:06:53Z"
+  "observed_at": "2026-10-28T18:07:54Z"
 }
