@@ -6,26 +6,26 @@
 
 candidate branches with mapped changes: **3** · audited base: `5b35123eb11f`
 
+### [feat/phase21b-native-lifecycle-20261028](https://github.com/kallmek3nny/ios-27/pull/71)
+
+head: `34e3ff0d9421` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +774/-0 lines
+  - candidate declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
+
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `eb339e8bf73d` · ci: **not_checked** · unmerged, not credited.
+head: `9431e4e63676` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +759/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +764/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
 
 ### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
 
-head: `a8da7a3a183a` · ci: **running** · unmerged, not credited.
+head: `a8da7a3a183a` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +794/-0 lines
   - candidate declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
-
-### [feat/phase21b-native-lifecycle-20261028](https://github.com/kallmek3nny/ios-27/pull/71)
-
-head: `0ea0dc7f2d57` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +692/-0 lines
-  - candidate declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

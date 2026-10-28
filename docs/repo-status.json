@@ -9,12 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 71,
+      "branch": "feat/phase21b-native-lifecycle-20261028",
+      "sha": "34e3ff0d94214535a46f27b1307e3fa869cd6d5f",
+      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+      "updated_at": "2026-10-28T19:52:49Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "eb339e8bf73d966fbc3ec48a6c88e57a6629f1a7",
+      "sha": "9431e4e6367659d53871618614e90c635227f111",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:52:37Z",
+      "updated_at": "2026-10-28T19:52:46Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +33,6 @@
       "title": "phase 21c: bounded native pthread synchronization and stress coverage",
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
       "updated_at": "2026-10-28T19:52:12Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 71,
-      "branch": "feat/phase21b-native-lifecycle-20261028",
-      "sha": "0ea0dc7f2d57d0186307221d76b32b3253b8dc8a",
-      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
-      "updated_at": "2026-10-28T19:51:15Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -120,5 +120,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:52:41Z"
+  "observed_at": "2026-10-28T19:53:02Z"
 }
