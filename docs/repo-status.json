@@ -11,10 +11,10 @@
     {
       "number": 80,
       "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "300e7cabce06362a02fba5388dd81b3c698cbced",
+      "sha": "9aec372a39662287e9d00e6230c27443ff82bdb2",
       "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:28:44Z",
+      "updated_at": "2026-10-28T21:29:18Z",
       "status": "unmerged: not counted"
     },
     {
@@ -128,5 +128,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:28:59Z"
+  "observed_at": "2026-10-28T21:29:24Z"
 }

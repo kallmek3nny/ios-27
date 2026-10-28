@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "300e7cabce06362a02fba5388dd81b3c698cbced",
+      "sha": "9aec372a39662287e9d00e6230c27443ff82bdb2",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "pr_number": 80,
-      "ci": "running",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 15,
       "possibly_truncated": false,
@@ -20,13 +20,14 @@
           "group_id": "libsystem-host-model",
           "source_files": 6,
           "fixture_files": 7,
-          "additions": 1224,
+          "additions": 1231,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21i_create",
             "ios27_21i_destroy",
             "ios27_21i_dispatch",
             "ios27_21i_dispatch_arm64",
+            "ios27_21i_dispatch_arm64_n",
             "ios27_21i_errno_to_darwin",
             "ios27_21i_get_stats",
             "ios27_21i_lookup",
@@ -85,7 +86,7 @@
       "sha": "03eb75ad79642ba09e9bd720c61be224966fb357",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
       "pr_number": 78,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 13,
       "possibly_truncated": false,
@@ -248,7 +249,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/80",
         "source_files": 6,
         "fixture_files": 7,
-        "ci": "running"
+        "ci": "not_checked"
       },
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
@@ -262,7 +263,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/78",
         "source_files": 2,
         "fixture_files": 9,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -612,5 +613,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:29:10Z"
+  "observed_at": "2026-10-28T21:29:30Z"
 }

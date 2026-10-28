@@ -8,10 +8,10 @@ candidate branches with mapped changes: **6** · audited base: `dd39b3167594`
 
 ### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
 
-head: `300e7cabce06` · ci: **running** · unmerged, not credited.
+head: `9aec372a3966` · ci: **not_checked** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 6 source files, 7 test/fixture files, +1224/-0 lines
-  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_dispatch_arm64`, `ios27_21i_errno_to_darwin`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
+- **libSystem guest model (not dylib)**: 6 source files, 7 test/fixture files, +1231/-0 lines
+  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_dispatch_arm64`, `ios27_21i_dispatch_arm64_n`, `ios27_21i_errno_to_darwin`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -22,7 +22,7 @@ head: `503a74a12900` · ci: **running** · unmerged, not credited.
 
 ### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
 
-head: `03eb75ad7964` · ci: **running** · unmerged, not credited.
+head: `03eb75ad7964` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1200/-0 lines
   - candidate declarations: `ios27_21f_mutex_create`, `ios27_21f_mutex_destroy`, `ios27_21f_mutex_info`, `ios27_21f_mutex_lock`, `ios27_21f_mutex_trylock`, `ios27_21f_mutex_unlock`, `ios27_21f_runtime_create`, `ios27_21f_runtime_destroy`, `ios27_21f_runtime_stats`
