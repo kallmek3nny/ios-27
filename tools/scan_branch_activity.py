@@ -27,6 +27,20 @@ GROUPS = [
     ("bsd-calls", r"^(src/darwin_probe|include/ios27/darwin_probe|tests/test_darwin_probe)"),
     ("dyld-engine", r"^(src/(images|chained|binds|exports|dyld_paths)\.c|include/ios27/(images|chained|binds|exports|dyld_paths)\.h|tests/test_(images|chained|binds|exports|dyld_paths)\.c|tests/fixtures/phase19b-|tools/phase19b-)"),
     ("mach-o", r"^(src/(macho|runner|darwin_object|darwin_branch26|darwin_got|inventory)\.c|include/ios27/(macho|runner|darwin_object|darwin_branch26|darwin_got|inventory)\.h|tests/test_(macho|compiled_darwin)|tests/fixtures/(phase19a-|phase19d-)|tools/(phase19a-|phase19d-))"),
+    ("swift", r"^(src/swift_|include/ios27/swift_)"),
+    ("corefoundation", r"^(src/(corefoundation|cf_)|include/ios27/(corefoundation|cf_))"),
+    ("foundation", r"^(src/foundation_|include/ios27/foundation_)"),
+    ("libdispatch", r"^(src/(dispatch_|libdispatch_)|include/ios27/(dispatch_|libdispatch_))"),
+    ("libsystem-c", r"^(src/(libc_|libsystem_c_)|include/ios27/(libc_|libsystem_c_))"),
+    ("libsystem-pthread", r"^(src/(pthread_|libsystem_pthread_)|include/ios27/(pthread_|libsystem_pthread_))"),
+    ("uikit", r"^(src/uikit_|include/ios27/uikit_)"),
+    ("swiftui", r"^(src/swiftui_|include/ios27/swiftui_)"),
+    ("coreanimation", r"^(src/(coreanimation_|ca_)|include/ios27/(coreanimation_|ca_))"),
+    ("metal", r"^(src/(metal_|iosurface_|vulkan_)|include/ios27/(metal_|iosurface_|vulkan_))"),
+    ("springboard", r"^(src/(springboard_|frontboard_|backboard_)|include/ios27/(springboard_|frontboard_|backboard_))"),
+    ("android", r"^(src/android_|include/ios27/android_)"),
+    ("security", r"^(src/security_|include/ios27/security_)"),
+    ("network", r"^(src/network_|include/ios27/network_)"),
 ]
 GROUPS = [(name, re.compile(regex)) for name, regex in GROUPS]
 ALLOWED_CI = ("native tests", "capability progress", "phase19b real linked darwin dylibs")
@@ -96,9 +110,11 @@ def summarize(candidate, files, ci, allowed):
         if not isinstance(path, str) or len(path) > 255:
             continue
         group = get_group(path)
+        source, fixture = is_source(path), is_fixture(path)
+        if group is None and (source or fixture):
+            group = "unclassified"
         if group not in allowed:
             continue
-        source, fixture = is_source(path), is_fixture(path)
         if not (source or fixture):
             continue
         g = groups[group]
@@ -160,7 +176,7 @@ def audit(repo, provenance, get, groups):
             files = result.get("files", [])
         if not isinstance(files, list):
             raise ValueError("bad diff response")
-        result = summarize(cand, files, check_runs(cand["sha"], get), set(groups))
+        result = summarize(cand, files, check_runs(cand["sha"], get), set(groups) | {"unclassified"})
         if result["groups"]:
             mapped.append(result)
             for entry in result["groups"]:
@@ -185,6 +201,8 @@ def self_test():
     assert get_group("src/mach_v2.c") == "mach-ipc"
     assert get_group("src/runner.c") == "mach-o"
     assert get_group("README.md") is None
+    assert get_group("src/metal_bridge.c") == "metal"
+    assert get_group("src/brand_new_subsystem.c") is None
     assert extract_symbols("+int ios27_objc_create(void) {\n+return ios27_objc_fake();\n") == {"ios27_objc_create"}
     provenance = {"main_source": {"sha": "a" * 40},
                   "open_pull_requests": [{"branch": "phase19e", "sha": "b" * 40,
