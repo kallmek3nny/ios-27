@@ -11,10 +11,10 @@
     {
       "number": 68,
       "branch": "fix/show-merged-agent-work-in-blocks",
-      "sha": "731cb58dd835868d6c1b494680bb1926ca01a644",
+      "sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
       "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/68",
-      "updated_at": "2026-10-28T19:31:33Z",
+      "updated_at": "2026-10-28T19:33:06Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -83,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:32:23Z"
+  "observed_at": "2026-10-28T19:33:36Z"
 }
