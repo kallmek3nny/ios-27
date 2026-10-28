@@ -231,11 +231,12 @@ static void run_once(unsigned round) {
         }
         CHECK(acquired);
     }
-    for (unsigned actor = 0; actor < PRODUCERS; ++actor)
-        for (unsigned i = 0; i < ITEMS; ++i)
-            CHECK(ios27_21j_probe(replay, 31u + (actor & 1u), actor, i) == 0 ||
-                  /* Same key gives same injected decision on a second call. */
-                  ios27_21j_probe(replay, 31u + (actor & 1u), actor, i) == ENOMEM);
+    for (unsigned actor = 0; actor < PRODUCERS; ++actor) {
+        for (unsigned i = 0; i < ITEMS; ++i) {
+            int rc = ios27_21j_probe(replay, 31u + (actor & 1u), actor, i);
+            CHECK(rc == 0 || rc == ENOMEM);
+        }
+    }
     for (unsigned value = 1; value <= total; ++value) {
         int rc = ios27_21j_probe(replay, 31u + ((WORKERS + 1u) & 1u),
                                  WORKERS + 1u, value);
