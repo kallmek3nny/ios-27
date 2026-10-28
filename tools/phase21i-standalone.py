@@ -53,6 +53,8 @@ def main():
                  "-o", str(target)], 60)
             run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
                  str(target)], 30)
+            run([sys.executable, str(ROOT / "tools/phase21i-macho.py"),
+                 "--attrs", str(target)], 30)
             threaded = dest / ("arm64-darwin-threads" + optimize + ".o")
             run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
                  "-fno-builtin", "-fno-stack-protector", "-Werror", "-Wall",
