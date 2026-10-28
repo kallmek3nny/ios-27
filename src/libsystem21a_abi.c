@@ -659,7 +659,8 @@ int ios27_21a_attach_thread(ios27_21a_runtime *rt,
         e = EAGAIN; goto done;
     }
     rt->threads[empty] = (bound_thread){
-        self, guest_thread_addr, 1u, 1u
+        .native_id = self, .guest_address = guest_thread_addr,
+        .occupied = 1u, .active = 1u
     };
     e = 0;
 done:
