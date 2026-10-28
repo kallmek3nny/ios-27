@@ -1,0 +1,39 @@
+name: phase21e tls cancellation native integration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/libsystem21e_*'
+      - 'include/ios27/libsystem21e_*'
+      - 'tests/phase21e-*'
+      - 'tools/phase21e-*'
+      - 'docs/phase21e-*'
+      - '.github/workflows/phase21e-tls-cancellation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase21e-threading:
+    name: phase21e / ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@v4
+      - name: compiler provenance
+        run: |
+          timeout 30s uname -m
+          timeout 30s cc --version
+          timeout 30s clang --version
+      - name: independent compiled native stress, teardown, and Darwin ARM64 object
+        run: timeout 300s python3 tools/phase21e-standalone.py
+      - name: address and undefined behavior sanitizer
+        env:
+          PHASE21E_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase21e-standalone.py
