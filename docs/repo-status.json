@@ -2,24 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "41b96cd39852e3e3707fff9c5e172c038516dbd7",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/41b96cd39852e3e3707fff9c5e172c038516dbd7",
-    "committed_at": "2026-10-28T19:22:21Z"
+    "sha": "760954f96010288b674d64686473a2f572a35b39",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/760954f96010288b674d64686473a2f572a35b39",
+    "committed_at": "2026-10-28T19:24:38Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
-    {
-      "number": 67,
-      "branch": "phase20c-native-objc-ownership",
-      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
-      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "updated_at": "2026-10-28T19:23:35Z",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "open_pull_requests": [],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 67,
+      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
+      "merged_at": "2026-10-28T19:24:38Z"
+    },
     {
       "number": 62,
       "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
@@ -68,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/60",
       "head_sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
       "merged_at": "2026-10-28T19:14:10Z"
-    },
-    {
-      "number": 59,
-      "title": "fix: handle progress refresh/main races and remove stale phase references",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
-      "head_sha": "788e8882e16c628a33eb735117680d9fbc286336",
-      "merged_at": "2026-10-28T18:51:52Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 26,
+    "branches_scanned": 27,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:24:13Z"
+  "observed_at": "2026-10-28T19:25:10Z"
 }

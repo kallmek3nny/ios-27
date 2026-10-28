@@ -1,61 +1,11 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "41b96cd39852e3e3707fff9c5e172c038516dbd7",
+  "main_source_sha": "760954f96010288b674d64686473a2f572a35b39",
   "method": "diff-based provisional activity, no automatic completion promotion",
-  "candidates_checked": 1,
-  "candidate_count": 1,
-  "candidates": [
-    {
-      "branch": "phase20c-native-objc-ownership",
-      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "pr_number": 67,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "objc-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 938,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_objc20c_alloc",
-            "ios27_objc20c_autorelease",
-            "ios27_objc20c_create",
-            "ios27_objc20c_destroy",
-            "ios27_objc20c_get_stats",
-            "ios27_objc20c_pool_pop",
-            "ios27_objc20c_pool_push",
-            "ios27_objc20c_release",
-            "ios27_objc20c_retain",
-            "ios27_objc20c_retain_count",
-            "ios27_objc20c_strong_store",
-            "ios27_objc20c_validate"
-          ],
-          "example_paths": [
-            "include/ios27/objc20c_lifetime.h",
-            "src/objc20c_lifetime.c",
-            "tests/phase20c-compiled-host.c",
-            "tests/phase20c-compiled.m"
-          ]
-        }
-      ]
-    }
-  ],
-  "groups": {
-    "objc-host-model": [
-      {
-        "branch": "phase20c-native-objc-ownership",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-        "source_files": 2,
-        "fixture_files": 4,
-        "ci": "passing_checks"
-      }
-    ]
-  },
-  "observed_at": "2026-10-28T19:24:14Z"
+  "candidates_checked": 0,
+  "candidate_count": 0,
+  "candidates": [],
+  "groups": {},
+  "observed_at": "2026-10-28T19:25:10Z"
 }

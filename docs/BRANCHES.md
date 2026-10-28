@@ -4,14 +4,9 @@
 
 **purple outlines = changed source or test files on an unmerged branch.** these are *provisional change signals*, not implementations that passed an Apple ABI conformance test. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **1** · audited base: `41b96cd39852`
+candidate branches with mapped changes: **0** · audited base: `760954f96010`
 
-### [phase20c-native-objc-ownership](https://github.com/kallmek3nny/ios-27/pull/67)
-
-head: `ab794912355e` · ci: **passing_checks** · unmerged, not credited.
-
-- **ObjC host prototype (not Apple libobjc)**: 2 source files, 4 test/fixture files, +938/-0 lines
-  - candidate declarations: `ios27_objc20c_alloc`, `ios27_objc20c_autorelease`, `ios27_objc20c_create`, `ios27_objc20c_destroy`, `ios27_objc20c_get_stats`, `ios27_objc20c_pool_pop`, `ios27_objc20c_pool_push`, `ios27_objc20c_release`, `ios27_objc20c_retain`, `ios27_objc20c_retain_count`, `ios27_objc20c_strong_store`, `ios27_objc20c_validate`
+no unmerged branches currently have source or test changes matching the catalog's known subsystem paths. this does **not** mean older work is absent from main.
 
 ## verification policy
 
