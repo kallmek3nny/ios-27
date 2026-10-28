@@ -19,13 +19,14 @@ INTEGRATION = (
     ROOT / "src/libsystem21e_tls.c",
 )
 
-def run(args, seconds, env=None):
-    print("+", " ".join(map(str, args)), flush=True)
+def run(args, seconds, env=None, input_data=None, echo=True):
+    if echo:
+        print("+", " ".join(map(str, args)), flush=True)
     completed = subprocess.run(
         args, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, timeout=seconds, env=env,
+        text=True, timeout=seconds, env=env, input=input_data,
     )
-    if completed.stdout:
+    if completed.stdout and echo:
         print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n", flush=True)
     if completed.returncode:
         raise RuntimeError("command failed ({})".format(completed.returncode))
@@ -104,9 +105,24 @@ def main():
                                 summary["last"] != 598 or
                                 summary["dropped"] != 0):
                             raise RuntimeError("trace CLI golden mismatch")
+                        captured = run(command + ["--jsonl"], 150, env,
+                                       echo=False)
+                        verifier = [sys.executable, str(ROOT / "tools" /
+                                     "phase21j-verify-trace.py")]
+                        run(verifier, 30, env, input_data=captured)
+                        corrupted = captured.replace('"kind":6', '"kind":5', 1)
+                        if corrupted == captured:
+                            raise RuntimeError("missing corruption candidate")
+                        rejected = subprocess.run(
+                            verifier, input=corrupted, text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            timeout=30, env=env, check=False,
+                        )
+                        if rejected.returncode == 0:
+                            raise RuntimeError("corrupted trace was accepted")
                     else:
                         run([str(output)], 150, env)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and a stable JSON trace CLI passed".format(
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and an independently checked JSON trace CLI passed".format(
         "ASan/UBSan" if sanitize else
         "8x native O2 stress" if stress else "O0/O2"), flush=True)
 
