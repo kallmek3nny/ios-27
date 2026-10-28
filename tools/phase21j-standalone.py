@@ -136,6 +136,34 @@ def main():
                         )
                         if rejected.returncode == 0:
                             raise RuntimeError("corrupted trace was accepted")
+                        explicit = [str(output), "0x21feed", "4", "8",
+                                    "--plan", "03120121"]
+                        plan_summary = json.loads(run(explicit, 150, env))
+                        if (plan_summary["plan"] != "03120121" or
+                                plan_summary["digest"] !=
+                                "0x79cdeb98a766411b" or
+                                plan_summary["injections"] != 4 or
+                                plan_summary["last"] != 12):
+                            raise RuntimeError("explicit actor-plan golden mismatch")
+                        plan_capture = run(explicit + ["--jsonl"], 150,
+                                           env, echo=False)
+                        run(verifier, 30, env, input_data=plan_capture)
+                        tampered = plan_capture.replace(
+                            '"plan":"03120121"', '"plan":"03120120"', 1)
+                        if tampered == plan_capture:
+                            raise RuntimeError("explicit actor plan not captured")
+                        refusal = subprocess.run(
+                            verifier, input=tampered, text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            timeout=30, env=env, check=False)
+                        if refusal.returncode == 0:
+                            raise RuntimeError("tampered actor plan passed verifier")
+                        bad = subprocess.run(
+                            explicit[:-1] + ["03120129"], text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            timeout=30, env=env, check=False)
+                        if bad.returncode != 2:
+                            raise RuntimeError("invalid actor digit was not rejected")
                     else:
                         run([str(output)], 150, env)
     mode = "ASan/UBSan" if sanitize else (
