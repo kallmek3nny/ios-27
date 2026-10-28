@@ -53,3 +53,12 @@ Phase 21h owns only `src/libsystem21h_*`, `include/ios27/libsystem21h_*`,
 `.github/workflows/phase21h-lifecycle.yml`. Actual active engineering duration
 must be recorded from observed timestamps; an hour must not be asserted unless
 an hour of active work actually happened.
+
+## observed active work log
+
+- Start: 2026-10-28 21:08:22 UTC (first repository verification/local tool command).
+- Checkpoint: 2026-10-28 21:14:44 UTC.
+- Observed elapsed interval: **6 minutes 22 seconds**, spent on implementation,
+  compiled stress execution, sanitizers, GitHub commits, PR creation and CI review.
+- Repeated the entire -O0/-O2 compiled suite **12 additional times**, all passed.
+- These are observed timestamps, **not a claim of 60 active minutes**.
