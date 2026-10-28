@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,6 +103,15 @@ def main():
     if path.stat().st_size > MAX_BYTES:
         raise ValueError("evidence exceeds 1 MiB")
     report = json.loads(path.read_text(encoding="utf-8"))
+    expected_head = os.environ.get("PHASE21J_HEAD_SHA")
+    if expected_head:
+        actual = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            check=False, timeout=30,
+        )
+        if actual.returncode or actual.stdout.strip() != expected_head:
+            raise ValueError("tested git commit does not match frozen SHA")
     count, elapsed = verify(report)
     print("phase21j evidence: {} compiled test cells, {:.3f}s actual runner elapsed; PASS".format(
         count, elapsed))
@@ -110,5 +120,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except (ValueError, OSError, TypeError, KeyError) as error:
+    except (ValueError, OSError, TypeError, KeyError,
+            subprocess.TimeoutExpired) as error:
         sys.exit("phase21j evidence: rejected: {}".format(error))
