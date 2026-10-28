@@ -1,1373 +1,1395 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1224" viewBox="0 0 760 1224" role="img" aria-label="proportional ios-27 compatibility blocks">
-<rect width="760" height="1224" fill="#0e1724"/>
-<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#f0f5fa">ios-27 / compatibility</text>
-<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#9cacc0">component area scales with its tracked functions; colors show test status</text>
-<text x="18" y="99" font-family="sans-serif" font-size="17" font-weight="600" fill="#e7edf4">system libraries / api targets</text>
-<text x="742" y="99" text-anchor="end" font-family="sans-serif" font-size="12" fill="#9db0c4">11 components · 233 targets</text>
-<line x1="18" x2="742" y1="114" y2="114" stroke="#2c3a4b" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1275" viewBox="0 0 760 1275" role="img" aria-label="ios-27 tracked API sample with proportional component size and evidence status">
+<style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>
+<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3" class="gh-text">ios-27 / compatibility</text>
+<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">component size = tracked targets · color = test evidence</text>
+<text x="18" y="101" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">system libraries / api targets</text>
+<text x="742" y="102" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">3.0%</text>
+<text x="18" y="120" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">11 components · 233 tracked</text>
+<text x="742" y="121" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">7 / 233 with fixture/probe evidence</text>
+<rect x="18.00" y="128.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
+<rect x="18.00" y="128.00" width="21.75" height="4.00" rx="2" fill="#d29922"/>
 <g><title>libsystem_kernel / bsd · 42 targets · conditional ceiling</title>
-<rect x="20.00" y="128.00" width="235.26" height="203.27" rx="2" fill="#1b293b"/>
+<rect x="20.00" y="142.00" width="235.26" height="203.27" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_kernel / bsd / exit: synthetic parser/model/probe</title>
-<rect x="22.60" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="22.60" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / getpid: synthetic parser/model/probe</title>
-<rect x="55.64" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="55.64" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / getppid: synthetic parser/model/probe</title>
-<rect x="88.67" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="88.67" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / getuid: synthetic parser/model/probe</title>
-<rect x="121.71" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="121.71" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / geteuid: synthetic parser/model/probe</title>
-<rect x="154.75" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="154.75" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / getgid: synthetic parser/model/probe</title>
-<rect x="187.79" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="187.79" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / getegid: synthetic parser/model/probe</title>
-<rect x="220.82" y="152.60" width="31.84" height="28.35" rx="1" fill="#edbc59"/>
+<rect x="220.82" y="166.60" width="31.84" height="28.35" rx="1" fill="#d29922"/>
 </g>
 <g><title>libsystem_kernel / bsd / open: unimplemented</title>
-<rect x="22.60" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / openat: unimplemented</title>
-<rect x="55.64" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / close: unimplemented</title>
-<rect x="88.67" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / read: unimplemented</title>
-<rect x="121.71" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / write: unimplemented</title>
-<rect x="154.75" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / pread: unimplemented</title>
-<rect x="187.79" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / pwrite: unimplemented</title>
-<rect x="220.82" y="182.15" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="196.15" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / lseek: unimplemented</title>
-<rect x="22.60" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / stat: unimplemented</title>
-<rect x="55.64" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / fstat: unimplemented</title>
-<rect x="88.67" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / lstat: unimplemented</title>
-<rect x="121.71" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / fcntl: unimplemented</title>
-<rect x="154.75" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / ioctl: unimplemented</title>
-<rect x="187.79" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / mmap: unimplemented</title>
-<rect x="220.82" y="211.69" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="225.69" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / munmap: unimplemented</title>
-<rect x="22.60" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / mprotect: unimplemented</title>
-<rect x="55.64" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / sysctl: unimplemented</title>
-<rect x="88.67" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / gettimeofday: unimplemented</title>
-<rect x="121.71" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / kqueue: unimplemented</title>
-<rect x="154.75" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / kevent: unimplemented</title>
-<rect x="187.79" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / poll: unimplemented</title>
-<rect x="220.82" y="241.24" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="255.24" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / select: unimplemented</title>
-<rect x="22.60" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / socket: unimplemented</title>
-<rect x="55.64" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / connect: unimplemented</title>
-<rect x="88.67" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / bind: unimplemented</title>
-<rect x="121.71" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / listen: unimplemented</title>
-<rect x="154.75" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / accept: unimplemented</title>
-<rect x="187.79" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / sendto: unimplemented</title>
-<rect x="220.82" y="270.78" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="284.78" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / recvfrom: unimplemented</title>
-<rect x="22.60" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / sigaction: unimplemented</title>
-<rect x="55.64" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / kill: unimplemented</title>
-<rect x="88.67" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / posix_spawn: unimplemented</title>
-<rect x="121.71" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / execve: unimplemented</title>
-<rect x="154.75" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / fork: unimplemented</title>
-<rect x="187.79" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_kernel / bsd / wait4: unimplemented</title>
-<rect x="220.82" y="300.33" width="31.84" height="28.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="314.33" width="31.84" height="28.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="26.00" y="143.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libsystem_kernel / bsd</text>
+<text x="26.00" y="157.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libsystem_kernel / bsd</text>
+<text x="248.26" y="157.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">17%</text>
 </g>
 <g><title>libsystem_c / libc · 35 targets · plausible ceiling</title>
-<rect x="20.00" y="335.27" width="235.26" height="168.73" rx="2" fill="#1b293b"/>
+<rect x="20.00" y="349.27" width="235.26" height="168.73" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_c / libc / malloc: unimplemented</title>
-<rect x="22.60" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / calloc: unimplemented</title>
-<rect x="55.64" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / realloc: unimplemented</title>
-<rect x="88.67" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / free: unimplemented</title>
-<rect x="121.71" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / memcpy: unimplemented</title>
-<rect x="154.75" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / memmove: unimplemented</title>
-<rect x="187.79" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / memset: unimplemented</title>
-<rect x="220.82" y="359.87" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="373.87" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / memcmp: unimplemented</title>
-<rect x="22.60" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strlen: unimplemented</title>
-<rect x="55.64" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strnlen: unimplemented</title>
-<rect x="88.67" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strcmp: unimplemented</title>
-<rect x="121.71" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strncmp: unimplemented</title>
-<rect x="154.75" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strcpy: unimplemented</title>
-<rect x="187.79" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strncpy: unimplemented</title>
-<rect x="220.82" y="388.42" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="402.42" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strdup: unimplemented</title>
-<rect x="22.60" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / snprintf: unimplemented</title>
-<rect x="55.64" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / printf: unimplemented</title>
-<rect x="88.67" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fprintf: unimplemented</title>
-<rect x="121.71" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / sscanf: unimplemented</title>
-<rect x="154.75" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strtol: unimplemented</title>
-<rect x="187.79" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strtod: unimplemented</title>
-<rect x="220.82" y="416.96" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="430.96" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fopen: unimplemented</title>
-<rect x="22.60" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fclose: unimplemented</title>
-<rect x="55.64" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fread: unimplemented</title>
-<rect x="88.67" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fwrite: unimplemented</title>
-<rect x="121.71" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fseek: unimplemented</title>
-<rect x="154.75" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / fflush: unimplemented</title>
-<rect x="187.79" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / setenv: unimplemented</title>
-<rect x="220.82" y="445.51" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="459.51" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / getenv: unimplemented</title>
-<rect x="22.60" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="22.60" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / unsetenv: unimplemented</title>
-<rect x="55.64" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="55.64" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / strerror: unimplemented</title>
-<rect x="88.67" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="88.67" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / qsort: unimplemented</title>
-<rect x="121.71" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="121.71" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / bsearch: unimplemented</title>
-<rect x="154.75" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="154.75" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / atexit: unimplemented</title>
-<rect x="187.79" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="187.79" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_c / libc / abort: unimplemented</title>
-<rect x="220.82" y="474.05" width="31.84" height="27.35" rx="1" fill="#526175"/>
+<rect x="220.82" y="488.05" width="31.84" height="27.35" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="26.00" y="350.27" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libsystem_c / libc</text>
+<text x="26.00" y="364.27" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libsystem_c / libc</text>
+<text x="248.26" y="364.27" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>libobjc / objc runtime · 27 targets · conditional ceiling</title>
-<rect x="259.26" y="128.00" width="145.15" height="209.75" rx="2" fill="#1b293b"/>
+<rect x="259.26" y="142.00" width="145.15" height="209.75" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libobjc / objc runtime / objc_msgSend: unimplemented</title>
-<rect x="261.86" y="152.60" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="166.60" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_msgSendSuper2: unimplemented</title>
-<rect x="290.09" y="152.60" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="290.09" y="166.60" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_getClass: unimplemented</title>
-<rect x="318.32" y="152.60" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="318.32" y="166.60" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_lookUpClass: unimplemented</title>
-<rect x="346.55" y="152.60" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="346.55" y="166.60" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_allocateClassPair: unimplemented</title>
-<rect x="374.78" y="152.60" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="374.78" y="166.60" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_registerClassPair: unimplemented</title>
-<rect x="261.86" y="183.22" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="197.22" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_disposeClassPair: unimplemented</title>
-<rect x="290.09" y="183.22" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="290.09" y="197.22" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / class_getName: unimplemented</title>
-<rect x="318.32" y="183.22" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="318.32" y="197.22" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / class_getSuperclass: unimplemented</title>
-<rect x="346.55" y="183.22" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="346.55" y="197.22" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / class_getInstanceMethod: unimplemented</title>
-<rect x="374.78" y="183.22" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="374.78" y="197.22" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / class_addMethod: unimplemented</title>
-<rect x="261.86" y="213.85" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="227.85" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / class_replaceMethod: unimplemented</title>
-<rect x="290.09" y="213.85" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="290.09" y="227.85" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / object_getClass: unimplemented</title>
-<rect x="318.32" y="213.85" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="318.32" y="227.85" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / object_setClass: unimplemented</title>
-<rect x="346.55" y="213.85" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="346.55" y="227.85" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / sel_registerName: unimplemented</title>
-<rect x="374.78" y="213.85" width="27.03" height="29.43" rx="1" fill="#526175"/>
+<rect x="374.78" y="227.85" width="27.03" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / sel_getName: unimplemented</title>
-<rect x="261.86" y="244.47" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="258.48" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / method_getImplementation: unimplemented</title>
-<rect x="297.15" y="244.47" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="297.15" y="258.48" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_retain: unimplemented</title>
-<rect x="332.44" y="244.47" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="332.44" y="258.48" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_release: unimplemented</title>
-<rect x="367.72" y="244.47" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="367.72" y="258.48" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_autorelease: unimplemented</title>
-<rect x="261.86" y="275.10" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="289.10" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_autoreleasePoolPush: unimplemented</title>
-<rect x="297.15" y="275.10" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="297.15" y="289.10" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_autoreleasePoolPop: unimplemented</title>
-<rect x="332.44" y="275.10" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="332.44" y="289.10" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_storeWeak: unimplemented</title>
-<rect x="367.72" y="275.10" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="367.72" y="289.10" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_loadWeakRetained: unimplemented</title>
-<rect x="261.86" y="305.73" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="261.86" y="319.73" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_initWeak: unimplemented</title>
-<rect x="297.15" y="305.73" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="297.15" y="319.73" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_destroyWeak: unimplemented</title>
-<rect x="332.44" y="305.73" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="332.44" y="319.73" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libobjc / objc runtime / objc_exception_throw: unimplemented</title>
-<rect x="367.72" y="305.73" width="34.09" height="29.43" rx="1" fill="#526175"/>
+<rect x="367.72" y="319.73" width="34.09" height="29.43" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="265.26" y="143.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libobjc / objc runti…</text>
+<text x="265.26" y="157.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libobjc / objc runti…</text>
 </g>
 <g><title>libsystem_pthread · 21 targets · conditional ceiling</title>
-<rect x="259.26" y="341.75" width="145.15" height="162.25" rx="2" fill="#1b293b"/>
+<rect x="259.26" y="355.75" width="145.15" height="162.25" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_pthread / pthread_create: unimplemented</title>
-<rect x="261.86" y="366.35" width="27.03" height="26.05" rx="1" fill="#526175"/>
+<rect x="261.86" y="380.35" width="27.03" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_join: unimplemented</title>
-<rect x="290.09" y="366.35" width="27.03" height="26.05" rx="1" fill="#526175"/>
+<rect x="290.09" y="380.35" width="27.03" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_detach: unimplemented</title>
-<rect x="318.32" y="366.35" width="27.03" height="26.05" rx="1" fill="#526175"/>
+<rect x="318.32" y="380.35" width="27.03" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_self: unimplemented</title>
-<rect x="346.55" y="366.35" width="27.03" height="26.05" rx="1" fill="#526175"/>
+<rect x="346.55" y="380.35" width="27.03" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_equal: unimplemented</title>
-<rect x="374.78" y="366.35" width="27.03" height="26.05" rx="1" fill="#526175"/>
+<rect x="374.78" y="380.35" width="27.03" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_once: unimplemented</title>
-<rect x="261.86" y="393.60" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="261.86" y="407.60" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_key_create: unimplemented</title>
-<rect x="297.15" y="393.60" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="297.15" y="407.60" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_setspecific: unimplemented</title>
-<rect x="332.44" y="393.60" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="332.44" y="407.60" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_getspecific: unimplemented</title>
-<rect x="367.72" y="393.60" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="367.72" y="407.60" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_mutex_init: unimplemented</title>
-<rect x="261.86" y="420.85" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="261.86" y="434.85" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_mutex_lock: unimplemented</title>
-<rect x="297.15" y="420.85" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="297.15" y="434.85" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_mutex_unlock: unimplemented</title>
-<rect x="332.44" y="420.85" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="332.44" y="434.85" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_cond_init: unimplemented</title>
-<rect x="367.72" y="420.85" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="367.72" y="434.85" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_cond_wait: unimplemented</title>
-<rect x="261.86" y="448.10" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="261.86" y="462.10" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_cond_signal: unimplemented</title>
-<rect x="297.15" y="448.10" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="297.15" y="462.10" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_cond_broadcast: unimplemented</title>
-<rect x="332.44" y="448.10" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="332.44" y="462.10" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_rwlock_rdlock: unimplemented</title>
-<rect x="367.72" y="448.10" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="367.72" y="462.10" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_rwlock_wrlock: unimplemented</title>
-<rect x="261.86" y="475.35" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="261.86" y="489.35" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_set_qos_class_self_np: unimplemented</title>
-<rect x="297.15" y="475.35" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="297.15" y="489.35" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_threadid_np: unimplemented</title>
-<rect x="332.44" y="475.35" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="332.44" y="489.35" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libsystem_pthread / pthread_getname_np: unimplemented</title>
-<rect x="367.72" y="475.35" width="34.09" height="26.05" rx="1" fill="#526175"/>
+<rect x="367.72" y="489.35" width="34.09" height="26.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="265.26" y="356.75" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libsystem_pthread</text>
+<text x="265.26" y="370.75" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libsystem_pthread</text>
 </g>
 <g><title>CoreFoundation · 20 targets · unknown ceiling</title>
-<rect x="408.41" y="128.00" width="163.79" height="136.74" rx="2" fill="#1b293b"/>
+<rect x="408.41" y="142.00" width="163.79" height="136.74" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CoreFoundation / CFGetTypeID: unimplemented</title>
-<rect x="411.01" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="411.01" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFRetain: unimplemented</title>
-<rect x="442.97" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="442.97" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFRelease: unimplemented</title>
-<rect x="474.93" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="474.93" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFStringCreateWithCString: unimplemented</title>
-<rect x="506.89" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="506.89" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFStringGetLength: unimplemented</title>
-<rect x="538.85" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="538.85" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFStringGetCString: unimplemented</title>
-<rect x="411.01" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="411.01" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFArrayCreate: unimplemented</title>
-<rect x="442.97" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="442.97" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFArrayGetCount: unimplemented</title>
-<rect x="474.93" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="474.93" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFArrayGetValueAtIndex: unimplemented</title>
-<rect x="506.89" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="506.89" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFDictionaryCreate: unimplemented</title>
-<rect x="538.85" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="538.85" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFDictionaryGetValue: unimplemented</title>
-<rect x="411.01" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="411.01" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFDataCreate: unimplemented</title>
-<rect x="442.97" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="442.97" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFDataGetLength: unimplemented</title>
-<rect x="474.93" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="474.93" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFURLCreateWithFileSystemPath: unimplemented</title>
-<rect x="506.89" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="506.89" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFRunLoopGetCurrent: unimplemented</title>
-<rect x="538.85" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="538.85" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFRunLoopRun: unimplemented</title>
-<rect x="411.01" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="411.01" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFRunLoopStop: unimplemented</title>
-<rect x="442.97" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="442.97" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFBundleGetMainBundle: unimplemented</title>
-<rect x="474.93" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="474.93" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFErrorCreate: unimplemented</title>
-<rect x="506.89" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="506.89" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreFoundation / CFPreferencesCopyAppValue: unimplemented</title>
-<rect x="538.85" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="538.85" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="414.41" y="143.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">CoreFoundation</text>
+<text x="414.41" y="157.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">CoreFoundation</text>
+<text x="565.21" y="157.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>libdispatch / gdc · 20 targets · conditional ceiling</title>
-<rect x="576.21" y="128.00" width="163.79" height="136.74" rx="2" fill="#1b293b"/>
+<rect x="576.21" y="142.00" width="163.79" height="136.74" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libdispatch / gdc / dispatch_async: unimplemented</title>
-<rect x="578.81" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="578.81" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_sync: unimplemented</title>
-<rect x="610.76" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="610.76" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_after: unimplemented</title>
-<rect x="642.72" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="642.72" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_once: unimplemented</title>
-<rect x="674.68" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="674.68" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_group_create: unimplemented</title>
-<rect x="706.64" y="152.60" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="706.64" y="166.60" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_group_async: unimplemented</title>
-<rect x="578.81" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="578.81" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_group_wait: unimplemented</title>
-<rect x="610.76" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="610.76" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_semaphore_create: unimplemented</title>
-<rect x="642.72" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="642.72" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_semaphore_wait: unimplemented</title>
-<rect x="674.68" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="674.68" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_semaphore_signal: unimplemented</title>
-<rect x="706.64" y="180.29" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="706.64" y="194.29" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_queue_create: unimplemented</title>
-<rect x="578.81" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="578.81" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_get_main_queue: unimplemented</title>
-<rect x="610.76" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="610.76" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_get_global_queue: unimplemented</title>
-<rect x="642.72" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="642.72" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_source_create: unimplemented</title>
-<rect x="674.68" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="674.68" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_source_set_event_handler: unimplemented</title>
-<rect x="706.64" y="207.97" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="706.64" y="221.97" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_activate: unimplemented</title>
-<rect x="578.81" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="578.81" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_retain: unimplemented</title>
-<rect x="610.76" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="610.76" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_release: unimplemented</title>
-<rect x="642.72" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="642.72" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_block_create: unimplemented</title>
-<rect x="674.68" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="674.68" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdispatch / gdc / dispatch_apply: unimplemented</title>
-<rect x="706.64" y="235.66" width="30.76" height="26.49" rx="1" fill="#526175"/>
+<rect x="706.64" y="249.66" width="30.76" height="26.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="582.21" y="143.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libdispatch / gdc</text>
+<text x="582.21" y="157.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libdispatch / gdc</text>
+<text x="733.00" y="157.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>Foundation / classes · 16 targets · unknown ceiling</title>
-<rect x="408.41" y="268.74" width="153.92" height="115.63" rx="2" fill="#1b293b"/>
+<rect x="408.41" y="282.74" width="153.92" height="115.63" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Foundation / classes / NSObject lifecycle: unimplemented</title>
-<rect x="411.01" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSString text operations: unimplemented</title>
-<rect x="436.00" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="436.00" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSNumber boxing: unimplemented</title>
-<rect x="460.99" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="460.99" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSArray collections: unimplemented</title>
-<rect x="485.97" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="485.97" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSDictionary collections: unimplemented</title>
-<rect x="510.96" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="510.96" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSData buffers: unimplemented</title>
-<rect x="535.95" y="293.34" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="535.95" y="307.34" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSError propagation: unimplemented</title>
-<rect x="411.01" y="323.22" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="337.22" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSURL parsing: unimplemented</title>
-<rect x="441.00" y="323.22" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="441.00" y="337.22" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSFileManager operations: unimplemented</title>
-<rect x="470.98" y="323.22" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="470.98" y="337.22" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSBundle lookup: unimplemented</title>
-<rect x="500.97" y="323.22" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="500.97" y="337.22" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSNotificationCenter notifications: unimplemented</title>
-<rect x="530.95" y="323.22" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="530.95" y="337.22" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSOperationQueue scheduling: unimplemented</title>
-<rect x="411.01" y="353.09" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="367.09" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSRunLoop integration: unimplemented</title>
-<rect x="441.00" y="353.09" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="441.00" y="367.09" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSDate and timers: unimplemented</title>
-<rect x="470.98" y="353.09" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="470.98" y="367.09" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSKeyedArchiver: unimplemented</title>
-<rect x="500.97" y="353.09" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="500.97" y="367.09" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Foundation / classes / NSLocale handling: unimplemented</title>
-<rect x="530.95" y="353.09" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="530.95" y="367.09" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="414.41" y="283.74" font-family="sans-serif" font-size="11.5" fill="#dee7f2">Foundation / classes</text>
+<text x="414.41" y="297.74" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Foundation / classes</text>
 </g>
 <g><title>Swift runtime / ABI · 16 targets · conditional ceiling</title>
-<rect x="408.41" y="388.37" width="153.92" height="115.63" rx="2" fill="#1b293b"/>
+<rect x="408.41" y="402.37" width="153.92" height="115.63" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Swift runtime / ABI / swift class metadata: unimplemented</title>
-<rect x="411.01" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / value witness tables: unimplemented</title>
-<rect x="436.00" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="436.00" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / protocol conformance lookup: unimplemented</title>
-<rect x="460.99" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="460.99" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / existential containers: unimplemented</title>
-<rect x="485.97" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="485.97" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / generic specialization metadata: unimplemented</title>
-<rect x="510.96" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="510.96" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift dynamic casting: unimplemented</title>
-<rect x="535.95" y="412.97" width="23.79" height="28.68" rx="1" fill="#526175"/>
+<rect x="535.95" y="426.97" width="23.79" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift retain/release: unimplemented</title>
-<rect x="411.01" y="442.85" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="456.85" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift heap allocation: unimplemented</title>
-<rect x="441.00" y="442.85" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="441.00" y="456.85" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift error propagation: unimplemented</title>
-<rect x="470.98" y="442.85" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="470.98" y="456.85" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift async tasks: unimplemented</title>
-<rect x="500.97" y="442.85" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="500.97" y="456.85" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift continuations: unimplemented</title>
-<rect x="530.95" y="442.85" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="530.95" y="456.85" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift actor isolation: unimplemented</title>
-<rect x="411.01" y="472.72" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="411.01" y="486.72" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift concurrency executor: unimplemented</title>
-<rect x="441.00" y="472.72" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="441.00" y="486.72" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift reflection metadata: unimplemented</title>
-<rect x="470.98" y="472.72" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="470.98" y="486.72" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift strings bridge: unimplemented</title>
-<rect x="500.97" y="472.72" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="500.97" y="486.72" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Swift runtime / ABI / swift objc interoperability: unimplemented</title>
-<rect x="530.95" y="472.72" width="28.78" height="28.68" rx="1" fill="#526175"/>
+<rect x="530.95" y="486.72" width="28.78" height="28.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="414.41" y="403.37" font-family="sans-serif" font-size="11.5" fill="#dee7f2">Swift runtime / ABI</text>
+<text x="414.41" y="417.37" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Swift runtime / ABI</text>
 </g>
 <g><title>libdyld / dynamic loading · 12 targets · conditional ceiling</title>
-<rect x="566.34" y="268.74" width="84.83" height="155.51" rx="2" fill="#1b293b"/>
+<rect x="566.34" y="282.74" width="84.83" height="155.51" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libdyld / dynamic loading / dlopen: unimplemented</title>
-<rect x="568.94" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="568.94" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / dlsym: unimplemented</title>
-<rect x="595.88" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="595.88" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / dlclose: unimplemented</title>
-<rect x="622.82" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="622.82" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / dlerror: unimplemented</title>
-<rect x="568.94" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="568.94" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / dladdr: unimplemented</title>
-<rect x="595.88" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="595.88" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_image_count: unimplemented</title>
-<rect x="622.82" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="622.82" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_get_image_name: unimplemented</title>
-<rect x="568.94" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="568.94" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_get_image_header: unimplemented</title>
-<rect x="595.88" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="595.88" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_get_image_vmaddr_slide: unimplemented</title>
-<rect x="622.82" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="622.82" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_register_func_for_add_image: unimplemented</title>
-<rect x="568.94" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="568.94" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / _dyld_register_func_for_remove_image: unimplemented</title>
-<rect x="595.88" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="595.88" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>libdyld / dynamic loading / dyld_dynamic_interpose: unimplemented</title>
-<rect x="622.82" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="622.82" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="572.34" y="283.74" font-family="sans-serif" font-size="11.5" fill="#dee7f2">libdyld / …</text>
+<text x="572.34" y="297.74" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libdyld / …</text>
 </g>
 <g><title>CFNetwork / Network.framework · 12 targets · conditional ceiling</title>
-<rect x="655.17" y="268.74" width="84.83" height="155.51" rx="2" fill="#1b293b"/>
+<rect x="655.17" y="282.74" width="84.83" height="155.51" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CFNetwork / Network.framework / CFHTTPMessageCreateRequest: unimplemented</title>
-<rect x="657.77" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="657.77" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / CFReadStreamOpen: unimplemented</title>
-<rect x="684.71" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="684.71" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / CFWriteStreamOpen: unimplemented</title>
-<rect x="711.66" y="293.34" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="711.66" y="307.34" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NSURLSession request: unimplemented</title>
-<rect x="657.77" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="657.77" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NSURLSession background task: unimplemented</title>
-<rect x="684.71" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="684.71" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NWConnection start: unimplemented</title>
-<rect x="711.66" y="325.72" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="711.66" y="339.72" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NWConnection send: unimplemented</title>
-<rect x="657.77" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="657.77" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NWConnection receive: unimplemented</title>
-<rect x="684.71" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="684.71" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / NWListener start: unimplemented</title>
-<rect x="711.66" y="358.09" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="711.66" y="372.09" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / Network path monitor: unimplemented</title>
-<rect x="657.77" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="657.77" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / TLS trust bridge: unimplemented</title>
-<rect x="684.71" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="684.71" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CFNetwork / Network.framework / Network sandbox policy: unimplemented</title>
-<rect x="711.66" y="390.47" width="25.74" height="31.18" rx="1" fill="#526175"/>
+<rect x="711.66" y="404.47" width="25.74" height="31.18" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="661.17" y="283.74" font-family="sans-serif" font-size="11.5" fill="#dee7f2">CFNetwork …</text>
+<text x="661.17" y="297.74" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">CFNetwork …</text>
 </g>
 <g><title>Security / keychain · 12 targets · unknown ceiling</title>
-<rect x="566.34" y="428.25" width="173.66" height="75.75" rx="2" fill="#1b293b"/>
+<rect x="566.34" y="442.25" width="173.66" height="75.75" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Security / keychain / SecItemAdd: unimplemented</title>
-<rect x="568.94" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="568.94" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecItemCopyMatching: unimplemented</title>
-<rect x="597.21" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="597.21" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecItemUpdate: unimplemented</title>
-<rect x="625.49" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="625.49" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecItemDelete: unimplemented</title>
-<rect x="653.77" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="653.77" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecRandomCopyBytes: unimplemented</title>
-<rect x="682.05" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="682.05" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecKeyCreateRandomKey: unimplemented</title>
-<rect x="710.32" y="452.85" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="710.32" y="466.85" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecKeyCreateSignature: unimplemented</title>
-<rect x="568.94" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="568.94" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecKeyVerifySignature: unimplemented</title>
-<rect x="597.21" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="597.21" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecTrustEvaluateWithError: unimplemented</title>
-<rect x="625.49" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="625.49" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecCertificateCreateWithData: unimplemented</title>
-<rect x="653.77" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="653.77" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecPolicyCreateBasicX509: unimplemented</title>
-<rect x="682.05" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="682.05" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Security / keychain / SecAccessControlCreateWithFlags: unimplemented</title>
-<rect x="710.32" y="477.72" width="27.08" height="23.68" rx="1" fill="#526175"/>
+<rect x="710.32" y="491.72" width="27.08" height="23.68" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="572.34" y="443.25" font-family="sans-serif" font-size="11.5" fill="#dee7f2">Security / keychain</text>
+<text x="572.34" y="457.25" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Security / keychain</text>
+<text x="733.00" y="457.25" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<text x="18" y="543" font-family="sans-serif" font-size="17" font-weight="600" fill="#e7edf4">darwin runtime / native compatibility</text>
-<text x="742" y="543" text-anchor="end" font-family="sans-serif" font-size="12" fill="#9db0c4">6 components · 85 targets</text>
-<line x1="18" x2="742" y1="558" y2="558" stroke="#2c3a4b" stroke-width="1"/>
+<text x="18" y="563" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">darwin runtime / native compatibility</text>
+<text x="742" y="564" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">43.5%</text>
+<text x="18" y="582" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">6 components · 85 tracked</text>
+<text x="742" y="583" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">37 / 85 with fixture/probe evidence</text>
+<rect x="18.00" y="590.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
+<rect x="18.00" y="590.00" width="25.55" height="4.00" rx="2" fill="#3fb950"/>
+<rect x="43.55" y="590.00" width="289.60" height="4.00" rx="2" fill="#d29922"/>
 <g><title>bsd syscall boundary · 17 targets · conditional ceiling</title>
-<rect x="20.00" y="572.00" width="140.80" height="240.00" rx="2" fill="#1b293b"/>
+<rect x="20.00" y="604.00" width="140.80" height="240.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>bsd syscall boundary / guest exit: synthetic parser/model/probe</title>
-<rect x="22.60" y="596.60" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="22.60" y="628.60" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / getpid selector: synthetic parser/model/probe</title>
-<rect x="56.80" y="596.60" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="56.80" y="628.60" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / getppid selector: synthetic parser/model/probe</title>
-<rect x="91.00" y="596.60" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="91.00" y="628.60" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / getuid selector: synthetic parser/model/probe</title>
-<rect x="125.20" y="596.60" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="125.20" y="628.60" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / geteuid selector: synthetic parser/model/probe</title>
-<rect x="22.60" y="639.40" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="22.60" y="671.40" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / getgid selector: synthetic parser/model/probe</title>
-<rect x="56.80" y="639.40" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="56.80" y="671.40" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / getegid selector: synthetic parser/model/probe</title>
-<rect x="91.00" y="639.40" width="33.00" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="91.00" y="671.40" width="33.00" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>bsd syscall boundary / fd table and isolation: unimplemented</title>
-<rect x="125.20" y="639.40" width="33.00" height="41.60" rx="1" fill="#526175"/>
+<rect x="125.20" y="671.40" width="33.00" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / open/read/write path: unimplemented</title>
-<rect x="22.60" y="682.20" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="22.60" y="714.20" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / virtual filesystem policy: unimplemented</title>
-<rect x="68.20" y="682.20" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="68.20" y="714.20" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / socket boundary: unimplemented</title>
-<rect x="113.80" y="682.20" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="113.80" y="714.20" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / memory map syscall abi: unimplemented</title>
-<rect x="22.60" y="725.00" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="22.60" y="757.00" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / process spawn semantics: unimplemented</title>
-<rect x="68.20" y="725.00" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="68.20" y="757.00" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / signal frames: unimplemented</title>
-<rect x="113.80" y="725.00" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="113.80" y="757.00" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / darwin error/carry abi: unimplemented</title>
-<rect x="22.60" y="767.80" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="22.60" y="799.80" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / thread syscall abi: unimplemented</title>
-<rect x="68.20" y="767.80" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="68.20" y="799.80" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>bsd syscall boundary / host syscall trapping: unimplemented</title>
-<rect x="113.80" y="767.80" width="44.40" height="41.60" rx="1" fill="#526175"/>
+<rect x="113.80" y="799.80" width="44.40" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="26.00" y="587.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">bsd syscall boundary</text>
+<text x="26.00" y="619.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">bsd syscall boundary</text>
 </g>
 <g><title>dyld / image graph · 16 targets · conditional ceiling</title>
-<rect x="164.80" y="572.00" width="132.28" height="240.00" rx="2" fill="#1b293b"/>
+<rect x="164.80" y="604.00" width="132.28" height="240.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>dyld / image graph / virtual @rpath resolution: synthetic parser/model/probe</title>
-<rect x="167.40" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="167.40" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / export trie parse: synthetic parser/model/probe</title>
-<rect x="199.47" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="199.47" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / classic pointer binds: synthetic parser/model/probe</title>
-<rect x="231.54" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="231.54" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / unauthenticated chained binds: synthetic parser/model/probe</title>
-<rect x="263.61" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="263.61" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / rebase validation: synthetic parser/model/probe</title>
-<rect x="167.40" y="639.40" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="167.40" y="671.40" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / cross-image native call: native arm64 fixture</title>
-<rect x="210.16" y="639.40" width="41.56" height="41.60" rx="1" fill="#32d5ad"/>
+<rect x="210.16" y="671.40" width="41.56" height="41.60" rx="1" fill="#3fb950"/>
 </g>
 <g><title>dyld / image graph / linked dylib graph fixture: synthetic parser/model/probe</title>
-<rect x="252.92" y="639.40" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="252.92" y="671.40" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / weak import policy: synthetic parser/model/probe</title>
-<rect x="167.40" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="167.40" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / re-export handling: synthetic parser/model/probe</title>
-<rect x="210.16" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="210.16" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / dependency-cycle rejection: synthetic parser/model/probe</title>
-<rect x="252.92" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="252.92" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>dyld / image graph / full dlopen lifecycle: unimplemented</title>
-<rect x="167.40" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="167.40" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>dyld / image graph / lazy binding: unimplemented</title>
-<rect x="210.16" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="210.16" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>dyld / image graph / dyld shared cache: unimplemented</title>
-<rect x="252.92" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="252.92" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>dyld / image graph / launch closure support: unimplemented</title>
-<rect x="167.40" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="167.40" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>dyld / image graph / authenticated arm64e fixups: unimplemented</title>
-<rect x="210.16" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="210.16" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>dyld / image graph / swift tls fixups: unimplemented</title>
-<rect x="252.92" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="252.92" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="170.80" y="587.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">dyld / image graph</text>
+<text x="170.80" y="619.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">dyld / image graph</text>
 </g>
 <g><title>mach ipc model · 16 targets · conditional ceiling</title>
-<rect x="301.08" y="572.00" width="132.28" height="240.00" rx="2" fill="#1b293b"/>
+<rect x="301.08" y="604.00" width="132.28" height="240.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>mach ipc model / task-local names: synthetic parser/model/probe</title>
-<rect x="303.68" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="303.68" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / send and receive rights: synthetic parser/model/probe</title>
-<rect x="335.75" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="335.75" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / send-once replies: synthetic parser/model/probe</title>
-<rect x="367.82" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="367.82" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / port descriptor copies: synthetic parser/model/probe</title>
-<rect x="399.89" y="596.60" width="30.87" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="399.89" y="628.60" width="30.87" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / multi-descriptor messages: synthetic parser/model/probe</title>
-<rect x="303.68" y="639.40" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="303.68" y="671.40" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / transactional queue commit: synthetic parser/model/probe</title>
-<rect x="346.44" y="639.40" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="346.44" y="671.40" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / port destruction cleanup: synthetic parser/model/probe</title>
-<rect x="389.20" y="639.40" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="389.20" y="671.40" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / synthetic dead-name watcher: synthetic parser/model/probe</title>
-<rect x="303.68" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="303.68" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / bounded guest arena: synthetic parser/model/probe</title>
-<rect x="346.44" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="346.44" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / register fixture dispatch: synthetic parser/model/probe</title>
-<rect x="389.20" y="682.20" width="41.56" height="41.60" rx="1" fill="#edbc59"/>
+<rect x="389.20" y="714.20" width="41.56" height="41.60" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach ipc model / out-of-line descriptors: unimplemented</title>
-<rect x="303.68" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="303.68" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach ipc model / mach message trailers: unimplemented</title>
-<rect x="346.44" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="346.44" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach ipc model / voucher support: unimplemented</title>
-<rect x="389.20" y="725.00" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="389.20" y="757.00" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach ipc model / real mig protocol servers: unimplemented</title>
-<rect x="303.68" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="303.68" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach ipc model / host process mach ipc: unimplemented</title>
-<rect x="346.44" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="346.44" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach ipc model / concurrency and races: unimplemented</title>
-<rect x="389.20" y="767.80" width="41.56" height="41.60" rx="1" fill="#526175"/>
+<rect x="389.20" y="799.80" width="41.56" height="41.60" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="307.08" y="587.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">mach ipc model</text>
+<text x="307.08" y="619.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">mach ipc model</text>
 </g>
 <g><title>guest security / isolation · 14 targets · conditional ceiling</title>
-<rect x="437.36" y="572.00" width="217.46" height="127.38" rx="2" fill="#1b293b"/>
+<rect x="437.36" y="604.00" width="217.46" height="127.38" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>guest security / isolation / bounded input validation: synthetic parser/model/probe</title>
-<rect x="439.96" y="596.60" width="41.49" height="32.59" rx="1" fill="#edbc59"/>
+<rect x="439.96" y="628.60" width="41.49" height="32.59" rx="1" fill="#d29922"/>
 </g>
 <g><title>guest security / isolation / mapping rollback: synthetic parser/model/probe</title>
-<rect x="482.66" y="596.60" width="41.49" height="32.59" rx="1" fill="#edbc59"/>
+<rect x="482.66" y="628.60" width="41.49" height="32.59" rx="1" fill="#d29922"/>
 </g>
 <g><title>guest security / isolation / w-x validation: synthetic parser/model/probe</title>
-<rect x="525.35" y="596.60" width="41.49" height="32.59" rx="1" fill="#edbc59"/>
+<rect x="525.35" y="628.60" width="41.49" height="32.59" rx="1" fill="#d29922"/>
 </g>
 <g><title>guest security / isolation / separate guest process: unimplemented</title>
-<rect x="568.04" y="596.60" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="568.04" y="628.60" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / guest memory isolation: unimplemented</title>
-<rect x="610.73" y="596.60" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="610.73" y="628.60" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / file descriptor policy: unimplemented</title>
-<rect x="439.96" y="630.39" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="439.96" y="662.39" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / network policy: unimplemented</title>
-<rect x="482.66" y="630.39" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="482.66" y="662.39" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / device permissions: unimplemented</title>
-<rect x="525.35" y="630.39" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="525.35" y="662.39" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / entitlement emulation: unimplemented</title>
-<rect x="568.04" y="630.39" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="568.04" y="662.39" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / signature trust design: unimplemented</title>
-<rect x="610.73" y="630.39" width="41.49" height="32.59" rx="1" fill="#526175"/>
+<rect x="610.73" y="662.39" width="41.49" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / safe process teardown: unimplemented</title>
-<rect x="439.96" y="664.19" width="52.16" height="32.59" rx="1" fill="#526175"/>
+<rect x="439.96" y="696.19" width="52.16" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / fuzz harness coverage: unimplemented</title>
-<rect x="493.33" y="664.19" width="52.16" height="32.59" rx="1" fill="#526175"/>
+<rect x="493.33" y="696.19" width="52.16" height="32.59" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>guest security / isolation / host selinux weakening: outside userspace-only scope</title>
-<rect x="546.69" y="664.19" width="52.16" height="32.59" rx="1" fill="#ac4b58"/>
+<rect x="546.69" y="696.19" width="52.16" height="32.59" rx="1" fill="#b85c64"/>
 </g>
 <g><title>guest security / isolation / boot or recovery modification: outside userspace-only scope</title>
-<rect x="600.06" y="664.19" width="52.16" height="32.59" rx="1" fill="#ac4b58"/>
+<rect x="600.06" y="696.19" width="52.16" height="32.59" rx="1" fill="#b85c64"/>
 </g>
-<text x="443.36" y="587.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">guest security / isolation</text>
+<text x="443.36" y="619.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">guest security / isolation</text>
+<text x="647.82" y="619.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">21%</text>
 </g>
 <g><title>mach-o parser and native loader · 12 targets · plausible ceiling</title>
-<rect x="437.36" y="703.38" width="217.46" height="108.62" rx="2" fill="#1b293b"/>
+<rect x="437.36" y="735.38" width="217.46" height="108.62" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>mach-o parser and native loader / thin arm64 parsing: synthetic parser/model/probe</title>
-<rect x="439.96" y="727.98" width="34.38" height="40.11" rx="1" fill="#edbc59"/>
+<rect x="439.96" y="759.98" width="34.38" height="40.11" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach-o parser and native loader / universal arm64 inventory: synthetic parser/model/probe</title>
-<rect x="475.54" y="727.98" width="34.38" height="40.11" rx="1" fill="#edbc59"/>
+<rect x="475.54" y="759.98" width="34.38" height="40.11" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach-o parser and native loader / compiler mh_object validation: synthetic parser/model/probe</title>
-<rect x="511.12" y="727.98" width="34.38" height="40.11" rx="1" fill="#edbc59"/>
+<rect x="511.12" y="759.98" width="34.38" height="40.11" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach-o parser and native loader / linked mh_execute entry: native arm64 fixture</title>
-<rect x="546.69" y="727.98" width="34.38" height="40.11" rx="1" fill="#32d5ad"/>
+<rect x="546.69" y="759.98" width="34.38" height="40.11" rx="1" fill="#3fb950"/>
 </g>
 <g><title>mach-o parser and native loader / multi-segment native entry: native arm64 fixture</title>
-<rect x="582.27" y="727.98" width="34.38" height="40.11" rx="1" fill="#32d5ad"/>
+<rect x="582.27" y="759.98" width="34.38" height="40.11" rx="1" fill="#3fb950"/>
 </g>
 <g><title>mach-o parser and native loader / 16k-compatible fixture mapping: synthetic parser/model/probe</title>
-<rect x="617.85" y="727.98" width="34.38" height="40.11" rx="1" fill="#edbc59"/>
+<rect x="617.85" y="759.98" width="34.38" height="40.11" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach-o parser and native loader / w-x sealing and rollback: synthetic parser/model/probe</title>
-<rect x="439.96" y="769.29" width="34.38" height="40.11" rx="1" fill="#edbc59"/>
+<rect x="439.96" y="801.29" width="34.38" height="40.11" rx="1" fill="#d29922"/>
 </g>
 <g><title>mach-o parser and native loader / darwin user stack: unimplemented</title>
-<rect x="475.54" y="769.29" width="34.38" height="40.11" rx="1" fill="#526175"/>
+<rect x="475.54" y="801.29" width="34.38" height="40.11" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach-o parser and native loader / full process startup: unimplemented</title>
-<rect x="511.12" y="769.29" width="34.38" height="40.11" rx="1" fill="#526175"/>
+<rect x="511.12" y="801.29" width="34.38" height="40.11" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach-o parser and native loader / tls and thread initialization: unimplemented</title>
-<rect x="546.69" y="769.29" width="34.38" height="40.11" rx="1" fill="#526175"/>
+<rect x="546.69" y="801.29" width="34.38" height="40.11" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach-o parser and native loader / untrusted binary isolation: unimplemented</title>
-<rect x="582.27" y="769.29" width="34.38" height="40.11" rx="1" fill="#526175"/>
+<rect x="582.27" y="801.29" width="34.38" height="40.11" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>mach-o parser and native loader / real apple app entry: unimplemented</title>
-<rect x="617.85" y="769.29" width="34.38" height="40.11" rx="1" fill="#526175"/>
+<rect x="617.85" y="801.29" width="34.38" height="40.11" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="443.36" y="718.38" font-family="sans-serif" font-size="11.5" fill="#dee7f2">mach-o parser and native loader</text>
+<text x="443.36" y="750.38" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">mach-o parser and native l…</text>
+<text x="647.82" y="750.38" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">58%</text>
 </g>
 <g><title>arm64e and abi compatibility · 10 targets · unknown ceiling</title>
-<rect x="658.82" y="572.00" width="81.18" height="240.00" rx="2" fill="#1b293b"/>
+<rect x="658.82" y="604.00" width="81.18" height="240.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>arm64e and abi compatibility / arm64e mach-o decode: unimplemented</title>
-<rect x="661.42" y="574.60" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="606.60" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / authenticated pointer rebases: unimplemented</title>
-<rect x="700.01" y="574.60" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="700.01" y="606.60" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / authenticated symbol bindings: unimplemented</title>
-<rect x="661.42" y="613.93" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="645.93" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / ptrauth key policy: unimplemented</title>
-<rect x="700.01" y="613.93" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="700.01" y="645.93" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / objc arm64e dispatch: unimplemented</title>
-<rect x="661.42" y="653.27" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="685.27" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / swift arm64e metadata: unimplemented</title>
-<rect x="700.01" y="653.27" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="700.01" y="685.27" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / branch target signing: unimplemented</title>
-<rect x="661.42" y="692.60" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="724.60" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / guest signal and unwind: unimplemented</title>
-<rect x="700.01" y="692.60" width="37.39" height="38.13" rx="1" fill="#526175"/>
+<rect x="700.01" y="724.60" width="37.39" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / apple-specific tls registers: unimplemented</title>
-<rect x="661.42" y="731.93" width="75.98" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="763.93" width="75.98" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>arm64e and abi compatibility / arm64e native execution: unimplemented</title>
-<rect x="661.42" y="771.27" width="75.98" height="38.13" rx="1" fill="#526175"/>
+<rect x="661.42" y="803.27" width="75.98" height="38.13" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 </g>
-<text x="18" y="851" font-family="sans-serif" font-size="17" font-weight="600" fill="#e7edf4">apple ui / android integration</text>
-<text x="742" y="851" text-anchor="end" font-family="sans-serif" font-size="12" fill="#9db0c4">8 components · 99 targets</text>
-<line x1="18" x2="742" y1="866" y2="866" stroke="#2c3a4b" stroke-width="1"/>
+<text x="18" y="889" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">apple ui / android integration</text>
+<text x="742" y="890" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#8b949e" class="gh-muted">0.0%</text>
+<text x="18" y="908" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">8 components · 99 tracked</text>
+<text x="742" y="909" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">0 / 99 with fixture/probe evidence</text>
+<rect x="18.00" y="916.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
 <g><title>Metal / IOSurface / gpu · 15 targets · unknown ceiling</title>
-<rect x="20.00" y="880.00" width="215.39" height="124.50" rx="2" fill="#1b293b"/>
+<rect x="20.00" y="930.00" width="215.39" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Metal / IOSurface / gpu / MTLDevice discovery: unimplemented</title>
-<rect x="22.60" y="904.60" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="954.60" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLCommandQueue: unimplemented</title>
-<rect x="64.88" y="904.60" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="954.60" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLCommandBuffer: unimplemented</title>
-<rect x="107.16" y="904.60" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="954.60" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLBuffer lifetime: unimplemented</title>
-<rect x="149.44" y="904.60" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="954.60" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLTexture lifetime: unimplemented</title>
-<rect x="191.72" y="904.60" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="954.60" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLRenderPipelineState: unimplemented</title>
-<rect x="22.60" y="937.43" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="987.43" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / MTLComputePipelineState: unimplemented</title>
-<rect x="64.88" y="937.43" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="987.43" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / metal shader translation: unimplemented</title>
-<rect x="107.16" y="937.43" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="987.43" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / synchronization fences: unimplemented</title>
-<rect x="149.44" y="937.43" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="987.43" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / iosurface allocation: unimplemented</title>
-<rect x="191.72" y="937.43" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="987.43" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / iosurface cross-process sharing: unimplemented</title>
-<rect x="22.60" y="970.27" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="1020.27" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / android graphics buffer bridge: unimplemented</title>
-<rect x="64.88" y="970.27" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="1020.27" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / vulkan submission: unimplemented</title>
-<rect x="107.16" y="970.27" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="1020.27" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / hardware gpu validation: unimplemented</title>
-<rect x="149.44" y="970.27" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="1020.27" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Metal / IOSurface / gpu / display surface present: unimplemented</title>
-<rect x="191.72" y="970.27" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="1020.27" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="26.00" y="895.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">Metal / IOSurface / gpu</text>
+<text x="26.00" y="945.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Metal / IOSurface / gpu</text>
+<text x="228.39" y="945.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>SpringBoard / apple services · 15 targets · unknown ceiling</title>
-<rect x="20.00" y="1008.50" width="215.39" height="124.50" rx="2" fill="#1b293b"/>
+<rect x="20.00" y="1058.50" width="215.39" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>SpringBoard / apple services / launchd bootstrap: unimplemented</title>
-<rect x="22.60" y="1033.10" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="1083.10" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / backboardd service: unimplemented</title>
-<rect x="64.88" y="1033.10" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="1083.10" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / frontboard app orchestration: unimplemented</title>
-<rect x="107.16" y="1033.10" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="1083.10" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / springboard launch: unimplemented</title>
-<rect x="149.44" y="1033.10" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="1083.10" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / springboard scenes: unimplemented</title>
-<rect x="191.72" y="1033.10" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="1083.10" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / lock screen: unimplemented</title>
-<rect x="22.60" y="1065.93" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="1115.93" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / control center: unimplemented</title>
-<rect x="64.88" y="1065.93" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="1115.93" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / notification presentation: unimplemented</title>
-<rect x="107.16" y="1065.93" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="1115.93" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / home screen icons: unimplemented</title>
-<rect x="149.44" y="1065.93" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="1115.93" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / multitasking scene: unimplemented</title>
-<rect x="191.72" y="1065.93" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="1115.93" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / wallpaper service: unimplemented</title>
-<rect x="22.60" y="1098.77" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="22.60" y="1148.77" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / system gestures: unimplemented</title>
-<rect x="64.88" y="1098.77" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="64.88" y="1148.77" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / privacy indicator: unimplemented</title>
-<rect x="107.16" y="1098.77" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="107.16" y="1148.77" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / battery/signal status: unimplemented</title>
-<rect x="149.44" y="1098.77" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="149.44" y="1148.77" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SpringBoard / apple services / system alert management: unimplemented</title>
-<rect x="191.72" y="1098.77" width="41.08" height="31.63" rx="1" fill="#526175"/>
+<rect x="191.72" y="1148.77" width="41.08" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="26.00" y="1023.50" font-family="sans-serif" font-size="11.5" fill="#dee7f2">SpringBoard / apple services</text>
+<text x="26.00" y="1073.50" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">SpringBoard / apple servi…</text>
+<text x="228.39" y="1073.50" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>UIKit / controls · 14 targets · unknown ceiling</title>
-<rect x="239.39" y="880.00" width="193.45" height="129.26" rx="2" fill="#1b293b"/>
+<rect x="239.39" y="930.00" width="193.45" height="129.26" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>UIKit / controls / UIApplication bootstrap: unimplemented</title>
-<rect x="241.99" y="904.60" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="241.99" y="954.60" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIWindow composition: unimplemented</title>
-<rect x="279.88" y="904.60" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="279.88" y="954.60" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIView lifecycle: unimplemented</title>
-<rect x="317.78" y="904.60" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="317.78" y="954.60" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIViewController lifecycle: unimplemented</title>
-<rect x="355.67" y="904.60" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="355.67" y="954.60" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UILabel text: unimplemented</title>
-<rect x="393.56" y="904.60" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="393.56" y="954.60" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIButton event handling: unimplemented</title>
-<rect x="241.99" y="939.02" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="241.99" y="989.02" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UITextField input: unimplemented</title>
-<rect x="279.88" y="939.02" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="279.88" y="989.02" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIScrollView gestures: unimplemented</title>
-<rect x="317.78" y="939.02" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="317.78" y="989.02" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UITableView data source: unimplemented</title>
-<rect x="355.67" y="939.02" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="355.67" y="989.02" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UICollectionView layout: unimplemented</title>
-<rect x="393.56" y="939.02" width="36.69" height="33.22" rx="1" fill="#526175"/>
+<rect x="393.56" y="989.02" width="36.69" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UINavigationController: unimplemented</title>
-<rect x="241.99" y="973.44" width="46.16" height="33.22" rx="1" fill="#526175"/>
+<rect x="241.99" y="1023.44" width="46.16" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UITabBarController: unimplemented</title>
-<rect x="289.36" y="973.44" width="46.16" height="33.22" rx="1" fill="#526175"/>
+<rect x="289.36" y="1023.44" width="46.16" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / UIAccessibility: unimplemented</title>
-<rect x="336.72" y="973.44" width="46.16" height="33.22" rx="1" fill="#526175"/>
+<rect x="336.72" y="1023.44" width="46.16" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>UIKit / controls / trait collection propagation: unimplemented</title>
-<rect x="384.08" y="973.44" width="46.16" height="33.22" rx="1" fill="#526175"/>
+<rect x="384.08" y="1023.44" width="46.16" height="33.22" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="245.39" y="895.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">UIKit / controls</text>
+<text x="245.39" y="945.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">UIKit / controls</text>
+<text x="425.85" y="945.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>Android host integration · 13 targets · conditional ceiling</title>
-<rect x="239.39" y="1013.26" width="193.45" height="119.74" rx="2" fill="#1b293b"/>
+<rect x="239.39" y="1063.26" width="193.45" height="119.74" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Android host integration / galaxy s25+ native test: unimplemented</title>
-<rect x="241.99" y="1037.86" width="36.69" height="30.05" rx="1" fill="#526175"/>
+<rect x="241.99" y="1087.86" width="36.69" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / termux launcher: unimplemented</title>
-<rect x="279.88" y="1037.86" width="36.69" height="30.05" rx="1" fill="#526175"/>
+<rect x="279.88" y="1087.86" width="36.69" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / guest process container: unimplemented</title>
-<rect x="317.78" y="1037.86" width="36.69" height="30.05" rx="1" fill="#526175"/>
+<rect x="317.78" y="1087.86" width="36.69" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android input bridge: unimplemented</title>
-<rect x="355.67" y="1037.86" width="36.69" height="30.05" rx="1" fill="#526175"/>
+<rect x="355.67" y="1087.86" width="36.69" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android accessibility bridge: unimplemented</title>
-<rect x="393.56" y="1037.86" width="36.69" height="30.05" rx="1" fill="#526175"/>
+<rect x="393.56" y="1087.86" width="36.69" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android audio output: unimplemented</title>
-<rect x="241.99" y="1069.11" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="241.99" y="1119.11" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android camera service: unimplemented</title>
-<rect x="289.36" y="1069.11" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="289.36" y="1119.11" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android notifications: unimplemented</title>
-<rect x="336.72" y="1069.11" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="336.72" y="1119.11" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android storage permission: unimplemented</title>
-<rect x="384.08" y="1069.11" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="384.08" y="1119.11" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android graphics surface: unimplemented</title>
-<rect x="241.99" y="1100.35" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="241.99" y="1150.35" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / android lifecycle teardown: unimplemented</title>
-<rect x="289.36" y="1100.35" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="289.36" y="1150.35" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / battery/perf profiling: unimplemented</title>
-<rect x="336.72" y="1100.35" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="336.72" y="1150.35" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>Android host integration / host crash containment: unimplemented</title>
-<rect x="384.08" y="1100.35" width="46.16" height="30.05" rx="1" fill="#526175"/>
+<rect x="384.08" y="1150.35" width="46.16" height="30.05" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="245.39" y="1028.26" font-family="sans-serif" font-size="11.5" fill="#dee7f2">Android host integration</text>
+<text x="245.39" y="1078.26" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Android host integrati…</text>
+<text x="425.85" y="1078.26" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>CoreAnimation / compositor · 13 targets · unknown ceiling</title>
-<rect x="436.85" y="880.00" width="186.14" height="124.50" rx="2" fill="#1b293b"/>
+<rect x="436.85" y="930.00" width="186.14" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CoreAnimation / compositor / CALayer tree: unimplemented</title>
-<rect x="439.45" y="904.60" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="954.60" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / CATransaction commit: unimplemented</title>
-<rect x="475.88" y="904.60" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="475.88" y="954.60" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / CAAnimation timeline: unimplemented</title>
-<rect x="512.31" y="904.60" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="512.31" y="954.60" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / compositor scheduling: unimplemented</title>
-<rect x="548.73" y="904.60" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="548.73" y="954.60" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / render server ipc: unimplemented</title>
-<rect x="585.16" y="904.60" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="585.16" y="954.60" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / backing store ownership: unimplemented</title>
-<rect x="439.45" y="937.43" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="987.43" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / text rendering: unimplemented</title>
-<rect x="484.98" y="937.43" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="484.98" y="987.43" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / blur and material layers: unimplemented</title>
-<rect x="530.52" y="937.43" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="530.52" y="987.43" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / color space translation: unimplemented</title>
-<rect x="576.05" y="937.43" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="576.05" y="987.43" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / HDR pipeline: unimplemented</title>
-<rect x="439.45" y="970.27" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="1020.27" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / synchronized display: unimplemented</title>
-<rect x="484.98" y="970.27" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="484.98" y="1020.27" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / vsync integration: unimplemented</title>
-<rect x="530.52" y="970.27" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="530.52" y="1020.27" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>CoreAnimation / compositor / glass material rendering: unimplemented</title>
-<rect x="576.05" y="970.27" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="576.05" y="1020.27" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="442.85" y="895.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">CoreAnimation / compositor</text>
+<text x="442.85" y="945.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">CoreAnimation / comp…</text>
+<text x="615.99" y="945.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>SwiftUI / view graph · 13 targets · unknown ceiling</title>
-<rect x="436.85" y="1008.50" width="186.14" height="124.50" rx="2" fill="#1b293b"/>
+<rect x="436.85" y="1058.50" width="186.14" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>SwiftUI / view graph / body computation: unimplemented</title>
-<rect x="439.45" y="1033.10" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="1083.10" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / View identity and diffing: unimplemented</title>
-<rect x="475.88" y="1033.10" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="475.88" y="1083.10" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / State storage: unimplemented</title>
-<rect x="512.31" y="1033.10" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="512.31" y="1083.10" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / Binding propagation: unimplemented</title>
-<rect x="548.73" y="1033.10" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="548.73" y="1083.10" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / Observable model: unimplemented</title>
-<rect x="585.16" y="1033.10" width="35.23" height="31.63" rx="1" fill="#526175"/>
+<rect x="585.16" y="1083.10" width="35.23" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / Environment values: unimplemented</title>
-<rect x="439.45" y="1065.93" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="1115.93" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / Layout protocol: unimplemented</title>
-<rect x="484.98" y="1065.93" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="484.98" y="1115.93" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / drawing effects: unimplemented</title>
-<rect x="530.52" y="1065.93" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="530.52" y="1115.93" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / navigation stack: unimplemented</title>
-<rect x="576.05" y="1065.93" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="576.05" y="1115.93" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / animation transactions: unimplemented</title>
-<rect x="439.45" y="1098.77" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="439.45" y="1148.77" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / gesture recognition: unimplemented</title>
-<rect x="484.98" y="1098.77" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="484.98" y="1148.77" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / app scene lifecycle: unimplemented</title>
-<rect x="530.52" y="1098.77" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="530.52" y="1148.77" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>SwiftUI / view graph / async view updates: unimplemented</title>
-<rect x="576.05" y="1098.77" width="44.34" height="31.63" rx="1" fill="#526175"/>
+<rect x="576.05" y="1148.77" width="44.34" height="31.63" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="442.85" y="1023.50" font-family="sans-serif" font-size="11.5" fill="#dee7f2">SwiftUI / view graph</text>
+<text x="442.85" y="1073.50" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">SwiftUI / view graph</text>
+<text x="615.99" y="1073.50" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
 <g><title>iOS apps / app services · 12 targets · unknown ceiling</title>
-<rect x="626.99" y="880.00" width="113.01" height="188.75" rx="2" fill="#1b293b"/>
+<rect x="626.99" y="930.00" width="113.01" height="188.75" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>iOS apps / app services / bundle launch: unimplemented</title>
-<rect x="629.59" y="904.60" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="629.59" y="954.60" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / Info.plist resolution: unimplemented</title>
-<rect x="665.93" y="904.60" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="665.93" y="954.60" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / ObjC app bootstrap: unimplemented</title>
-<rect x="702.26" y="904.60" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="702.26" y="954.60" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / Swift app bootstrap: unimplemented</title>
-<rect x="629.59" y="945.29" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="629.59" y="995.29" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / UIKit app lifecycle: unimplemented</title>
-<rect x="665.93" y="945.29" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="665.93" y="995.29" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / document sandbox: unimplemented</title>
-<rect x="702.26" y="945.29" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="702.26" y="995.29" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / app preferences: unimplemented</title>
-<rect x="629.59" y="985.98" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="629.59" y="1035.97" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / app extensions: unimplemented</title>
-<rect x="665.93" y="985.98" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="665.93" y="1035.97" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / push notifications: unimplemented</title>
-<rect x="702.26" y="985.98" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="702.26" y="1035.97" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / background task scheduling: unimplemented</title>
-<rect x="629.59" y="1026.66" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="629.59" y="1076.66" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / app network services: unimplemented</title>
-<rect x="665.93" y="1026.66" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="665.93" y="1076.66" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
 <g><title>iOS apps / app services / legitimate app runtime smoke test: unimplemented</title>
-<rect x="702.26" y="1026.66" width="35.14" height="39.49" rx="1" fill="#526175"/>
+<rect x="702.26" y="1076.66" width="35.14" height="39.49" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<text x="632.99" y="895.00" font-family="sans-serif" font-size="11.5" fill="#dee7f2">iOS apps / app …</text>
+<text x="632.99" y="945.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">iOS apps / app …</text>
 </g>
 <g><title>device boot and kernel ownership · 4 targets · excluded ceiling</title>
-<rect x="626.99" y="1072.75" width="113.01" height="60.25" rx="2" fill="#1b293b"/>
+<rect x="626.99" y="1122.75" width="113.01" height="60.25" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>device boot and kernel ownership / replace android kernel: outside userspace-only scope</title>
-<rect x="629.59" y="1097.35" width="26.05" height="33.05" rx="1" fill="#ac4b58"/>
+<rect x="629.59" y="1147.35" width="26.05" height="33.05" rx="1" fill="#b85c64"/>
 </g>
 <g><title>device boot and kernel ownership / write boot partitions: outside userspace-only scope</title>
-<rect x="656.84" y="1097.35" width="26.05" height="33.05" rx="1" fill="#ac4b58"/>
+<rect x="656.84" y="1147.35" width="26.05" height="33.05" rx="1" fill="#b85c64"/>
 </g>
 <g><title>device boot and kernel ownership / disable verified boot: outside userspace-only scope</title>
-<rect x="684.09" y="1097.35" width="26.05" height="33.05" rx="1" fill="#ac4b58"/>
+<rect x="684.09" y="1147.35" width="26.05" height="33.05" rx="1" fill="#b85c64"/>
 </g>
 <g><title>device boot and kernel ownership / alter bootloader: outside userspace-only scope</title>
-<rect x="711.35" y="1097.35" width="26.05" height="33.05" rx="1" fill="#ac4b58"/>
+<rect x="711.35" y="1147.35" width="26.05" height="33.05" rx="1" fill="#b85c64"/>
 </g>
-<text x="632.99" y="1087.75" font-family="sans-serif" font-size="11.5" fill="#dee7f2">device boot and…</text>
+<text x="632.99" y="1137.75" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">device boot and…</text>
 </g>
-<line x1="18" x2="742" y1="1164" y2="1164" stroke="#2c3a4b" stroke-width="1"/>
-<rect x="18.00" y="1181.00" width="10.00" height="10.00" rx="2" fill="#32d5ad"/>
-<text x="34" y="1190" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">native fixture</text>
-<rect x="157.00" y="1181.00" width="10.00" height="10.00" rx="2" fill="#edbc59"/>
-<text x="173" y="1190" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">synthetic model/probe</text>
-<rect x="367.00" y="1181.00" width="10.00" height="10.00" rx="2" fill="#526175"/>
-<text x="383" y="1190" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">not implemented</text>
-<rect x="549.00" y="1181.00" width="10.00" height="10.00" rx="2" fill="#ac4b58"/>
-<text x="565" y="1190" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">excluded</text>
+<line x1="18" x2="742" y1="1215" y2="1215" stroke="#30363d" class="gh-rule" stroke-width="1"/>
+<rect x="18.00" y="1232.00" width="10.00" height="10.00" rx="2" fill="#3fb950"/>
+<text x="34" y="1241" font-family="sans-serif" font-size="11.5" fill="#8b949e" class="gh-muted">native fixture</text>
+<rect x="157.00" y="1232.00" width="10.00" height="10.00" rx="2" fill="#d29922"/>
+<text x="173" y="1241" font-family="sans-serif" font-size="11.5" fill="#8b949e" class="gh-muted">synthetic model/probe</text>
+<rect x="367.00" y="1232.00" width="10.00" height="10.00" rx="2" fill="#30363d" class="gh-missing"/>
+<text x="383" y="1241" font-family="sans-serif" font-size="11.5" fill="#8b949e" class="gh-muted">not implemented</text>
+<rect x="549.00" y="1232.00" width="10.00" height="10.00" rx="2" fill="#b85c64"/>
+<text x="565" y="1241" font-family="sans-serif" font-size="11.5" fill="#8b949e" class="gh-muted">excluded</text>
 </svg>

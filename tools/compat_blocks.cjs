@@ -8,13 +8,13 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
     const targets=groups.flatMap(g=>g.targets);
     return {panel,groups,targets,h:Math.round(Math.max(230,Math.min(485,166+0.92*targets.length)))};
   });
-  const top=84,header=42,gap=22,bottom=67;
+  const top=82,header=58,gap=24,bottom=66;
   const height=top+panels.reduce((a,p)=>a+header+p.h+gap,0)+bottom;
   const svg=[
-    '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="proportional ios-27 compatibility blocks">',
-    '<rect width="'+width+'" height="'+height+'" fill="#0e1724"/>',
-    '<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#f0f5fa">ios-27 / compatibility</text>',
-    '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#9cacc0">component area scales with its tracked functions; colors show test status</text>'
+    '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="ios-27 tracked API sample with proportional component size and evidence status">',
+    '<style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>',
+    '<text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3">ios-27 / compatibility</text>',
+    '<text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e">component size = tracked targets · color = test evidence</text>'
   ];
   const rect=(x,y,w,h,color,r)=>{
     if(![x,y,w,h].every(Number.isFinite)||w<0||h<0)throw Error("invalid rectangle");
@@ -68,9 +68,15 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
   for(const p of panels){
     const c=count(p.targets);
     totals.push({panel:p.panel,groups:p.groups,c,total:p.targets.length});
-    svg.push('<text x="'+margin+'" y="'+(y+15)+'" font-family="sans-serif" font-size="17" font-weight="600" fill="#e7edf4">'+esc(p.panel.title)+'</text>');
-    svg.push('<text x="'+(width-margin)+'" y="'+(y+15)+'" text-anchor="end" font-family="sans-serif" font-size="12" fill="#9db0c4">'+p.groups.length+' components · '+p.targets.length+' targets</text>');
-    svg.push('<line x1="'+margin+'" x2="'+(width-margin)+'" y1="'+(y+30)+'" y2="'+(y+30)+'" stroke="#2c3a4b" stroke-width="1"/>');
+    const covered=c["native-fixture"]+c.synthetic;
+    const coverage=(100*covered/p.targets.length).toFixed(1);
+    svg.push('<text x="'+margin+'" y="'+(y+19)+'" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3">'+esc(p.panel.title)+'</text>');
+    svg.push('<text x="'+(width-margin)+'" y="'+(y+20)+'" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="'+(covered?"#e6edf3":"#8b949e")+'">'+coverage+'%</text>');
+    svg.push('<text x="'+margin+'" y="'+(y+38)+'" font-family="sans-serif" font-size="12" fill="#8b949e">'+p.groups.length+' components · '+p.targets.length+' tracked</text>');
+    svg.push('<text x="'+(width-margin)+'" y="'+(y+39)+'" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e">'+covered+' / '+p.targets.length+' with fixture/probe evidence</text>');
+    svg.push(rect(margin,y+46,mapW,4,"#30363d",2));
+    if(c["native-fixture"])svg.push(rect(margin,y+46,mapW*c["native-fixture"]/p.targets.length,4,colors["native-fixture"],2));
+    if(c.synthetic)svg.push(rect(margin+mapW*c["native-fixture"]/p.targets.length,y+46,mapW*c.synthetic/p.targets.length,4,colors.synthetic,2));
     const mapY=y+header;
     const ordered=p.groups.slice().sort((a,b)=>b.targets.length-a.targets.length||a.id.localeCompare(b.id));
     const placements=partition(ordered,margin,mapY,mapW,p.h);
@@ -80,7 +86,7 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
       if(box.x<margin-0.01||box.y<mapY-0.01||box.x+box.w>margin+mapW+0.01||box.y+box.h>mapY+p.h+0.01)throw Error("component bounds failed");
       const g=box.group,x=box.x+2,y0=box.y+2,w=Math.max(0,box.w-4),h=Math.max(0,box.h-4);
       svg.push('<g><title>'+esc(g.label+' · '+g.targets.length+' targets · '+g.ceiling+' ceiling')+'</title>');
-      svg.push(rect(x,y0,w,h,"#1b293b",2));
+      svg.push(rect(x,y0,w,h,"#161b22",3));
       const labelH=(w>82&&h>38)?22:0;
       const iw=Math.max(0,w-4),ih=Math.max(0,h-4-labelH);
       const rows=Math.max(1,Math.min(g.targets.length,Math.round(Math.sqrt(g.targets.length*ih/Math.max(iw,1)))));
@@ -99,9 +105,14 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
       if(index!==g.targets.length)throw Error("target count mismatch "+g.id);
       rendered+=index;
       if(labelH){
-        const maxChars=Math.floor((w-12)/6.1);
+        const evidence=g.targets.filter(t=>t.status==="native-fixture"||t.status==="synthetic").length;
+        const showPercent=w>=155;
+        const maxChars=Math.max(3,Math.floor((w-(showPercent?52:12))/6.1));
         const label=g.label.length>maxChars?g.label.slice(0,maxChars-1)+"…":g.label;
-        svg.push('<text x="'+(x+6).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" font-family="sans-serif" font-size="11.5" fill="#dee7f2">'+esc(label)+'</text>');
+        svg.push('<text x="'+(x+6).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9">'+esc(label)+'</text>');
+        if(showPercent){
+          svg.push('<text x="'+(x+w-7).toFixed(2)+'" y="'+(y0+15).toFixed(2)+'" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="'+(evidence?"#d29922":"#8b949e")+'">'+Math.round(100*evidence/g.targets.length)+'%</text>');
+        }
       }
       svg.push('</g>');
     }
@@ -109,7 +120,7 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
     y+=header+p.h+gap;
   }
   const legendY=height-40;
-  svg.push('<line x1="18" x2="742" y1="'+(legendY-20)+'" y2="'+(legendY-20)+'" stroke="#2c3a4b" stroke-width="1"/>');
+  svg.push('<line x1="18" x2="742" y1="'+(legendY-20)+'" y2="'+(legendY-20)+'" stroke="#30363d" stroke-width="1"/>');
   let lx=18;
   for(const [status,title,advance] of [
     ["native-fixture","native fixture",139],
@@ -118,16 +129,23 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather){
     ["excluded","excluded",130]
   ]){
     svg.push(rect(lx,legendY-3,10,10,colors[status],2));
-    svg.push('<text x="'+(lx+16)+'" y="'+(legendY+6)+'" font-family="sans-serif" font-size="11.5" fill="#c3d0e0">'+esc(title)+'</text>');
+    svg.push('<text x="'+(lx+16)+'" y="'+(legendY+6)+'" font-family="sans-serif" font-size="11.5" fill="#8b949e">'+esc(title)+'</text>');
     lx+=advance;
   }
-  svg.push('</svg>');
-  return {svg,totals};
+  const themed=svg.map(line=>line
+    .replace(/fill="#e6edf3"/g,'fill="#e6edf3" class="gh-text"')
+    .replace(/fill="#c9d1d9"/g,'fill="#c9d1d9" class="gh-text"')
+    .replace(/fill="#8b949e"/g,'fill="#8b949e" class="gh-muted"')
+    .replace(/stroke="#30363d"/g,'stroke="#30363d" class="gh-rule"')
+    .replace(/fill="#161b22"/g,'fill="#161b22" class="gh-surface"')
+    .replace(/fill="#30363d"/g,'fill="#30363d" class="gh-missing"'));
+  themed.push('</svg>');
+  return {svg:themed,totals};
 };
 const render = function render(data){
   "use strict";
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-  const colors={"native-fixture":"#32d5ad","synthetic":"#edbc59","missing":"#526175","excluded":"#ac4b58"};
+  const colors={"native-fixture":"#3fb950","synthetic":"#d29922","missing":"#30363d","excluded":"#b85c64"};
   const names={"native-fixture":"native arm64 fixture","synthetic":"synthetic parser/model/probe","missing":"unimplemented","excluded":"outside userspace-only scope"};
   const classes={plausible:"limited subset feasible",conditional:"needs major compatibility layer",unknown:"official Apple compatibility unproven",excluded:"intentionally not in scope"};
   const count=items=>{const o={"native-fixture":0,synthetic:0,missing:0,excluded:0};for(const t of items)o[t.status]++;return o;};
@@ -149,6 +167,7 @@ const render = function render(data){
       +"grey = not implemented; red = expressly excluded by userspace-only policy. "
       +"No color means that a real Apple framework or application is runnable.","",
     "[Browsable per-target details](blocks.html) · [Machine-readable sample catalog](compat-targets.json) · [Broader milestones](PROGRESS.md)","",
+    "The displayed percentages are **sample evidence coverage**: native fixtures plus synthetic probes divided by explicitly tracked targets, not real iOS framework compatibility.","",
     "## counted target samples","",
     "| layer | native fixtures | synthetic/probe | unimplemented | excluded | sampled targets |",
     "| --- | ---: | ---: | ---: | ---: | ---: |"
@@ -178,7 +197,7 @@ const render = function render(data){
   const html=[
     '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
     '<title>ios-27 / compatibility block explorer</title>',
-    '<style>body{margin:0 auto;max-width:1540px;padding:24px;background:#0f1828;color:#e6edf7;font:15px system-ui,sans-serif}a{color:#91c5ff}p{line-height:1.55}.lead{color:#b4c4d8;max-width:100ch}.map{width:100%;height:auto;display:block;border-radius:10px}.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,365px),1fr));gap:15px}.panel{background:#1a293c;border:1px solid #455570;border-radius:10px;padding:12px}.group{border:1px solid #496078;border-radius:7px;margin:9px 0}.group summary{padding:10px;cursor:pointer}.group p{padding:0 10px;color:#b7c9db;font-size:13px}.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:6px;padding:10px}.chip{background:#283a51;border-radius:4px;display:flex;gap:6px;align-items:flex-start;padding:5px;font-size:12px;overflow-wrap:anywhere}.sq{display:inline-block;width:10px;height:10px;min-width:10px;border-radius:2px;margin-top:2px}.stats{font-size:12px;color:#b7c9db}.tag{font-size:11px;border:1px solid #7589a0;padding:2px 5px;border-radius:99px;color:#d1e0f1}</style>',
+    '<style>body{margin:0 auto;max-width:1540px;padding:24px;background:#0d1117;color:#c9d1d9;font:15px system-ui,sans-serif}a{color:#58a6ff}p{line-height:1.55}.lead{color:#8b949e;max-width:100ch}.map{width:100%;height:auto;display:block;border-radius:10px}.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,365px),1fr));gap:15px}.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px}.group{border:1px solid #30363d;border-radius:7px;margin:9px 0}.group summary{padding:10px;cursor:pointer}.group p{padding:0 10px;color:#8b949e;font-size:13px}.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:6px;padding:10px}.chip{background:#21262d;border-radius:4px;display:flex;gap:6px;align-items:flex-start;padding:5px;font-size:12px;overflow-wrap:anywhere}.sq{display:inline-block;width:10px;height:10px;min-width:10px;border-radius:2px;margin-top:2px}.stats{font-size:12px;color:#8b949e}.tag{font-size:11px;border:1px solid #30363d;padding:2px 5px;border-radius:99px;color:#c9d1d9}</style>',
     '</head><body><h1>ios-27 / block compatibility explorer</h1>',
     '<p class="lead">anyps5-style visualization for deliberately enumerated target api functions and contracts. representative target sample, not all iOS exports. native means a restricted ARM64 test fixture; synthetic means a limited parser/probe/model. neither proves a working Apple app. no exact completion ceiling can be derived for Apple framework layers.</p>',
     '<img class="map" src="blocks.svg" alt="system libraries and iOS runtime target block map">',
