@@ -30,6 +30,9 @@ def run(args, seconds):
         raise RuntimeError("command failed ({})".format(completed.returncode))
 
 def main():
+    if sys.argv[1:] not in ([], ["--sanitize"]):
+        raise RuntimeError("expected no args or --sanitize")
+    sanitize = sys.argv[1:] == ["--sanitize"]
     architecture = platform.machine().lower()
     if architecture not in ("x86_64", "amd64", "aarch64", "arm64"):
         raise RuntimeError("unexpected native architecture: " + architecture)
@@ -40,9 +43,13 @@ def main():
         "-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
         "-pthread", "-I" + str(ROOT / "include"),
     ]
-    print("phase21j native architecture: {}".format(architecture), flush=True)
+    if sanitize:
+        flags.extend(["-g", "-fsanitize=address,undefined",
+                      "-fno-omit-frame-pointer"])
+    print("phase21j native architecture: {}; sanitizer={}".format(
+        architecture, sanitize), flush=True)
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
-        for optimize in ("-O0", "-O2"):
+        for optimize in (("-O1",) if sanitize else ("-O0", "-O2")):
             for test in ("diagnostics", "integration"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
@@ -51,7 +58,8 @@ def main():
                 sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
                 run([str(output)], 150)
-    print("phase21j: native compiler -Werror, O0/O2, diagnostics and integration passed", flush=True)
+    print("phase21j: native compiler -Werror, {}, diagnostics and integration passed".format(
+        "ASan/UBSan" if sanitize else "O0/O2"), flush=True)
 
 if __name__ == "__main__":
     try:
