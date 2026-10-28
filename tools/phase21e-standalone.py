@@ -20,6 +20,12 @@ RACE = ROOT / 'tests/phase21e-racing-deletion.c'
 CANCEL_RACE = ROOT / 'tests/phase21e-cancel-races.c'
 ROLLBACK = ROOT / 'tests/phase21e-allocation-rollback.c'
 OWNERSHIP = ROOT / 'tests/phase21e-resource-ownership.c'
+STATE_MODEL = ROOT / 'tests/phase21e-state-model.c'
+EXIT_BOUNDARY = ROOT / 'tests/phase21e-exit-token-boundary.c'
+PTHREAD_ROLLBACK = ROOT / 'tests/phase21e-pthread-error-rollback.c'
+WRAP_PTHREAD = [
+    '-Wl,--wrap=pthread_mutex_init,--wrap=pthread_key_create,--wrap=pthread_setspecific'
+]
 MACHO = ROOT / 'tests/phase21e-arm64-darwin.c'
 
 
@@ -99,7 +105,7 @@ def main():
             order = td / ('nested' + optimization)
             run([cc, *opts, optimization, str(SOURCE), str(ORDER), '-o', str(order)], 120)
             run([str(order)], 180)
-            for name, source in (('cross-runtime',CROSS), ('key-race',RACE), ('cancel-races',CANCEL_RACE), ('ownership',OWNERSHIP)):
+            for name, source in (('cross-runtime',CROSS), ('key-race',RACE), ('cancel-races',CANCEL_RACE), ('ownership',OWNERSHIP), ('model',STATE_MODEL), ('exit-boundary',EXIT_BOUNDARY)):
                 target = td / (name+optimization)
                 run([cc,*opts,optimization,str(SOURCE),str(source),'-o',str(target)],120)
                 run([str(target)],180)
@@ -107,6 +113,10 @@ def main():
             run([cc,*opts,optimization,'-Dcalloc=ios27_21e_test_calloc',
                  str(SOURCE),str(ROLLBACK),'-o',str(rollback)],120)
             run([str(rollback)],180)
+            native_faults = td / ('pthread-faults'+optimization)
+            run([cc,*opts,optimization,str(SOURCE),str(PTHREAD_ROLLBACK),
+                 *WRAP_PTHREAD,'-o',str(native_faults)],120)
+            run([str(native_faults)],180)
         if os.environ.get('PHASE21E_SANITIZE') == '1':
             exe = td / 'sanitized'
             run([clang, *opts, '-O1', '-g', '-fno-omit-frame-pointer',
@@ -136,7 +146,7 @@ def main():
             run([str(order)], 180, dict(os.environ,
                 ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
                 UBSAN_OPTIONS='halt_on_error=1'))
-            for name, source in (('cross-runtime',CROSS), ('key-race',RACE), ('cancel-races',CANCEL_RACE), ('ownership',OWNERSHIP)):
+            for name, source in (('cross-runtime',CROSS), ('key-race',RACE), ('cancel-races',CANCEL_RACE), ('ownership',OWNERSHIP), ('model',STATE_MODEL), ('exit-boundary',EXIT_BOUNDARY)):
                 target = td / (name+'-sanitized')
                 run([clang,*opts,'-O1','-g','-fno-omit-frame-pointer',
                      '-fsanitize=address,undefined',str(SOURCE),str(source),
@@ -150,6 +160,13 @@ def main():
                  '-Dcalloc=ios27_21e_test_calloc',str(SOURCE),str(ROLLBACK),
                  '-o',str(rollback)],120)
             run([str(rollback)],180,dict(os.environ,
+                ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+                UBSAN_OPTIONS='halt_on_error=1'))
+            native_faults = td / 'pthread-faults-sanitized'
+            run([clang,*opts,'-O1','-g','-fno-omit-frame-pointer',
+                 '-fsanitize=address,undefined',str(SOURCE),str(PTHREAD_ROLLBACK),
+                 *WRAP_PTHREAD,'-o',str(native_faults)],120)
+            run([str(native_faults)],180,dict(os.environ,
                 ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
                 UBSAN_OPTIONS='halt_on_error=1'))
         obj = td / 'phase21e-darwin-arm64.o'
