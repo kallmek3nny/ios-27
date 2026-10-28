@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "phase20c-native-objc-ownership",
-      "sha": "8a2ae81e23b731616f83361ee313059913474a30",
+      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
       "pr_number": 67,
       "ci": "passing_checks",
@@ -57,5 +57,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:23:21Z"
+  "observed_at": "2026-10-28T19:24:14Z"
 }

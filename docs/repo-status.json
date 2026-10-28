@@ -11,10 +11,10 @@
     {
       "number": 67,
       "branch": "phase20c-native-objc-ownership",
-      "sha": "8a2ae81e23b731616f83361ee313059913474a30",
+      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
       "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "updated_at": "2026-10-28T19:22:34Z",
+      "updated_at": "2026-10-28T19:23:35Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -83,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:22:43Z"
+  "observed_at": "2026-10-28T19:24:13Z"
 }
