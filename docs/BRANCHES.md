@@ -8,10 +8,16 @@ candidate branches with mapped changes: **3** · audited base: `2a1f8af8f814`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `c3324f7b0595` · ci: **running** · unmerged, not credited.
+head: `ab52aaeae209` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 11 test/fixture files, +1997/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 12 test/fixture files, +2051/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
+
+### [phase21e-cancellation-ownership-20261028](https://github.com/kallmek3nny/ios-27/pull/75)
+
+head: `bed479092c72` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +452/-15 lines
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -19,12 +25,6 @@ head: `d4e67343ede0` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +1450/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
-
-### [phase21e-cancellation-ownership-20261028](https://github.com/kallmek3nny/ios-27/tree/phase21e-cancellation-ownership-20261028)
-
-head: `bed479092c72` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 7 test/fixture files, +452/-15 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
