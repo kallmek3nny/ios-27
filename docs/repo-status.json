@@ -63,7 +63,17 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "e654f346ed364dbe424b098e9e4920047c17e5be",
+      "ahead_by": 14,
+      "behind_by": 4,
+      "last_commit_at": "2026-10-28T21:17:39Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 81,
@@ -124,9 +134,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 35,
+    "branches_scanned": 36,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:17:10Z"
+  "observed_at": "2026-10-28T21:17:44Z"
 }
