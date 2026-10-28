@@ -4,11 +4,11 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **3** · audited base: `e84a0f2ca216`
+candidate branches with mapped changes: **4** · audited base: `e84a0f2ca216`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `9da58aba0436` · ci: **running** · unmerged, not credited.
+head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 19 test/fixture files, +2922/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
@@ -17,7 +17,7 @@ head: `9da58aba0436` · ci: **running** · unmerged, not credited.
 
 head: `2265f89f62c2` · ci: **passing_checks** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1984/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 10 test/fixture files, +2244/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
 
@@ -27,6 +27,14 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 1 source files, 4 test/fixture files, +282/-11 lines
 - **libsystem_pthread**: 0 source files, 1 test/fixture files, +76/-0 lines
+
+### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once)
+
+head: `f3a8ae787162` · ci: **not_checked** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 10 test/fixture files, +2244/-0 lines
+  - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
+- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
