@@ -8,17 +8,19 @@
 #include <time.h>
 
 /* Host locks never occupy the Darwin opaque bytes. All slots are bounded. */
-enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4 };
+enum object_kind { KIND_MUTEX = 1, KIND_COND = 2, KIND_RWLOCK = 3, KIND_MUTEXATTR = 4, KIND_ONCE = 5 };
 enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RU,
-    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_UNSUPPORTED
+    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_UNSUPPORTED
 };
 typedef struct {
     uint64_t addr, token;
     unsigned kind, pins;
     unsigned mutex_locked, rw_writer_locked, mutex_type, mutex_depth;
+    unsigned once_state;
+    pthread_t once_owner;
     pthread_t mutex_owner, rw_writer;
     pthread_t rw_reader_ids[32];
     unsigned rw_reader_counts[32];
@@ -26,12 +28,20 @@ typedef struct {
         pthread_mutex_t mutex;
         pthread_cond_t cond;
         pthread_rwlock_t rwlock;
+        struct { pthread_mutex_t lock; pthread_cond_t ready; } once;
     } native;
 } object_slot;
+typedef struct {
+    uint64_t guest_pc;
+    ios27_21a_once_callback callback;
+    void *context;
+} once_binding;
 struct ios27_21a_runtime {
     ios27_21a_region regions[IOS27_21A_MAX_REGIONS];
     size_t region_count;
     uint64_t next_token;
+    size_t callback_count;
+    once_binding callbacks[IOS27_21A_MAX_ONCE_CALLBACKS];
     pthread_mutex_t guard;
     object_slot objects[IOS27_21A_MAX_OBJECTS];
 };
@@ -59,7 +69,7 @@ static const entry symbols[] = {
     {"pthread_mutexattr_destroy", OP_MAD},
     {"pthread_mutexattr_settype", OP_MAS},
     {"pthread_mutexattr_gettype", OP_MAG},
-    {"pthread_once", OP_UNSUPPORTED},
+    {"pthread_once", OP_ONCE},
     {"pthread_create", OP_UNSUPPORTED},
     {"pthread_join", OP_UNSUPPORTED},
     {"pthread_detach", OP_UNSUPPORTED},
@@ -77,6 +87,7 @@ static size_t object_size(unsigned kind) {
         case KIND_COND: return sizeof(ios27_21a_cond);
         case KIND_RWLOCK: return sizeof(ios27_21a_rwlock);
         case KIND_MUTEXATTR: return sizeof(ios27_21a_mutexattr);
+        case KIND_ONCE: return sizeof(ios27_21a_once);
         default: return 0u;
     }
 }
@@ -203,6 +214,13 @@ static int native_init(object_slot *s, unsigned kind, unsigned mutex_type) {
         case KIND_COND: return pthread_cond_init(&s->native.cond, NULL);
         case KIND_RWLOCK: return pthread_rwlock_init(&s->native.rwlock, NULL);
         case KIND_MUTEXATTR: return 0;
+        case KIND_ONCE: {
+            int e = pthread_mutex_init(&s->native.once.lock, NULL);
+            if (e) return e;
+            e = pthread_cond_init(&s->native.once.ready, NULL);
+            if (e) (void)pthread_mutex_destroy(&s->native.once.lock);
+            return e;
+        }
         default: return EINVAL;
     }
 }
@@ -212,6 +230,11 @@ static int native_destroy(object_slot *s) {
         case KIND_COND: return pthread_cond_destroy(&s->native.cond);
         case KIND_RWLOCK: return pthread_rwlock_destroy(&s->native.rwlock);
         case KIND_MUTEXATTR: return 0;
+        case KIND_ONCE: {
+            int e = pthread_cond_destroy(&s->native.once.ready);
+            if (e) return e;
+            return pthread_mutex_destroy(&s->native.once.lock);
+        }
         default: return EINVAL;
     }
 }
@@ -242,7 +265,8 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
                  sig == IOS27_21A_MUTEX_ERRORCHECK_SIG ||
                  sig == IOS27_21A_MUTEX_RECURSIVE_SIG) :
                 kind == KIND_COND ? sig == IOS27_21A_COND_STATIC_SIG :
-                kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG : 0;
+                kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG :
+                kind == KIND_ONCE ? sig == IOS27_21A_ONCE_STATIC_SIG : 0;
         if (!accepted) { e = EINVAL; goto done; }
         if (kind == KIND_MUTEX)
             mutex_type = sig == IOS27_21A_MUTEX_RECURSIVE_SIG ? 2u :
@@ -269,6 +293,7 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     s->rw_writer_locked = 0;
     s->mutex_depth = 0;
     s->mutex_type = mutex_type;
+    s->once_state = 0u;
     memset(s->rw_reader_counts, 0, sizeof(s->rw_reader_counts));
     s->kind = kind;
 done:
@@ -295,7 +320,8 @@ static int slot_pin(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
                         sig == IOS27_21A_MUTEX_ERRORCHECK_SIG ||
                         sig == IOS27_21A_MUTEX_RECURSIVE_SIG) :
                        kind == KIND_COND ? sig == IOS27_21A_COND_STATIC_SIG :
-                       kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG : 0u;
+                       kind == KIND_RWLOCK ? sig == IOS27_21A_RWLOCK_STATIC_SIG :
+                       kind == KIND_ONCE ? sig == IOS27_21A_ONCE_STATIC_SIG : 0u;
             if (pass == 0u && expected) {
                 /* One winner initializes the static Darwin object; races
                  * observe the committed bridge record on second pass. */
@@ -576,6 +602,73 @@ cleanup:
     slot_unpin(rt, cond);
     return e;
 }
+int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
+                            ios27_21a_once_callback callback, void *context) {
+    size_t i;
+    int e = 0;
+    if (!rt || !callback || !guest_pc || (guest_pc & 3u)) return EINVAL;
+    e = ios27_21a_validate_access(rt, guest_pc, 4u, 4u, IOS27_21A_READ);
+    if (e) return e;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < rt->callback_count; ++i) {
+        if (rt->callbacks[i].guest_pc == guest_pc) {
+            e = EEXIST; goto done;
+        }
+    }
+    if (rt->callback_count == IOS27_21A_MAX_ONCE_CALLBACKS) {
+        e = EAGAIN; goto done;
+    }
+    rt->callbacks[rt->callback_count++] =
+        (once_binding){guest_pc, callback, context};
+done:
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
+int ios27_21a_release_once(ios27_21a_runtime *rt, uint64_t once_address) {
+    return slot_destroy(rt, once_address, KIND_ONCE);
+}
+static int once_native(ios27_21a_runtime *rt, uint64_t once_address,
+                       uint64_t callback_pc) {
+    object_slot *s = NULL;
+    ios27_21a_once_callback callback = NULL;
+    void *context = NULL;
+    size_t i;
+    int e;
+    if (!callback_pc || (callback_pc & 3u)) return EINVAL;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < rt->callback_count; ++i) {
+        if (rt->callbacks[i].guest_pc == callback_pc) {
+            callback = rt->callbacks[i].callback;
+            context = rt->callbacks[i].context;
+            break;
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    if (!callback) return ENOTSUP;
+    e = slot_pin(rt, once_address, KIND_ONCE, &s);
+    if (e) return e;
+    (void)pthread_mutex_lock(&s->native.once.lock);
+    while (s->once_state == 1u) {
+        if (pthread_equal(s->once_owner, pthread_self())) {
+            e = EDEADLK;
+            goto done;
+        }
+        e = pthread_cond_wait(&s->native.once.ready, &s->native.once.lock);
+        if (e) goto done;
+    }
+    if (s->once_state == 2u) { e = 0; goto done; }
+    s->once_owner = pthread_self();
+    s->once_state = 1u;
+    (void)pthread_mutex_unlock(&s->native.once.lock);
+    e = callback(context);
+    (void)pthread_mutex_lock(&s->native.once.lock);
+    s->once_state = e ? 0u : 2u;
+    (void)pthread_cond_broadcast(&s->native.once.ready);
+done:
+    (void)pthread_mutex_unlock(&s->native.once.lock);
+    slot_unpin(rt, s);
+    return e;
+}
 static int attr_value(ios27_21a_runtime *rt, uint64_t address,
                       int setter, unsigned *value) {
     object_slot *s = NULL;
@@ -605,7 +698,9 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
     }
     if (!matched) return ENOSYS;
     if (op == OP_UNSUPPORTED) { *x0 = ENOTSUP; return ENOTSUP; }
-    if (op == OP_MAI) {
+    if (op == OP_ONCE) {
+        e = once_native(rt, args[0], args[1]);
+    } else if (op == OP_MAI) {
         e = slot_init(rt, args[0], KIND_MUTEXATTR, 0, 0u);
     } else if (op == OP_MAD) {
         e = slot_destroy(rt, args[0], KIND_MUTEXATTR);
