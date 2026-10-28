@@ -2,12 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "9d522c1123459eb5b18d9ea58b68a0afb503adb3",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/9d522c1123459eb5b18d9ea58b68a0afb503adb3",
-    "committed_at": "2026-10-28T21:15:49Z"
+    "sha": "dd39b31675943da242866870fa133461c8bade3b",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/dd39b31675943da242866870fa133461c8bade3b",
+    "committed_at": "2026-10-28T21:16:50Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
+    {
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "c0e965907aa71ca843144bd7cc1f3285f7611481",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:16:35Z",
+      "status": "unmerged: not counted"
+    },
     {
       "number": 78,
       "branch": "phase21f-fifo-mutex-20261028",
@@ -24,24 +33,6 @@
       "title": "phase 21j: deterministic synchronization fault injection and integration stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "updated_at": "2026-10-28T21:16:16Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 80,
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "19997d0770b437c44caa9a6c3fe189568ed2f3be",
-      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:15:48Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 81,
-      "branch": "phase21g-darwin-condition-variables",
-      "sha": "6a95c1a393c3c5e50a0bdca477880b35da436656",
-      "title": "phase21g: atomic Darwin-style condition waits and FIFO wakeup semantics",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/81",
-      "updated_at": "2026-10-28T21:15:33Z",
       "status": "unmerged: not counted"
     },
     {
@@ -74,6 +65,13 @@
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 81,
+      "title": "phase21g: atomic Darwin-style condition waits and FIFO wakeup semantics",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/81",
+      "head_sha": "6a95c1a393c3c5e50a0bdca477880b35da436656",
+      "merged_at": "2026-10-28T21:16:51Z"
+    },
     {
       "number": 79,
       "title": "phase21h: cancellation-safe synchronization-object lifetime registry",
@@ -122,20 +120,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/68",
       "head_sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
       "merged_at": "2026-10-28T19:33:53Z"
-    },
-    {
-      "number": 67,
-      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
-      "merged_at": "2026-10-28T19:24:38Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 34,
+    "branches_scanned": 35,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:16:23Z"
+  "observed_at": "2026-10-28T21:17:10Z"
 }
