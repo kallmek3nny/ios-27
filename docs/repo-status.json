@@ -2,61 +2,59 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "0a7f89465131ba71bf0eaef6bb9e4883f306735d",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/0a7f89465131ba71bf0eaef6bb9e4883f306735d",
-    "committed_at": "2026-10-28T17:50:22Z"
+    "sha": "c4d79d3c960f2cf5c454f07ca86b60e3dc49b89f",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/c4d79d3c960f2cf5c454f07ca86b60e3dc49b89f",
+    "committed_at": "2026-10-28T18:01:04Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 54,
-      "branch": "phase19a-native-startup-20261028",
-      "sha": "0740b0a1a5efce950580219f22f26825f8c5d887",
-      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
-      "updated_at": "2026-10-28T18:00:19Z",
+      "number": 55,
+      "branch": "phase19d-arm64-relocs-20261028",
+      "sha": "86fdf47657086ac5ce51396f0ebcb6e69309bd79",
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "updated_at": "2026-10-28T18:01:27Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "cf779db69cce1b4785e7dbad4295432a7f0ea2c9",
+      "sha": "474b7e862d52f8f146823186cfe20e881e9c1dc2",
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T18:00:19Z",
+      "updated_at": "2026-10-28T18:01:23Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 55,
-      "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "046f764cab15cbaaecba16a395a15a93cf19b1b0",
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "updated_at": "2026-10-28T18:00:16Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 56,
-      "branch": "phase19c-mach-task-exceptions",
-      "sha": "681fef8b390096eb7253c4029e491e59e0446389",
-      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
-      "updated_at": "2026-10-28T17:59:56Z",
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "64506cd5d7827356938cc7ba742cd86eb5be0073",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T18:00:49Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "phase19e-objc-libsystem-foundations",
-      "sha": "d590ca765bbe7d469374ba44ffca3b596f8c55f4",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T17:51:04Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19e-objc-libsystem-foundations",
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "bdba487e3985d34f79597c2a8ef8e97bfd925f09",
+      "ahead_by": 13,
+      "behind_by": 3,
+      "last_commit_at": "2026-10-28T18:01:49Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19a-native-startup-20261028",
       "status": "unmerged: not counted"
     }
   ],
   "recent_merged_pull_requests": [
+    {
+      "number": 56,
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
+      "merged_at": "2026-10-28T18:01:05Z"
+    },
     {
       "number": 52,
       "title": "fix: exclude stale squash-merged refs from recent branch candidates",
@@ -105,20 +103,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/46",
       "head_sha": "1b559faa531085739ae22268398f27245f38edd5",
       "merged_at": "2026-10-28T17:21:48Z"
-    },
-    {
-      "number": 45,
-      "title": "feat: AnyPS5-style API block tracker with scoped compatibility ceilings",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/45",
-      "head_sha": "571ce308e57cecc3d22bab14dbbc09accda986f7",
-      "merged_at": "2026-10-28T17:11:54Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 47,
+    "branches_scanned": 49,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:00:47Z"
+  "observed_at": "2026-10-28T18:01:55Z"
 }
