@@ -6,7 +6,7 @@ implemented claims. Bounded GitHub API calls run under an outer CLI timeout.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
@@ -21,6 +21,20 @@ def newer_than_main(branch_date, main_date):
     return (isinstance(branch_date, str) and isinstance(main_date, str)
             and branch_date.endswith("Z") and main_date.endswith("Z")
             and branch_date > main_date)
+
+def recent_active_branch(branch_date, now=None):
+    """Branches must stay visible when another agent advances main.
+    A bounded activity window plus merged-PR exclusion prevents stale ref spam.
+    """
+    if not isinstance(branch_date, str) or not branch_date.endswith("Z"):
+        return False
+    try:
+        updated = datetime.fromisoformat(branch_date.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    observed = now or datetime.now(timezone.utc)
+    return observed - timedelta(hours=4) <= updated <= observed + timedelta(minutes=5)
+
 
 API = "https://api.github.com"
 BOT_PREFIX = "chore(progress):"
@@ -74,7 +88,7 @@ def snapshot(repo, get):
          "status": "unmerged: not counted"}
         for p in open_prs if p["base"]["ref"] == "main"
     ][:8]
-    excluded_sha = {p["head_sha"] for p in recently_merged} | {p["sha"] for p in pending}
+    excluded_sha = {p["head"]["sha"] for p in closed if p.get("merged_at")} | {p["sha"] for p in pending}
     candidates = [
         (p["name"], p["commit"]["sha"]) for p in branches
         if p["name"] != "main" and p["commit"]["sha"] not in excluded_sha
@@ -94,11 +108,10 @@ def snapshot(repo, get):
         if c.get("status") not in ("ahead", "diverged") or c.get("ahead_by", 0) < 1:
             return None
         history = c.get("commits", [])
-        # Squash merges leave obsolete source refs looking "ahead" even after
-        # their work reaches main. Only surface branches updated AFTER the
-        # audited main source, in addition to separately tracked open PRs.
+        # Squash-merged refs can look ahead. Exclude their merged PR heads
+        # first, then require a recent push regardless of concurrent main advances.
         last_date = history[-1]["commit"]["committer"]["date"] if history else ""
-        if not newer_than_main(last_date, source["committed_at"]):
+        if not recent_active_branch(last_date):
             return None
         return {"branch": name, "sha": sha,
                 "ahead_by": c["ahead_by"], "behind_by": c.get("behind_by", 0),
@@ -142,6 +155,10 @@ def self_test():
     assert not unchanged(dict(sample, main_source={"sha": "b" * 40}), sample)
     assert not newer_than_main("2026-10-28T16:45:00Z", "2026-10-28T17:47:44Z")
     assert newer_than_main("2026-10-28T18:45:00Z", "2026-10-28T17:47:44Z")
+    fixed = datetime(2026, 10, 28, 19, 0, tzinfo=timezone.utc)
+    assert recent_active_branch("2026-10-28T17:00:00Z", fixed)
+    assert not recent_active_branch("2026-10-28T11:00:00Z", fixed)
+    assert not recent_active_branch("2026-10-29T11:00:00Z", fixed)
     print("repository provenance self-test passed")
 
 

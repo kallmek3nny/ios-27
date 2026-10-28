@@ -2,7 +2,7 @@
 <style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>
 <text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3" class="gh-text">ios-27 / compatibility</text>
 <text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">component area = tracked targets · color = test evidence</text>
-<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">main 7c5b4852 · 0 incoming prs</text>
+<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#a371f7">1 source-diff candidate(s) · not verified</text>
 <text x="18" y="119" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">system libraries / api targets</text>
 <text x="742" y="120" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">9.2%</text>
 <text x="18" y="138" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">13 components · 249 tracked</text>
@@ -10,7 +10,7 @@
 <rect x="18.00" y="146.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
 <rect x="18.00" y="146.00" width="2.91" height="4.00" rx="2" fill="#3fb950"/>
 <rect x="20.91" y="146.00" width="63.97" height="4.00" rx="2" fill="#d29922"/>
-<g><title>libsystem_kernel / bsd · 42 targets · conditional ceiling</title>
+<g><title>libsystem_kernel / bsd · 42 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="20.00" y="160.00" width="219.89" height="211.45" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_kernel / bsd / exit: synthetic parser/model/probe</title>
 <rect x="22.60" y="191.60" width="29.64" height="28.54" rx="1" fill="#d29922"/>
@@ -143,7 +143,7 @@
 <rect x="26.00" y="182.00" width="34.65" height="2.00" rx="1" fill="#d29922"/>
 <text x="232.89" y="175.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">17%</text>
 </g>
-<g><title>libsystem_c / libc · 35 targets · plausible ceiling</title>
+<g><title>libsystem_c / libc · 35 tracked targets · plausible ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="20.00" y="375.45" width="219.89" height="175.55" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_c / libc / malloc: unimplemented</title>
 <rect x="22.60" y="407.05" width="29.64" height="27.31" rx="1" fill="#30363d" class="gh-missing"/>
@@ -254,7 +254,7 @@
 <rect x="26.00" y="397.45" width="207.89" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="232.89" y="390.45" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>libobjc / objc runtime · 27 targets · conditional ceiling</title>
+<g><title>libobjc / objc runtime · 27 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="243.89" y="160.00" width="135.57" height="218.19" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libobjc / objc runtime / objc_msgSend: unimplemented</title>
 <rect x="246.49" y="191.60" width="25.11" height="29.66" rx="1" fill="#30363d" class="gh-missing"/>
@@ -340,7 +340,7 @@
 <text x="249.89" y="175.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libobjc / objc runt…</text>
 <rect x="249.89" y="182.00" width="123.57" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>libsystem_pthread · 21 targets · conditional ceiling</title>
+<g><title>libsystem_pthread · 21 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="243.89" y="382.19" width="135.57" height="168.81" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_pthread / pthread_create: unimplemented</title>
 <rect x="246.49" y="413.79" width="25.11" height="25.96" rx="1" fill="#30363d" class="gh-missing"/>
@@ -408,7 +408,7 @@
 <text x="249.89" y="397.19" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libsystem_pthread</text>
 <rect x="249.89" y="404.19" width="123.57" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>CoreFoundation · 20 targets · unknown ceiling</title>
+<g><title>CoreFoundation · 20 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="383.45" y="160.00" width="176.27" height="123.42" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CoreFoundation / CFGetTypeID: unimplemented</title>
 <rect x="386.05" y="191.60" width="23.41" height="28.94" rx="1" fill="#30363d" class="gh-missing"/>
@@ -474,7 +474,7 @@
 <rect x="389.45" y="182.00" width="164.27" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="552.73" y="175.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>libdispatch / gdc · 20 targets · conditional ceiling</title>
+<g><title>libdispatch / gdc · 20 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="563.73" y="160.00" width="176.27" height="123.42" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libdispatch / gdc / dispatch_async: unimplemented</title>
 <rect x="566.33" y="191.60" width="23.41" height="28.94" rx="1" fill="#30363d" class="gh-missing"/>
@@ -540,7 +540,7 @@
 <rect x="569.73" y="182.00" width="164.27" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="733.00" y="175.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>Foundation / classes · 16 targets · unknown ceiling</title>
+<g><title>Foundation / classes · 16 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="383.45" y="287.42" width="133.35" height="129.79" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Foundation / classes / NSObject lifecycle: unimplemented</title>
 <rect x="386.05" y="319.02" width="20.36" height="31.06" rx="1" fill="#30363d" class="gh-missing"/>
@@ -593,7 +593,7 @@
 <text x="389.45" y="302.42" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Foundation / class…</text>
 <rect x="389.45" y="309.42" width="121.35" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>Swift runtime / ABI · 16 targets · conditional ceiling</title>
+<g><title>Swift runtime / ABI · 16 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="383.45" y="421.21" width="133.35" height="129.79" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Swift runtime / ABI / swift class metadata: unimplemented</title>
 <rect x="386.05" y="452.81" width="20.36" height="31.06" rx="1" fill="#30363d" class="gh-missing"/>
@@ -646,7 +646,7 @@
 <text x="389.45" y="436.21" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Swift runtime / ABI</text>
 <rect x="389.45" y="443.21" width="121.35" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>libdyld / dynamic loading · 12 targets · conditional ceiling</title>
+<g><title>libdyld / dynamic loading · 12 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="520.80" y="287.42" width="107.60" height="119.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libdyld / dynamic loading / dlopen: unimplemented</title>
 <rect x="523.40" y="319.02" width="24.70" height="27.63" rx="1" fill="#30363d" class="gh-missing"/>
@@ -687,7 +687,7 @@
 <text x="526.80" y="302.42" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libdyld / dyna…</text>
 <rect x="526.80" y="309.42" width="95.60" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>CFNetwork / Network.framework · 12 targets · conditional ceiling</title>
+<g><title>CFNetwork / Network.framework · 12 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="632.40" y="287.42" width="107.60" height="119.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CFNetwork / Network.framework / CFHTTPMessageCreateRequest: unimplemented</title>
 <rect x="635.00" y="319.02" width="24.70" height="27.63" rx="1" fill="#30363d" class="gh-missing"/>
@@ -728,7 +728,7 @@
 <text x="638.40" y="302.42" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">CFNetwork / Ne…</text>
 <rect x="638.40" y="309.42" width="95.60" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>Security / keychain · 12 targets · unknown ceiling</title>
+<g><title>Security / keychain · 12 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="520.80" y="410.92" width="91.66" height="140.08" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Security / keychain / SecItemAdd: unimplemented</title>
 <rect x="523.40" y="442.52" width="28.02" height="25.57" rx="1" fill="#30363d" class="gh-missing"/>
@@ -768,7 +768,7 @@
 </g>
 <text x="526.80" y="425.92" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Security / k…</text>
 </g>
-<g><title>libSystem guest model (not dylib) · 8 targets · conditional ceiling</title>
+<g><title>libSystem guest model (not dylib) · 8 tracked targets · conditional ceiling · 1 incoming branches, not counted as compatibility</title>
 <rect x="616.46" y="410.92" width="123.54" height="68.04" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libSystem guest model (not dylib) / guest offset-checked read trap: synthetic parser/model/probe</title>
 <rect x="619.06" y="442.52" width="28.69" height="16.32" rx="1" fill="#d29922"/>
@@ -794,11 +794,13 @@
 <g><title>libSystem guest model (not dylib) / quota-checked host heap ownership: synthetic parser/model/probe</title>
 <rect x="708.71" y="460.04" width="28.69" height="16.32" rx="1" fill="#d29922"/>
 </g>
+<rect x="616.46" y="410.92" width="123.54" height="68.04" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="733.00" y="471.96" text-anchor="end" font-family="sans-serif" font-size="11" fill="#c9a7ff">1 WIP branch</text>
 <text x="622.46" y="425.92" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libSystem guest m…</text>
 <rect x="622.46" y="432.92" width="111.54" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <rect x="622.46" y="432.92" width="111.54" height="2.00" rx="1" fill="#d29922"/>
 </g>
-<g><title>ObjC host prototype (not Apple libobjc) · 8 targets · conditional ceiling</title>
+<g><title>ObjC host prototype (not Apple libobjc) · 8 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="616.46" y="482.96" width="123.54" height="68.04" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>ObjC host prototype (not Apple libobjc) / Clang ObjC2 absolute metadata parsing: synthetic parser/model/probe</title>
 <rect x="619.06" y="514.56" width="28.69" height="16.32" rx="1" fill="#d29922"/>
@@ -836,7 +838,7 @@
 <rect x="18.00" y="623.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
 <rect x="18.00" y="623.00" width="39.78" height="4.00" rx="2" fill="#3fb950"/>
 <rect x="57.78" y="623.00" width="326.20" height="4.00" rx="2" fill="#d29922"/>
-<g><title>mach ipc model · 20 targets · conditional ceiling</title>
+<g><title>mach ipc model · 20 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="20.00" y="637.00" width="155.12" height="246.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>mach ipc model / task-local names: synthetic parser/model/probe</title>
 <rect x="22.60" y="668.60" width="36.58" height="41.40" rx="1" fill="#d29922"/>
@@ -903,7 +905,7 @@
 <rect x="26.00" y="659.00" width="114.50" height="2.00" rx="1" fill="#d29922"/>
 <text x="168.12" y="652.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">80%</text>
 </g>
-<g><title>bsd syscall boundary · 17 targets · conditional ceiling</title>
+<g><title>bsd syscall boundary · 17 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="179.12" y="637.00" width="131.25" height="246.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>bsd syscall boundary / guest exit: synthetic parser/model/probe</title>
 <rect x="181.72" y="668.60" width="30.61" height="41.40" rx="1" fill="#d29922"/>
@@ -960,7 +962,7 @@
 <rect x="185.12" y="659.00" width="119.25" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <rect x="185.12" y="659.00" width="49.10" height="2.00" rx="1" fill="#d29922"/>
 </g>
-<g><title>dyld / image graph · 17 targets · conditional ceiling</title>
+<g><title>dyld / image graph · 17 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="314.37" y="637.00" width="131.25" height="246.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>dyld / image graph / virtual @rpath resolution: synthetic parser/model/probe</title>
 <rect x="316.97" y="668.60" width="30.61" height="41.40" rx="1" fill="#d29922"/>
@@ -1018,7 +1020,7 @@
 <rect x="320.37" y="659.00" width="7.01" height="2.00" rx="1" fill="#3fb950"/>
 <rect x="327.39" y="659.00" width="70.15" height="2.00" rx="1" fill="#d29922"/>
 </g>
-<g><title>guest security / isolation · 14 targets · conditional ceiling</title>
+<g><title>guest security / isolation · 14 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="449.63" y="637.00" width="210.81" height="125.63" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>guest security / isolation / bounded input validation: synthetic parser/model/probe</title>
 <rect x="452.23" y="668.60" width="40.16" height="29.68" rx="1" fill="#d29922"/>
@@ -1067,7 +1069,7 @@
 <rect x="455.63" y="659.00" width="42.60" height="2.00" rx="1" fill="#d29922"/>
 <text x="653.44" y="652.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">21%</text>
 </g>
-<g><title>mach-o parser and native loader · 13 targets · plausible ceiling</title>
+<g><title>mach-o parser and native loader · 13 tracked targets · plausible ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="449.63" y="766.63" width="210.81" height="116.37" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>mach-o parser and native loader / thin arm64 parsing: synthetic parser/model/probe</title>
 <rect x="452.23" y="798.23" width="28.34" height="40.49" rx="1" fill="#d29922"/>
@@ -1114,7 +1116,7 @@
 <rect x="516.80" y="788.63" width="76.47" height="2.00" rx="1" fill="#d29922"/>
 <text x="653.44" y="781.63" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#d29922">69%</text>
 </g>
-<g><title>arm64e and abi compatibility · 10 targets · unknown ceiling</title>
+<g><title>arm64e and abi compatibility · 10 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="664.44" y="637.00" width="75.56" height="246.00" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>arm64e and abi compatibility / arm64e mach-o decode: unimplemented</title>
 <rect x="667.04" y="639.60" width="34.58" height="39.13" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1152,7 +1154,7 @@
 <text x="18" y="947" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">8 components · 99 tracked</text>
 <text x="742" y="948" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">0 / 99 with fixture/probe evidence</text>
 <rect x="18.00" y="955.00" width="724.00" height="4.00" rx="2" fill="#30363d" class="gh-missing"/>
-<g><title>Metal / IOSurface / gpu · 15 targets · unknown ceiling</title>
+<g><title>Metal / IOSurface / gpu · 15 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="20.00" y="969.00" width="215.39" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Metal / IOSurface / gpu / MTLDevice discovery: unimplemented</title>
 <rect x="22.60" y="1000.60" width="41.08" height="29.30" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1203,7 +1205,7 @@
 <rect x="26.00" y="991.00" width="203.39" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="228.39" y="984.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>SpringBoard / apple services · 15 targets · unknown ceiling</title>
+<g><title>SpringBoard / apple services · 15 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="20.00" y="1097.50" width="215.39" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>SpringBoard / apple services / launchd bootstrap: unimplemented</title>
 <rect x="22.60" y="1129.10" width="41.08" height="29.30" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1254,7 +1256,7 @@
 <rect x="26.00" y="1119.50" width="203.39" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="228.39" y="1112.50" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>UIKit / controls · 14 targets · unknown ceiling</title>
+<g><title>UIKit / controls · 14 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="239.39" y="969.00" width="193.45" height="129.26" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>UIKit / controls / UIApplication bootstrap: unimplemented</title>
 <rect x="241.99" y="1000.60" width="36.69" height="30.89" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1302,7 +1304,7 @@
 <rect x="245.39" y="991.00" width="181.45" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="425.85" y="984.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>Android host integration · 13 targets · conditional ceiling</title>
+<g><title>Android host integration · 13 tracked targets · conditional ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="239.39" y="1102.26" width="193.45" height="119.74" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>Android host integration / galaxy s25+ native test: unimplemented</title>
 <rect x="241.99" y="1133.86" width="25.86" height="42.17" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1347,7 +1349,7 @@
 <rect x="245.39" y="1124.26" width="181.45" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="425.85" y="1117.26" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>CoreAnimation / compositor · 13 targets · unknown ceiling</title>
+<g><title>CoreAnimation / compositor · 13 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="436.85" y="969.00" width="186.14" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>CoreAnimation / compositor / CALayer tree: unimplemented</title>
 <rect x="439.45" y="1000.60" width="35.23" height="29.30" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1392,7 +1394,7 @@
 <rect x="442.85" y="991.00" width="174.14" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="615.99" y="984.00" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>SwiftUI / view graph · 13 targets · unknown ceiling</title>
+<g><title>SwiftUI / view graph · 13 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="436.85" y="1097.50" width="186.14" height="124.50" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>SwiftUI / view graph / body computation: unimplemented</title>
 <rect x="439.45" y="1129.10" width="35.23" height="29.30" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1437,7 +1439,7 @@
 <rect x="442.85" y="1119.50" width="174.14" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <text x="615.99" y="1112.50" text-anchor="end" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#8b949e" class="gh-muted">0%</text>
 </g>
-<g><title>iOS apps / app services · 12 targets · unknown ceiling</title>
+<g><title>iOS apps / app services · 12 tracked targets · unknown ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="626.99" y="969.00" width="113.01" height="188.75" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>iOS apps / app services / bundle launch: unimplemented</title>
 <rect x="629.59" y="1000.60" width="35.14" height="37.74" rx="1" fill="#30363d" class="gh-missing"/>
@@ -1478,7 +1480,7 @@
 <text x="632.99" y="984.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">iOS apps / app …</text>
 <rect x="632.99" y="991.00" width="101.01" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>device boot and kernel ownership · 4 targets · excluded ceiling</title>
+<g><title>device boot and kernel ownership · 4 tracked targets · excluded ceiling · 0 incoming branches, not counted as compatibility</title>
 <rect x="626.99" y="1161.75" width="113.01" height="60.25" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>device boot and kernel ownership / replace android kernel: outside userspace-only scope</title>
 <rect x="629.59" y="1193.35" width="26.05" height="26.05" rx="1" fill="#b85c64"/>
