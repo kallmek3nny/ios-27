@@ -59,6 +59,7 @@ int ios27_21a_create_regions(ios27_21a_runtime **out,
 int ios27_21a_destroy(ios27_21a_runtime *rt);
 int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
                             ios27_21a_once_callback callback, void *context);
+int ios27_21a_release_once(ios27_21a_runtime *rt, uint64_t once_address);
 int ios27_21a_validate_access(ios27_21a_runtime *rt, uint64_t guest_addr,
                               size_t span, size_t alignment, unsigned permissions);
 int ios27_21a_validate(ios27_21a_runtime *rt, uint64_t guest_addr,
