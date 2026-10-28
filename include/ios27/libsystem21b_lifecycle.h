@@ -8,7 +8,7 @@
 #define IOS27_21B_ATTR_VERSION 0x21b00001u
 #define IOS27_21B_STACK_MAX (128u * 1024u * 1024u)
 typedef struct ios27_21b_runtime ios27_21b_runtime;
-typedef struct { uint32_t slot, generation; } ios27_21b_thread;
+typedef struct { uint32_t slot, generation; uint64_t owner; } ios27_21b_thread;
 typedef void *(*ios27_21b_entry)(void *);
 typedef struct {
     uint32_t version;
