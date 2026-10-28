@@ -73,7 +73,7 @@ def markdown(data):
     lines = [
         "# ios-27 | capability progress",
         "",
-        f"snapshot: {data['as_of']} · baseline: \`{data['baseline_commit'][:12]}\`",
+        f"snapshot: {data['as_of']} · baseline: `{data['baseline_commit'][:12]}`",
         "",
         "![capability gate dashboard](progress.svg)",
         "",
@@ -119,11 +119,11 @@ def markdown(data):
     lines.extend([
         "## maintenance and verification",
         "",
-        "Edit \`docs/progress.json\` only when adding/removing a specifically defined gate "
+        "Edit `docs/progress.json` only when adding/removing a specifically defined gate "
         "or when new evidence establishes completion. Completed gates need a real "
         "repository evidence path; registered CTest names are checked where specified. "
-        "Run \`timeout 15s python3 tools/progress.py\` to regenerate this page and the SVG. "
-        "Run \`timeout 15s python3 tools/progress.py --check\` to reject stale results. "
+        "Run `timeout 15s python3 tools/progress.py` to regenerate this page and the SVG. "
+        "Run `timeout 15s python3 tools/progress.py --check` to reject stale results. "
         "A passing generator check does not execute native code; the existing x86_64 "
         "and ARM64 CTest workflows remain necessary.",
         "",
