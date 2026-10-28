@@ -308,23 +308,37 @@ static int dispatch_lp64_attr(ios27_21i_runtime *rt, const char *symbol,
     bytes = rt->guest.memory + (size_t)(address - rt->guest.base);
     signature = mutex_attr ? UINT64_C(0x4d545841) :
                              UINT64_C(0x434e4441);
+    (void)pthread_mutex_lock(&rt->guard);
+    /* Prevent attribute mutation from overwriting live opaque pthread
+     * objects. Keep the guard held until guest storage is fully updated. */
+    for (size_t i = 0; i < rt->capacity; ++i) {
+        const struct entry *e = &rt->entries[i];
+        if (e->kind && intersects(address, 16, e->address, e->extent)) {
+            (void)pthread_mutex_unlock(&rt->guard);
+            return EBUSY;
+        }
+    }
     if (operation == 1) {
         memset(bytes, 0, 16);
         write_le64(bytes, signature);
         if (mutex_attr) write_le32(bytes + 12u, (2u << 4u) | (2u << 6u));
         else write_le32(bytes + 8u, 2u);
-        return 0;
-    }
-    if (read_le64(bytes) != signature) return EINVAL;
-    if (operation == 2) {
+        rc = 0;
+    } else if (read_le64(bytes) != signature) {
+        rc = EINVAL;
+    } else if (operation == 2) {
         write_le64(bytes, 0);
-        return 0;
+        rc = 0;
+    } else if ((uint32_t)value > 2u) {
+        rc = EINVAL;
+    } else {
+        uint32_t flags = read_le32(bytes + 12u);
+        write_le32(bytes + 12u, (flags & ~(3u << 2u)) |
+                                 ((uint32_t)value << 2u));
+        rc = 0;
     }
-    if ((uint32_t)value > 2u) return EINVAL;
-    uint32_t flags = read_le32(bytes + 12u);
-    write_le32(bytes + 12u, (flags & ~(3u << 2u)) |
-                             ((uint32_t)value << 2u));
-    return 0;
+    (void)pthread_mutex_unlock(&rt->guard);
+    return rc;
 }
 /* No host address is calculated until validated. No pthread host layout is
  * exposed in guest memory; all state lives in generation-checked sidecars. */
