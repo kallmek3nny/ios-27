@@ -34,6 +34,16 @@ int ios27_21i_create(ios27_21i_runtime **out, const ios27_21i_guest *guest,
 int ios27_21i_create_apple_lp64_attrs(ios27_21i_runtime **out,
                                       const ios27_21i_guest *guest,
                                       size_t capacity);
+/* Optional sparse-page/permission gate for a caller-owned bounded memory view.
+ * The callback returns zero on access, nonzero on denial (normalized to
+ * EFAULT). The backing pointer and mapping must remain stable for the call.
+ * The guest pointer is not converted to a host pointer before this check. */
+typedef int (*ios27_21i_access_check)(void *context, uint64_t guest_address,
+                                      size_t length, int writable);
+int ios27_21i_create_checked(ios27_21i_runtime **out,
+                              const ios27_21i_guest *guest, size_t capacity,
+                              ios27_21i_access_check checker, void *context,
+                              int apple_lp64_attribute_profile);
 int ios27_21i_destroy(ios27_21i_runtime *runtime);
 /* Symbol names are the exact ARM64 Mach-O external names, with leading '_'.
  * Supported: init/destroy/lock/trylock/unlock for mutex; init/destroy/wait/
