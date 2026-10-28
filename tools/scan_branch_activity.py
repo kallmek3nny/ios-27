@@ -61,6 +61,8 @@ def get_group(filename):
         return "libsystem-pthread"
     if "objc" in name or "objective_c" in name:
         return "objc-host-model"
+    if re.match(r"libsystem21[a-z]_", name):
+        return "libsystem-pthread"
     if "libsystem" in name:
         return "libsystem-host-model"
     if "mach" in name and "macho" not in name:
@@ -282,6 +284,10 @@ def self_test():
     assert get_group("src/libsystem20d_threads.c") == "libsystem-pthread"
     assert get_group("tests/phase20d_threads.c") == "libsystem-pthread"
     assert get_group("src/objc20e_metadata.c") == "objc-host-model"
+    assert get_group("src/libsystem21b_lifecycle.c") == "libsystem-pthread"
+    assert get_group("include/ios27/libsystem21g_cond.h") == "libsystem-pthread"
+    assert get_group("src/libsystem21h_lifecycle.c") == "libsystem-pthread"
+    assert get_group("src/libsystem21e_tls.c") == "libsystem-pthread"
     phase20d = summarize(
         {"branch": "phase20d-darwin-threading", "sha": "b" * 40,
          "url": "https://github.com/example/repo/tree/phase20d"},
