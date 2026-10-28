@@ -32,11 +32,13 @@ def main():
             flags.extend(["-fsanitize=address,undefined",
                           "-fno-omit-frame-pointer", "-g"])
         for optimization in (("-O1",) if sanitizers else ("-O0", "-O2")):
-            for source in ("phase21i-native.c", "phase21i-recycle.c"):
+            for source in ("phase21i-native.c", "phase21i-recycle.c",
+                           "phase21i-arm64-args.c"):
                 exe = dest / (source + optimization)
                 run([cc, *flags, optimization,
                      str(ROOT / "src/libsystem21c_sync.c"),
                      str(ROOT / "src/libsystem21i_abi.c"),
+                     str(ROOT / "src/libsystem21i_arm64.c"),
                      str(ROOT / "tests" / source),
                      "-o", str(exe)], 120)
                 run([str(exe)], 120)
