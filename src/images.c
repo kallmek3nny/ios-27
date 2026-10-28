@@ -136,7 +136,8 @@ static int valid_layout(image_node *node, size_t page,
         /* __PAGEZERO is a deliberate inaccessible guest address reservation,
          * not host memory to allocate. Keep it out of the span entirely. */
         if (strcmp(s->name, "__PAGEZERO") == 0) {
-            if (s->filesize || s->initprot || s->maxprot)
+            if (s->vmaddr != 0u || s->fileoff != 0u ||
+                s->filesize || s->initprot || s->maxprot)
                 return fail(error, cap, "invalid __PAGEZERO permissions");
             continue;
         }
@@ -165,6 +166,10 @@ static int valid_layout(image_node *node, size_t page,
                 return fail(error, cap, "overlapping file segments");
         }
     }
+    for (size_t i = 0u; i < node->info.segment_count; ++i)
+        if (strcmp(node->info.segments[i].name, "__PAGEZERO") == 0 &&
+            node->info.segments[i].vmsize > min_vm)
+            return fail(error, cap, "__PAGEZERO overlaps loadable VM");
     if (!executable || max_vm <= min_vm ||
         max_vm - min_vm > IOS27_IMAGE_MAX_BYTES)
         return fail(error, cap, "missing executable code or oversized image span");
@@ -319,8 +324,8 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         if (ios27_macho_parse(node->source, node->source_size,
                              &node->info, error, cap))
             goto rollback;
-        if (node->info.encrypted) {
-            (void)fail(error, cap, "encrypted image unsupported");
+        if (node->info.encrypted || node->info.unsupported_required) {
+            (void)fail(error, cap, "encrypted or unknown-required image unsupported");
             goto rollback;
         }
         if ((node->info.filetype != IOS27_MH_EXECUTE &&

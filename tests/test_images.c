@@ -323,6 +323,15 @@ int main(void) {
     le64(consumer_bytes + DATA_OFF, PTR_BIND | 1u);
     expect_failure(specs, 2u); /* invalid import index */
 
+    /* PAGEZERO may not swallow a loadable VM page. */
+    provider(provider_bytes, NULL);
+    header(provider_bytes, 3u, 160u, 6u);
+    segment(provider_bytes + 120u, "__PAGEZERO", 0u,
+            UINT64_C(0x100000001), 0u, 0u, 0u);
+    classic_consumer(consumer_bytes);
+    expect_failure(specs, 2u);
+    provider(provider_bytes, NULL);
+
     /* An earlier rejected graph may not poison a subsequent fresh load. */
     classic_consumer(consumer_bytes);
     check_graph(provider_bytes, consumer_bytes, 1);

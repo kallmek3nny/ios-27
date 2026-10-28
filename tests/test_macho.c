@@ -147,8 +147,63 @@ static void executable_layout_tests(void) {
                                           4096u, &layout, err, sizeof(err)) != 0);
 }
 
+static void executable_extra_rejections(void) {
+    uint8_t b[8192] = {0};
+    uint8_t small[264];
+    ios27_macho_info info;
+    ios27_exec_layout layout;
+    char err[128];
+
+    fixture(small);
+    memcpy(b, small, sizeof(small));
+    put64(b + 72u, 4096u); /* __TEXT is not based at file offset zero */
+    put64(b + 80u, 1024u);
+    put64(b + 112u, 4352u); /* file-relative LC_MAIN */
+    memcpy(b + 4352u, small + 256u, 8u);
+    assert(ios27_macho_parse(b, sizeof(b), &info, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &info, 4096u,
+                                          &layout, err, sizeof(err)) == 0);
+    assert(layout.entry_vmaddr == UINT64_C(0x100000100));
+    {
+        uint64_t entry = 0u;
+        assert(ios27_macho_entry_vm(&info, &entry) == 0);
+        assert(entry == layout.entry_vmaddr);
+    }
+
+    fixture(small);
+    put32(small + 16u, 3u);
+    put32(small + 20u, 104u);
+    put32(small + 128u, 0x8000007fu);
+    put32(small + 132u, 8u);
+    assert(ios27_macho_parse(small, sizeof(small), &info,
+                             err, sizeof(err)) == 0);
+    assert(info.unsupported_required);
+    assert(ios27_macho_executable_layout(small, sizeof(small), &info,
+                                          4096u, &layout, err, sizeof(err)) != 0);
+
+    fixture(small);
+    memcpy(small + 176u, small + 104u, 24u); /* move LC_MAIN */
+    memset(small + 104u, 0, 72u);
+    put32(small + 16u, 3u);
+    put32(small + 20u, 168u);
+    put32(small + 104u, 0x19u);
+    put32(small + 108u, 72u);
+    memcpy(small + 112u, "__PAGEZERO", 10u);
+    put64(small + 136u, UINT64_C(0x100000001));
+    assert(ios27_macho_parse(small, sizeof(small), &info,
+                             err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(small, sizeof(small), &info,
+                                          4096u, &layout, err, sizeof(err)) != 0);
+    put64(small + 136u, UINT64_C(0x100000000));
+    assert(ios27_macho_parse(small, sizeof(small), &info,
+                             err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(small, sizeof(small), &info,
+                                          16384u, &layout, err, sizeof(err)) == 0);
+}
+
 int main(void) {
     executable_layout_tests();
+    executable_extra_rejections();
     uint8_t b[264], scratch[264];
     ios27_macho_info image;
     char err[128];
