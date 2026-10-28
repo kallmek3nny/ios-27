@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "beba6636c5c95df336720c3d37323261119d30b7",
+      "sha": "33bd575c93ef7c5a16f6399b8707f0ecf71441a9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "pr_number": 73,
       "ci": "passing_checks",
@@ -486,5 +486,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T20:31:04Z"
+  "observed_at": "2026-10-28T20:32:40Z"
 }

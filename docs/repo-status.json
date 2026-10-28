@@ -11,10 +11,10 @@
     {
       "number": 73,
       "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "beba6636c5c95df336720c3d37323261119d30b7",
+      "sha": "33bd575c93ef7c5a16f6399b8707f0ecf71441a9",
       "title": "phase 21d: fair reader-writer lock and safe once initialization",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:30:13Z",
+      "updated_at": "2026-10-28T20:31:54Z",
       "status": "unmerged: not counted"
     },
     {
@@ -101,5 +101,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:30:59Z"
+  "observed_at": "2026-10-28T20:32:32Z"
 }
