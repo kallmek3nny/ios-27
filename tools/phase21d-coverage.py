@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src/libsystem21d_rw_once.c"
-TESTS = ("stress", "once", "ownership", "timeout", "cancel", "exhaustion", "fault", "integration")
+TESTS = ("stress", "once", "ownership", "timeout", "cancel", "exhaustion", "fault", "integration", "fairness")
 MIN_LINES = 90.0
 MIN_BRANCHES = 70.0
 FLAGS = ("-std=c11", "-O0", "-g", "--coverage", "-Wall", "-Wextra",

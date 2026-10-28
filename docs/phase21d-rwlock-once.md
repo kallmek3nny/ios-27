@@ -19,3 +19,12 @@ The API accepts opaque bridge handles and is **not** a drop-in Darwin pthread AB
 ## cumulative code coverage
 
 `timeout 180s python3 tools/phase21d-coverage.py` builds one GCC gcov-instrumented bridge object, links all eight real compiled tests into their own executables, then collects cumulative production-source coverage. Local verification measured **98.60% lines, 87.29% branch outcomes**. CI requires at least 90% lines and 70% branch outcomes, allowing minor compiler-version differences. The unexecuted production lines require exhaustion of a 64-bit monotonic runtime-cookie counter or corruption of the guarded once dependency graph; they are defensive fail-closed branches.
+
+### deterministic fifo cohort regression
+
+The standalone harness also runs `tests/phase21d-fairness.c`. Each of 25
+rounds queues 16 writers while a reader holds the lock, then verifies exact
+fifo admission. A separate queue admits three readers together, then a writer,
+then three later readers; the test confirms that neither reader cohort can
+bypass the queued writer. All wait loops are bounded and the whole program is
+run under the independent build and sanitizer variants.

@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src/libsystem21d_rw_once.c"
 FLAGS = ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
          "-pthread", "-I" + str(ROOT / "include")]
-TESTS = ("stress", "once", "ownership", "timeout", "cancel", "exhaustion", "fault", "integration")
+TESTS = ("stress", "once", "ownership", "timeout", "cancel", "exhaustion", "fault", "integration", "fairness")
 
 
 def link_flags(name):
