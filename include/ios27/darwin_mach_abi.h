@@ -31,6 +31,15 @@
 #define IOS27_DARWIN_FIXTURE_RECEIVE_SET  UINT32_C(0x49530110)
 #define IOS27_DARWIN_FIXTURE_RECEIVE_TRAILER UINT32_C(0x49530111)
 #define IOS27_DARWIN_FIXTURE_RECEIVE_OOL UINT32_C(0x49530112)
+#define IOS27_DARWIN_FIXTURE_THREAD_CREATE UINT32_C(0x49530113)
+#define IOS27_DARWIN_FIXTURE_THREAD_DESTROY UINT32_C(0x49530114)
+#define IOS27_DARWIN_FIXTURE_THREAD_IDENTITY UINT32_C(0x49530115)
+#define IOS27_DARWIN_FIXTURE_EXCEPTION_SET UINT32_C(0x49530116)
+#define IOS27_DARWIN_FIXTURE_EXCEPTION_GET UINT32_C(0x49530117)
+#define IOS27_DARWIN_FIXTURE_EXCEPTION_RAISE UINT32_C(0x49530118)
+#define IOS27_DARWIN_FIXTURE_VM_COPY UINT32_C(0x49530119)
+#define IOS27_DARWIN_FIXTURE_VM_ZERO UINT32_C(0x4953011a)
+#define IOS27_DARWIN_FIXTURE_VM_MAX 4096u
 
 typedef struct {
     uint64_t x[8];
@@ -53,6 +62,16 @@ typedef struct {
  *   RECEIVE_TRAILER: x0 receive name, x1 offset, x2 capacity, x3 timeout
  *   RECEIVE_OOL: x0 receive name, x1 offset, x2 wire+OOL capacity,
  *                x3 timeout. Returned OOL address is a guest-arena offset.
+ *
+ * THREAD_CREATE -> out.x0 = global non-recycled synthetic thread ID
+ * THREAD_DESTROY / THREAD_IDENTITY: x0 thread ID (IDENTITY -> out.x0 owner)
+ * EXCEPTION_SET: x0 bit mask (bits 0..7), x1 task-local send right (or 0)
+ * EXCEPTION_GET: x0 exception bit index -> out.x0 active send name or 0
+ * EXCEPTION_RAISE: x0 thread ID, x1 exception bit, x2 exception code
+ * VM_COPY: x0 source offset, x1 destination offset, x2 byte count
+ * VM_ZERO: x0 destination offset, x1 byte count
+ * VM_COPY/VM_ZERO operate only within the supplied disjoint guest arena and
+ * have a 4KiB per-call budget. They are not host mmap/mprotect or XNU traps.
  *
  * SEND/RECEIVE success: out.x[0] = transferred bytes.
  * RECEIVE TOO_LARGE: out.x[0] = required bytes; the message remains queued.
