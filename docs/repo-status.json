@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 78,
+      "branch": "phase21f-fifo-mutex-20261028",
+      "sha": "3d65b8502016eea0ba0a0edb38e18b163730991c",
+      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
+      "updated_at": "2026-10-28T21:16:18Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "42ba575a09350d7eb4390f0c8cc8acf04c9c047f",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:16:16Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 80,
       "branch": "agent/phase21i-darwin-pthread-abi",
       "sha": "19997d0770b437c44caa9a6c3fe189568ed2f3be",
@@ -24,24 +42,6 @@
       "title": "phase21g: atomic Darwin-style condition waits and FIFO wakeup semantics",
       "url": "https://github.com/kallmek3nny/ios-27/pull/81",
       "updated_at": "2026-10-28T21:15:33Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 77,
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "85f33c32763644cba900a85a624ea8cd75578710",
-      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:15:12Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 78,
-      "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "5455196600e7d451254e1d4092fa46ba5a277ab0",
-      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
-      "updated_at": "2026-10-28T21:14:32Z",
       "status": "unmerged: not counted"
     },
     {
@@ -137,5 +137,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:15:58Z"
+  "observed_at": "2026-10-28T21:16:23Z"
 }
