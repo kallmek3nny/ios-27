@@ -2,6 +2,7 @@
 """Inspect Clang ARM64 Darwin MH_OBJECT symbol + external branch relocations."""
 import struct
 import sys
+import random
 from pathlib import Path
 
 EXPECTED = {
@@ -74,7 +75,10 @@ def inspect(data):
         terminator = strings.find(b"\0", strx)
         if terminator == -1:
             raise MachOError("unterminated symbol")
-        names.append(strings[strx:terminator].decode("ascii"))
+        try:
+            names.append(strings[strx:terminator].decode("ascii"))
+        except UnicodeDecodeError as exc:
+            raise MachOError("non-ascii symbol name") from exc
     for index, _pcrel, _length, external, _kind in relocations:
         if external and index >= len(names):
             raise MachOError("out of range external relocation symbol")
@@ -99,8 +103,9 @@ def selftest(original):
             pass
         else:
             raise AssertionError("corrupt Mach-O accepted")
-    # Corrupt a real compiler-emitted relocation: bad location or symbol ref.
+    # Corrupt real compiler relocations: invalid offset and symbol reference.
     cursor = 32
+    found_reloc = False
     while cursor < len(original):
         cmd, size = struct.unpack("<II", original[cursor:cursor+8])
         if cmd == 0x19:
@@ -119,10 +124,26 @@ def selftest(original):
                             pass
                         else:
                             raise AssertionError("bad relocation accepted")
-                    print(f"phase21i: {count} external ARM64 branch targets, {total} relocations; malformed inputs rejected")
-                    return
+                    found_reloc = True
+                    break
+            if found_reloc:
+                break
         cursor += size
-    raise AssertionError("no relocations discovered")
+    if not found_reloc:
+        raise AssertionError("no relocations discovered")
+    # Mutate real Clang output with a deterministic campaign. A mutated object
+    # may remain valid, but must not cause an unhandled parser exception.
+    rng = random.Random(21)
+    for trial in range(1500):
+        broken = bytearray(original)
+        for _ in range(1 + trial % 4):
+            at = rng.randrange(len(broken))
+            broken[at] = rng.randrange(256)
+        try:
+            inspect(bytes(broken))
+        except MachOError:
+            continue
+    print(f"phase21i: {count} external ARM64 branch targets, {total} relocations; malformed inputs + 1500 bounded mutations checked")
 
 
 if __name__ == "__main__":
