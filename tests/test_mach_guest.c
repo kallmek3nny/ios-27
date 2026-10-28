@@ -246,7 +246,67 @@ static void reject_unaligned_host_result(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* Real wire-length validation across the guest-virtual offset facade:
+ * multiple descriptors must survive TOO_LARGE, collision and normalization
+ * without a partial guest store or a premature dequeue. */
+static void phase17c_complex_guest_offsets(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t server, item, dest, alias, sends, once;
+    unsigned receive;
+    uint8_t arena[512], before[512];
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &server) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 3u, &item) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, server, 2u, &dest) ==
+           IOS27_MACH_OK);
+    for (unsigned i = 0u; i < 2u; ++i)
+        assert(ios27_mach_v2_make_send(s, 3u, item, 2u, &alias) ==
+               IOS27_MACH_OK);
+    memset(arena, 0, sizeof(arena));
+    wire(arena + 64u, dest, IOS27_MACH_COMPLEX | IOS27_MACH_COPY_SEND,
+         0u, 1710u);
+    le32(arena + 68u, 52u);
+    le32(arena + 88u, 2u);
+    for (unsigned i = 0u; i < 2u; ++i) {
+        size_t off = 64u + 28u + i * 12u;
+        le32(arena + off, alias);
+        arena[off + 10u] = IOS27_MACH_MOVE_SEND;
+        arena[off + 11u] = IOS27_MACH_PORT_DESCRIPTOR;
+    }
+    assert(ios27_mach_guest_call_offset(s, 2u, IOS27_MACH_GUEST_SEND, 0u,
+                                        arena, sizeof(arena), 64u, 52u,
+                                        0u, 32u) == IOS27_MACH_OK);
+    assert(rd32(arena + 32u) == 52u);
+    assert(ios27_mach_v2_rights(s, 2u, alias, &sends, &once, &receive) ==
+           IOS27_MACH_BAD_RIGHT);
+    memcpy(before, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                        server, arena, sizeof(arena), 128u,
+                                        51u, 0u, 40u) == IOS27_MACH_TOO_LARGE);
+    assert(rd32(arena + 40u) == 52u);
+    assert(memcmp(arena + 128u, before + 128u, 52u) == 0);
+    memcpy(before, arena, sizeof(arena));
+    assert(ios27_mach_guest_call_offset(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                        server, arena, sizeof(arena), 128u,
+                                        52u, 0u, 140u) == IOS27_MACH_BAD_ARGUMENT);
+    assert(memcmp(arena, before, sizeof(arena)) == 0);
+    assert(ios27_mach_guest_call_offset(s, 1u, IOS27_MACH_GUEST_RECEIVE,
+                                        server, arena, sizeof(arena), 128u,
+                                        52u, 0u, 40u) == IOS27_MACH_OK);
+    assert(rd32(arena + 40u) == 52u);
+    assert(rd32(arena + 128u + 24u) == 2u);
+    assert(arena[128u + 38u] == IOS27_MACH_MOVE_SEND);
+    assert(arena[128u + 50u] == IOS27_MACH_MOVE_SEND);
+    uint32_t received = rd32(arena + 128u + 28u);
+    assert(rd32(arena + 128u + 40u) == received);
+    assert(ios27_mach_v2_rights(s, 1u, received, &sends, &once, &receive) ==
+           IOS27_MACH_OK && sends == 2u);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase17c_complex_guest_offsets();
     reject_unaligned_host_result();
     round_trip();
     invalid_arena_offsets();
