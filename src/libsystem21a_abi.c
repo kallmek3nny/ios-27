@@ -155,6 +155,16 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     if (e) return e;
     (void)pthread_mutex_lock(&rt->guard);
     if (find_slot(rt, address)) { e = EBUSY; goto done; }
+    /* Reject guest ranges overlapping another live opaque object. */
+    for (i = 0; i < IOS27_21A_MAX_OBJECTS; ++i) {
+        object_slot *other = &rt->objects[i];
+        if (other->kind &&
+            address < other->addr + object_size(other->kind) &&
+            other->addr < address + sz) {
+            e = EBUSY;
+            goto done;
+        }
+    }
     memcpy(&sig, p, sizeof(sig));
     if (static_initializer) {
         uint64_t expected = kind == KIND_MUTEX ? IOS27_21A_MUTEX_STATIC_SIG :
