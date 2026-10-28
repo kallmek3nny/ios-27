@@ -139,6 +139,9 @@ int ios27_macho_parse(const uint8_t *data, size_t size,
             out->platform = u32(p + 8);
             out->minos = u32(p + 12);
             out->sdk = u32(p + 16);
+        } else if ((cmd & 0x80000000u) != 0u) {
+            /* An unrecognized LC_REQ_DYLD is not safely executable. */
+            out->unsupported_required = 1u;
         }
         cursor += (size_t)cmdsize;
     }
@@ -160,9 +163,9 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                                   size_t page_size, ios27_exec_layout *layout,
                                   char *error, size_t error_size) {
     ios27_macho_info parsed;
-    uint64_t low = UINT64_MAX, high = 0u, text_vm = 0u, entry;
-    int text_found = 0, entry_found = 0;
-    uint64_t pagezero_end = 0u;
+    uint64_t low = UINT64_MAX, high = 0u, text_vm = 0u;
+    uint64_t text_fileoff = 0u, entry, pagezero_end = 0u;
+    int text_found = 0, entry_found = 0, pagezero_found = 0;
 
     if (layout) memset(layout, 0, sizeof(*layout));
     if (!data || !info || !layout ||
@@ -175,7 +178,8 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
         return bad(error, error_size, "image metadata differs from source");
     if (parsed.filetype != IOS27_MH_EXECUTE || !parsed.has_main ||
         parsed.needs_dyld || parsed.has_dylibs || parsed.has_fixups ||
-        parsed.encrypted || parsed.segment_count == 0u)
+        parsed.encrypted || parsed.unsupported_required ||
+        parsed.segment_count == 0u)
         return bad(error, error_size, "not a freestanding LC_MAIN executable");
 
     for (size_t i = 0u; i < parsed.segment_count; ++i) {
@@ -185,6 +189,7 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
             if (text_found++)
                 return bad(error, error_size, "duplicate __TEXT segment");
             text_vm = s->vmaddr;
+            text_fileoff = s->fileoff;
         }
         if ((s->initprot | s->maxprot) & ~7u ||
             (s->initprot & ~s->maxprot) != 0u ||
@@ -192,8 +197,8 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
             (s->maxprot & 6u) == 6u)
             return bad(error, error_size, "invalid or W+X protections");
         if (strcmp(s->name, "__PAGEZERO") == 0) {
-            if (s->vmaddr != 0u || s->filesize || s->initprot ||
-                s->maxprot || pagezero_end != 0u)
+            if (pagezero_found++ || s->vmaddr != 0u ||
+                s->fileoff != 0u || s->filesize || s->initprot || s->maxprot)
                 return bad(error, error_size, "invalid __PAGEZERO range/protections");
             pagezero_end = s->vmsize;
             continue;
@@ -223,9 +228,11 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                 return bad(error, error_size, "overlapping host mapping pages");
         }
     }
-    if (!text_found || parsed.entryoff > UINT64_MAX - text_vm)
+    /* LC_MAIN is a file offset; map it relative to __TEXT's file offset. */
+    if (!text_found || parsed.entryoff < text_fileoff ||
+        parsed.entryoff - text_fileoff > UINT64_MAX - text_vm)
         return bad(error, error_size, "missing __TEXT or overflowing LC_MAIN");
-    entry = text_vm + parsed.entryoff;
+    entry = text_vm + (parsed.entryoff - text_fileoff);
     if ((entry & 3u) != 0u)
         return bad(error, error_size, "unaligned ARM64 LC_MAIN entry");
     for (size_t i = 0u; i < parsed.segment_count; ++i) {
@@ -262,21 +269,24 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
  * can resolve explicitly supplied dependent images before exposing this RX
  * entry, without claiming support for dyld or Darwin process initialization. */
 int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address) {
-    uint64_t text_base = 0u, entry;
+    uint64_t text_base = 0u, text_fileoff = 0u, entry;
     unsigned text_found = 0u, code_found = 0u;
     if (!info || !address || info->filetype != IOS27_MH_EXECUTE ||
-        !info->has_main || info->segment_count > IOS27_MAX_SEGMENTS)
+        !info->has_main || info->unsupported_required ||
+        info->segment_count > IOS27_MAX_SEGMENTS)
         return -1;
     for (size_t i = 0u; i < info->segment_count; ++i) {
         const ios27_segment *s = &info->segments[i];
         if (strcmp(s->name, "__TEXT") == 0) {
             if (text_found++) return -1;
             text_base = s->vmaddr;
+            text_fileoff = s->fileoff;
         }
     }
-    if (text_found != 1u || info->entryoff > UINT64_MAX - text_base)
+    if (text_found != 1u || info->entryoff < text_fileoff ||
+        info->entryoff - text_fileoff > UINT64_MAX - text_base)
         return -1;
-    entry = text_base + info->entryoff;
+    entry = text_base + (info->entryoff - text_fileoff);
     if ((entry & 3u) != 0u) return -1;
     for (size_t i = 0u; i < info->segment_count; ++i) {
         const ios27_segment *s = &info->segments[i];

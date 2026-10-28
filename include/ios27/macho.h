@@ -33,6 +33,7 @@ typedef struct {
     unsigned has_dylibs : 1;
     unsigned has_fixups : 1;
     unsigned encrypted : 1;
+    unsigned unsupported_required : 1;
     ios27_segment segments[IOS27_MAX_SEGMENTS];
 } ios27_macho_info;
 
