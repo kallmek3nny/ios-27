@@ -29,7 +29,7 @@ def main():
         flags = ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
                  "-pthread", "-I" + str(ROOT / "include")]
         for opt in ("-O0", "-O2"):
-            for test in ("functional", "stress", "adversarial"):
+            for test in ("functional", "stress", "adversarial", "randomized"):
                 exe = tmp / (test + opt)
                 run([cc, *flags, opt, str(ROOT / "src/libsystem21f_mutex.c"),
                      str(ROOT / ("tests/phase21f-" + test + ".c")),
