@@ -27,7 +27,11 @@ def main():
         dest = Path(temp)
         flags = ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
                  "-pthread", "-I" + str(ROOT / "include")]
-        for optimization in ("-O0", "-O2"):
+        sanitizers = os.environ.get("PHASE21I_SANITIZE") == "1"
+        if sanitizers:
+            flags.extend(["-fsanitize=address,undefined",
+                          "-fno-omit-frame-pointer", "-g"])
+        for optimization in (("-O1",) if sanitizers else ("-O0", "-O2")):
             exe = dest / ("host" + optimization)
             run([cc, *flags, optimization,
                  str(ROOT / "src/libsystem21c_sync.c"),
