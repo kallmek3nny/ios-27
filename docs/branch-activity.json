@@ -3,15 +3,54 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "dd39b31675943da242866870fa133461c8bade3b",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 6,
-  "candidate_count": 6,
+  "candidates_checked": 8,
+  "candidate_count": 8,
   "candidates": [
+    {
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "ab1de00513e335bb0c8481a2e0affff111a27501",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "pr_number": 77,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 17,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 6,
+          "fixture_files": 9,
+          "additions": 2056,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21j_acquire",
+            "ios27_21j_acquire_injected",
+            "ios27_21j_create",
+            "ios27_21j_destroy",
+            "ios27_21j_export",
+            "ios27_21j_lockorder_acquire",
+            "ios27_21j_lockorder_cancel_wait",
+            "ios27_21j_lockorder_create",
+            "ios27_21j_lockorder_destroy",
+            "ios27_21j_lockorder_edge",
+            "ios27_21j_lockorder_release",
+            "ios27_21j_lockorder_reset"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21j_diagnostics.h",
+            "include/ios27/libsystem21j_lockorder.h",
+            "include/ios27/libsystem21j_schedule.h",
+            "src/libsystem21j_diagnostics.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "agent/phase21i-darwin-pthread-abi",
       "sha": "8919df1dc65c390a266f29353ffa3c71c5d7385f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "pr_number": 80,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 15,
       "possibly_truncated": false,
@@ -38,45 +77,6 @@
             "include/ios27/libsystem21i_arm64.h",
             "include/ios27/libsystem21i_errno.h",
             "src/libsystem21i_abi.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "a38e001e2a62f0063475980520b6e033d84fa9d5",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "pr_number": 77,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 16,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 6,
-          "fixture_files": 8,
-          "additions": 1965,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21j_acquire",
-            "ios27_21j_acquire_injected",
-            "ios27_21j_create",
-            "ios27_21j_destroy",
-            "ios27_21j_export",
-            "ios27_21j_lockorder_acquire",
-            "ios27_21j_lockorder_cancel_wait",
-            "ios27_21j_lockorder_create",
-            "ios27_21j_lockorder_destroy",
-            "ios27_21j_lockorder_edge",
-            "ios27_21j_lockorder_release",
-            "ios27_21j_lockorder_reset"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21j_diagnostics.h",
-            "include/ios27/libsystem21j_lockorder.h",
-            "include/ios27/libsystem21j_schedule.h",
-            "src/libsystem21j_diagnostics.c"
           ]
         }
       ]
@@ -240,22 +240,97 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "94a1ddb0853417168ff92e4fa77d7217a288cd74",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
+      "pr_number": null,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 15,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 6,
+          "fixture_files": 7,
+          "additions": 1279,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21i_create",
+            "ios27_21i_destroy",
+            "ios27_21i_dispatch",
+            "ios27_21i_dispatch_arm64",
+            "ios27_21i_dispatch_arm64_n",
+            "ios27_21i_errno_to_darwin",
+            "ios27_21i_get_stats",
+            "ios27_21i_lookup",
+            "ios27_21i_verify"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21i_abi.h",
+            "include/ios27/libsystem21i_arm64.h",
+            "include/ios27/libsystem21i_errno.h",
+            "src/libsystem21i_abi.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "3a292cc477c4d1fd06433c9af0594a4791490db8",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
+      "pr_number": null,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 17,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 6,
+          "fixture_files": 9,
+          "additions": 2056,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21j_acquire",
+            "ios27_21j_acquire_injected",
+            "ios27_21j_create",
+            "ios27_21j_destroy",
+            "ios27_21j_export",
+            "ios27_21j_lockorder_acquire",
+            "ios27_21j_lockorder_cancel_wait",
+            "ios27_21j_lockorder_create",
+            "ios27_21j_lockorder_destroy",
+            "ios27_21j_lockorder_edge",
+            "ios27_21j_lockorder_release",
+            "ios27_21j_lockorder_reset"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21j_diagnostics.h",
+            "include/ios27/libsystem21j_lockorder.h",
+            "include/ios27/libsystem21j_schedule.h",
+            "src/libsystem21j_diagnostics.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
     "libsystem-host-model": [
       {
+        "branch": "phase21j-deterministic-sync-diagnostics",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+        "source_files": 6,
+        "fixture_files": 9,
+        "ci": "running"
+      },
+      {
         "branch": "agent/phase21i-darwin-pthread-abi",
         "url": "https://github.com/kallmek3nny/ios-27/pull/80",
         "source_files": 6,
         "fixture_files": 7,
-        "ci": "not_checked"
-      },
-      {
-        "branch": "phase21j-deterministic-sync-diagnostics",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-        "source_files": 6,
-        "fixture_files": 8,
         "ci": "running"
       },
       {
@@ -285,6 +360,20 @@
         "source_files": 1,
         "fixture_files": 4,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase21i-darwin-pthread-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
+        "source_files": 6,
+        "fixture_files": 7,
+        "ci": "running"
+      },
+      {
+        "branch": "phase21j-deterministic-sync-diagnostics",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
+        "source_files": 6,
+        "fixture_files": 9,
+        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -613,5 +702,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:29:52Z"
+  "observed_at": "2026-10-28T21:30:17Z"
 }
