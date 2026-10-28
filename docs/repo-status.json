@@ -2,37 +2,37 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "dd39b31675943da242866870fa133461c8bade3b",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/dd39b31675943da242866870fa133461c8bade3b",
-    "committed_at": "2026-10-28T21:16:50Z"
+    "sha": "0d9edb176c31d7afad3b35c693415b3b140cc4c3",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/0d9edb176c31d7afad3b35c693415b3b140cc4c3",
+    "committed_at": "2026-10-28T23:24:24Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 77,
       "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "ab1de00513e335bb0c8481a2e0affff111a27501",
+      "sha": "9e15234388e206983bdf73dd57a3628f2d6ae037",
       "title": "phase 21j: deterministic synchronization fault injection and integration stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:29:44Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 80,
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "8919df1dc65c390a266f29353ffa3c71c5d7385f",
-      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:29:40Z",
+      "updated_at": "2026-10-28T22:06:15Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 78,
       "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "03eb75ad79642ba09e9bd720c61be224966fb357",
+      "sha": "6acea7b2995ce6255f7e710734644940e9b225c1",
       "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
-      "updated_at": "2026-10-28T21:28:31Z",
+      "updated_at": "2026-10-28T22:04:37Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "b552d849941698465ae2030cb0e5bb0895edf449",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:47:23Z",
       "status": "unmerged: not counted"
     },
     {
@@ -63,27 +63,15 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "94a1ddb0853417168ff92e4fa77d7217a288cd74",
-      "ahead_by": 41,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:30:02Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "3a292cc477c4d1fd06433c9af0594a4791490db8",
-      "ahead_by": 43,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:30:01Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21j-deterministic-sync-diagnostics",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 82,
+      "title": "fix: revive broken progress refresh and show real merged agent development prominently",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/82",
+      "head_sha": "a144b1a733e6775d846fa9187982d21206ccfd92",
+      "merged_at": "2026-10-28T23:24:24Z"
+    },
     {
       "number": 81,
       "title": "phase21g: atomic Darwin-style condition waits and FIFO wakeup semantics",
@@ -132,20 +120,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/71",
       "head_sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
       "merged_at": "2026-10-28T19:54:07Z"
-    },
-    {
-      "number": 68,
-      "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/68",
-      "head_sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
-      "merged_at": "2026-10-28T19:33:53Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 37,
+    "branches_scanned": 36,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:30:07Z"
+  "observed_at": "2026-10-28T23:24:53Z"
 }
