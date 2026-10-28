@@ -74,19 +74,39 @@ int main(int argc, char **argv) {
     ios27_21j_snapshot_data stats;
     size_t count = 0;
     uint64_t first = 0, last = 0;
-    int jsonl = argc == 5;
-    if ((argc != 4 && argc != 5) ||
-        (argc == 5 && strcmp(argv[4], "--jsonl") != 0) ||
+    int planned = argc == 6 || argc == 7;
+    int jsonl = (argc == 5 && strcmp(argv[4], "--jsonl") == 0) ||
+                (argc == 7 && strcmp(argv[6], "--jsonl") == 0);
+    const char *literal_plan = planned ? argv[5] : NULL;
+    if ((argc != 4 && argc != 5 && argc != 6 && argc != 7) ||
+        (argc == 5 && !jsonl) ||
+        (planned && (strcmp(argv[4], "--plan") != 0 ||
+                     (argc == 7 && !jsonl))) ||
         parse(argv[1], &seed) || parse(argv[2], &actor_value) ||
         parse(argv[3], &count_value) ||
         actor_value < 1 || actor_value > MAX_ACTORS ||
         count_value < 1 || count_value > MAX_STEPS) {
-        fprintf(stderr, "usage: phase21j-trace SEED ACTORS(1..8) STEPS(1..1024) [--jsonl]\n");
+        fprintf(stderr, "usage: phase21j-trace SEED ACTORS(1..8) STEPS(1..1024) [--jsonl | --plan ACTOR_DIGITS [--jsonl]]\n");
         return 2;
     }
     state.steps = (size_t)count_value;
-    for (size_t i = 0; i < state.steps; ++i)
-        state.plan[i] = (uint32_t)(mix(seed ^ i) % actor_value);
+    if (planned && strlen(literal_plan) != state.steps) {
+        fprintf(stderr, "phase21j trace: plan length must match STEPS\n");
+        return 2;
+    }
+    for (size_t i = 0; i < state.steps; ++i) {
+        if (!planned) state.plan[i] = (uint32_t)(mix(seed ^ i) % actor_value);
+        else {
+            unsigned char ch = (unsigned char)literal_plan[i];
+            if (ch < (unsigned char)'0' ||
+                ch >= (unsigned char)('0' + actor_value)) {
+                fprintf(stderr, "phase21j trace: invalid actor digit at %llu\n",
+                        (unsigned long long)i);
+                return 2;
+            }
+            state.plan[i] = (uint32_t)(ch - (unsigned char)'0');
+        }
+    }
     CHECK(ios27_21j_create(&state.diagnostics, (size_t)actor_value,
                            seed, 1750) == 0);
     CHECK(ios27_21j_schedule_create(&state.schedule, (uint32_t)actor_value,
@@ -108,13 +128,15 @@ int main(int argc, char **argv) {
                     last : IOS27_21J_TRACE_CAPACITY));
     for (size_t i = 0; i < count; ++i)
         CHECK(journal[i].sequence == first + i);
-    printf("{\"seed\":\"0x%016llx\",\"actors\":%llu,\"steps\":%llu,"
-           "\"first\":%llu,\"last\":%llu,\"saved\":%llu,\"dropped\":%llu,"
-           "\"injections\":%llu,\"digest\":\"0x%016llx\"}\n",
+    printf("{\"seed\":\"0x%016llx\",\"actors\":%llu,\"steps\":%llu,\"plan\":",
            (unsigned long long)seed, (unsigned long long)actor_value,
-           (unsigned long long)count_value, (unsigned long long)first,
-           (unsigned long long)last, (unsigned long long)count,
-           (unsigned long long)stats.dropped,
+           (unsigned long long)count_value);
+    if (planned) printf("\"%s\"", literal_plan);
+    else fputs("null", stdout);
+    printf(",\"first\":%llu,\"last\":%llu,\"saved\":%llu,\"dropped\":%llu,"
+           "\"injections\":%llu,\"digest\":\"0x%016llx\"}\n",
+           (unsigned long long)first, (unsigned long long)last,
+           (unsigned long long)count, (unsigned long long)stats.dropped,
            (unsigned long long)stats.injections,
            (unsigned long long)digest(journal, count));
     if (jsonl) {
