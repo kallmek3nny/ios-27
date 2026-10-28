@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "c7166b2d754b8315907c0604265782f44f776e09",
+  "main_source_sha": "41b96cd39852e3e3707fff9c5e172c038516dbd7",
   "method": "diff-based provisional activity, no automatic completion promotion",
-  "candidates_checked": 2,
-  "candidate_count": 2,
+  "candidates_checked": 1,
+  "candidate_count": 1,
   "candidates": [
     {
       "branch": "phase20c-native-objc-ownership",
-      "sha": "31782fb7ddcc0d4180ac3a453bcf93810abb0bd2",
+      "sha": "8a2ae81e23b731616f83361ee313059913474a30",
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
       "pr_number": 67,
       "ci": "running",
@@ -44,57 +44,9 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase20e-libsystem-userspace",
-      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "pr_number": 62,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 6,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 3,
-          "additions": 558,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_20e_advance_time",
-            "ios27_20e_calloc",
-            "ios27_20e_close",
-            "ios27_20e_free",
-            "ios27_20e_getenv",
-            "ios27_20e_gettimeofday",
-            "ios27_20e_guest_ptr",
-            "ios27_20e_init",
-            "ios27_20e_lseek",
-            "ios27_20e_malloc",
-            "ios27_20e_mmap",
-            "ios27_20e_mprotect"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem20e_services.h",
-            "src/libsystem20e_services.c",
-            "tests/phase20e-darwin-fixture.c",
-            "tests/phase20e-standalone.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
-    "libsystem-host-model": [
-      {
-        "branch": "phase20e-libsystem-userspace",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "passing_checks"
-      }
-    ],
     "objc-host-model": [
       {
         "branch": "phase20c-native-objc-ownership",
@@ -105,5 +57,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:22:16Z"
+  "observed_at": "2026-10-28T19:22:44Z"
 }

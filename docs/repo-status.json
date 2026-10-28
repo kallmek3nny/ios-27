@@ -2,33 +2,31 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "c7166b2d754b8315907c0604265782f44f776e09",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/c7166b2d754b8315907c0604265782f44f776e09",
-    "committed_at": "2026-10-28T19:22:02Z"
+    "sha": "41b96cd39852e3e3707fff9c5e172c038516dbd7",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/41b96cd39852e3e3707fff9c5e172c038516dbd7",
+    "committed_at": "2026-10-28T19:22:21Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 67,
       "branch": "phase20c-native-objc-ownership",
-      "sha": "31782fb7ddcc0d4180ac3a453bcf93810abb0bd2",
+      "sha": "8a2ae81e23b731616f83361ee313059913474a30",
       "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "updated_at": "2026-10-28T19:22:08Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 62,
-      "branch": "phase20e-libsystem-userspace",
-      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
-      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "updated_at": "2026-10-28T19:21:24Z",
+      "updated_at": "2026-10-28T19:22:34Z",
       "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 62,
+      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "merged_at": "2026-10-28T19:22:22Z"
+    },
     {
       "number": 66,
       "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
@@ -77,20 +75,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/59",
       "head_sha": "788e8882e16c628a33eb735117680d9fbc286336",
       "merged_at": "2026-10-28T18:51:52Z"
-    },
-    {
-      "number": 58,
-      "title": "fix: audit phase19 progress and verify standalone Objective-C/libSystem CI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/58",
-      "head_sha": "6167c8a3fa848b39e2aa36cb84a5f3bc60446594",
-      "merged_at": "2026-10-28T18:49:37Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 25,
+    "branches_scanned": 26,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:22:14Z"
+  "observed_at": "2026-10-28T19:22:43Z"
 }
