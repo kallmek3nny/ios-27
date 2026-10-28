@@ -3,9 +3,79 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "5b35123eb11f45fca6ccc8d61893d4f4bada0716",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 4,
-  "candidate_count": 3,
+  "candidates_checked": 5,
+  "candidate_count": 4,
   "candidates": [
+    {
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "a8da7a3a183a4a4c323ed5911682f09f6a0fe4dc",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "pr_number": 70,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 794,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21c_cond_broadcast",
+            "ios27_21c_cond_signal",
+            "ios27_21c_cond_timedwait",
+            "ios27_21c_cond_wait",
+            "ios27_21c_mutex_lock",
+            "ios27_21c_mutex_trylock",
+            "ios27_21c_mutex_unlock",
+            "ios27_21c_runtime_create",
+            "ios27_21c_runtime_destroy",
+            "ios27_21c_sync_create",
+            "ios27_21c_sync_destroy",
+            "ios27_21c_usage"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21c_sync.h",
+            "src/libsystem21c_sync.c",
+            "tests/phase21c-darwin-abi.c",
+            "tests/phase21c-native.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "300f4dc229a3cec457aed49eb4c6d5e34879da36",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "pr_number": 69,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 749,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_destroy",
+            "ios27_21a_validate"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-arm64-darwin.c",
+            "tests/phase21a-boundaries.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "feat/phase21b-native-lifecycle-20261028",
       "sha": "0ea0dc7f2d57d0186307221d76b32b3253b8dc8a",
@@ -47,19 +117,19 @@
     },
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "dd315afa77e6ab640115c4b9bc3e495e865475a6",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "pr_number": 69,
-      "ci": "passing_checks",
+      "sha": "dc3079fabcfd50830143b6e4c334eaacab4a06c9",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
+      "pr_number": null,
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
+      "files_checked": 12,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 4,
-          "additions": 641,
+          "additions": 749,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_call",
@@ -75,49 +145,24 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "0fcbef956e51efcebabba3423d048fb2db2fa7d6",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "pr_number": 70,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 3,
-          "additions": 621,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21c_cond_broadcast",
-            "ios27_21c_cond_signal",
-            "ios27_21c_cond_timedwait",
-            "ios27_21c_cond_wait",
-            "ios27_21c_mutex_lock",
-            "ios27_21c_mutex_trylock",
-            "ios27_21c_mutex_unlock",
-            "ios27_21c_runtime_create",
-            "ios27_21c_runtime_destroy",
-            "ios27_21c_sync_create",
-            "ios27_21c_sync_destroy",
-            "ios27_21c_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21c_sync.h",
-            "src/libsystem21c_sync.c",
-            "tests/phase21c-darwin-abi.c",
-            "tests/phase21c-native.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
     "libsystem-host-model": [
+      {
+        "branch": "phase21c-pthread-sync-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+        "source_files": 2,
+        "fixture_files": 4,
+        "ci": "running"
+      },
+      {
+        "branch": "phase21a/darwin-pthread-abi-bridge",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+        "source_files": 2,
+        "fixture_files": 4,
+        "ci": "running"
+      },
       {
         "branch": "feat/phase21b-native-lifecycle-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/71",
@@ -127,17 +172,10 @@
       },
       {
         "branch": "phase21a/darwin-pthread-abi-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
         "source_files": 2,
         "fixture_files": 4,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase21c-pthread-sync-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "passing_checks"
+        "ci": "not_checked"
       }
     ]
   },
@@ -382,5 +420,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:52:05Z"
+  "observed_at": "2026-10-28T19:52:27Z"
 }

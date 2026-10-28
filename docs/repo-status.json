@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 70,
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "a8da7a3a183a4a4c323ed5911682f09f6a0fe4dc",
+      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "updated_at": "2026-10-28T19:52:12Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "300f4dc229a3cec457aed49eb4c6d5e34879da36",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T19:52:05Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 71,
       "branch": "feat/phase21b-native-lifecycle-20261028",
       "sha": "0ea0dc7f2d57d0186307221d76b32b3253b8dc8a",
@@ -16,27 +34,18 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/71",
       "updated_at": "2026-10-28T19:51:15Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 69,
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "dd315afa77e6ab640115c4b9bc3e495e865475a6",
-      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:51:13Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 70,
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "0fcbef956e51efcebabba3423d048fb2db2fa7d6",
-      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "updated_at": "2026-10-28T19:50:09Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "dc3079fabcfd50830143b6e4c334eaacab4a06c9",
+      "ahead_by": 9,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:52:15Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
+      "status": "unmerged: not counted"
+    },
     {
       "branch": "phase21e-tls-cancel-20261028",
       "sha": "f76c7bbd3aaf6a5424279b45931b8bb740a789e3",
@@ -116,9 +125,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 30,
+    "branches_scanned": 31,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:51:34Z"
+  "observed_at": "2026-10-28T19:52:19Z"
 }
