@@ -25,6 +25,15 @@ int ios27_21i_get_stats(ios27_21i_runtime *runtime, ios27_21i_stats *out);
 
 int ios27_21i_create(ios27_21i_runtime **out, const ios27_21i_guest *guest,
                      size_t capacity);
+/* Opt-in Apple *published* LP64 pthreadattr profile (NOT a claim about any
+ * future SDK): mutexattr has sig+ceiling+bitfields at 16 bytes; condattr has
+ * sig+flags at 16 bytes. Only process-private, non-priority, documented
+ * normal/errorcheck/recursive types are accepted. Unsupported policy
+ * semantics remain explicitly limited. Guest memory must be stable during
+ * attribute decoding. Requires mutex 64/8 and condition 48/8 profiles. */
+int ios27_21i_create_apple_lp64_attrs(ios27_21i_runtime **out,
+                                      const ios27_21i_guest *guest,
+                                      size_t capacity);
 int ios27_21i_destroy(ios27_21i_runtime *runtime);
 /* Symbol names are the exact ARM64 Mach-O external names, with leading '_'.
  * Supported: init/destroy/lock/trylock/unlock for mutex; init/destroy/wait/
