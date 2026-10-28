@@ -1,0 +1,33 @@
+name: phase21b lifecycle independent native
+on:
+  pull_request:
+    paths:
+      - 'src/libsystem21b_*'
+      - 'include/ios27/libsystem21b_*'
+      - 'tests/phase21b-*'
+      - 'tools/phase21b-*'
+      - 'docs/phase21b-*'
+      - '.github/workflows/phase21b-lifecycle-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-lifecycle:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: verify architecture and standalone lifecycle
+        run: |
+          set -euo pipefail
+          uname -m
+          timeout 240s python3 tools/phase21b-standalone.py
+      - name: sanitizer native host
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE21B_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase21b-standalone.py
