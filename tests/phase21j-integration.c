@@ -147,7 +147,9 @@ static void *worker(void *value) {
     else consume(a);
     OK(pthread_mutex_lock(&r->gate));
     ++r->ready;
-    OK(pthread_cond_signal(&r->gate_changed));
+    /* Coordinator and workers share this CV: a signal can wake a worker
+       instead of the coordinator, causing a missed readiness transition. */
+    OK(pthread_cond_broadcast(&r->gate_changed));
     while (!r->release) OK(pthread_cond_wait(&r->gate_changed, &r->gate));
     OK(pthread_mutex_unlock(&r->gate));
     CHECK(ios27_21e_cancel_checkpoint(r->tls) == ECANCELED);
