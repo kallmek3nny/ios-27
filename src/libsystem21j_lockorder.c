@@ -12,6 +12,7 @@ struct ios27_21j_lockorder {
     uint64_t edges[IOS27_21J_GRAPH_MAX_LOCKS];
     uint64_t held[IOS27_21J_GRAPH_MAX_ACTORS];
     uint32_t owners[IOS27_21J_GRAPH_MAX_LOCKS];
+    uint32_t waiting_on[IOS27_21J_GRAPH_MAX_ACTORS];
     ios27_21j_lockorder_stats statistics;
 };
 static int reaches(const ios27_21j_lockorder *g, uint32_t from, uint32_t to) {
@@ -51,7 +52,7 @@ int ios27_21j_lockorder_create(ios27_21j_lockorder **out,
 int ios27_21j_lockorder_destroy(ios27_21j_lockorder *g) {
     if (!g) return EINVAL;
     (void)pthread_mutex_lock(&g->mutex);
-    if (g->statistics.active) {
+    if (g->statistics.active || g->statistics.waiting) {
         (void)pthread_mutex_unlock(&g->mutex);
         return EBUSY;
     }
@@ -69,7 +70,9 @@ int ios27_21j_lockorder_acquire(ios27_21j_lockorder *g,
     (void)pthread_mutex_lock(&g->mutex);
     bit = UINT64_C(1) << lock_id;
     held = g->held[actor];
-    if (held & bit) {
+    if (g->waiting_on[actor]) {
+        rc = EBUSY;
+    } else if (held & bit) {
         ++g->statistics.cycles_rejected;
         rc = EDEADLK;
     } else if (g->owners[lock_id]) {
@@ -114,6 +117,55 @@ int ios27_21j_lockorder_release(ios27_21j_lockorder *g,
         g->held[actor] &= ~(UINT64_C(1) << lock_id);
         ++g->statistics.releases;
         --g->statistics.active;
+    }
+    (void)pthread_mutex_unlock(&g->mutex);
+    return rc;
+}
+/* Wait-for edges follow the actual logical lock owner, not historical
+   acquisition order. The owner and wait tables are protected by one guard. */
+int ios27_21j_lockorder_wait(ios27_21j_lockorder *g,
+                             uint32_t actor, uint32_t lock_id) {
+    uint32_t owner;
+    int cycle = 0, rc = 0;
+    if (!g || actor >= g->nactors || lock_id >= g->nlocks) return EINVAL;
+    (void)pthread_mutex_lock(&g->mutex);
+    if (g->waiting_on[actor]) {
+        rc = EALREADY;
+    } else {
+        owner = g->owners[lock_id];
+        if (!owner) rc = EAGAIN;
+        else {
+            uint32_t current = owner - 1u;
+            for (size_t hops = 0; hops < g->nactors; ++hops) {
+                if (current == actor) { cycle = 1; break; }
+                uint32_t awaited = g->waiting_on[current];
+                if (!awaited) break;
+                owner = g->owners[awaited - 1u];
+                if (!owner) break;
+                current = owner - 1u;
+            }
+            if (cycle) {
+                ++g->statistics.cycles_rejected;
+                ++g->statistics.wait_cycles_rejected;
+                rc = EDEADLK;
+            } else {
+                g->waiting_on[actor] = lock_id + 1u;
+                ++g->statistics.waiting;
+            }
+        }
+    }
+    (void)pthread_mutex_unlock(&g->mutex);
+    return rc;
+}
+int ios27_21j_lockorder_cancel_wait(ios27_21j_lockorder *g,
+                                    uint32_t actor, uint32_t lock_id) {
+    int rc = 0;
+    if (!g || actor >= g->nactors || lock_id >= g->nlocks) return EINVAL;
+    (void)pthread_mutex_lock(&g->mutex);
+    if (g->waiting_on[actor] != lock_id + 1u) rc = EINVAL;
+    else {
+        g->waiting_on[actor] = 0;
+        --g->statistics.waiting;
     }
     (void)pthread_mutex_unlock(&g->mutex);
     return rc;
