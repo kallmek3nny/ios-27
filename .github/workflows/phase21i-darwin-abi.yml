@@ -28,3 +28,9 @@ jobs:
           timeout 20s clang --version
       - name: independent host tests and real clang darwin mach-o evidence
         run: timeout 300s python3 tools/phase21i-standalone.py
+      - name: sanitizer lifecycle stress (address and undefined)
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          CC: clang
+          PHASE21I_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase21i-standalone.py
