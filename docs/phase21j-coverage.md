@@ -30,6 +30,10 @@ phase 21b, 21c and 21e APIs without editing their sources.
 | `phase21j-timeout-races` | 768 real native condition signal/deadline interactions, separately synchronized guaranteed-expiry controls, guaranteed signaled controls and truly competing timeout cases |
 | `phase21j-trace` and independent verifier | Compiled explicit actor-plan or seeded replay with stable JSON/JSONL digest, independent Python checker reconstructs all retained events and rejects tampered actor plans, corrupted events and malformed IDs |
 
+| `phase21j-audit` | 20,000 threaded lease lifecycles and 30,000+ concurrent atomic audits validating generation slots, resource balance, journal retention and contention histograms |
+| `phase21j-graph-audit` | 32,000 concurrent logical owner transitions, 10,000+ historical DAG / live wait-for audits, and owner-change while a wait is pending |
+| `phase21j-schedule-limits` | Actual maximum-capacity 128-thread turn schedule with 4,096 exact ordered operations and a fully checked wrapped event-ring suffix |
+
 Tests abort on violated invariants and return nonzero. Nothing weakens
 `-Werror`, skips a known regression or silently treats a timeout as success.
 
@@ -96,6 +100,29 @@ the competing phase, and uses a distinct synchronization barrier before
 signaling to prove the no-signal expired case. This avoids the invalid
 assumption that every already-expired deadline necessarily returns
 `ETIMEDOUT` when a concurrent signal races it.
+
+## Native CI evidence attestation
+
+Every successful phase21j matrix job stores an individually named artifact
+`phase21j-ARCH-MODE`. Its compact JSON report records the physical runner
+architecture, actual compiler and warning flags, test optimization, real
+per-case elapsed seconds, number of test repetitions and the immutable
+pull-request head SHA. Recorded times describe **machine test execution**;
+they are never presented as the engineer's active work duration.
+
+The independent `tools/phase21j-verify-evidence.py` rejects incomplete
+test inventories, duplicate or skipped cells, missing `-Werror`, missing
+sanitizers in memory-safety mode, mismatched native host architecture, wrong
+SHA, forged elapsed durations and unknown report fields. The
+`tools/phase21j-test-evidence.py` negative fixture runner exercises 30
+malformed variants before evidence upload. Uploads are made only when all
+tests and both attestation steps succeed.
+
+The eight workflow jobs are **GCC** x86_64/arm64,
+**Clang** x86_64/arm64, **ASan/UBSan/LSan** x86_64/arm64 and
+**eight-pass stress** x86_64/arm64. Each runner checks the exact on-disk
+`tests/phase21j-*.c` inventory against its 23-entry executable manifest
+(including the standalone trace CLI) before compiling anything.
 
 ## Exact replay semantics
 
