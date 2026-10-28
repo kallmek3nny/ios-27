@@ -2,19 +2,55 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/e84a0f2ca2165d036d5e5ba1b1e63e1a9c828173",
-    "committed_at": "2026-10-28T20:14:11Z"
+    "sha": "9d522c1123459eb5b18d9ea58b68a0afb503adb3",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/9d522c1123459eb5b18d9ea58b68a0afb503adb3",
+    "committed_at": "2026-10-28T21:15:49Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "19997d0770b437c44caa9a6c3fe189568ed2f3be",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:15:48Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 81,
+      "branch": "phase21g-darwin-condition-variables",
+      "sha": "6a95c1a393c3c5e50a0bdca477880b35da436656",
+      "title": "phase21g: atomic Darwin-style condition waits and FIFO wakeup semantics",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/81",
+      "updated_at": "2026-10-28T21:15:33Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 77,
+      "branch": "phase21j-deterministic-sync-diagnostics",
+      "sha": "85f33c32763644cba900a85a624ea8cd75578710",
+      "title": "phase 21j: deterministic synchronization fault injection and integration stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "updated_at": "2026-10-28T21:15:12Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 78,
+      "branch": "phase21f-fifo-mutex-20261028",
+      "sha": "5455196600e7d451254e1d4092fa46ba5a277ab0",
+      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
+      "updated_at": "2026-10-28T21:14:32Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 73,
       "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "33bd575c93ef7c5a16f6399b8707f0ecf71441a9",
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
       "title": "phase 21d: fair reader-writer lock and safe once initialization",
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:31:54Z",
+      "updated_at": "2026-10-28T20:38:04Z",
       "status": "unmerged: not counted"
     },
     {
@@ -38,6 +74,13 @@
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 79,
+      "title": "phase21h: cancellation-safe synchronization-object lifetime registry",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/79",
+      "head_sha": "302a34581d62fb43da479c100150c0e3cb27fe6e",
+      "merged_at": "2026-10-28T21:15:49Z"
+    },
     {
       "number": 75,
       "title": "phase21e: globally unique cleanup scopes and deep cancellation/ownership tests",
@@ -86,20 +129,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
       "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
       "merged_at": "2026-10-28T19:24:38Z"
-    },
-    {
-      "number": 62,
-      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
-      "merged_at": "2026-10-28T19:22:22Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 33,
+    "branches_scanned": 34,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T20:32:32Z"
+  "observed_at": "2026-10-28T21:15:58Z"
 }
