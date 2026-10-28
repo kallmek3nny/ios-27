@@ -6,9 +6,16 @@
 
 candidate branches with mapped changes: **3** · audited base: `e84a0f2ca216`
 
+### [phase21e-exit-cancellation-20261028](https://github.com/kallmek3nny/ios-27/pull/76)
+
+head: `298e5e8bcf28` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 1 source files, 4 test/fixture files, +282/-11 lines
+- **libsystem_pthread**: 0 source files, 1 test/fixture files, +76/-0 lines
+
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `644319592dd0` · ci: **running** · unmerged, not credited.
+head: `7486c41b38e9` · ci: **running** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 16 test/fixture files, +2544/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
@@ -20,13 +27,6 @@ head: `dd0355350547` · ci: **passing_checks** · unmerged, not credited.
 - **libSystem guest model (not dylib)**: 2 source files, 9 test/fixture files, +1901/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
-
-### [phase21e-exit-cancellation-20261028](https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028)
-
-head: `298e5e8bcf28` · ci: **not_checked** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 1 source files, 4 test/fixture files, +282/-11 lines
-- **libsystem_pthread**: 0 source files, 1 test/fixture files, +76/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
