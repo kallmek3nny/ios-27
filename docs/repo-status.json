@@ -2,24 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "e0d5b3127b0ab861f53b1f7d2f60ad285a742719",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/e0d5b3127b0ab861f53b1f7d2f60ad285a742719",
-    "committed_at": "2026-10-28T18:49:37Z"
+    "sha": "7c5b48525b1373f4489ec09324969051e5e99b62",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/7c5b48525b1373f4489ec09324969051e5e99b62",
+    "committed_at": "2026-10-28T18:51:51Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
-    {
-      "number": 59,
-      "branch": "fix/progress-refresh-merge-race",
-      "sha": "788e8882e16c628a33eb735117680d9fbc286336",
-      "title": "fix: handle progress refresh/main races and remove stale phase references",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
-      "updated_at": "2026-10-28T18:51:04Z",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "open_pull_requests": [],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 59,
+      "title": "fix: handle progress refresh/main races and remove stale phase references",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
+      "head_sha": "788e8882e16c628a33eb735117680d9fbc286336",
+      "merged_at": "2026-10-28T18:51:52Z"
+    },
     {
       "number": 58,
       "title": "fix: audit phase19 progress and verify standalone Objective-C/libSystem CI",
@@ -68,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/52",
       "head_sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
       "merged_at": "2026-10-28T17:50:23Z"
-    },
-    {
-      "number": 51,
-      "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/51",
-      "head_sha": "f340541b0622159f80cf12411fe11a16ef795926",
-      "merged_at": "2026-10-28T17:47:44Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 52,
+    "branches_scanned": 53,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:51:47Z"
+  "observed_at": "2026-10-28T18:52:29Z"
 }

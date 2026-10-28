@@ -47,9 +47,8 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `e0d5b3127b0a`
+main source: `7c5b48525b13`
 
-- [PR #59](https://github.com/kallmek3nny/ios-27/pull/59) · incoming, not counted
 
 ## realistic ceilings for every tracked area
 
