@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Independent native phase 21j diagnostics and integration build/test runner."""
 from pathlib import Path
+import json
 import os
 import platform
 import shutil
@@ -28,6 +29,7 @@ def run(args, seconds, env=None):
         print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n", flush=True)
     if completed.returncode:
         raise RuntimeError("command failed ({})".format(completed.returncode))
+    return completed.stdout
 
 def main():
     if sys.argv[1:] not in ([], ["--sanitize"], ["--stress"]):
@@ -52,7 +54,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else
                          ("-O2",) if stress else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast", "rules", "large-cycle", "boundaries"):
+            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast", "rules", "large-cycle", "boundaries", "trace-cli"):
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -77,7 +79,11 @@ def main():
                     ])
                 if test == "broadcast":
                     sources.append(ROOT / "src/libsystem21c_sync.c")
-                sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
+                if test == "trace-cli":
+                    sources.append(ROOT / "src/libsystem21j_schedule.c")
+                    sources.append(ROOT / "tools/phase21j-trace.c")
+                else:
+                    sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
                 run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
                 for attempt in range(8 if stress else 1):
                     env = os.environ.copy()
@@ -86,8 +92,21 @@ def main():
                             0x21A000009F + attempt * 0x10000)
                         print("phase21j stress seed:", env["PHASE21J_SEED_BASE"],
                               flush=True)
-                    run([str(output)], 150, env)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices passed".format(
+                    if test == "trace-cli":
+                        command = [str(output), "0x21feed", "4", "512"]
+                        first = run(command, 150, env)
+                        second = run(command, 150, env)
+                        if first != second:
+                            raise RuntimeError("trace digest varied for fixed seed")
+                        summary = json.loads(first.strip())
+                        if (summary["digest"] != "0x084ccace638e3858" or
+                                summary["injections"] != 86 or
+                                summary["last"] != 598 or
+                                summary["dropped"] != 0):
+                            raise RuntimeError("trace CLI golden mismatch")
+                    else:
+                        run([str(output)], 150, env)
+    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and a stable JSON trace CLI passed".format(
         "ASan/UBSan" if sanitize else
         "8x native O2 stress" if stress else "O0/O2"), flush=True)
 
