@@ -26,7 +26,8 @@ int main(void) {
     assert(ios27_21a_validate(rt, BASE, 8, 3) == EINVAL);
     assert(invoke(rt, "pthread_mutex_init", BASE + 1u, 0) == EFAULT);
     assert(invoke(rt, "pthread_mutex_init", BASE + sizeof(bytes) - 8u, 0) == EFAULT);
-    assert(invoke(rt, "pthread_mutex_init", BASE + 64u, 1u) == ENOTSUP);
+    /* Nonzero attributes are validated as guest pointers, not ignored. */
+    assert(invoke(rt, "pthread_mutex_init", BASE + 64u, 1u) == EFAULT);
     assert(invoke(rt, "pthread_mutex_unlock", BASE + 64u, 0) == EINVAL);
     assert(invoke(rt, "pthread_cond_signal", BASE + 64u, 0) == EINVAL);
     assert(invoke(rt, "pthread_rwlock_wrlock", BASE + 64u, 0) == EINVAL);
