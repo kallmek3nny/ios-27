@@ -546,7 +546,117 @@ static void phase18c_abi_bounded_ool(void) {
     ios27_mach_v2_free(s);
 }
 
+static void phase19c_fixture_identity_exception_vm(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    ios27_darwin_guest_registers in = {{0}}, out = {{0}}, untouched;
+    uint8_t arena[256], reference[256], snapshot[256];
+    uint32_t receiver = 0u, sender = 0u, thread = 0u;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &receiver) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, receiver, 2u, &sender) ==
+           IOS27_MACH_OK);
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_THREAD_CREATE,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    thread = (uint32_t)out.x[0];
+    in.x[0] = thread;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_THREAD_IDENTITY,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK && out.x[0] == 2u);
+    assert(ios27_darwin_fixture_call(s, 3u,
+           IOS27_DARWIN_FIXTURE_THREAD_IDENTITY,
+           &in, &out, NULL, 0u) == IOS27_MACH_BAD_RIGHT);
+    in.x[0] = 3u;
+    in.x[1] = sender;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_EXCEPTION_SET,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    in.x[0] = 1u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_EXCEPTION_GET,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK &&
+           out.x[0] == sender);
+    in.x[0] = thread;
+    in.x[1] = 1u;
+    in.x[2] = 991u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_EXCEPTION_RAISE,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    memset(arena, 0xab, sizeof(arena));
+    in.x[0] = receiver;
+    in.x[1] = 32u;
+    in.x[2] = 39u;
+    in.x[3] = 0u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+           IOS27_DARWIN_FIXTURE_RECEIVE,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_TOO_LARGE &&
+           out.x[0] == 40u && arena[32u] == 0xabu);
+    in.x[2] = 40u;
+    assert(ios27_darwin_fixture_call(s, 1u,
+           IOS27_DARWIN_FIXTURE_RECEIVE,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_OK &&
+           out.x[0] == 40u);
+    assert(rd32(arena + 52u) == IOS27_MACH_V2_EXCEPTION_MSG_ID);
+    assert(rd32(arena + 56u) == thread && rd32(arena + 60u) == 2u);
+    assert(rd32(arena + 64u) == 1u && rd32(arena + 68u) == 991u);
+    in.x[0] = thread;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_THREAD_DESTROY,
+           &in, &out, NULL, 0u) == IOS27_MACH_OK);
+    in.x[0] = thread;
+    in.x[1] = 1u;
+    in.x[2] = 992u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_EXCEPTION_RAISE,
+           &in, &out, NULL, 0u) == IOS27_MACH_BAD_RIGHT);
+    for (size_t i = 0u; i < sizeof(arena); ++i)
+        arena[i] = (uint8_t)i;
+    memcpy(reference, arena, sizeof(arena));
+    memmove(reference + 16u, reference + 8u, 80u);
+    in.x[0] = 8u;
+    in.x[1] = 16u;
+    in.x[2] = 80u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_VM_COPY,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_OK &&
+           out.x[0] == 80u);
+    assert(memcmp(reference, arena, sizeof(arena)) == 0);
+    memset(reference + 48u, 0, 64u);
+    in.x[0] = 48u;
+    in.x[1] = 64u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_VM_ZERO,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_OK &&
+           out.x[0] == 64u);
+    assert(memcmp(reference, arena, sizeof(arena)) == 0);
+    memcpy(snapshot, arena, sizeof(arena));
+    memset(&out, 0x55, sizeof(out));
+    untouched = out;
+    in.x[0] = 250u;
+    in.x[1] = 80u;
+    in.x[2] = 10u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_VM_COPY,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_BAD_ARGUMENT);
+    assert(memcmp(snapshot, arena, sizeof(arena)) == 0);
+    assert(memcmp(&out, &untouched, sizeof(out)) == 0);
+    in.x[0] = UINT64_MAX;
+    in.x[1] = 1u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_VM_ZERO,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_BAD_ARGUMENT);
+    assert(memcmp(snapshot, arena, sizeof(arena)) == 0);
+    in.x[0] = 0u;
+    in.x[1] = IOS27_DARWIN_FIXTURE_VM_MAX + 1u;
+    assert(ios27_darwin_fixture_call(s, 2u,
+           IOS27_DARWIN_FIXTURE_VM_ZERO,
+           &in, &out, arena, sizeof(arena)) == IOS27_MACH_BAD_ARGUMENT);
+    assert(memcmp(&out, &untouched, sizeof(out)) == 0);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase19c_fixture_identity_exception_vm();
     phase18c_abi_bounded_ool();
     phase18c_reject_abi_state_alias();
     phase18c_abi_port_set_dispatch();

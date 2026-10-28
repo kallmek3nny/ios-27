@@ -2,6 +2,8 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include <sched.h>
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,6 +35,11 @@ typedef struct {
 } queued_wire;
 
 typedef struct {
+    uint32_t id;
+    uint8_t active;
+} thread_record;
+
+typedef struct {
     uint8_t alive;
     uint8_t owner;
     uint8_t head;
@@ -49,6 +56,10 @@ typedef struct {
 } port_set;
 
 struct ios27_mach_v2 {
+    atomic_flag guard;
+    uint32_t next_thread_id;
+    thread_record threads[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_THREADS];
+    uint32_t exception_names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_EXCEPTION_SLOTS];
     port_set sets[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_PORT_SETS];
     uint32_t next_name[IOS27_MACH_TASK_MAX];
     local_right names[IOS27_MACH_TASK_MAX][IOS27_MACH_V2_NAMES];
@@ -183,15 +194,18 @@ static int may_arrive(ios27_mach_v2 *s, uint32_t task, uint8_t obj,
 
 ios27_mach_v2 *ios27_mach_v2_new(void) {
     ios27_mach_v2 *s = calloc(1u, sizeof(*s));
-    if (s)
+    if (s) {
+        atomic_flag_clear_explicit(&s->guard, memory_order_release);
+        s->next_thread_id = 1u;
         for (size_t i = 0u; i < IOS27_MACH_TASK_MAX; ++i)
             s->next_name[i] = FIRST_NAME;
+    }
     return s;
 }
 void ios27_mach_v2_free(ios27_mach_v2 *s) {
     free(s);
 }
-int ios27_mach_v2_allocate(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_allocate_unlocked(ios27_mach_v2 *s, uint32_t owner,
                            uint32_t *local_name) {
     if (!s || !valid_task(owner) || !local_name ||
         ios27_mach_v2_validate_external(s, local_name,
@@ -213,7 +227,7 @@ int ios27_mach_v2_allocate(ios27_mach_v2 *s, uint32_t owner,
 }
 /* Port sets are task-local, do not own receive rights, and never
  * grant a right to a different task. All changes are preflighted. */
-int ios27_mach_v2_set_allocate(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_set_allocate_unlocked(ios27_mach_v2 *s, uint32_t owner,
                                uint32_t *set_name) {
     if (!s || !valid_task(owner) || !set_name ||
         ranges_overlap(set_name, sizeof(*set_name), s, sizeof(*s)))
@@ -232,7 +246,7 @@ int ios27_mach_v2_set_allocate(ios27_mach_v2 *s, uint32_t owner,
     }
     return IOS27_MACH_LIMIT;
 }
-int ios27_mach_v2_set_add(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_set_add_unlocked(ios27_mach_v2 *s, uint32_t owner,
                           uint32_t set_name, uint32_t receive_name) {
     uint8_t id = 0u;
     port_set *set = lookup_set(s, owner, set_name, &id);
@@ -244,7 +258,7 @@ int ios27_mach_v2_set_add(ios27_mach_v2 *s, uint32_t owner,
     obj->set_id = id;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_set_remove(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_set_remove_unlocked(ios27_mach_v2 *s, uint32_t owner,
                              uint32_t set_name, uint32_t receive_name) {
     uint8_t id = 0u;
     port_set *set = lookup_set(s, owner, set_name, &id);
@@ -256,7 +270,7 @@ int ios27_mach_v2_set_remove(ios27_mach_v2 *s, uint32_t owner,
     obj->set_id = 0u;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_set_destroy(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_set_destroy_unlocked(ios27_mach_v2 *s, uint32_t owner,
                               uint32_t set_name) {
     uint8_t id = 0u;
     port_set *set = lookup_set(s, owner, set_name, &id);
@@ -269,7 +283,7 @@ int ios27_mach_v2_set_destroy(ios27_mach_v2 *s, uint32_t owner,
     memset(set, 0, sizeof(*set));
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_make_send(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_make_send_unlocked(ios27_mach_v2 *s, uint32_t owner,
                             uint32_t receive_name, uint32_t recipient,
                             uint32_t *recipient_name) {
     local_right *origin, *recipient_right;
@@ -287,7 +301,7 @@ int ios27_mach_v2_make_send(ios27_mach_v2 *s, uint32_t owner,
     *recipient_name = recipient_right->name;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_drop_send(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
+static int ios27_mach_v2_drop_send_unlocked(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
     local_right *r = by_name(s, task, name);
     if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
     if (!r || !r->sends) return IOS27_MACH_BAD_RIGHT;
@@ -295,7 +309,7 @@ int ios27_mach_v2_drop_send(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
     prune(r);
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_drop_send_once(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_drop_send_once_unlocked(ios27_mach_v2 *s, uint32_t task,
                                  uint32_t name) {
     local_right *r = by_name(s, task, name);
     if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
@@ -305,7 +319,7 @@ int ios27_mach_v2_drop_send_once(ios27_mach_v2 *s, uint32_t task,
     return IOS27_MACH_OK;
 }
 /* A bounded fixture event queue, not a kernel notification message. */
-int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_watch_dead_name_unlocked(ios27_mach_v2 *s, uint32_t task,
                                   uint32_t local_name) {
     local_right *r;
     if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
@@ -315,7 +329,7 @@ int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *s, uint32_t task,
     r->watch_dead = 1u;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_poll_dead_name_unlocked(ios27_mach_v2 *s, uint32_t task,
                                  uint32_t *local_name) {
     size_t t;
     if (!s || !valid_task(task) || !local_name ||
@@ -338,7 +352,7 @@ static void enqueue_dead_name(ios27_mach_v2 *s, uint32_t task,
     s->dead_events[t][tail] = name;
     ++s->dead_count[t];
 }
-int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_rights_unlocked(const ios27_mach_v2 *s, uint32_t task,
                          uint32_t name, uint32_t *send, uint32_t *send_once,
                          unsigned *receive) {
     const local_right *r = by_name_const(s, task, name);
@@ -384,7 +398,7 @@ static void cancel_pending(ios27_mach_v2 *s, uint32_t task, uint8_t obj,
     }
     prune(r);
 }
-int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
+static int ios27_mach_v2_destroy_unlocked(ios27_mach_v2 *s, uint32_t owner,
                           uint32_t receive_name) {
     local_right *right;
     port_object *obj;
@@ -434,7 +448,7 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
  * must keep teardown from silently invalidating its destination credit.
  * This does not model XNU dead-name/notification behavior.
  */
-int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
+static int ios27_mach_v2_task_teardown_unlocked(ios27_mach_v2 *s, uint32_t task) {
     uint8_t owned[IOS27_MACH_PORT_MAX] = {0};
     uint16_t canceled_sends[IOS27_MACH_PORT_MAX] = {0};
     uint16_t canceled_once[IOS27_MACH_PORT_MAX] = {0};
@@ -514,6 +528,10 @@ int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
            sizeof(s->dead_events[TASK_INDEX(task)]));
     s->dead_head[TASK_INDEX(task)] = 0u;
     s->dead_count[TASK_INDEX(task)] = 0u;
+    memset(s->threads[TASK_INDEX(task)], 0,
+           sizeof(s->threads[TASK_INDEX(task)]));
+    memset(s->exception_names[TASK_INDEX(task)], 0,
+           sizeof(s->exception_names[TASK_INDEX(task)]));
     return IOS27_MACH_OK;
 }
 
@@ -715,11 +733,11 @@ static int send_impl(ios27_mach_v2 *s, uint32_t task,
     ++dest->count;
     return IOS27_MACH_OK;
 }
-int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_send_unlocked(ios27_mach_v2 *s, uint32_t task,
                        const void *wire, size_t size, uint32_t timeout_ms) {
     return send_impl(s, task, wire, size, timeout_ms, NULL, 0u);
 }
-int ios27_mach_v2_send_guest_ool(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_send_guest_ool_unlocked(ios27_mach_v2 *s, uint32_t task,
                                  const void *wire, size_t size,
                                  uint32_t timeout_ms,
                                  const uint8_t *arena, size_t arena_size) {
@@ -799,13 +817,13 @@ static int receive_impl(ios27_mach_v2 *s, uint32_t task,
     return IOS27_MACH_OK;
 }
 
-int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_receive_unlocked(ios27_mach_v2 *s, uint32_t task,
                           uint32_t receive_name, void *out,
                           size_t *inout_size, uint32_t timeout_ms) {
     return receive_impl(s, task, receive_name, out, inout_size,
                         timeout_ms, 0, 0u);
 }
-int ios27_mach_v2_receive_guest_ool(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_receive_guest_ool_unlocked(ios27_mach_v2 *s, uint32_t task,
                                     uint32_t receive_name, void *out,
                                     size_t *inout_size, uint32_t timeout_ms,
                                     uint64_t guest_offset) {
@@ -814,7 +832,7 @@ int ios27_mach_v2_receive_guest_ool(ios27_mach_v2 *s, uint32_t task,
 }
 /* No set receive can mutate the selected port, rights, or cursor before
  * the underlying direct receive has committed successfully. */
-int ios27_mach_v2_receive_set(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_receive_set_unlocked(ios27_mach_v2 *s, uint32_t task,
                               uint32_t set_name, void *out,
                               size_t *inout_size, uint32_t timeout_ms) {
     port_set *set;
@@ -834,7 +852,7 @@ int ios27_mach_v2_receive_set(ios27_mach_v2 *s, uint32_t task,
             continue;
         right = by_object(s, task, (uint8_t)(index + 1u));
         if (!right || !right->receive) return IOS27_MACH_BAD_RIGHT;
-        status = ios27_mach_v2_receive(s, task, right->name,
+        status = ios27_mach_v2_receive_unlocked(s, task, right->name,
                                        out, inout_size, timeout_ms);
         if (status == IOS27_MACH_OK)
             set->cursor = (uint8_t)((index + 1u) % IOS27_MACH_PORT_MAX);
@@ -843,7 +861,7 @@ int ios27_mach_v2_receive_set(ios27_mach_v2 *s, uint32_t task,
     return IOS27_MACH_TIMEOUT;
 }
 
-int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
+static int ios27_mach_v2_receive_trailer_unlocked(ios27_mach_v2 *s, uint32_t task,
                                   uint32_t receive_name, void *out,
                                   size_t *inout_size, uint32_t timeout_ms) {
     local_right *right;
@@ -870,7 +888,7 @@ int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
     }
     sequence = obj->seqno;
     wire_capacity = *inout_size;
-    status = ios27_mach_v2_receive(s, task, receive_name, out,
+    status = ios27_mach_v2_receive_unlocked(s, task, receive_name, out,
                                    &wire_capacity, timeout_ms);
     if (status != IOS27_MACH_OK) return status;
     wr32(bytes + wire_len, 0u); /* MACH_MSG_TRAILER_FORMAT_0 */
@@ -878,4 +896,395 @@ int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
     wr32(bytes + wire_len + 8u, sequence);
     *inout_size = needed;
     return IOS27_MACH_OK;
+}
+
+/* Phase 19c: independently owned, never-recycled fixture thread identities. */
+static const thread_record *thread_lookup(const ios27_mach_v2 *s,
+                                           uint32_t task, uint32_t id) {
+    if (!s || !valid_task(task) || !id) return NULL;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        const thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (r->active && r->id == id) return r;
+    }
+    return NULL;
+}
+
+static int ios27_mach_v2_thread_create_unlocked(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t *thread_id) {
+    if (!s || !valid_task(task) || !thread_id ||
+        ios27_mach_v2_validate_external(s, thread_id,
+                                         sizeof(*thread_id)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (s->next_thread_id == UINT32_MAX) return IOS27_MACH_LIMIT;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (!r->active) {
+            r->id = s->next_thread_id++;
+            r->active = 1u;
+            *thread_id = r->id;
+            return IOS27_MACH_OK;
+        }
+    }
+    return IOS27_MACH_LIMIT;
+}
+
+static int ios27_mach_v2_thread_destroy_unlocked(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t thread_id) {
+    if (!s || !valid_task(task)) return IOS27_MACH_BAD_ARGUMENT;
+    for (size_t i = 0u; i < IOS27_MACH_V2_THREADS; ++i) {
+        thread_record *r = &s->threads[TASK_INDEX(task)][i];
+        if (r->active && r->id == thread_id) {
+            memset(r, 0, sizeof(*r));
+            return IOS27_MACH_OK;
+        }
+    }
+    return IOS27_MACH_BAD_RIGHT;
+}
+
+static int ios27_mach_v2_thread_identity_unlocked(const ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t *owner) {
+    if (!s || !valid_task(task) || !owner ||
+        ios27_mach_v2_validate_external(s, owner,
+                                         sizeof(*owner)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (!thread_lookup(s, task, thread_id)) return IOS27_MACH_BAD_RIGHT;
+    *owner = task;
+    return IOS27_MACH_OK;
+}
+
+/* No ownership transfer is implicit: a registered name remains a send right
+ * in the registering task's local namespace. Stale names never get reused. */
+static uint32_t live_exception_name(const ios27_mach_v2 *s,
+                                     uint32_t task, uint32_t slot) {
+    uint32_t name = s->exception_names[TASK_INDEX(task)][slot];
+    const local_right *r = by_name_const(s, task, name);
+    if (!r || !r->sends || !r->object ||
+        r->object > IOS27_MACH_PORT_MAX ||
+        !s->ports[r->object - 1u].alive)
+        return 0u;
+    return name;
+}
+
+static int ios27_mach_v2_exception_set_unlocked(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t mask, uint32_t send_name) {
+    const uint32_t supported = (UINT32_C(1) << IOS27_MACH_V2_EXCEPTION_SLOTS) - 1u;
+    if (!s || !valid_task(task) || !mask || (mask & ~supported))
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (send_name) {
+        const local_right *r = by_name_const(s, task, send_name);
+        if (!r || !r->sends || !r->object ||
+            r->object > IOS27_MACH_PORT_MAX ||
+            !s->ports[r->object - 1u].alive)
+            return IOS27_MACH_BAD_RIGHT;
+    }
+    for (uint32_t bit = 0u; bit < IOS27_MACH_V2_EXCEPTION_SLOTS; ++bit)
+        if (mask & (UINT32_C(1) << bit))
+            s->exception_names[TASK_INDEX(task)][bit] = send_name;
+    return IOS27_MACH_OK;
+}
+
+static int ios27_mach_v2_exception_get_unlocked(const ios27_mach_v2 *s, uint32_t task,
+                                uint32_t slot, uint32_t *send_name) {
+    if (!s || !valid_task(task) || slot >= IOS27_MACH_V2_EXCEPTION_SLOTS ||
+        !send_name ||
+        ios27_mach_v2_validate_external(s, send_name,
+                                         sizeof(*send_name)) != IOS27_MACH_OK)
+        return IOS27_MACH_BAD_ARGUMENT;
+    *send_name = live_exception_name(s, task, slot);
+    return IOS27_MACH_OK;
+}
+
+static int ios27_mach_v2_exception_raise_unlocked(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t slot,
+                                  uint32_t code) {
+    uint8_t wire[40] = {0};
+    uint32_t name;
+    if (!s || !valid_task(task) || slot >= IOS27_MACH_V2_EXCEPTION_SLOTS)
+        return IOS27_MACH_BAD_ARGUMENT;
+    if (!thread_lookup(s, task, thread_id)) return IOS27_MACH_BAD_RIGHT;
+    name = live_exception_name(s, task, slot);
+    if (!name) return IOS27_MACH_BAD_RIGHT;
+    wr32(wire, IOS27_MACH_COPY_SEND);
+    wr32(wire + 4u, sizeof(wire));
+    wr32(wire + 8u, name);
+    wr32(wire + 20u, IOS27_MACH_V2_EXCEPTION_MSG_ID);
+    wr32(wire + 24u, thread_id);
+    wr32(wire + 28u, task);
+    wr32(wire + 32u, slot);
+    wr32(wire + 36u, code);
+    return ios27_mach_v2_send_unlocked(s, task, wire, sizeof(wire), 0u);
+}
+
+/*
+ * Serialize shared Mach fixture mutations across host threads. Operations
+ * never sleep on a guest queue; only this short process-local state lock
+ * yields while another host worker owns it. Callers still own lifetime and
+ * must not free the fixture or race writes to their external guest arenas.
+ * Internal unlocked entrypoints are shared by compound receive/exception
+ * paths so nested API calls cannot deadlock.
+ */
+static void ios27_mach_v2_lock(ios27_mach_v2 *s) {
+    while (atomic_flag_test_and_set_explicit(&s->guard, memory_order_acquire))
+        (void)sched_yield();
+}
+static void ios27_mach_v2_unlock(ios27_mach_v2 *s) {
+    atomic_flag_clear_explicit(&s->guard, memory_order_release);
+}
+
+int ios27_mach_v2_allocate(ios27_mach_v2 *s, uint32_t owner,
+                           uint32_t *local_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_allocate_unlocked(s, owner, local_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_set_allocate(ios27_mach_v2 *s, uint32_t owner,
+                               uint32_t *set_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_set_allocate_unlocked(s, owner, set_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_set_add(ios27_mach_v2 *s, uint32_t owner,
+                          uint32_t set_name, uint32_t receive_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_set_add_unlocked(s, owner, set_name, receive_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_set_remove(ios27_mach_v2 *s, uint32_t owner,
+                             uint32_t set_name, uint32_t receive_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_set_remove_unlocked(s, owner, set_name, receive_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_set_destroy(ios27_mach_v2 *s, uint32_t owner,
+                              uint32_t set_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_set_destroy_unlocked(s, owner, set_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_make_send(ios27_mach_v2 *s, uint32_t owner,
+                            uint32_t receive_name, uint32_t recipient,
+                            uint32_t *recipient_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_make_send_unlocked(s, owner, receive_name, recipient, recipient_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_drop_send(ios27_mach_v2 *s, uint32_t task, uint32_t name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_drop_send_unlocked(s, task, name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_drop_send_once(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_drop_send_once_unlocked(s, task, name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t local_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_watch_dead_name_unlocked(s, task, local_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t *local_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_poll_dead_name_unlocked(s, task, local_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_rights(const ios27_mach_v2 *s, uint32_t task,
+                         uint32_t name, uint32_t *send, uint32_t *send_once,
+                         unsigned *receive) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_rights_unlocked(s, task, name, send, send_once, receive);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_destroy(ios27_mach_v2 *s, uint32_t owner,
+                          uint32_t receive_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_destroy_unlocked(s, owner, receive_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_task_teardown(ios27_mach_v2 *s, uint32_t task) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_task_teardown_unlocked(s, task);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_send(ios27_mach_v2 *s, uint32_t task,
+                       const void *wire, size_t size, uint32_t timeout_ms) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_send_unlocked(s, task, wire, size, timeout_ms);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_send_guest_ool(ios27_mach_v2 *s, uint32_t task,
+                                 const void *wire, size_t size,
+                                 uint32_t timeout_ms,
+                                 const uint8_t *arena, size_t arena_size) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_send_guest_ool_unlocked(s, task, wire, size, timeout_ms, arena, arena_size);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_receive(ios27_mach_v2 *s, uint32_t task,
+                          uint32_t receive_name, void *out,
+                          size_t *inout_size, uint32_t timeout_ms) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_receive_unlocked(s, task, receive_name, out, inout_size, timeout_ms);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_receive_guest_ool(ios27_mach_v2 *s, uint32_t task,
+                                    uint32_t receive_name, void *out,
+                                    size_t *inout_size, uint32_t timeout_ms,
+                                    uint64_t guest_offset) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_receive_guest_ool_unlocked(s, task, receive_name, out, inout_size, timeout_ms, guest_offset);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_receive_set(ios27_mach_v2 *s, uint32_t task,
+                              uint32_t set_name, void *out,
+                              size_t *inout_size, uint32_t timeout_ms) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_receive_set_unlocked(s, task, set_name, out, inout_size, timeout_ms);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_receive_trailer(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t receive_name, void *out,
+                                  size_t *inout_size, uint32_t timeout_ms) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_receive_trailer_unlocked(s, task, receive_name, out, inout_size, timeout_ms);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_thread_create(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t *thread_id) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_thread_create_unlocked(s, task, thread_id);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_thread_destroy(ios27_mach_v2 *s, uint32_t task,
+                                 uint32_t thread_id) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_thread_destroy_unlocked(s, task, thread_id);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_thread_identity(const ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t *owner) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_thread_identity_unlocked(s, task, thread_id, owner);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_exception_set(ios27_mach_v2 *s, uint32_t task,
+                                uint32_t mask, uint32_t send_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_exception_set_unlocked(s, task, mask, send_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_exception_get(const ios27_mach_v2 *s, uint32_t task,
+                                uint32_t slot, uint32_t *send_name) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_exception_get_unlocked(s, task, slot, send_name);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
+}
+
+int ios27_mach_v2_exception_raise(ios27_mach_v2 *s, uint32_t task,
+                                  uint32_t thread_id, uint32_t slot,
+                                  uint32_t code) {
+    int result;
+    if (!s) return IOS27_MACH_BAD_ARGUMENT;
+    ios27_mach_v2_lock((ios27_mach_v2 *)(void *)s);
+    result = ios27_mach_v2_exception_raise_unlocked(s, task, thread_id, slot, code);
+    ios27_mach_v2_unlock((ios27_mach_v2 *)(void *)s);
+    return result;
 }
