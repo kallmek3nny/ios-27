@@ -15,7 +15,7 @@ enum operation {
     OP_MI, OP_MD, OP_ML, OP_MT, OP_MTL, OP_MU,
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW, OP_CREL,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RTR, OP_RTW, OP_RU,
-    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
+    OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_MAPS, OP_MAPG, OP_ONCE, OP_SELF, OP_EQUAL,
     OP_KC, OP_KD, OP_KS, OP_KG, OP_TID, OP_MAIN, OP_THREADED,
     OP_CAI, OP_CAD, OP_CAS, OP_CAG, OP_RAI, OP_RAD, OP_RAS, OP_RAG,
     OP_TAI, OP_TAD, OP_TAGD, OP_TASD, OP_TAGS, OP_TASS,
@@ -97,6 +97,8 @@ static const entry symbols[] = {
     {"pthread_mutexattr_destroy", OP_MAD},
     {"pthread_mutexattr_settype", OP_MAS},
     {"pthread_mutexattr_gettype", OP_MAG},
+    {"pthread_mutexattr_setpshared", OP_MAPS},
+    {"pthread_mutexattr_getpshared", OP_MAPG},
     {"pthread_condattr_init", OP_CAI},
     {"pthread_condattr_destroy", OP_CAD},
     {"pthread_condattr_setpshared", OP_CAS},
@@ -1184,6 +1186,9 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
     } else if (op == OP_CW || op == OP_CTW || op == OP_CREL) {
         e = cond_wait_native(rt, args, op == OP_CTW ? 1 :
                                          op == OP_CREL ? 2 : 0);
+    } else if (op == OP_MAPS || op == OP_MAPG) {
+        e = attr_pshared_guest(rt, args[0], KIND_MUTEXATTR, args[1],
+                                op == OP_MAPS);
     } else if (op == OP_MAS || op == OP_MAG) {
         unsigned type = (unsigned)args[1];
         if (op == OP_MAS && args[1] > 2u) e = EINVAL;
@@ -1198,7 +1203,15 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
             unsigned type = 0u;
             if (args[1]) {
                 if (op == OP_MI) {
-                    e = attr_value(rt, args[1], 0, &type);
+                    object_slot *attr = NULL;
+                    e = slot_pin(rt, args[1], KIND_MUTEXATTR, &attr);
+                    if (!e) {
+                        (void)pthread_mutex_lock(&rt->guard);
+                        type = attr->mutex_type;
+                        e = attr->attr_pshared == 2u ? 0 : ENOTSUP;
+                        (void)pthread_mutex_unlock(&rt->guard);
+                        slot_unpin(rt, attr);
+                    }
                 } else {
                     object_slot *attr = NULL;
                     unsigned attr_kind = op == OP_CI ? KIND_CONDATTR :
