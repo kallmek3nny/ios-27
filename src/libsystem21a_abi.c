@@ -17,6 +17,10 @@ enum operation {
 typedef struct {
     uint64_t addr, token;
     unsigned kind, pins;
+    unsigned mutex_locked, rw_writer_locked;
+    pthread_t mutex_owner, rw_writer;
+    pthread_t rw_reader_ids[32];
+    unsigned rw_reader_counts[32];
     union {
         pthread_mutex_t mutex;
         pthread_cond_t cond;
@@ -174,6 +178,9 @@ static int slot_init(ios27_21a_runtime *rt, uint64_t address, unsigned kind,
     s->addr = address;
     s->token = token;
     s->pins = 0;
+    s->mutex_locked = 0;
+    s->rw_writer_locked = 0;
+    memset(s->rw_reader_counts, 0, sizeof(s->rw_reader_counts));
     s->kind = kind;
 done:
     (void)pthread_mutex_unlock(&rt->guard);
@@ -246,13 +253,18 @@ static int slot_destroy(ios27_21a_runtime *rt, uint64_t address, unsigned kind) 
         e = EINVAL;
         goto done;
     }
-    if (s->pins) { e = EBUSY; goto done; }
+    if (s->pins || s->mutex_locked || s->rw_writer_locked) {
+        e = EBUSY; goto done;
+    }
+    if (kind == KIND_RWLOCK) {
+        size_t i;
+        for (i = 0; i < 32u; ++i)
+            if (s->rw_reader_counts[i]) { e = EBUSY; goto done; }
+    }
     e = native_destroy(s);
     if (e) goto done;
     memset(p, 0, object_size(kind));
-    s->kind = 0;
-    s->addr = 0;
-    s->token = 0;
+    memset(s, 0, sizeof(*s));
 done:
     (void)pthread_mutex_unlock(&rt->guard);
     return e;
@@ -272,22 +284,101 @@ int ios27_21a_destroy(ios27_21a_runtime *rt) {
     free(rt);
     return 0;
 }
+/* Ownership is recorded separately from host lock memory. Invalid unlock
+ * is rejected before calling pthread_rwlock_unlock (undefined otherwise). */
+static int rw_record_acquire(ios27_21a_runtime *rt, object_slot *s,
+                             int writer) {
+    pthread_t self = pthread_self();
+    size_t i, empty = 32u;
+    int e = 0;
+    (void)pthread_mutex_lock(&rt->guard);
+    if (writer) {
+        s->rw_writer = self;
+        s->rw_writer_locked = 1u;
+    } else {
+        for (i = 0; i < 32u; ++i) {
+            if (s->rw_reader_counts[i] &&
+                pthread_equal(s->rw_reader_ids[i], self)) {
+                if (s->rw_reader_counts[i] == UINT32_MAX) e = EAGAIN;
+                else ++s->rw_reader_counts[i];
+                break;
+            }
+            if (!s->rw_reader_counts[i] && empty == 32u) empty = i;
+        }
+        if (i == 32u) {
+            if (empty == 32u) e = EAGAIN;
+            else {
+                s->rw_reader_ids[empty] = self;
+                s->rw_reader_counts[empty] = 1u;
+            }
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    if (e) (void)pthread_rwlock_unlock(&s->native.rwlock);
+    return e;
+}
+static int rw_owned_unlock(ios27_21a_runtime *rt, object_slot *s) {
+    pthread_t self = pthread_self();
+    size_t i;
+    int e = EPERM;
+    (void)pthread_mutex_lock(&rt->guard);
+    if (s->rw_writer_locked && pthread_equal(s->rw_writer, self)) {
+        e = pthread_rwlock_unlock(&s->native.rwlock);
+        if (!e) s->rw_writer_locked = 0u;
+    } else {
+        for (i = 0; i < 32u; ++i) {
+            if (s->rw_reader_counts[i] &&
+                pthread_equal(s->rw_reader_ids[i], self)) {
+                e = pthread_rwlock_unlock(&s->native.rwlock);
+                if (!e) --s->rw_reader_counts[i];
+                break;
+            }
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
+static int mutex_owned_unlock(ios27_21a_runtime *rt, object_slot *s) {
+    int e = EPERM;
+    (void)pthread_mutex_lock(&rt->guard);
+    if (s->mutex_locked && pthread_equal(s->mutex_owner, pthread_self())) {
+        e = pthread_mutex_unlock(&s->native.mutex);
+        if (!e) s->mutex_locked = 0u;
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    return e;
+}
 static int call_native(ios27_21a_runtime *rt, uint64_t address,
                        unsigned kind, enum operation op) {
     object_slot *s = NULL;
     int e = slot_pin(rt, address, kind, &s);
     if (e) return e;
     switch (op) {
-        case OP_ML: e = pthread_mutex_lock(&s->native.mutex); break;
-        case OP_MT: e = pthread_mutex_trylock(&s->native.mutex); break;
-        case OP_MU: e = pthread_mutex_unlock(&s->native.mutex); break;
+        case OP_ML:
+        case OP_MT:
+            e = (op == OP_ML) ? pthread_mutex_lock(&s->native.mutex) :
+                               pthread_mutex_trylock(&s->native.mutex);
+            if (!e) {
+                (void)pthread_mutex_lock(&rt->guard);
+                s->mutex_locked = 1u;
+                s->mutex_owner = pthread_self();
+                (void)pthread_mutex_unlock(&rt->guard);
+            }
+            break;
+        case OP_MU: e = mutex_owned_unlock(rt, s); break;
         case OP_CS: e = pthread_cond_signal(&s->native.cond); break;
         case OP_CB: e = pthread_cond_broadcast(&s->native.cond); break;
-        case OP_RL: e = pthread_rwlock_rdlock(&s->native.rwlock); break;
-        case OP_RWL: e = pthread_rwlock_wrlock(&s->native.rwlock); break;
-        case OP_RTL: e = pthread_rwlock_tryrdlock(&s->native.rwlock); break;
-        case OP_RTWL: e = pthread_rwlock_trywrlock(&s->native.rwlock); break;
-        case OP_RU: e = pthread_rwlock_unlock(&s->native.rwlock); break;
+        case OP_RL:
+        case OP_RWL:
+        case OP_RTL:
+        case OP_RTWL:
+            if (op == OP_RL) e = pthread_rwlock_rdlock(&s->native.rwlock);
+            else if (op == OP_RWL) e = pthread_rwlock_wrlock(&s->native.rwlock);
+            else if (op == OP_RTL) e = pthread_rwlock_tryrdlock(&s->native.rwlock);
+            else e = pthread_rwlock_trywrlock(&s->native.rwlock);
+            if (!e) e = rw_record_acquire(rt, s, op == OP_RWL || op == OP_RTWL);
+            break;
+        case OP_RU: e = rw_owned_unlock(rt, s); break;
         default: e = ENOTSUP; break;
     }
     slot_unpin(rt, s);
