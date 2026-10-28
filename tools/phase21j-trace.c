@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define CHECK(x) do { if (!(x)) { \
     fprintf(stderr, "phase21j trace:%d %s\n", __LINE__, #x); abort(); \
@@ -75,12 +76,7 @@ int main(int argc, char **argv) {
     uint64_t first = 0, last = 0;
     int jsonl = argc == 5;
     if ((argc != 4 && argc != 5) ||
-        (argc == 5 && argv[4][0] == 0) ||
-        (argc == 5 && argv[4][0] != '-') ||
-        (argc == 5 && !(argv[4][1] == '-' && argv[4][2] == 'j' &&
-                          argv[4][3] == 's' && argv[4][4] == 'o' &&
-                          argv[4][5] == 'n' && argv[4][6] == 'l' &&
-                          argv[4][7] == 0)) ||
+        (argc == 5 && strcmp(argv[4], "--jsonl") != 0) ||
         parse(argv[1], &seed) || parse(argv[2], &actor_value) ||
         parse(argv[3], &count_value) ||
         actor_value < 1 || actor_value > MAX_ACTORS ||
