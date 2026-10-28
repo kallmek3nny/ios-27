@@ -54,6 +54,19 @@ def main():
         raise RuntimeError(
             "phase21j test manifest mismatch: unlisted={}, missing={}".format(
                 sorted(discovered - expected), sorted(expected - discovered)))
+    frozen_head = os.environ.get("PHASE21J_HEAD_SHA")
+    if frozen_head:
+        actual = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, check=False,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, timeout=30,
+        )
+        if actual.returncode or actual.stdout.strip() != frozen_head:
+            raise RuntimeError(
+                "checkout HEAD is not the exact frozen pull-request head: "
+                "expected={} actual={}".format(
+                    frozen_head, actual.stdout.strip()))
+        print("phase21j frozen checkout: {}".format(frozen_head), flush=True)
     architecture = platform.machine().lower()
     if architecture not in ("x86_64", "amd64", "aarch64", "arm64"):
         raise RuntimeError("unexpected native architecture: " + architecture)
