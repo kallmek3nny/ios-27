@@ -9,7 +9,7 @@ TRACE_CAPACITY = 1024
 MAX_BYTES = 2 * 1024 * 1024
 SUMMARY_KEYS = {
     "seed", "actors", "steps", "first", "last",
-    "saved", "dropped", "injections", "digest",
+    "saved", "dropped", "injections", "digest", "plan",
 }
 EVENT_KEYS = {"seq", "actor", "kind", "result", "detail"}
 
@@ -56,6 +56,13 @@ def verify(lines):
     steps = integer(header, "steps")
     if not 1 <= actors <= 8 or not 1 <= steps <= TRACE_CAPACITY:
         raise ValueError("actor or step count out of bounds")
+    plan = header["plan"]
+    if plan is not None:
+        if type(plan) is not str or len(plan) != steps or any(
+            character < "0" or character >= chr(ord("0") + actors)
+            for character in plan
+        ):
+            raise ValueError("invalid scripted actor plan")
     events = []
     for line in lines[1:]:
         item = json.loads(line)
@@ -66,7 +73,7 @@ def verify(lines):
         events.append(item)
     expected = []
     for step in range(steps):
-        actor = splitmix(seed ^ step) % actors
+        actor = int(plan[step]) if plan is not None else splitmix(seed ^ step) % actors
         selection = splitmix(
             seed ^ splitmix((19 << 32) | actor) ^ splitmix(step)
         )
