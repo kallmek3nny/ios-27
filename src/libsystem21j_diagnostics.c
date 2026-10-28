@@ -197,3 +197,27 @@ int ios27_21j_read(ios27_21j_diagnostics *d, uint64_t sequence,
     (void)pthread_mutex_unlock(&d->mutex);
     return result;
 }
+
+int ios27_21j_export(ios27_21j_diagnostics *d,
+                     ios27_21j_event *out, size_t capacity,
+                     size_t *count, uint64_t *first, uint64_t *last) {
+    size_t available;
+    uint64_t start, finish;
+    if (!d || !count || (!out && capacity)) return EINVAL;
+    (void)pthread_mutex_lock(&d->mutex);
+    finish = d->counters.next_sequence;
+    available = (size_t)(finish < IOS27_21J_TRACE_CAPACITY ?
+                         finish : IOS27_21J_TRACE_CAPACITY);
+    start = available ? finish - available + 1u : 0u;
+    *count = available;
+    if (first) *first = start;
+    if (last) *last = finish;
+    if (available > capacity || (!out && available)) {
+        (void)pthread_mutex_unlock(&d->mutex);
+        return ENOSPC;
+    }
+    for (size_t i = 0; i < available; ++i)
+        out[i] = d->events[(start - 1u + i) % IOS27_21J_TRACE_CAPACITY];
+    (void)pthread_mutex_unlock(&d->mutex);
+    return 0;
+}
