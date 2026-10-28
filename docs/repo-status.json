@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 80,
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "60973bc0c74a99a2a015896486f78ef6aaf057fa",
+      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "updated_at": "2026-10-28T21:20:31Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 78,
       "branch": "phase21f-fifo-mutex-20261028",
       "sha": "852760eef1526a92f8153bab75d9382f143d49d4",
@@ -24,15 +33,6 @@
       "title": "phase 21j: deterministic synchronization fault injection and integration stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "updated_at": "2026-10-28T21:20:01Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 80,
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "abb8cb535104315040b636bbe51dc6379d44fb94",
-      "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "updated_at": "2026-10-28T21:19:35Z",
       "status": "unmerged: not counted"
     },
     {
@@ -66,10 +66,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "60973bc0c74a99a2a015896486f78ef6aaf057fa",
-      "ahead_by": 13,
+      "sha": "1f1cadf4516715056a33993a7a9d316973d33f00",
+      "ahead_by": 14,
       "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:20:30Z",
+      "last_commit_at": "2026-10-28T21:20:55Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi",
       "status": "unmerged: not counted"
     }
@@ -138,5 +138,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:20:33Z"
+  "observed_at": "2026-10-28T21:20:59Z"
 }

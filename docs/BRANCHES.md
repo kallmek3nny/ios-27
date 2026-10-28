@@ -6,6 +6,13 @@
 
 candidate branches with mapped changes: **7** · audited base: `dd39b3167594`
 
+### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
+
+head: `60973bc0c74a` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +729/-0 lines
+  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_lookup`, `ios27_21i_verify`
+
 ### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
 
 head: `852760eef152` · ci: **running** · unmerged, not credited.
@@ -19,13 +26,6 @@ head: `5f22e27aff80` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +820/-0 lines
   - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_note_contention`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_snapshot`
-
-### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
-
-head: `abb8cb535104` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +729/-0 lines
-  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_lookup`, `ios27_21i_verify`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -51,7 +51,7 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 ### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi)
 
-head: `60973bc0c74a` · ci: **not_checked** · unmerged, not credited.
+head: `1f1cadf45167` · ci: **not_checked** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +729/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_lookup`, `ios27_21i_verify`
