@@ -51,6 +51,11 @@ static void segment(uint8_t *p, const char *name, uint64_t vmaddr,
     le32(p + 56u, prot);
     le32(p + 60u, prot);
 }
+static void main_command(uint8_t *p) {
+    le32(p, 0x80000028u);
+    le32(p + 4u, 24u);
+    le64(p + 8u, CODE_OFF);
+}
 static void dylib(uint8_t *p, const char *name) {
     le32(p, 0x0cu);
     le32(p + 4u, 40u);
@@ -90,7 +95,7 @@ static void provider(uint8_t file[IMAGE_SIZE], const char *depends_on) {
 static void consumer(uint8_t file[IMAGE_SIZE], uint16_t page_size) {
     uint8_t *p;
     memset(file, 0, IMAGE_SIZE);
-    header(file, 5u, 216u, 2u);
+    header(file, 6u, 240u, 2u);
     segment(file + 32u, "__TEXT", UINT64_C(0x100000000), 4096u,
             0u, 1024u, 5u);
     segment(file + 104u, "__DATA", UINT64_C(0x100001000),
@@ -106,6 +111,7 @@ static void consumer(uint8_t file[IMAGE_SIZE], uint16_t page_size) {
     le32(file + 240u, EXPORTS_OFF);
     le32(file + 244u, (uint32_t)trie_len("_call"));
     export_trie(file + EXPORTS_OFF, "_call");
+    main_command(file + 248u);
     p = file + FIXUPS_OFF;
     le32(p + 4u, 28u); /* starts offset */
     le32(p + 8u, 64u); /* imports offset */
@@ -134,7 +140,7 @@ static void classic_consumer(uint8_t file[IMAGE_SIZE]) {
         0x51u, 0x71u, 0x00u, 0x90u, 0x00u
     };
     memset(file, 0, IMAGE_SIZE);
-    header(file, 5u, 248u, 2u);
+    header(file, 6u, 272u, 2u);
     segment(file + 32u, "__TEXT", UINT64_C(0x100000000), 4096u,
             0u, 1024u, 5u);
     segment(file + 104u, "__DATA", UINT64_C(0x100001000), 4096u,
@@ -149,6 +155,7 @@ static void classic_consumer(uint8_t file[IMAGE_SIZE]) {
     le32(file + 272u, EXPORTS_OFF);
     le32(file + 276u, (uint32_t)trie_len("_call"));
     export_trie(file + EXPORTS_OFF, "_call");
+    main_command(file + 280u);
     memcpy(file + 352u, binding, sizeof(binding));
     le32(file + CODE_OFF, 0xb0000010u);
     le32(file + CODE_OFF + 4u, 0xf9400210u);
@@ -170,7 +177,7 @@ static void check_graph(uint8_t provider_bytes[IMAGE_SIZE],
         {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
     };
     ios27_images *images = NULL;
-    uintptr_t provider_fn, consumer_fn;
+    uintptr_t provider_fn, consumer_fn, entry_fn;
     ios27_image_state state;
     char error[128];
     assert(ios27_images_load(specs, 2u, &images, error, sizeof(error)) == 0);
@@ -184,6 +191,9 @@ static void check_graph(uint8_t provider_bytes[IMAGE_SIZE],
                                "_answer", &provider_fn) == 0);
     assert(ios27_images_symbol(images, "consumer.dylib",
                                "_call", &consumer_fn) == 0);
+    assert(ios27_images_entrypoint(images, "consumer.dylib", &entry_fn) == 0);
+    assert(entry_fn == consumer_fn);
+    assert(ios27_images_entrypoint(images, "provider.dylib", &entry_fn) != 0);
     assert(ios27_images_symbol(images, "provider.dylib", "_missing", &consumer_fn) != 0);
     /* A bound pointer now targets the actual provider VM, not a mock value. */
     assert(rd64((const uint8_t *)(consumer_fn - CODE_OFF + 4096u)) ==
@@ -194,7 +204,7 @@ static void check_graph(uint8_t provider_bytes[IMAGE_SIZE],
 #if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
     if (execute) {
         int (*caller)(void);
-        memcpy(&caller, &consumer_fn, sizeof(caller));
+        memcpy(&caller, &entry_fn, sizeof(caller));
         assert(caller() == 42);
     }
 #else
@@ -258,9 +268,31 @@ int main(void) {
     expect_failure(specs, 2u);
     specs[0].name = "consumer.dylib";
 
+    /* Standard Mach-O __PAGEZERO must not consume host memory or shift code. */
+    provider(provider_bytes, NULL);
+    header(provider_bytes, 3u, 160u, 6u);
+    segment(provider_bytes + 120u, "__PAGEZERO", 0u,
+            UINT64_C(0x100000000), 0u, 0u, 0u);
+    classic_consumer(consumer_bytes);
+    check_graph(provider_bytes, consumer_bytes, 1);
+    provider(provider_bytes, NULL);
+
     classic_consumer(consumer_bytes);
     memcpy(consumer_bytes + 224u + 24u, "unknown.dylib", 14u);
     expect_failure(specs, 2u); /* load command inconsistent with graph */
+
+    classic_consumer(consumer_bytes);
+    le64(consumer_bytes + 280u + 8u, DATA_OFF); /* LC_MAIN in RW data */
+    expect_failure(specs, 2u);
+    classic_consumer(consumer_bytes);
+    le64(consumer_bytes + 280u + 8u, 256u); /* LC_MAIN within commands */
+    expect_failure(specs, 2u);
+    classic_consumer(consumer_bytes);
+    le64(consumer_bytes + 104u + 40u, CODE_OFF); /* overlapping file ranges */
+    expect_failure(specs, 2u);
+    classic_consumer(consumer_bytes);
+    le32(consumer_bytes + 104u + 56u, 1u); /* init prot exceeds max */
+    expect_failure(specs, 2u);
 
     classic_consumer(consumer_bytes);
     le32(consumer_bytes + 104u + 60u, 7u); /* RWX data segment */
@@ -285,6 +317,9 @@ int main(void) {
     le64(consumer_bytes + DATA_OFF, PTR_BIND | 1u);
     expect_failure(specs, 2u); /* invalid import index */
 
-    puts("native multi-image graph, W^X and rollback tests passed");
+    /* An earlier rejected graph may not poison a subsequent fresh load. */
+    classic_consumer(consumer_bytes);
+    check_graph(provider_bytes, consumer_bytes, 1);
+    puts("native multi-image entry, W^X and rollback tests passed");
     return 0;
 }

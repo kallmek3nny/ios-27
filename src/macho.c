@@ -242,3 +242,39 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
     if (error && error_size) error[0] = '\0';
     return 0;
 }
+
+/* An LC_MAIN offset is relative to the __TEXT VM base, not the file start.
+ * Deliberately separate from freestanding-layout preflight: the graph loader
+ * can resolve explicitly supplied dependent images before exposing this RX
+ * entry, without claiming support for dyld or Darwin process initialization. */
+int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address) {
+    uint64_t text_base = 0u, entry;
+    unsigned text_found = 0u, code_found = 0u;
+    if (!info || !address || info->filetype != IOS27_MH_EXECUTE ||
+        !info->has_main || info->segment_count > IOS27_MAX_SEGMENTS)
+        return -1;
+    for (size_t i = 0u; i < info->segment_count; ++i) {
+        const ios27_segment *s = &info->segments[i];
+        if (strcmp(s->name, "__TEXT") == 0) {
+            if (text_found++) return -1;
+            text_base = s->vmaddr;
+        }
+    }
+    if (text_found != 1u || info->entryoff > UINT64_MAX - text_base)
+        return -1;
+    entry = text_base + info->entryoff;
+    if ((entry & 3u) != 0u) return -1;
+    for (size_t i = 0u; i < info->segment_count; ++i) {
+        const ios27_segment *s = &info->segments[i];
+        uint64_t delta;
+        if (entry < s->vmaddr) continue;
+        delta = entry - s->vmaddr;
+        if (delta >= s->vmsize) continue;
+        if (!(s->initprot & 4u) || s->filesize < 4u ||
+            delta > s->filesize - 4u || code_found++)
+            return -1;
+    }
+    if (code_found != 1u) return -1;
+    *address = entry;
+    return 0;
+}
