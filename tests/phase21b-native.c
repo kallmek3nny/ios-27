@@ -93,7 +93,7 @@ static void lifecycle(void) {
     assert(ios27_21b_runtime_create(&rt, 65) == EINVAL);
     assert(!ios27_21b_runtime_create(&rt, 1));
     init_gate(&g);
-    w = (work){rt, &g, &count, {0, 0}};
+    w = (work){rt, &g, &count, {0}};
     assert(ios27_21b_thread_create(rt, NULL, NULL, job, &w) == EINVAL);
     assert(ios27_21b_thread_create(rt, &id, NULL, NULL, &w) == EINVAL);
     assert(!ios27_21b_thread_create(rt, &id, NULL, job, &w));
@@ -107,7 +107,7 @@ static void lifecycle(void) {
     release_gate(&g);
     assert(!ios27_21b_thread_join(rt, id, &value) && value == &w);
     assert(ios27_21b_thread_equal(w.observed, id));
-    assert(!ios27_21b_thread_equal(w.observed, (ios27_21b_thread){0, 0}));
+    assert(!ios27_21b_thread_equal(w.observed, (ios27_21b_thread){0}));
     assert(ios27_21b_thread_join(rt, id, NULL) == ESRCH);
     assert(ios27_21b_thread_detach(rt, id) == ESRCH);
     assert(!ios27_21b_runtime_usage(rt, &n) && n == 0);
@@ -148,7 +148,7 @@ static void race_join_detach(void) {
         pthread_barrier_t barrier;
         contender a, b;
         init_gate(&g);
-        w = (work){rt, &g, NULL, {0, 0}};
+        w = (work){rt, &g, NULL, {0}};
         assert(!ios27_21b_thread_create(rt, &id, NULL, job, &w));
         assert(!pthread_barrier_init(&barrier, NULL, 3));
         a = (contender){rt, id, &barrier, 0, -1};
@@ -191,7 +191,7 @@ static void detached_and_stress(void) {
     attr.detached = 1;
     init_gate(&g);
     for (i = 0; i < 8; ++i) {
-        w[i] = (work){rt, &g, &count, {0, 0}};
+        w[i] = (work){rt, &g, &count, {0}};
         assert(!ios27_21b_thread_create(rt, &ids[i], &attr, job, &w[i]));
     }
     assert(ios27_21b_thread_create(rt, &ids[0], &attr, job, &w[0]) == EAGAIN);
@@ -231,12 +231,80 @@ static void explicit_stack_and_self(void) {
     assert(!ios27_21b_thread_self(rt).slot);
     assert(!ios27_21b_runtime_destroy(rt));
 }
+
+typedef struct { ios27_21b_runtime *rt; int observed; gate *ack; } self_join_context;
+static void *self_join_job(void *p) {
+    self_join_context *ctx = p;
+    ctx->observed = ios27_21b_thread_join(ctx->rt,
+        ios27_21b_thread_self(ctx->rt), NULL);
+    release_gate(ctx->ack);
+    return ctx;
+}
+static void identity_isolation(void) {
+    ios27_21b_runtime *left = NULL, *right = NULL;
+    ios27_21b_thread a, b;
+    self_join_context ctx;
+    gate ack;
+    init_gate(&ack);
+    assert(!ios27_21b_runtime_create(&left, 1));
+    assert(!ios27_21b_runtime_create(&right, 1));
+    ctx.rt = left; ctx.observed = -1; ctx.ack = &ack;
+    assert(!ios27_21b_thread_create(left, &a, NULL, self_join_job, &ctx));
+    assert(!ios27_21b_thread_create(right, &b, NULL, no_op, NULL));
+    assert(a.slot == b.slot && a.generation == b.generation);
+    assert(a.owner != b.owner);
+    assert(!ios27_21b_thread_equal(a, b));
+    assert(ios27_21b_thread_join(right, a, NULL) == ESRCH);
+    assert(ios27_21b_thread_detach(left, b) == ESRCH);
+    await_gate(&ack);
+    assert(!ios27_21b_thread_join(left, a, NULL));
+    assert(ctx.observed == EDEADLK);
+    assert(!ios27_21b_thread_join(right, b, NULL));
+    assert(!ios27_21b_runtime_destroy(left));
+    assert(!ios27_21b_runtime_destroy(right));
+    destroy_gate(&ack);
+}
+static void race_double_join(void) {
+    ios27_21b_runtime *rt = NULL;
+    assert(!ios27_21b_runtime_create(&rt, 1));
+    for (int i = 0; i < 64; ++i) {
+        gate g;
+        work w;
+        ios27_21b_thread id;
+        pthread_t t1, t2;
+        pthread_barrier_t b;
+        contender a, c;
+        init_gate(&g);
+        w = (work){rt, &g, NULL, {0}};
+        assert(!ios27_21b_thread_create(rt, &id, NULL, job, &w));
+        assert(!pthread_barrier_init(&b, NULL, 3));
+        a = (contender){rt, id, &b, 0, -1};
+        c = (contender){rt, id, &b, 0, -1};
+        assert(!pthread_create(&t1, NULL, contend, &a));
+        assert(!pthread_create(&t2, NULL, contend, &c));
+        int v = pthread_barrier_wait(&b);
+        assert(!v || v == PTHREAD_BARRIER_SERIAL_THREAD);
+        release_gate(&g);
+        assert(!pthread_join(t1, NULL));
+        assert(!pthread_join(t2, NULL));
+        assert((!a.error) != (!c.error));
+        assert((a.error == 0 || a.error == EINVAL || a.error == ESRCH) &&
+               (c.error == 0 || c.error == EINVAL || c.error == ESRCH));
+        assert(!ios27_21b_runtime_wait_idle(rt, 3000));
+        assert(!pthread_barrier_destroy(&b));
+        destroy_gate(&g);
+    }
+    assert(!ios27_21b_runtime_destroy(rt));
+}
+
 int main(void) {
     validate_attrs();
+    identity_isolation();
+    race_double_join();
     lifecycle();
     race_join_detach();
     detached_and_stress();
     explicit_stack_and_self();
-    puts("phase21b: 3 lifecycle milestones and 2048 TLS-cleaned transitions passed");
+    puts("phase21b: 4 lifecycle milestones, 192 ownership races and 2048 TLS-cleaned transitions passed");
     return 0;
 }
