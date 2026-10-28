@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Independent native phase 21j diagnostics and integration build/test runner."""
+from pathlib import Path
+import os
+import platform
+import shutil
+import subprocess
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCES = (
+    ROOT / "src/libsystem21j_diagnostics.c",
+)
+INTEGRATION = (
+    ROOT / "src/libsystem21b_lifecycle.c",
+    ROOT / "src/libsystem21c_sync.c",
+    ROOT / "src/libsystem21e_tls.c",
+)
+
+def run(args, seconds):
+    print("+", " ".join(map(str, args)), flush=True)
+    completed = subprocess.run(
+        args, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, timeout=seconds,
+    )
+    if completed.stdout:
+        print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n", flush=True)
+    if completed.returncode:
+        raise RuntimeError("command failed ({})".format(completed.returncode))
+
+def main():
+    architecture = platform.machine().lower()
+    if architecture not in ("x86_64", "amd64", "aarch64", "arm64"):
+        raise RuntimeError("unexpected native architecture: " + architecture)
+    compiler = os.environ.get("CC", "cc")
+    if not shutil.which(compiler):
+        raise RuntimeError("missing native compiler " + compiler)
+    flags = [
+        "-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
+        "-pthread", "-I" + str(ROOT / "include"),
+    ]
+    print("phase21j native architecture: {}".format(architecture), flush=True)
+    with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
+        for optimize in ("-O0", "-O2"):
+            for test in ("diagnostics", "integration"):
+                output = Path(temp) / (test + optimize)
+                sources = [*SOURCES]
+                if test == "integration":
+                    sources.extend(INTEGRATION)
+                sources.append(ROOT / "tests" / ("phase21j-" + test + ".c"))
+                run([compiler, *flags, optimize, *map(str, sources), "-o", str(output)], 120)
+                run([str(output)], 150)
+    print("phase21j: native compiler -Werror, O0/O2, diagnostics and integration passed", flush=True)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        sys.exit("phase21j failed: {}".format(error))
