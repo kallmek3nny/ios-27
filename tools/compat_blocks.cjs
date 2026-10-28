@@ -164,7 +164,7 @@ const render = function render(data,live){
     if(!panelNames.has(g.panel)||groupNames.has(g.id)||!classes[g.ceiling]||!g.note||!Array.isArray(g.targets)||!g.targets.length)throw Error("invalid group "+g.id);
     groupNames.add(g.id);const seen=new Set();
     for(const t of g.targets){if(!t.name||seen.has(t.name)||!(t.status in names))throw Error("invalid target "+g.id+" "+t.name);seen.add(t.name);}
-    if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")&&(!g.evidence||!g.test))throw Error("unproven status "+g.id);
+    if(g.targets.some(t=>t.status==="native-fixture"||t.status==="synthetic")&&(!g.evidence||!(g.test||g.standalone_test)))throw Error("unproven status "+g.id);
   }
   const {svg,totals}=makeMap(data,colors,names,esc,count,gather,live);
   const md=[
