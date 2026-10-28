@@ -119,6 +119,15 @@ int ios27_21j_acquire(ios27_21j_diagnostics *d, ios27_21j_lease *out) {
     (void)pthread_mutex_unlock(&d->mutex);
     return 0;
 }
+int ios27_21j_acquire_injected(ios27_21j_diagnostics *d,
+                              uint32_t stage, uint32_t actor,
+                              uint64_t ordinal, ios27_21j_lease *out) {
+    int rc;
+    if (!d || !out || !stage) return EINVAL;
+    *out = (ios27_21j_lease){0, 0, 0};
+    rc = ios27_21j_probe(d, stage, actor, ordinal);
+    return rc ? rc : ios27_21j_acquire(d, out);
+}
 int ios27_21j_release(ios27_21j_diagnostics *d, ios27_21j_lease lease) {
     lease_slot *slot;
     if (!d || !lease.slot || lease.slot > d->capacity ||
