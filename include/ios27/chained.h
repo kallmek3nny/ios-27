@@ -11,6 +11,7 @@
 typedef struct {
     char symbol[IOS27_BIND_SYMBOL_MAX];
     int32_t ordinal;
+    int32_t addend; /* signed DYLD_CHAINED_IMPORT_ADDEND, zero for basic imports */
 } ios27_chained_import;
 
 typedef struct {
@@ -33,7 +34,8 @@ typedef struct {
 /*
  * Parse LC_DYLD_CHAINED_FIXUPS on a *synthetic*, thin, unencrypted ARM64
  * Mach-O file. Only DYLD_CHAINED_PTR_64_OFFSET (6), plain 32-bit imports
- * (1), uncompressed symbols (0), single-start pages and unauthenticated
+ * (1) and signed-addend imports (2), uncompressed symbols (0),
+ * single-start pages and unauthenticated
  * bind/rebase pointers are supported. Every other layout fails closed.
  *
  * No host code or memory is modified by parsing.
