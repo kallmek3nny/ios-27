@@ -32,6 +32,10 @@ bound by the bridge. It does not claim native iOS app compatibility.
    create/lock/unlock/destroy cycles, quota failures, and stale-handle checks.
    Fifteen separate 64-thread wait-for graphs verify that only the closing
    edge is rejected while acyclic chains unwind without ownership leaks.
+   A 24-round, 48-waiter cancellation storm removes head, middle and tail
+   queued nodes, then verifies that all remaining workers receive handoffs;
+   all 1,152 threads either acquire or cancel without leaving an owner or
+   queue node. Separate adversarial tests cover cancellation at grant time.
 5. Compiler-produced native executable suites exercise FIFO ordering,
    ownership errors, recursive calls, invalid handles, two-lock cycles,
    100,000 contended increments, 250 cancellation/handoff races, and capacity
