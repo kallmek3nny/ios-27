@@ -11,7 +11,7 @@
       "sha": "8a2ae81e23b731616f83361ee313059913474a30",
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
       "pr_number": 67,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -53,9 +53,9 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/67",
         "source_files": 2,
         "fixture_files": 4,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
-  "observed_at": "2026-10-28T19:22:44Z"
+  "observed_at": "2026-10-28T19:23:21Z"
 }
