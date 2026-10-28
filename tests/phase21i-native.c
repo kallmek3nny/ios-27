@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define CHECK(x) do { if (!(x)) { \
-    fprintf(stderr, "phase21i: %s:%d: %s\\n", __FILE__, __LINE__, #x); \
+    fprintf(stderr, "phase21i: %s:%d: %s\n", __FILE__, __LINE__, #x); \
     abort(); } } while (0)
 #define OK(x) CHECK((x) == 0)
 #define CALL(rt, name, a, b, c) ios27_21i_dispatch((rt), "_pthread_" name, (a), (b), (c))
@@ -113,7 +113,7 @@ static void test_bridge(void) {
     CHECK(CALL(rt, "mutex_trylock", MUTEX, 0, 0) == EBUSY);
     write_le64(memory + 1032, 1000000000u);
     CHECK(CALL(rt, "cond_timedwait", RELEASE, MUTEX, BASE + 1024) == EINVAL);
-    CHECK(CALL(rt, "cond_timedwait", RELEASE, MUTEX, BASE + 4090) == EFAULT);
+    CHECK(CALL(rt, "cond_timedwait", RELEASE, MUTEX, BASE + 4088) == EFAULT);
     condition.go = 1;
     OK(CALL(rt, "cond_broadcast", RELEASE, 0, 0));
     OK(CALL(rt, "mutex_unlock", MUTEX, 0, 0));
