@@ -39,6 +39,21 @@ typedef struct ios27_images ios27_images;
 int ios27_images_load(const ios27_image_spec *specs, size_t count,
                       ios27_images **out, char *error, size_t cap);
 
+/* Resolve Mach-O install names against explicitly supplied canonical guest
+ * paths. No filesystem access. main_executable is a canonical absolute guest
+ * path; LC_RPATH from a matching main image is inherited by dependent dylibs.
+ * Exact ordinal names remain in specs[].dependencies for validation.
+ * All failures leave *out == NULL and roll back the entire graph. */
+int ios27_images_load_with_paths(const ios27_image_spec *specs, size_t count,
+                                 const char *const *guest_paths,
+                                 const char *main_executable,
+                                 ios27_images **out, char *error, size_t cap);
+
+/* Dependency-first initialization plan, without running guest constructors.
+ * The returned name remains owned by the live image graph. */
+int ios27_images_initialization_image(const ios27_images *images,
+                                      size_t position, const char **name);
+
 /*
  * Return an RX entry pointer for a loaded freestanding MH_EXECUTE with
  * validated LC_MAIN. Caller must keep the graph alive while using it.

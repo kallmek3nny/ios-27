@@ -326,6 +326,86 @@ static void check_phase17b_graph(void) {
     ios27_images_unload(images);
 }
 
+
+/* Phase 18b: real dyld-token names are resolved in a virtual, explicitly
+ * supplied catalog. There is never a host filesystem fallback. */
+static void check_phase18b_virtual_paths(void) {
+    static uint8_t caller[IMAGE_SIZE], leaf[IMAGE_SIZE], original[IMAGE_SIZE];
+    const char *deps[] = {"@loader_path/X"};
+    const char *paths[] = {"/App/consumer.dylib", "/App/X"};
+    ios27_image_spec specs[] = {
+        {"consumer.dylib", caller, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", leaf, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    const char *name = NULL;
+    uintptr_t code, target;
+    char error[128];
+
+    consumer(caller, 4096u);
+    dylib(caller + 192u, deps[0]);
+    provider(leaf, NULL);
+    memcpy(original, caller, IMAGE_SIZE);
+    if (ios27_images_load_with_paths(specs, 2u, paths, paths[0],
+                                     &images, error, sizeof(error))) {
+        fprintf(stderr, "phase18b virtual path failure: %s\\n", error);
+        assert(0 && "phase18b virtual path should load");
+    }
+    assert(ios27_images_initialization_image(images, 0u, &name) == 0);
+    assert(strcmp(name, "provider.dylib") == 0);
+    assert(ios27_images_initialization_image(images, 1u, &name) == 0);
+    assert(strcmp(name, "consumer.dylib") == 0);
+    assert(ios27_images_initialization_image(images, 2u, &name) == -1);
+    assert(ios27_images_symbol(images, "provider.dylib", "_answer", &target) == 0);
+    assert(ios27_images_symbol(images, "consumer.dylib", "_call", &code) == 0);
+    assert(rd64((const uint8_t *)(code - CODE_OFF + DATA_OFF)) == target);
+    ios27_images_unload(images);
+    assert(memcmp(original, caller, IMAGE_SIZE) == 0);
+
+    /* A missing strong dependency rolls back. No cross-host search. */
+    paths[1] = "/Elsewhere/X";
+    assert(ios27_images_load_with_paths(specs, 2u, paths, paths[0],
+                                        &images, error, sizeof(error)) != 0);
+    assert(images == NULL);
+    paths[1] = "/App/X";
+    /* Reject catalog aliases, noncanonical and duplicate paths before map. */
+    paths[1] = "/App/../App/X";
+    assert(ios27_images_load_with_paths(specs, 2u, paths, paths[0],
+                                        &images, error, sizeof(error)) != 0);
+    assert(images == NULL);
+    paths[1] = "/App/X";
+
+    /* Put a new LC_RPATH into an expanded command area; relocate only
+     * metadata, leaving original compiler-style machine code unchanged. */
+    consumer(caller, 4096u);
+    deps[0] = "@rpath/X";
+    dylib(caller + 192u, deps[0]);
+    memmove(caller + 640u, caller + FIXUPS_OFF, 80u);
+    memmove(caller + 896u, caller + EXPORTS_OFF, trie_len("_call"));
+    le32(caller + 184u, 640u);
+    le32(caller + 240u, 896u);
+    header(caller, 7u, 272u, 2u);
+    le32(caller + 272u, 0x8000001cu);
+    le32(caller + 276u, 32u);
+    le32(caller + 280u, 12u);
+    memcpy(caller + 284u, "@loader_path/F", 15u);
+    paths[1] = "/App/F/X";
+    memcpy(original, caller, IMAGE_SIZE);
+    if (ios27_images_load_with_paths(specs, 2u, paths, paths[0],
+                                     &images, error, sizeof(error))) {
+        fprintf(stderr, "phase18b rpath failure: %s\\n", error);
+        assert(0 && "phase18b rpath should load");
+    }
+    ios27_images_unload(images);
+    assert(memcmp(original, caller, IMAGE_SIZE) == 0);
+
+    /* An invalid late path never creates partial graph state. */
+    memcpy(caller + 284u, "@rpath/nested", 14u);
+    assert(ios27_images_load_with_paths(specs, 2u, paths, paths[0],
+                                        &images, error, sizeof(error)) != 0);
+    assert(images == NULL);
+}
+
 int main(void) {
     static uint8_t provider_bytes[IMAGE_SIZE];
     static uint8_t consumer_bytes[IMAGE_SIZE];
@@ -461,6 +541,7 @@ int main(void) {
     classic_consumer(consumer_bytes);
     check_graph(provider_bytes, consumer_bytes, 1);
     check_phase17b_graph();
+    check_phase18b_virtual_paths();
     puts("native multi-image entry, W^X, weak, reexports and rollback tests passed");
     return 0;
 }
