@@ -9,7 +9,8 @@
 #define IOS27_21F_MAX_WAITERS 1024u
 #endif
 typedef struct ios27_21f_runtime ios27_21f_runtime;
-typedef struct { uint32_t slot, generation; } ios27_21f_handle;
+/* Runtime identity prevents handles from aliasing other independent runtimes. */
+typedef struct { uint32_t slot, generation; uint64_t runtime_id; } ios27_21f_handle;
 typedef enum {
     IOS27_21F_NORMAL = 1,
     IOS27_21F_RECURSIVE = 2,

@@ -1,7 +1,9 @@
 # phase 21f: fair and bounded pthread mutex bridge
 
 This independent original-source host-native synchronization component provides
-three mutex policies with generation-checked handles. Its handle values are NOT
+three mutex policies with generation-checked handles and non-reused runtime
+identity tags. Cross-runtime handles are explicitly rejected even when numeric
+slots and generations coincide. Its handle values are NOT
 Darwin's opaque pthread mutex ABI, and compiled Darwin callsites are not run or
 bound by the bridge. It does not claim native iOS app compatibility.
 
@@ -20,7 +22,11 @@ bound by the bridge. It does not claim native iOS app compatibility.
    Cancellation removes queued nodes or retransfers a granted mutex atomically.
    Slots, waiters, and generation rollover are bounded, with deterministic
    `EAGAIN`, `EINVAL`, and `EBUSY` failures for exhaustion/invalid state.
-4. Compiler-produced native executable suites exercise FIFO ordering,
+4. Runtime isolation uses an atomic, saturating allocator for runtime IDs;
+   retired runtime tokens cannot alias a freshly created runtime. Six
+   concurrent worker threads create/destroy 6,000 separate runtimes and test
+   malformed, cross-runtime, and stale identity handles.
+5. Compiler-produced native executable suites exercise FIFO ordering,
    ownership errors, recursive calls, invalid handles, two-lock cycles,
    100,000 contended increments, 250 cancellation/handoff races, and capacity
    exhaustion at `-O0` and `-O2` with `-Werror`. An SDK-free fixture builds real

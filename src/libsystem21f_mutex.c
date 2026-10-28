@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -27,14 +28,31 @@ typedef struct waiter {
 } waiter;
 struct ios27_21f_runtime {
     pthread_mutex_t guard;
+    uint64_t runtime_id;
     size_t capacity, pending, live_waiters, peak;
     uint64_t grants, handoffs, deadlocks, canceled;
     waiter *all;
     mutex_slot slots[IOS27_21F_MAX_MUTEXES];
 };
+/* Runtime generation is never reused, including when a runtime is freed. */
+static atomic_uint_fast64_t next_runtime_id = ATOMIC_VAR_INIT(1);
+static int allocate_runtime_id(uint64_t *out) {
+    uint_fast64_t current = atomic_load_explicit(&next_runtime_id, memory_order_relaxed);
+    for (;;) {
+        if (current >= UINT64_MAX) return EAGAIN;
+        if (atomic_compare_exchange_weak_explicit(&next_runtime_id, &current,
+                                                  current + 1u,
+                                                  memory_order_relaxed,
+                                                  memory_order_relaxed)) {
+            *out = (uint64_t)current;
+            return 0;
+        }
+    }
+}
 static mutex_slot *lookup(ios27_21f_runtime *rt, ios27_21f_handle id) {
     mutex_slot *m;
-    if (!id.slot || id.slot > rt->capacity || !id.generation) return NULL;
+    if (!id.slot || id.slot > rt->capacity || !id.generation ||
+        id.runtime_id != rt->runtime_id) return NULL;
     m = &rt->slots[id.slot - 1u];
     return m->kind && m->generation == id.generation ? m : NULL;
 }
@@ -51,6 +69,8 @@ int ios27_21f_runtime_create(ios27_21f_runtime **out, size_t capacity) {
     if (!rt) return ENOMEM;
     err = pthread_mutex_init(&rt->guard, NULL);
     if (err) { free(rt); return err; }
+    err = allocate_runtime_id(&rt->runtime_id);
+    if (err) { (void)pthread_mutex_destroy(&rt->guard); free(rt); return err; }
     rt->capacity = capacity;
     *out = rt;
     return 0;
@@ -75,7 +95,7 @@ int ios27_21f_mutex_create(ios27_21f_runtime *rt, ios27_21f_kind kind,
     size_t i;
     mutex_slot *m;
     if (!rt || !out || !kind_ok(kind)) return EINVAL;
-    *out = (ios27_21f_handle){0, 0};
+    *out = (ios27_21f_handle){0};
     (void)pthread_mutex_lock(&rt->guard);
     for (i = 0; i < rt->capacity; ++i)
         if (!rt->slots[i].kind && !rt->slots[i].retired) break;
@@ -91,7 +111,8 @@ int ios27_21f_mutex_create(ios27_21f_runtime *rt, ios27_21f_kind kind,
     m->first = m->last = NULL;
     m->queued = 0;
     m->handoffs = 0;
-    *out = (ios27_21f_handle){(uint32_t)(i + 1u), m->generation};
+    *out = (ios27_21f_handle){(uint32_t)(i + 1u), m->generation,
+                               rt->runtime_id};
     (void)pthread_mutex_unlock(&rt->guard);
     return 0;
 }

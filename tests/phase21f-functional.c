@@ -83,9 +83,9 @@ int main(void) {
     REQUIRE(ios27_21f_mutex_unlock(NULL, a) == EINVAL);
     REQUIRE(ios27_21f_mutex_info(NULL, a, &info) == EINVAL);
     REQUIRE(ios27_21f_mutex_info(rt, a, NULL) == EINVAL);
-    REQUIRE(ios27_21f_mutex_info(rt, (ios27_21f_handle){0, 0}, &info) == EINVAL);
-    REQUIRE(ios27_21f_mutex_lock(rt, (ios27_21f_handle){0, 0}) == EINVAL);
-    REQUIRE(ios27_21f_mutex_trylock(rt, (ios27_21f_handle){0, 0}) == EINVAL);
+    REQUIRE(ios27_21f_mutex_info(rt, (ios27_21f_handle){0}, &info) == EINVAL);
+    REQUIRE(ios27_21f_mutex_lock(rt, (ios27_21f_handle){0}) == EINVAL);
+    REQUIRE(ios27_21f_mutex_trylock(rt, (ios27_21f_handle){0}) == EINVAL);
     REQUIRE(ios27_21f_mutex_lock(rt, a) == 0);
     REQUIRE(ios27_21f_mutex_lock(rt, a) == EDEADLK);
     REQUIRE(ios27_21f_mutex_trylock(rt, a) == EBUSY);
