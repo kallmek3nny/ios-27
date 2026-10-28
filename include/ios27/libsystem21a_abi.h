@@ -32,6 +32,8 @@ _Static_assert(_Alignof(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
 #define IOS27_21A_MUTEX_RECURSIVE_SIG UINT64_C(0x32aaaba2)
 #define IOS27_21A_COND_STATIC_SIG UINT64_C(0x3cb0b1bb)
 #define IOS27_21A_RWLOCK_STATIC_SIG UINT64_C(0x2da8b3b4)
+#define IOS27_21A_ONCE_STATIC_SIG UINT64_C(0x30b1bcba)
+#define IOS27_21A_MAX_ONCE_CALLBACKS 32u
 #define IOS27_21A_MAX_OBJECTS 128u
 #define IOS27_21A_MAX_REGIONS 8u
 #define IOS27_21A_READ 1u
@@ -45,6 +47,8 @@ typedef struct {
     unsigned permissions;
 } ios27_21a_region;
 typedef struct ios27_21a_runtime ios27_21a_runtime;
+/* Trusted native test/integration callback; never receives a raw guest ptr. */
+typedef int (*ios27_21a_once_callback)(void *context);
 
 /* Guest addresses are NOT process pointers. Guest arena must remain stable,
  * mapped, and exclusively managed for the lifetime of the bridge. */
@@ -53,6 +57,8 @@ int ios27_21a_create(ios27_21a_runtime **out, unsigned char *arena,
 int ios27_21a_create_regions(ios27_21a_runtime **out,
                              const ios27_21a_region *regions, size_t count);
 int ios27_21a_destroy(ios27_21a_runtime *rt);
+int ios27_21a_register_once(ios27_21a_runtime *rt, uint64_t guest_pc,
+                            ios27_21a_once_callback callback, void *context);
 int ios27_21a_validate_access(ios27_21a_runtime *rt, uint64_t guest_addr,
                               size_t span, size_t alignment, unsigned permissions);
 int ios27_21a_validate(ios27_21a_runtime *rt, uint64_t guest_addr,
