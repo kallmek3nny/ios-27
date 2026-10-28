@@ -33,6 +33,13 @@ def main():
                 run([cc, *flags, optimization, str(SRC), str(ROOT / "tests" / name),
                      "-o", str(executable)])
                 run([str(executable)])
+        if os.environ.get("PHASE21A_SANITIZE") == "1":
+            for name in ("phase21a-native.c", "phase21a-boundaries.c"):
+                executable = out / (name + "-sanitized")
+                run([cc, *flags, "-O1", "-g", "-fno-omit-frame-pointer",
+                     "-fsanitize=address,undefined", str(SRC),
+                     str(ROOT / "tests" / name), "-o", str(executable)])
+                run([str(executable)])
         object_file = out / "phase21a-darwin.o"
         run([clang, "--target=arm64-apple-darwin", "-ffreestanding",
              "-fno-builtin", "-fno-stack-protector", "-std=c11",
