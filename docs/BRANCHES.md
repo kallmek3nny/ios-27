@@ -4,7 +4,7 @@
 
 **purple outlines = changed source or test files on an unmerged branch.** these are *provisional change signals*, not implementations that passed an Apple ABI conformance test. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **4** · audited base: `e7deb774da6d`
+candidate branches with mapped changes: **3** · audited base: `6fc645a38528`
 
 ### [phase20d-darwin-threading](https://github.com/kallmek3nny/ios-27/pull/64)
 
@@ -21,14 +21,6 @@ head: `809381d1f0e3` · ci: **running** · unmerged, not credited.
 - **ObjC host prototype (not Apple libobjc)**: 2 source files, 0 test/fixture files, +384/-0 lines
   - candidate declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
 - **unclassified**: 0 source files, 4 test/fixture files, +212/-0 lines
-
-### [agent/phase20a-objc-metadata-20261028](https://github.com/kallmek3nny/ios-27/pull/65)
-
-head: `8e767fcb59c6` · ci: **passing_checks** · unmerged, not credited.
-
-- **ObjC host prototype (not Apple libobjc)**: 3 source files, 0 test/fixture files, +748/-0 lines
-  - candidate declarations: `ios27_objc20a_counts`, `ios27_objc20a_find_class`, `ios27_objc20a_inspect`, `ios27_objc20a_register`, `ios27_objc20a_register_image`, `ios27_objc20a_registry_create`, `ios27_objc20a_registry_destroy`
-- **unclassified**: 0 source files, 5 test/fixture files, +254/-0 lines
 
 ### [phase20e-libsystem-userspace](https://github.com/kallmek3nny/ios-27/pull/62)
 
