@@ -83,6 +83,7 @@ int main(void) {
     /* Recursive mutex from Apple-published LP64 attr bit layout. */
     set_mutexattr(memory, 2, 2, 0, 2, 0);
     OK(CALL(runtime, "mutex_init", M, MATTR));
+    ASSERT(CALL(runtime, "mutexattr_init", M, 0) == EBUSY);
     OK(CALL(runtime, "mutex_lock", M, 0));
     OK(CALL(runtime, "mutex_lock", M, 0));
     OK(CALL(runtime, "mutex_trylock", M, 0));
@@ -114,6 +115,7 @@ int main(void) {
     set_condattr(memory, 2);
     ASSERT(CALL(runtime, "cond_init", C, C) == EINVAL);
     OK(CALL(runtime, "cond_init", C, CATTR));
+    ASSERT(CALL(runtime, "condattr_init", C, 0) == EBUSY);
     OK(CALL(runtime, "cond_signal", C, 0));
     OK(CALL(runtime, "cond_broadcast", C, 0));
     OK(CALL(runtime, "cond_destroy", C, 0));
