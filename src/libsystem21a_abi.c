@@ -16,7 +16,7 @@ enum operation {
     OP_CI, OP_CD, OP_CS, OP_CB, OP_CW, OP_CTW, OP_CREL,
     OP_RI, OP_RD, OP_RL, OP_RWL, OP_RTL, OP_RTWL, OP_RTR, OP_RTW, OP_RU,
     OP_MAI, OP_MAD, OP_MAS, OP_MAG, OP_ONCE, OP_SELF, OP_EQUAL,
-    OP_KC, OP_KD, OP_KS, OP_KG,
+    OP_KC, OP_KD, OP_KS, OP_KG, OP_TID, OP_MAIN, OP_THREADED,
     OP_CAI, OP_CAD, OP_CAS, OP_CAG, OP_RAI, OP_RAD, OP_RAS, OP_RAG,
     OP_TAI, OP_TAD, OP_TAGD, OP_TASD, OP_TAGS, OP_TASS,
     OP_TAGG, OP_TASG, OP_TAGO, OP_TASO, OP_UNSUPPORTED
@@ -47,7 +47,7 @@ typedef struct {
 } once_binding;
 typedef struct {
     pthread_t native_id;
-    uint64_t guest_address;
+    uint64_t guest_address, guest_id;
     unsigned occupied, active;
     uint64_t tls[IOS27_21A_MAX_KEYS];
 } bound_thread;
@@ -63,7 +63,9 @@ struct ios27_21a_runtime {
     once_binding callbacks[IOS27_21A_MAX_ONCE_CALLBACKS];
     bound_thread threads[IOS27_21A_MAX_BOUND_THREADS];
     key_slot keys[IOS27_21A_MAX_KEYS];
-    uint64_t next_key_token;
+    uint64_t next_key_token, next_thread_id;
+    pthread_t creator;
+    unsigned had_multiple_threads;
     pthread_mutex_t guard;
     object_slot objects[IOS27_21A_MAX_OBJECTS];
 };
@@ -123,6 +125,9 @@ static const entry symbols[] = {
     {"pthread_detach", OP_UNSUPPORTED},
     {"pthread_self", OP_SELF},
     {"pthread_equal", OP_EQUAL},
+    {"pthread_threadid_np", OP_TID},
+    {"pthread_main_np", OP_MAIN},
+    {"pthread_is_threaded_np", OP_THREADED},
     {"pthread_key_create", OP_KC},
     {"pthread_key_delete", OP_KD},
     {"pthread_getspecific", OP_KG},
@@ -230,6 +235,8 @@ int ios27_21a_create_regions(ios27_21a_runtime **out,
     rt->region_count = count;
     rt->next_token = 1u;
     rt->next_key_token = 1u;
+    rt->next_thread_id = 1u;
+    rt->creator = pthread_self();
     error = pthread_mutex_init(&rt->guard, NULL);
     if (error) { free(rt); return error; }
     *out = rt;
@@ -745,11 +752,15 @@ int ios27_21a_attach_thread(ios27_21a_runtime *rt,
             e = EBUSY; goto done;
         }
     }
-    if (empty == IOS27_21A_MAX_BOUND_THREADS) {
+    if (empty == IOS27_21A_MAX_BOUND_THREADS ||
+        rt->next_thread_id == UINT64_MAX) {
         e = EAGAIN; goto done;
     }
+    if (!pthread_equal(rt->creator, self))
+        rt->had_multiple_threads = 1u;
     rt->threads[empty] = (bound_thread){
         .native_id = self, .guest_address = guest_thread_addr,
+        .guest_id = rt->next_thread_id++,
         .occupied = 1u, .active = 1u
     };
     e = 0;
@@ -827,6 +838,32 @@ static bound_thread *thread_current_locked(ios27_21a_runtime *rt) {
         if (b->active && pthread_equal(b->native_id, self)) return b;
     }
     return NULL;
+}
+static int thread_id_guest(ios27_21a_runtime *rt,
+                           uint64_t guest_thread, uint64_t out_address) {
+    uint64_t id = 0u;
+    pthread_t self = pthread_self();
+    size_t i;
+    (void)pthread_mutex_lock(&rt->guard);
+    for (i = 0; i < IOS27_21A_MAX_BOUND_THREADS; ++i) {
+        const bound_thread *b = &rt->threads[i];
+        if (!b->active) continue;
+        if (guest_thread ?
+            b->guest_address == guest_thread : pthread_equal(b->native_id, self)) {
+            id = b->guest_id;
+            break;
+        }
+    }
+    (void)pthread_mutex_unlock(&rt->guard);
+    if (!id) return ESRCH;
+    return guest_store_u64(rt, out_address, id);
+}
+static uint64_t thread_is_threaded_guest(ios27_21a_runtime *rt) {
+    uint64_t value;
+    (void)pthread_mutex_lock(&rt->guard);
+    value = rt->had_multiple_threads ? 1u : 0u;
+    (void)pthread_mutex_unlock(&rt->guard);
+    return value;
 }
 static int key_create_guest(ios27_21a_runtime *rt,
                             uint64_t address, uint64_t destructor) {
@@ -1089,6 +1126,12 @@ int ios27_21a_call(ios27_21a_runtime *rt, const char *symbol,
                             thread_equal_guest(rt, args[0], args[1], &result);
         *x0 = result;
         return e;
+    } else if (op == OP_MAIN || op == OP_THREADED) {
+        *x0 = op == OP_MAIN ? (uint64_t)pthread_equal(pthread_self(), rt->creator) :
+                             thread_is_threaded_guest(rt);
+        return 0;
+    } else if (op == OP_TID) {
+        e = thread_id_guest(rt, args[0], args[1]);
     } else if (op == OP_KC) {
         e = key_create_guest(rt, args[0], args[1]);
     } else if (op == OP_KD) {
