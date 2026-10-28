@@ -50,16 +50,16 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 main source: `4c4667700fdb`
 
 - [PR #69](https://github.com/kallmek3nny/ios-27/pull/69) · incoming, not counted
-- [PR #72](https://github.com/kallmek3nny/ios-27/pull/72) · incoming, not counted
 - [PR #70](https://github.com/kallmek3nny/ios-27/pull/70) · incoming, not counted
+- [PR #72](https://github.com/kallmek3nny/ios-27/pull/72) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 5 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 4 active candidate(s) with recognized code changes.
 
-- **libSystem guest model (not dylib)**: 5 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 4 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 

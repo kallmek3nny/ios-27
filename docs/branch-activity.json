@@ -3,12 +3,12 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "4c4667700fdb5d716c934f0d577c858caaf042b2",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 5,
-  "candidate_count": 5,
+  "candidates_checked": 4,
+  "candidate_count": 4,
   "candidates": [
     {
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "914b2400989901440d3403719dc715bdbefe7a74",
+      "sha": "4b20015f4c7e1be5d294252a72499481bd2e6ebb",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "pr_number": 69,
       "ci": "running",
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 4,
-          "additions": 869,
+          "additions": 883,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21a_call",
@@ -33,6 +33,45 @@
             "src/libsystem21a_abi.c",
             "tests/phase21a-arm64-darwin.c",
             "tests/phase21a-boundaries.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21c-pthread-sync-20261028",
+      "sha": "6bbe94566cfac9d6dc96d15bb26eeb793687c12e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "pr_number": 70,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 925,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21c_cond_broadcast",
+            "ios27_21c_cond_signal",
+            "ios27_21c_cond_timedwait",
+            "ios27_21c_cond_wait",
+            "ios27_21c_mutex_lock",
+            "ios27_21c_mutex_trylock",
+            "ios27_21c_mutex_unlock",
+            "ios27_21c_runtime_create",
+            "ios27_21c_runtime_destroy",
+            "ios27_21c_sync_create",
+            "ios27_21c_sync_destroy",
+            "ios27_21c_usage"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21c_sync.h",
+            "src/libsystem21c_sync.c",
+            "tests/phase21c-cancel.c",
+            "tests/phase21c-darwin-abi.c"
           ]
         }
       ]
@@ -72,84 +111,6 @@
             "src/libsystem21e_tls.c",
             "tests/phase21e-arm64-darwin.c",
             "tests/phase21e-stress.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "a8da7a3a183a4a4c323ed5911682f09f6a0fe4dc",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "pr_number": 70,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 925,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21c_cond_broadcast",
-            "ios27_21c_cond_signal",
-            "ios27_21c_cond_timedwait",
-            "ios27_21c_cond_wait",
-            "ios27_21c_mutex_lock",
-            "ios27_21c_mutex_trylock",
-            "ios27_21c_mutex_unlock",
-            "ios27_21c_runtime_create",
-            "ios27_21c_runtime_destroy",
-            "ios27_21c_sync_create",
-            "ios27_21c_sync_destroy",
-            "ios27_21c_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21c_sync.h",
-            "src/libsystem21c_sync.c",
-            "tests/phase21c-cancel.c",
-            "tests/phase21c-darwin-abi.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "6bbe94566cfac9d6dc96d15bb26eeb793687c12e",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21c-pthread-sync-20261028",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 925,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21c_cond_broadcast",
-            "ios27_21c_cond_signal",
-            "ios27_21c_cond_timedwait",
-            "ios27_21c_cond_wait",
-            "ios27_21c_mutex_lock",
-            "ios27_21c_mutex_trylock",
-            "ios27_21c_mutex_unlock",
-            "ios27_21c_runtime_create",
-            "ios27_21c_runtime_destroy",
-            "ios27_21c_sync_create",
-            "ios27_21c_sync_destroy",
-            "ios27_21c_usage"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21c_sync.h",
-            "src/libsystem21c_sync.c",
-            "tests/phase21c-cancel.c",
-            "tests/phase21c-darwin-abi.c"
           ]
         }
       ]
@@ -203,25 +164,18 @@
         "ci": "running"
       },
       {
+        "branch": "phase21c-pthread-sync-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "running"
+      },
+      {
         "branch": "phase21e-tls-cancel-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/72",
         "source_files": 2,
         "fixture_files": 4,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase21c-pthread-sync-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase21c-pthread-sync-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21c-pthread-sync-20261028",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "not_checked"
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
@@ -520,5 +474,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:55:12Z"
+  "observed_at": "2026-10-28T19:55:38Z"
 }
