@@ -59,6 +59,13 @@ int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                                   char *error, size_t error_size);
 
 /*
+ * Translate an LC_MAIN offset from the executable's __TEXT base into a
+ * file-backed RX guest address. Caller must have parsed and validated bytes.
+ * No host page is mapped and no instruction is executed by this helper.
+ */
+int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address);
+
+/*
  * Experimental in-process execution of freestanding ARM64 images only.
  * Requires ARM64 hardware and a trusted, specially constructed test image.
  * Does NOT implement iOS syscalls, dyld, ObjC, frameworks, or a sandbox.

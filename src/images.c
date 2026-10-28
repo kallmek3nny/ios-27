@@ -133,9 +133,18 @@ static int valid_layout(image_node *node, size_t page,
     for (size_t i = 0u; i < node->info.segment_count; ++i) {
         const ios27_segment *s = &node->info.segments[i];
         uint64_t end;
+        /* __PAGEZERO is a deliberate inaccessible guest address reservation,
+         * not host memory to allocate. Keep it out of the span entirely. */
+        if (strcmp(s->name, "__PAGEZERO") == 0) {
+            if (s->filesize || s->initprot || s->maxprot)
+                return fail(error, cap, "invalid __PAGEZERO permissions");
+            continue;
+        }
         if (!s->vmsize || s->vmaddr % page || s->vmsize % page ||
             (s->initprot != 1u && s->initprot != 3u &&
              s->initprot != 5u) ||
+            (s->maxprot & ~7u) || (s->maxprot & 6u) == 6u ||
+            (s->initprot & ~s->maxprot) ||
             s->vmsize > UINT64_MAX - s->vmaddr)
             return fail(error, cap, "unaligned, overflowing or W+X segment");
         end = s->vmaddr + s->vmsize;
@@ -144,9 +153,14 @@ static int valid_layout(image_node *node, size_t page,
         if ((s->initprot & 4u) && s->filesize) ++executable;
         for (size_t j = 0u; j < i; ++j) {
             const ios27_segment *prev = &node->info.segments[j];
-            if (s->vmaddr < prev->vmaddr + prev->vmsize &&
+            if (strcmp(prev->name, "__PAGEZERO") != 0 &&
+                s->vmaddr < prev->vmaddr + prev->vmsize &&
                 prev->vmaddr < end)
                 return fail(error, cap, "overlapping VM segments");
+            if (s->filesize && prev->filesize &&
+                s->fileoff < prev->fileoff + prev->filesize &&
+                prev->fileoff < s->fileoff + s->filesize)
+                return fail(error, cap, "overlapping file segments");
         }
     }
     if (!executable || max_vm <= min_vm ||
@@ -165,7 +179,9 @@ static int find_symbol(const image_node *node, const char *symbol,
         return -1;
     for (size_t i = 0u; i < node->info.segment_count; ++i) {
         const ios27_segment *s = &node->info.segments[i];
-        uint64_t offset = s->vmaddr - node->min_vm;
+        uint64_t offset;
+        if (strcmp(s->name, "__PAGEZERO") == 0) continue;
+        offset = s->vmaddr - node->min_vm;
         if ((s->initprot & 4u) &&
             entry->address >= offset &&
             entry->address - offset < s->filesize) {
@@ -227,6 +243,24 @@ int ios27_images_symbol(const ios27_images *images, const char *name,
         return -1;
     return find_symbol(&images->nodes[(size_t)index], symbol, address);
 }
+int ios27_images_entrypoint(const ios27_images *images, const char *name,
+                            uintptr_t *address) {
+    int index;
+    const image_node *node;
+    uint64_t entry_vm;
+    if (!images || !name || !address) return -1;
+    index = index_of(images, name);
+    if (index < 0) return -1;
+    node = &images->nodes[(size_t)index];
+    if (node->state != IOS27_IMAGE_READY || node->info.needs_dyld ||
+        ios27_macho_entry_vm(&node->info, &entry_vm) ||
+        entry_vm < node->min_vm || entry_vm - node->min_vm >= node->span)
+        return -1;
+    *address = (uintptr_t)node->mapping +
+               (uintptr_t)(entry_vm - node->min_vm);
+    return 0;
+}
+
 int ios27_images_load(const ios27_image_spec *specs, size_t count,
                       ios27_images **out, char *error, size_t cap) {
     ios27_images *images;
@@ -281,11 +315,26 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
                 }
         }
         if (ios27_macho_parse(node->source, node->source_size,
-                             &node->info, error, cap) ||
-            node->info.encrypted ||
+                             &node->info, error, cap))
+            goto rollback;
+        if (node->info.encrypted) {
+            (void)fail(error, cap, "encrypted image unsupported");
+            goto rollback;
+        }
+        if ((node->info.filetype != IOS27_MH_EXECUTE &&
+             node->info.filetype != 6u) ||
             valid_layout(node, images->page_size, error, cap)) {
-            if (!node->info.encrypted && error && cap && error[0] == '\0')
-                (void)fail(error, cap, "invalid Mach-O image");
+            if (error && cap && error[0] == '\0')
+                (void)fail(error, cap, "invalid loadable Mach-O image");
+            goto rollback;
+        }
+        /* LC_MAIN in the load-command table or unmapped code is never valid.
+         * Reject it before mapping any node in the dependency graph. */
+        if (node->info.filetype == IOS27_MH_EXECUTE &&
+            (!node->info.has_main ||
+             node->info.entryoff < 32u + rd32(node->source + 20u) ||
+             ios27_macho_entry_vm(&node->info, &(uint64_t){0}))) {
+            (void)fail(error, cap, "invalid executable LC_MAIN entry");
             goto rollback;
         }
         node->state = IOS27_IMAGE_PARSED;
@@ -382,6 +431,7 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         image_node *node = &images->nodes[i];
         for (size_t s = 0u; s < node->info.segment_count; ++s) {
             const ios27_segment *seg = &node->info.segments[s];
+            if (strcmp(seg->name, "__PAGEZERO") == 0) continue;
             uint8_t *destination = node->mapping +
                                    (size_t)(seg->vmaddr - node->min_vm);
             if (mprotect(destination, (size_t)seg->vmsize,
@@ -398,6 +448,7 @@ int ios27_images_load(const ios27_image_spec *specs, size_t count,
         image_node *node = &images->nodes[i];
         for (size_t s = 0u; s < node->info.segment_count; ++s) {
             const ios27_segment *seg = &node->info.segments[s];
+            if (strcmp(seg->name, "__PAGEZERO") == 0) continue;
             uint8_t *destination = node->mapping +
                                    (size_t)(seg->vmaddr - node->min_vm);
             int prot = PROT_READ | ((seg->initprot & 4u) ? PROT_EXEC : 0) |

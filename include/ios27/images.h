@@ -39,6 +39,14 @@ typedef struct ios27_images ios27_images;
 int ios27_images_load(const ios27_image_spec *specs, size_t count,
                       ios27_images **out, char *error, size_t cap);
 
+/*
+ * Return an RX entry pointer for a loaded freestanding MH_EXECUTE with
+ * validated LC_MAIN. Caller must keep the graph alive while using it.
+ * The loader does not provide Darwin ABI, dyld or untrusted-code isolation.
+ */
+int ios27_images_entrypoint(const ios27_images *images, const char *name,
+                            uintptr_t *address);
+
 /* Finds an export address of one explicitly loaded image; does not execute. */
 int ios27_images_symbol(const ios27_images *images, const char *image,
                         const char *symbol, uintptr_t *address);
