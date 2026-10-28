@@ -28,7 +28,10 @@ _Static_assert(_Alignof(ios27_21a_rwlock) == 8, "Darwin LP64 alignment");
 
 /* Documented Darwin static-initializer signatures, not runtime signatures. */
 #define IOS27_21A_MUTEX_STATIC_SIG UINT64_C(0x32aaaba7)
+#define IOS27_21A_MUTEX_ERRORCHECK_SIG UINT64_C(0x32aaaba1)
+#define IOS27_21A_MUTEX_RECURSIVE_SIG UINT64_C(0x32aaaba2)
 #define IOS27_21A_COND_STATIC_SIG UINT64_C(0x3cb0b1bb)
+#define IOS27_21A_RWLOCK_STATIC_SIG UINT64_C(0x2da8b3b4)
 #define IOS27_21A_MAX_OBJECTS 128u
 
 typedef struct ios27_21a_runtime ios27_21a_runtime;
