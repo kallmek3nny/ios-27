@@ -12,7 +12,9 @@
 #define IOS27_21E_DESTRUCTOR_PASSES 4u
 
 typedef struct ios27_21e_runtime ios27_21e_runtime;
-typedef struct { uint32_t slot; uint32_t generation; } ios27_21e_handle;
+/* Host-only bridge handles encode owning runtime identity to reject
+ * accidental cross-runtime aliasing when slot/generation numbers match. */
+typedef struct { uint32_t slot; uint32_t generation; uint64_t runtime_id; } ios27_21e_handle;
 typedef void (*ios27_21e_callback)(void *);
 enum ios27_21e_cancel_state {
     IOS27_21E_CANCEL_ENABLE = 0,

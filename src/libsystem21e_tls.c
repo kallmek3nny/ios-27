@@ -2,6 +2,7 @@
 #include "ios27/libsystem21e_tls.h"
 
 #include <errno.h>
+#include <stdatomic.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,8 +38,11 @@ struct context {
     uint32_t token_generation;
     enum ios27_21e_cancel_state state;
     int tearing_down;
+    int draining_cleanup;
+    unsigned active_cleanup_callbacks;
 };
 struct ios27_21e_runtime {
+    uint64_t runtime_id;
     pthread_mutex_t mutex;
     pthread_key_t native_key;
     struct context *contexts;
@@ -49,6 +53,18 @@ struct ios27_21e_runtime {
     uint64_t completed_destructors;
 };
 
+/* Never recycle a runtime identity during this process lifetime. */
+static atomic_uint_fast64_t runtime_serial = ATOMIC_VAR_INIT(0);
+static int assign_identity(ios27_21e_runtime *runtime) {
+    uint_fast64_t old = atomic_load(&runtime_serial);
+    for (;;) {
+        if (old == UINT64_MAX) return EOVERFLOW;
+        if (atomic_compare_exchange_weak(&runtime_serial, &old, old + 1u)) {
+            runtime->runtime_id = (uint64_t)(old + 1u);
+            return 0;
+        }
+    }
+}
 static int lock_runtime(ios27_21e_runtime *runtime) {
     return pthread_mutex_lock(&runtime->mutex);
 }
@@ -59,12 +75,14 @@ static uint32_t next_generation(uint32_t old) {
     return old == UINT32_MAX ? 0u : old + 1u;
 }
 static int key_valid(ios27_21e_runtime *runtime, ios27_21e_handle key) {
-    return key.slot < IOS27_21E_MAX_KEYS && key.generation != 0 &&
+    return key.runtime_id == runtime->runtime_id &&
+           key.slot < IOS27_21E_MAX_KEYS && key.generation != 0 &&
            runtime->keys[key.slot].used &&
            runtime->keys[key.slot].generation == key.generation;
 }
 static int token_valid(ios27_21e_runtime *runtime, ios27_21e_handle token) {
-    return token.slot < IOS27_21E_MAX_CANCEL && token.generation != 0 &&
+    return token.runtime_id == runtime->runtime_id &&
+           token.slot < IOS27_21E_MAX_CANCEL && token.generation != 0 &&
            runtime->tokens[token.slot].used &&
            runtime->tokens[token.slot].generation == token.generation;
 }
@@ -72,22 +90,31 @@ static struct context *current(ios27_21e_runtime *runtime) {
     return pthread_getspecific(runtime->native_key);
 }
 
-static void run_cleanup(struct context *ctx) {
+static int run_cleanup(struct context *ctx) {
     ios27_21e_runtime *runtime = ctx->runtime;
+    int err = lock_runtime(runtime);
+    if (err) return err;
+    if (ctx->draining_cleanup || ctx->active_cleanup_callbacks) {
+        unlock_runtime(runtime);
+        return EBUSY;
+    }
+    ctx->draining_cleanup = 1;
     for (;;) {
-        struct cleanup item;
-        if (lock_runtime(runtime) != 0) return;
-        if (ctx->depth == 0) {
-            unlock_runtime(runtime);
-            return;
-        }
-        item = ctx->stack[--ctx->depth];
+        if (ctx->depth == 0) break;
+        /* Claim this item before calling user code. Reentrant draining cannot
+         * consume the remaining stack while this callback is in flight. */
+        struct cleanup item = ctx->stack[--ctx->depth];
+        ++ctx->active_cleanup_callbacks;
         unlock_runtime(runtime);
         item.handler(item.argument);
-        if (lock_runtime(runtime) != 0) return;
+        err = lock_runtime(runtime);
+        if (err) return err;
+        --ctx->active_cleanup_callbacks;
         ++runtime->completed_cleanup;
-        unlock_runtime(runtime);
     }
+    ctx->draining_cleanup = 0;
+    unlock_runtime(runtime);
+    return 0;
 }
 /* Run destructor on a cleared value, without runtime lock. The generation
  * guard prevents stale values being used with recycled key slots. */
@@ -132,7 +159,7 @@ static void teardown_context(struct context *ctx) {
     /* pthread_key destructors receive an already-cleared native key; restore
      * it temporarily so application TLS callbacks can reenter this bridge. */
     (void)pthread_setspecific(runtime->native_key, ctx);
-    run_cleanup(ctx);
+    (void)run_cleanup(ctx);
     run_destructors(ctx);
     (void)pthread_setspecific(runtime->native_key, NULL);
     if (lock_runtime(runtime) != 0) return;
@@ -160,7 +187,9 @@ int ios27_21e_create(ios27_21e_runtime **out) {
     *out = NULL;
     ios27_21e_runtime *runtime = calloc(1, sizeof(*runtime));
     if (!runtime) return ENOMEM;
-    int err = pthread_mutex_init(&runtime->mutex, NULL);
+    int err = assign_identity(runtime);
+    if (err) { free(runtime); return err; }
+    err = pthread_mutex_init(&runtime->mutex, NULL);
     if (err) { free(runtime); return err; }
     err = pthread_key_create(&runtime->native_key, native_destructor);
     if (err) { (void)pthread_mutex_destroy(&runtime->mutex); free(runtime); return err; }
@@ -210,9 +239,9 @@ int ios27_21e_thread_detach(ios27_21e_runtime *runtime) {
     struct context *ctx = current(runtime);
     if (!ctx) return EINVAL;
     if (lock_runtime(runtime) != 0) return EBUSY;
-    int tearing_down = ctx->tearing_down;
+    int cannot_detach = ctx->tearing_down || ctx->active_cleanup_callbacks || ctx->draining_cleanup;
     unlock_runtime(runtime);
-    if (tearing_down) return EBUSY;
+    if (cannot_detach) return EBUSY;
     teardown_context(ctx);
     return 0;
 }
@@ -230,6 +259,7 @@ int ios27_21e_key_create(ios27_21e_runtime *runtime,
             key->destructor = destructor;
             out->slot = i;
             out->generation = key->generation;
+            out->runtime_id = runtime->runtime_id;
             rc = 0;
             break;
         }
@@ -260,6 +290,7 @@ int ios27_21e_setspecific(ios27_21e_runtime *runtime,
     int valid = key_valid(runtime, key);
     unlock_runtime(runtime);
     if (!valid) return EINVAL;
+    const int was_attached = current(runtime) != NULL;
     err = ios27_21e_attach(runtime);
     if (err) return err;
     err = lock_runtime(runtime);
@@ -272,6 +303,10 @@ int ios27_21e_setspecific(ios27_21e_runtime *runtime,
         rc = 0;
     }
     unlock_runtime(runtime);
+    /* A key may be deleted after the precheck while the current thread
+     * attaches. Reclaim an otherwise-empty context created by this call. */
+    if (rc == EINVAL && !was_attached)
+        (void)ios27_21e_thread_detach(runtime);
     return rc;
 }
 int ios27_21e_getspecific(ios27_21e_runtime *runtime,
@@ -292,6 +327,7 @@ int ios27_21e_getspecific(ios27_21e_runtime *runtime,
 }
 int ios27_21e_cancel_register(ios27_21e_runtime *runtime, ios27_21e_handle *out) {
     if (!runtime || !out) return EINVAL;
+    const int was_attached = current(runtime) != NULL;
     int err = ios27_21e_attach(runtime);
     if (err) return err;
     err = lock_runtime(runtime);
@@ -312,12 +348,16 @@ int ios27_21e_cancel_register(ios27_21e_runtime *runtime, ios27_21e_handle *out)
                 ctx->state = IOS27_21E_CANCEL_ENABLE;
                 out->slot = i;
                 out->generation = t->generation;
+                out->runtime_id = runtime->runtime_id;
                 rc = 0;
                 break;
             }
         }
     }
     unlock_runtime(runtime);
+    /* Quota exhaustion must not strand a just-created native thread context. */
+    if (rc == EAGAIN && !was_attached)
+        (void)ios27_21e_thread_detach(runtime);
     return rc;
 }
 int ios27_21e_cancel_unregister(ios27_21e_runtime *runtime, ios27_21e_handle token) {
@@ -393,15 +433,20 @@ int ios27_21e_cleanup_push(ios27_21e_runtime *runtime,
     if (err) return err;
     struct context *ctx = current(runtime);
     int rc = EBUSY;
-    if (!ctx->tearing_down && ctx->depth < IOS27_21E_MAX_CLEANUPS &&
+    if (!ctx->tearing_down && !ctx->draining_cleanup &&
+        !ctx->active_cleanup_callbacks &&
+        ctx->depth < IOS27_21E_MAX_CLEANUPS &&
         ctx->next_scope != UINT64_MAX) {
         uint64_t id = ++ctx->next_scope;
         ctx->stack[ctx->depth++] = (struct cleanup){id, handler, argument};
         *scope = id;
         rc = 0;
-    } else if (!ctx->tearing_down && ctx->depth >= IOS27_21E_MAX_CLEANUPS) {
+    } else if (ctx->tearing_down || ctx->draining_cleanup ||
+               ctx->active_cleanup_callbacks) {
+        rc = EBUSY;
+    } else if (ctx->depth >= IOS27_21E_MAX_CLEANUPS) {
         rc = EAGAIN;
-    } else if (!ctx->tearing_down) {
+    } else {
         rc = EOVERFLOW;
     }
     unlock_runtime(runtime);
@@ -418,6 +463,7 @@ int ios27_21e_cleanup_pop(ios27_21e_runtime *runtime, uint64_t scope,
     if (ctx && !ctx->tearing_down && ctx->depth &&
         ctx->stack[ctx->depth - 1].scope == scope) {
         item = ctx->stack[--ctx->depth];
+        if (execute) ++ctx->active_cleanup_callbacks;
         rc = 0;
     }
     unlock_runtime(runtime);
@@ -425,6 +471,7 @@ int ios27_21e_cleanup_pop(ios27_21e_runtime *runtime, uint64_t scope,
         item.handler(item.argument);
         err = lock_runtime(runtime);
         if (err) return err;
+        --ctx->active_cleanup_callbacks;
         ++runtime->completed_cleanup;
         unlock_runtime(runtime);
     }
@@ -434,8 +481,7 @@ int ios27_21e_cleanup_unwind(ios27_21e_runtime *runtime) {
     if (!runtime) return EINVAL;
     struct context *ctx = current(runtime);
     if (!ctx) return EINVAL;
-    run_cleanup(ctx);
-    return 0;
+    return run_cleanup(ctx);
 }
 int ios27_21e_stats(ios27_21e_runtime *runtime, size_t *attached,
                      size_t *keys, size_t *tokens, uint64_t *cleanups,

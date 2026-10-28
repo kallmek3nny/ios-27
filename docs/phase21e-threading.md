@@ -17,13 +17,16 @@ or changes to shared CMake or existing agents' files.
 
 ## implemented milestones
 
-1. **Generation-safe TLS**: creation, deletion, validation, stale-handle
+1. **Generation-safe, runtime-isolated TLS**: creation, deletion, validation, stale-handle
    rejection, slot reuse, independent per-thread values, automatic native
    thread-exit cleanup, explicit detach, four deterministic destructor passes,
    reentrant `setspecific` from destructors, and bounded quotas. Destructors
    are called outside locks, with the slot pinned; deletion returns `EBUSY`
    while a callback is in flight. Deletion/recreation invalidates all previous
    thread-local values by generation, including values on other threads.
+   Handles carry an explicit process-unique runtime identity in addition to
+   slot and generation, so an old handle cannot alias an unrelated runtime,
+   even after the former runtime was destroyed.
 2. **Cooperative cancellation**: owner-bound, generation-protected tokens,
    explicit request, per-thread enabled/disabled state, pending cancellation
    preserved during disabled intervals, and deterministic checkpoints returning
@@ -31,7 +34,11 @@ or changes to shared CMake or existing agents' files.
    Exit invalidates outstanding tokens, protecting against reused slots.
 3. **Scoped cleanup and teardown**: strictly nested, capped 64-entry cleanup
    stacks; unique non-repeating scope IDs; LIFO pop/unwind; callback ownership
-   transferred off-stack before invocation. Automatic thread exit runs
+   transferred off-stack before invocation. Cleanup execution pins its owning
+   thread context until callback return; attempts to detach or recursively
+   drain the same stack are rejected with `EBUSY`. Callbacks cannot extend
+   an in-progress drain by indefinitely pushing more cleanup handlers.
+   Automatic thread exit runs
    remaining cleanup handlers before four TLS destructor iterations, and safely
    removes the thread context and its token. Runtime destruction refuses live
    threads, TLS keys and tokens. Reentrant detach during teardown is rejected.
@@ -39,7 +46,11 @@ or changes to shared CMake or existing agents' files.
    in 128 batches, 8,193 destructor invocations, 128 simultaneous cancellation
    registrations, reentrant/recursive destructor exercises, nested cleanup,
    invalid ownership/handles, repeated teardown, exhaustion, stale handles and
-   deletion during in-flight destructor. Run both `-O0` and `-O2` with `-Werror`,
+   deletion during in-flight destructor. Additional compiled tests cover 1,000
+   separate runtime creations, 768 cross-key destructor reentries, 768 threads
+   each managing three independent runtimes, and 4,000 key generations with
+   at least one synchronized reader per generation amid concurrent deletion.
+   Run both `-O0` and `-O2` with `-Werror`,
    optional ASan+UBSan, plus a genuine SDK-free Clang ARM64 Mach-O object.
 
 ## standalone verification
@@ -73,8 +84,13 @@ CI matrix results must be checked on the PR's **unchanged head SHA**.
   checkpoint. No unsafe asynchronous cancellation or cancellation signal.
 - Cleanup callbacks are invoked without holding the runtime mutex. External
   application resources must have their own synchronization; ownership is
-  transferred before the handler runs, and callbacks should not repeatedly
-  trigger nested unwind or nonlocal control transfer.
+  transferred before the handler runs. Reentrant unwind, callback-driven
+  cleanup registration and same-thread detach are rejected while a callback
+  is executing, avoiding reentrant teardown and freed-context reuse.
+  Nonlocal control transfers are unsupported.
+- Every key/cancellation handle contains a runtime identity that does not repeat
+  until the process-wide 64-bit identity sequence is exhausted. These handles
+  are *not* binary compatible with Darwin opaque pthread handles.
 - The runtime's native pthread key is per-runtime; explicit thread detach
   before exit is recommended when using long-lived external thread pools.
 - This module deliberately does not modify the shared build system, so users
@@ -83,6 +99,8 @@ CI matrix results must be checked on the PR's **unchanged head SHA**.
 
 ## work timing
 
-Engineering began at 2026-10-28 19:45 UTC. For reliable duration accounting,
-record the completion timestamp and elapsed active session time in the PR
-summary after verification; do not report a fabricated one-hour session.
+Initial engineering began at 2026-10-28 19:45 UTC. The first isolated PR
+(#72) merged at 19:56:54 UTC after roughly twelve minutes of engineering
+and CI. This follow-up fixes independently discovered lifetime and cross-
+runtime handle hazards. Report its completion timestamp separately; initial
+work plus follow-up work does not by itself establish a sixty-minute session.
