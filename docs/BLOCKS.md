@@ -47,7 +47,6 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `c52905479f50`
 
-- [PR #55](https://github.com/kallmek3nny/ios-27/pull/55) · incoming, not counted
 - [PR #53](https://github.com/kallmek3nny/ios-27/pull/53) · incoming, not counted
 
 ## realistic ceilings for every tracked area

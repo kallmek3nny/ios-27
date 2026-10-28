@@ -9,25 +9,26 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 55,
-      "branch": "phase19d-arm64-relocs-20261028",
-      "sha": "bfd7dae85723c5742dc969a41d4806d96e45537c",
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "updated_at": "2026-10-28T18:03:50Z",
-      "status": "unmerged: not counted"
-    },
-    {
       "number": 53,
       "branch": "phase19b-native-dyld-lifecycle",
-      "sha": "cf4c65d005114c350fd2e3ff44dc4e34b9684ba0",
+      "sha": "4a148a78f0c4a160645c1be078f5ff01eb1e59d7",
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
-      "updated_at": "2026-10-28T18:03:08Z",
+      "updated_at": "2026-10-28T18:04:22Z",
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "phase19d-arm64-relocs-20261028",
+      "sha": "0ba00d9067252f79bc06b2e7d4a33ed52bcb785f",
+      "ahead_by": 3,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T18:04:28Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase19d-arm64-relocs-20261028",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 54,
@@ -88,9 +89,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 49,
+    "branches_scanned": 50,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:04:17Z"
+  "observed_at": "2026-10-28T18:04:33Z"
 }
