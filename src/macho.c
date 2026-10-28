@@ -357,8 +357,7 @@ static int main_is_code_section(const uint8_t *data, uint64_t entry) {
                 const uint8_t *sec = p + 72u + (size_t)j * 80u;
                 uint64_t addr = u64(sec + 32u), bytes = u64(sec + 40u);
                 uint32_t flags = u32(sec + 64u);
-                if (memcmp(sec, "__text\0", 7u) == 0 &&
-                    (flags & UINT32_C(0x80000000)) != 0u &&
+                if ((flags & UINT32_C(0x80000000)) != 0u &&
                     (flags & 0xffu) == 0u &&
                     entry >= addr && bytes >= 4u &&
                     entry - addr <= bytes - 4u)
