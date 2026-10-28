@@ -218,6 +218,9 @@ static void test_token_quota(void) {
     until(&quota_ready, IOS27_21E_MAX_CANCEL);
     ios27_21e_handle extra;
     CHECK(ios27_21e_cancel_register(runtime, &extra) == EAGAIN);
+    size_t attached=0,keys=0,tokens=0;
+    CHECK(ios27_21e_stats(runtime,&attached,&keys,&tokens,NULL,NULL)==0);
+    CHECK(attached==IOS27_21E_MAX_CANCEL && tokens==IOS27_21E_MAX_CANCEL);
     for (unsigned i = 0; i < IOS27_21E_MAX_CANCEL; ++i)
         CHECK(ios27_21e_cancel_request(runtime, quota_tokens[i]) == 0);
     atomic_store_explicit(&quota_release, 1, memory_order_release);
