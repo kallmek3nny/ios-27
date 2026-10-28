@@ -902,7 +902,73 @@ static void phase17c_multitask_rollback(void) {
     ios27_mach_v2_free(s);
 }
 
+
+/* Dead-name observers are task-local, FIFO, and never see a recycled name.
+ * A full queue rejects destruction without changing the live port. */
+static void phase17c_dead_name_capacity_and_lifecycle(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t owner, alias = 0u, dead = 0u, old[IOS27_MACH_V2_NAMES];
+    uint32_t a, b;
+    unsigned r;
+    assert(s);
+    for (unsigned i = 0u; i < IOS27_MACH_V2_NAMES; ++i) {
+        assert(ios27_mach_v2_allocate(s, 3u, &owner) == IOS27_MACH_OK);
+        assert(ios27_mach_v2_make_send(s, 3u, owner, 2u, &alias) ==
+               IOS27_MACH_OK);
+        assert(ios27_mach_v2_watch_dead_name(s, 2u, alias) == IOS27_MACH_OK);
+        old[i] = alias;
+        assert(ios27_mach_v2_destroy(s, 3u, owner) == IOS27_MACH_OK);
+        assert(ios27_mach_v2_rights(s, 2u, alias, &a, &b, &r) ==
+               IOS27_MACH_BAD_RIGHT);
+    }
+    assert(ios27_mach_v2_allocate(s, 3u, &owner) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 3u, owner, 2u, &alias) ==
+           IOS27_MACH_OK);
+    assert(ios27_mach_v2_watch_dead_name(s, 2u, alias) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_destroy(s, 3u, owner) == IOS27_MACH_LIMIT);
+    check(s, 2u, alias, 1u, 0u, 0u);
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &dead) == IOS27_MACH_OK);
+    assert(dead == old[0]);
+    assert(ios27_mach_v2_destroy(s, 3u, owner) == IOS27_MACH_OK);
+    for (unsigned i = 1u; i < IOS27_MACH_V2_NAMES; ++i) {
+        assert(ios27_mach_v2_poll_dead_name(s, 2u, &dead) ==
+               IOS27_MACH_OK);
+        assert(dead == old[i]);
+    }
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &dead) == IOS27_MACH_OK);
+    assert(dead == alias);
+    dead = 0xbeefu;
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &dead) ==
+           IOS27_MACH_TIMEOUT && dead == 0xbeefu);
+    ios27_mach_v2_free(s);
+}
+
+/* Multi-port teardown preflights foreign observers and discards the
+ * terminating task's own unread notifications. */
+static void phase17c_dead_name_multitask_teardown(void) {
+    ios27_mach_v2 *s = ios27_mach_v2_new();
+    uint32_t x, y, sx, sy, event;
+    assert(s);
+    assert(ios27_mach_v2_allocate(s, 1u, &x) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_allocate(s, 1u, &y) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, x, 2u, &sx) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_make_send(s, 1u, y, 2u, &sy) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_watch_dead_name(s, 2u, sx) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_watch_dead_name(s, 2u, sy) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_watch_dead_name(s, 2u, 0u) == IOS27_MACH_BAD_RIGHT);
+    assert(ios27_mach_v2_task_teardown(s, 1u) == IOS27_MACH_OK);
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &event) == IOS27_MACH_OK);
+    assert(event == sx);
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &event) == IOS27_MACH_OK);
+    assert(event == sy);
+    assert(ios27_mach_v2_poll_dead_name(s, 1u, &event) == IOS27_MACH_TIMEOUT);
+    assert(ios27_mach_v2_poll_dead_name(s, 2u, &event) == IOS27_MACH_TIMEOUT);
+    ios27_mach_v2_free(s);
+}
+
 int main(void) {
+    phase17c_dead_name_capacity_and_lifecycle();
+    phase17c_dead_name_multitask_teardown();
     phase17c_complex_multi_transfer();
     phase17c_overlapping_debits_and_discard();
     phase17c_multitask_rollback();
