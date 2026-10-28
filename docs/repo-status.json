@@ -2,24 +2,21 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "81df51719a12205f73293f0b7e64d3663ed6640e",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/81df51719a12205f73293f0b7e64d3663ed6640e",
-    "committed_at": "2026-10-28T18:08:08Z"
+    "sha": "83038ea120daacf8dc124799f7818e801f7a72bd",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/83038ea120daacf8dc124799f7818e801f7a72bd",
+    "committed_at": "2026-10-28T18:10:36Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [
-    {
-      "number": 57,
-      "branch": "phase19e-objc-libsystem-foundations",
-      "sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
-      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
-      "updated_at": "2026-10-28T18:09:50Z",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "open_pull_requests": [],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 57,
+      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+      "head_sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
+      "merged_at": "2026-10-28T18:10:37Z"
+    },
     {
       "number": 53,
       "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
@@ -68,20 +65,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/49",
       "head_sha": "5acf526c319c89d42cbb7166f92f789a76baab90",
       "merged_at": "2026-10-28T17:45:40Z"
-    },
-    {
-      "number": 50,
-      "title": "phase 18b: path-aware native dyld graphs, relocations and linked ARM64 fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/50",
-      "head_sha": "e624dfa6a9dbd12c775a122fb403c5de5dd5e544",
-      "merged_at": "2026-10-28T17:43:13Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 50,
+    "branches_scanned": 51,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T18:10:31Z"
+  "observed_at": "2026-10-28T18:11:22Z"
 }
