@@ -31,6 +31,9 @@ REQUIRED = (
     b"_pthread_getspecific",
     b"_pthread_self",
     b"_pthread_equal",
+    b"_pthread_threadid_np",
+    b"_pthread_main_np",
+    b"_pthread_is_threaded_np",
 )
 
 
