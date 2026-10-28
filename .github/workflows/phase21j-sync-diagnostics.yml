@@ -27,11 +27,36 @@ jobs:
         run: timeout 360s python3 tools/phase21j-standalone.py
 
   memory-safety:
-    name: asan-ubsan-x86_64
-    runs-on: ubuntu-24.04
+    name: asan-ubsan-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - name: bounded address/undefined behavior and leak checks
         run: |
           timeout 360s env ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 UBSAN_OPTIONS=halt_on_error=1 python3 tools/phase21j-standalone.py --sanitize
+
+  stress:
+    name: stress-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: eight-pass bounded high-contention campaigns
+        run: timeout 360s python3 tools/phase21j-standalone.py --stress
