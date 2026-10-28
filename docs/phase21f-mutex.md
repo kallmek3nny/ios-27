@@ -41,6 +41,9 @@ bound by the bridge. It does not claim native iOS app compatibility.
    100,000 contended increments, 250 cancellation/handoff races, and capacity
    exhaustion at `-O0` and `-O2` with `-Werror`. An SDK-free fixture builds real
    Darwin Mach-O pthread callsites for ARM64 and x86_64, without executing them.
+   An independently runnable Mach-O parser validates architecture, load
+   commands, bounds, external undefined symbol records, and actual callsite
+   relocation references, not merely the presence of symbol-name strings.
 
 ## independent execution
 

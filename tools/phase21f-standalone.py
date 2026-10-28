@@ -51,12 +51,9 @@ def main():
             data = obj.read_bytes()
             if data[:4] != bytes.fromhex("cffaedfe"):
                 raise RuntimeError(target + ": expected 64-bit Mach-O magic")
-            for symbol in (b"_pthread_mutex_init\0", b"_pthread_mutex_lock\0",
-                           b"_pthread_mutex_trylock\0", b"_pthread_mutex_unlock\0",
-                           b"_pthread_mutex_destroy\0", b"_pthread_create\0",
-                           b"_pthread_join\0"):
-                if symbol not in data:
-                    raise RuntimeError(target + ": missing symbol " + repr(symbol))
+            arch = "arm64" if target.startswith("arm64") else "x86_64"
+            run([sys.executable, str(ROOT / "tools/phase21f-macho-check.py"),
+                 arch, str(obj)], 30)
             print("phase21f: compiled genuine " + target + " pthread callsites")
     print("phase21f: all independent -Werror checks passed")
 
