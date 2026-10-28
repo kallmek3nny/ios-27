@@ -114,9 +114,13 @@ The independent `tools/phase21j-verify-evidence.py` rejects incomplete
 test inventories, duplicate or skipped cells, missing `-Werror`, missing
 sanitizers in memory-safety mode, mismatched native host architecture, wrong
 SHA, forged elapsed durations and unknown report fields. The
-`tools/phase21j-test-evidence.py` negative fixture runner exercises 30
+`tools/phase21j-test-evidence.py` negative fixture runner exercises 33
 malformed variants before evidence upload. Uploads are made only when all
-tests and both attestation steps succeed.
+tests and both attestation steps succeed. Both the runner and the separate
+artifact verifier execute a 30-second-bounded `git rev-parse HEAD` and reject
+any checkout that differs from the exact event-provided pull-request head
+SHA. Every dedicated workflow checkout is pinned explicitly to that SHA,
+not GitHub's synthetic pull-request merge ref.
 
 The eight workflow jobs are **GCC** x86_64/arm64,
 **Clang** x86_64/arm64, **ASan/UBSan/LSan** x86_64/arm64 and
