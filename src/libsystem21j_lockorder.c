@@ -173,7 +173,7 @@ int ios27_21j_lockorder_cancel_wait(ios27_21j_lockorder *g,
 int ios27_21j_lockorder_reset(ios27_21j_lockorder *g) {
     if (!g) return EINVAL;
     (void)pthread_mutex_lock(&g->mutex);
-    if (g->statistics.active) {
+    if (g->statistics.active || g->statistics.waiting) {
         (void)pthread_mutex_unlock(&g->mutex);
         return EBUSY;
     }
