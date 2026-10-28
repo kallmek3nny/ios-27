@@ -30,6 +30,8 @@ bound by the bridge. It does not claim native iOS app compatibility.
    in arrival order while four concurrent try-lock competitors attempt to barge.
    A 16-thread, two-slot lifecycle stress performs 38,400 concurrent
    create/lock/unlock/destroy cycles, quota failures, and stale-handle checks.
+   Fifteen separate 64-thread wait-for graphs verify that only the closing
+   edge is rejected while acyclic chains unwind without ownership leaks.
 5. Compiler-produced native executable suites exercise FIFO ordering,
    ownership errors, recursive calls, invalid handles, two-lock cycles,
    100,000 contended increments, 250 cancellation/handoff races, and capacity
