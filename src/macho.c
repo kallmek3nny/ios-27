@@ -148,3 +148,97 @@ int ios27_macho_parse(const uint8_t *data, size_t size,
         error[0] = '\0';
     return 0;
 }
+
+/*
+ * Preflight a freestanding executable against the *actual mapping granule*.
+ * The same check runs on x86_64, without ever making guest pages executable.
+ * LC_MAIN.entryoff is a VM-relative offset from __TEXT, not an arbitrary
+ * file offset. No syscall/dyld/ObjC execution is supported by this path.
+ */
+int ios27_macho_executable_layout(const uint8_t *data, size_t size,
+                                  const ios27_macho_info *info,
+                                  size_t page_size, ios27_exec_layout *layout,
+                                  char *error, size_t error_size) {
+    ios27_macho_info parsed;
+    uint64_t low = UINT64_MAX, high = 0u, text_vm = 0u, entry;
+    int text_found = 0, entry_found = 0;
+
+    if (layout) memset(layout, 0, sizeof(*layout));
+    if (!data || !info || !layout ||
+        (page_size != 4096u && page_size != 16384u))
+        return bad(error, error_size, "invalid executable layout input/page size");
+    if (ios27_macho_parse(data, size, &parsed, error, error_size))
+        return -1;
+    /* Reject stale or hand-edited metadata, including protection overrides. */
+    if (memcmp(info, &parsed, sizeof(parsed)) != 0)
+        return bad(error, error_size, "image metadata differs from source");
+    if (parsed.filetype != IOS27_MH_EXECUTE || !parsed.has_main ||
+        parsed.needs_dyld || parsed.has_dylibs || parsed.has_fixups ||
+        parsed.encrypted || parsed.segment_count == 0u)
+        return bad(error, error_size, "not a freestanding LC_MAIN executable");
+
+    for (size_t i = 0u; i < parsed.segment_count; ++i) {
+        const ios27_segment *s = &parsed.segments[i];
+        uint64_t last, aligned_last;
+        if (strcmp(s->name, "__TEXT") == 0) {
+            if (text_found++)
+                return bad(error, error_size, "duplicate __TEXT segment");
+            text_vm = s->vmaddr;
+        }
+        if ((s->initprot | s->maxprot) & ~7u ||
+            (s->initprot & ~s->maxprot) != 0u ||
+            (s->initprot & 6u) == 6u ||
+            (s->maxprot & 6u) == 6u)
+            return bad(error, error_size, "invalid or W+X protections");
+        if (strcmp(s->name, "__PAGEZERO") == 0) {
+            if (s->filesize || s->initprot || s->maxprot)
+                return bad(error, error_size, "invalid __PAGEZERO protections/data");
+            continue;
+        }
+        if (!s->vmsize) continue;
+        last = s->vmaddr + s->vmsize; /* parser checked overflow */
+        if (last > UINT64_MAX - (uint64_t)(page_size - 1u))
+            return bad(error, error_size, "segment page rounding overflow");
+        aligned_last = (last + (uint64_t)(page_size - 1u)) &
+                       ~((uint64_t)page_size - 1u);
+        if ((s->vmaddr & ~((uint64_t)page_size - 1u)) < low)
+            low = s->vmaddr & ~((uint64_t)page_size - 1u);
+        if (aligned_last > high) high = aligned_last;
+
+        /* Page-level isolation is required even if byte ranges do not overlap. */
+        for (size_t j = 0u; j < i; ++j) {
+            const ios27_segment *p = &parsed.segments[j];
+            uint64_t p_end;
+            if (!p->vmsize || strcmp(p->name, "__PAGEZERO") == 0) continue;
+            p_end = (p->vmaddr + p->vmsize + (uint64_t)(page_size - 1u)) &
+                    ~((uint64_t)page_size - 1u);
+            if ((p->vmaddr & ~((uint64_t)page_size - 1u)) < aligned_last &&
+                (s->vmaddr & ~((uint64_t)page_size - 1u)) < p_end)
+                return bad(error, error_size, "overlapping host mapping pages");
+        }
+    }
+    if (!text_found || parsed.entryoff > UINT64_MAX - text_vm)
+        return bad(error, error_size, "missing __TEXT or overflowing LC_MAIN");
+    entry = text_vm + parsed.entryoff;
+    if ((entry & 3u) != 0u)
+        return bad(error, error_size, "unaligned ARM64 LC_MAIN entry");
+    for (size_t i = 0u; i < parsed.segment_count; ++i) {
+        const ios27_segment *s = &parsed.segments[i];
+        if ((s->initprot & 4u) && entry >= s->vmaddr &&
+            entry - s->vmaddr <= s->filesize &&
+            s->filesize - (entry - s->vmaddr) >= 4u) {
+            if (entry_found++)
+                return bad(error, error_size, "ambiguous LC_MAIN entry");
+        }
+    }
+    if (!entry_found || low == UINT64_MAX || high <= low ||
+        high - low > (256ull * 1024ull * 1024ull) ||
+        high - low > (uint64_t)SIZE_MAX)
+        return bad(error, error_size, "unmapped LC_MAIN or invalid span");
+    layout->min_vmaddr = low;
+    layout->entry_vmaddr = entry;
+    layout->span = (size_t)(high - low);
+    layout->page_size = page_size;
+    if (error && error_size) error[0] = '\0';
+    return 0;
+}
