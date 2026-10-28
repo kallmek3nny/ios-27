@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 73,
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "1fd3dc09051ab8dd4be2138a3247ed49b0ce6e65",
+      "title": "phase 21d: fair reader-writer lock and safe once initialization",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "updated_at": "2026-10-28T19:56:31Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "4a87c1fb9155f829d400ee09e86789c51baf25d5",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T19:56:17Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 70,
       "branch": "phase21c-pthread-sync-20261028",
       "sha": "60849e53d4a6e9919413df9a142c809ae3a1142d",
       "title": "phase 21c: bounded native pthread synchronization and stress coverage",
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
       "updated_at": "2026-10-28T19:56:11Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 69,
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "5a7275af0e0989c6072d229aa0c46bf1b0dcd39d",
-      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:56:06Z",
       "status": "unmerged: not counted"
     },
     {
@@ -36,26 +45,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "4a87c1fb9155f829d400ee09e86789c51baf25d5",
-      "ahead_by": 19,
-      "behind_by": 10,
-      "last_commit_at": "2026-10-28T19:56:16Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "db322a8c4493f1dad81aae858d40eac443c49be3",
-      "ahead_by": 1,
-      "behind_by": 10,
-      "last_commit_at": "2026-10-28T19:53:19Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 71,
@@ -116,9 +106,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 31,
+    "branches_scanned": 29,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:56:19Z"
+  "observed_at": "2026-10-28T19:56:42Z"
 }

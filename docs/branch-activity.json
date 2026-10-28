@@ -3,15 +3,84 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "4c4667700fdb5d716c934f0d577c858caaf042b2",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 5,
-  "candidate_count": 5,
+  "candidates_checked": 4,
+  "candidate_count": 4,
   "candidates": [
+    {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "1fd3dc09051ab8dd4be2138a3247ed49b0ce6e65",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "pr_number": 73,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 1054,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21d_create",
+            "ios27_21d_destroy",
+            "ios27_21d_once",
+            "ios27_21d_rdlock",
+            "ios27_21d_runtime_create",
+            "ios27_21d_runtime_destroy",
+            "ios27_21d_tryrdlock",
+            "ios27_21d_trywrlock",
+            "ios27_21d_unlock",
+            "ios27_21d_usage",
+            "ios27_21d_wrlock"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21d_rw_once.h",
+            "src/libsystem21d_rw_once.c",
+            "tests/phase21d-darwin.c",
+            "tests/phase21d-once.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "4a87c1fb9155f829d400ee09e86789c51baf25d5",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "pr_number": 69,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 892,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_destroy",
+            "ios27_21a_validate"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-arm64-darwin.c",
+            "tests/phase21a-boundaries.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase21c-pthread-sync-20261028",
       "sha": "60849e53d4a6e9919413df9a142c809ae3a1142d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/70",
       "pr_number": 70,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -46,42 +115,11 @@
       ]
     },
     {
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "5a7275af0e0989c6072d229aa0c46bf1b0dcd39d",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "pr_number": 69,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 892,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21a_call",
-            "ios27_21a_create",
-            "ios27_21a_destroy",
-            "ios27_21a_validate"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21a_abi.h",
-            "src/libsystem21a_abi.c",
-            "tests/phase21a-arm64-darwin.c",
-            "tests/phase21a-boundaries.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase21e-tls-cancel-20261028",
       "sha": "86645688a035874587739102189f9a8014a6e3e1",
       "url": "https://github.com/kallmek3nny/ios-27/pull/72",
       "pr_number": 72,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 8,
       "possibly_truncated": false,
@@ -114,82 +152,13 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "4a87c1fb9155f829d400ee09e86789c51baf25d5",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 892,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21a_call",
-            "ios27_21a_create",
-            "ios27_21a_destroy",
-            "ios27_21a_validate"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21a_abi.h",
-            "src/libsystem21a_abi.c",
-            "tests/phase21a-arm64-darwin.c",
-            "tests/phase21a-boundaries.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "db322a8c4493f1dad81aae858d40eac443c49be3",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 1054,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21d_create",
-            "ios27_21d_destroy",
-            "ios27_21d_once",
-            "ios27_21d_rdlock",
-            "ios27_21d_runtime_create",
-            "ios27_21d_runtime_destroy",
-            "ios27_21d_tryrdlock",
-            "ios27_21d_trywrlock",
-            "ios27_21d_unlock",
-            "ios27_21d_usage",
-            "ios27_21d_wrlock"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21d_rw_once.h",
-            "src/libsystem21d_rw_once.c",
-            "tests/phase21d-darwin.c",
-            "tests/phase21d-once.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
     "libsystem-host-model": [
       {
-        "branch": "phase21c-pthread-sync-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+        "branch": "feat/phase21d-fair-rwlock-once",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 2,
         "fixture_files": 5,
         "ci": "running"
@@ -202,25 +171,18 @@
         "ci": "running"
       },
       {
+        "branch": "phase21c-pthread-sync-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "passing_checks"
+      },
+      {
         "branch": "phase21e-tls-cancel-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/72",
         "source_files": 2,
         "fixture_files": 4,
-        "ci": "running"
-      },
-      {
-        "branch": "phase21a/darwin-pthread-abi-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
-        "source_files": 2,
-        "fixture_files": 4,
-        "ci": "not_checked"
-      },
-      {
-        "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "not_checked"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -512,5 +474,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T19:56:28Z"
+  "observed_at": "2026-10-28T19:56:47Z"
 }
