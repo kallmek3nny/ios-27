@@ -18,6 +18,13 @@ INTEGRATION = (
     ROOT / "src/libsystem21c_sync.c",
     ROOT / "src/libsystem21e_tls.c",
 )
+TEST_NAMES = (
+    "diagnostics", "rules", "export", "identities", "boundaries",
+    "schedule", "schedule-races", "replay", "handoff",
+    "timed-handoff", "broadcast", "lockorder",
+    "deadlock-integration", "large-cycle", "integration",
+    "trace-cli",
+)
 
 def run(args, seconds, env=None, input_data=None, echo=True):
     if echo:
@@ -37,6 +44,15 @@ def main():
         raise RuntimeError("expected no args, --sanitize or --stress")
     sanitize = sys.argv[1:] == ["--sanitize"]
     stress = sys.argv[1:] == ["--stress"]
+    discovered = {
+        path.stem[len("phase21j-"):]
+        for path in (ROOT / "tests").glob("phase21j-*.c")
+    }
+    expected = set(TEST_NAMES) - {"trace-cli"}
+    if discovered != expected:
+        raise RuntimeError(
+            "phase21j test manifest mismatch: unlisted={}, missing={}".format(
+                sorted(discovered - expected), sorted(expected - discovered)))
     architecture = platform.machine().lower()
     if architecture not in ("x86_64", "amd64", "aarch64", "arm64"):
         raise RuntimeError("unexpected native architecture: " + architecture)
@@ -55,7 +71,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="phase21j-") as temp:
         for optimize in (("-O1",) if sanitize else
                          ("-O2",) if stress else ("-O0", "-O2")):
-            for test in ("diagnostics", "integration", "schedule", "schedule-races", "replay", "lockorder", "deadlock-integration", "export", "handoff", "broadcast", "rules", "large-cycle", "boundaries", "identities", "timed-handoff", "trace-cli"):
+            for test in TEST_NAMES:
                 output = Path(temp) / (test + optimize)
                 sources = [*SOURCES]
                 if test == "integration":
@@ -122,9 +138,10 @@ def main():
                             raise RuntimeError("corrupted trace was accepted")
                     else:
                         run([str(output)], 150, env)
-    print("phase21j: native compiler -Werror, {}, diagnostics, integration, schedules, schedule races and synchronization replay, lock order, deadlock prevention and coherent journal snapshots and cond-wait handoffs and fanout broadcasts and scripted fault rules and 64-actor cycles and invalid scalar matrices and concurrent runtime identities, timed condition races and an independently checked JSON trace CLI passed".format(
-        "ASan/UBSan" if sanitize else
-        "8x native O2 stress" if stress else "O0/O2"), flush=True)
+    mode = "ASan/UBSan" if sanitize else (
+        "8-pass O2 stress" if stress else "O0/O2")
+    print("phase21j: {} native programs all passed with -Werror ({})".format(
+        len(TEST_NAMES), mode), flush=True)
 
 if __name__ == "__main__":
     try:
