@@ -350,8 +350,130 @@ static void linked_phase15a_tests(void) {
     puts("phase15a linked native execution/layout tests passed");
 }
 
+
+/* A host-independent three-segment preflight with explicit section records.
+ * Unlike the compiler fixture this one deliberately does not require LLD. */
+static void phase17a_section_layout_tests(void) {
+    uint8_t b[0xc000] = {0};
+    ios27_macho_info image;
+    ios27_exec_layout layout;
+    char err[160];
+    const uint64_t base = UINT64_C(0x100000000);
+    const size_t text = 32u, ro = 184u, data = 336u, maincmd = 568u;
+    const size_t textsec = text + 72u, rosec = ro + 72u;
+    const size_t datasec = data + 72u, bsssec = datasec + 80u;
+
+    put32(b, UINT32_C(0xfeedfacf));
+    put32(b + 4u, UINT32_C(0x0100000c));
+    put32(b + 12u, IOS27_MH_EXECUTE);
+    put32(b + 16u, 4u);
+    put32(b + 20u, 560u);
+    put32(b + text, 0x19u);
+    put32(b + text + 4u, 152u);
+    memcpy(b + text + 8u, "__TEXT", 6u);
+    put64(b + text + 24u, base);
+    put64(b + text + 32u, 0x4000u);
+    put64(b + text + 48u, 0x4000u);
+    put32(b + text + 56u, 5u);
+    put32(b + text + 60u, 5u);
+    put32(b + text + 64u, 1u);
+    memcpy(b + textsec, "__text", 6u);
+    memcpy(b + textsec + 16u, "__TEXT", 6u);
+    put64(b + textsec + 32u, base + 1024u);
+    put64(b + textsec + 40u, 8u);
+    put32(b + textsec + 48u, 1024u);
+    put32(b + textsec + 64u, UINT32_C(0x80000400));
+
+    put32(b + ro, 0x19u);
+    put32(b + ro + 4u, 152u);
+    memcpy(b + ro + 8u, "__DATA_CONST", 12u);
+    put64(b + ro + 24u, base + 0x4000u);
+    put64(b + ro + 32u, 0x4000u);
+    put64(b + ro + 40u, 0x4000u);
+    put64(b + ro + 48u, 0x4000u);
+    put32(b + ro + 56u, 1u);
+    put32(b + ro + 60u, 1u);
+    put32(b + ro + 64u, 1u);
+    memcpy(b + rosec, "__const", 7u);
+    memcpy(b + rosec + 16u, "__DATA_CONST", 12u);
+    put64(b + rosec + 32u, base + 0x4000u);
+    put64(b + rosec + 40u, 4u);
+    put32(b + rosec + 48u, 0x4000u);
+
+    put32(b + data, 0x19u);
+    put32(b + data + 4u, 232u);
+    memcpy(b + data + 8u, "__DATA", 6u);
+    put64(b + data + 24u, base + 0x8000u);
+    put64(b + data + 32u, 0x4000u);
+    put64(b + data + 40u, 0x8000u);
+    put64(b + data + 48u, 0x4000u);
+    put32(b + data + 56u, 3u);
+    put32(b + data + 60u, 3u);
+    put32(b + data + 64u, 2u);
+    memcpy(b + datasec, "__data", 6u);
+    memcpy(b + datasec + 16u, "__DATA", 6u);
+    put64(b + datasec + 32u, base + 0x8000u);
+    put64(b + datasec + 40u, 4u);
+    put32(b + datasec + 48u, 0x8000u);
+    memcpy(b + bsssec, "__bss", 5u);
+    memcpy(b + bsssec + 16u, "__DATA", 6u);
+    put64(b + bsssec + 32u, base + 0x8004u);
+    put64(b + bsssec + 40u, 32u);
+    put32(b + bsssec + 64u, 1u); /* S_ZEROFILL, no section file offset */
+
+    put32(b + maincmd, UINT32_C(0x80000028));
+    put32(b + maincmd + 4u, 24u);
+    put64(b + maincmd + 8u, 1024u);
+    put32(b + 1024u, UINT32_C(0x52800540)); /* mov w0,#42 */
+    put32(b + 1028u, UINT32_C(0xd65f03c0)); /* ret */
+    put32(b + 0x4000u, 37u);
+    put32(b + 0x8000u, 5u);
+    memset(b + 0x8004u, 0xa5, 32u); /* must be ignored by S_ZEROFILL */
+
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) == 0);
+    assert(layout.span == 0xc000u);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         16384u, &layout, err, sizeof(err)) == 0);
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+    {
+        int value = -1;
+        assert(ios27_run_freestanding(b, sizeof(b), &image,
+                                      &value, err, sizeof(err)) == 0);
+        assert(value == 42);
+    }
+#endif
+    put32(b + rosec + 48u, 0x4004u); /* incorrect file/VM correspondence */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) != 0);
+    put32(b + rosec + 48u, 0x4000u);
+    put32(b + bsssec + 64u, 0u); /* zero-fill treated as file backed */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         16384u, &layout, err, sizeof(err)) != 0);
+    put32(b + bsssec + 64u, 1u);
+    put32(b + rosec + 64u, 6u); /* dyld pointer section unsupported */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) != 0);
+    put32(b + rosec + 64u, 0u);
+    put64(b + bsssec + 32u, base + 0x8002u); /* overlaps __data */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         16384u, &layout, err, sizeof(err)) != 0);
+    put64(b + bsssec + 32u, base + 0x8004u);
+    put32(b + textsec + 60u, 1u); /* unresolved relocation */
+    assert(ios27_macho_parse(b, sizeof(b), &image, err, sizeof(err)) == 0);
+    assert(ios27_macho_executable_layout(b, sizeof(b), &image,
+                                         4096u, &layout, err, sizeof(err)) != 0);
+    puts("phase17a multisegment section and 4k/16k layout tests passed");
+}
+
 int main(void) {
     executable_layout_tests();
+    phase17a_section_layout_tests();
     linked_phase15a_tests();
     executable_extra_rejections();
     uint8_t b[264], scratch[264];

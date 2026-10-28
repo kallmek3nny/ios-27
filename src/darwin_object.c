@@ -243,18 +243,28 @@ int ios27_darwin_executable_inspect(const uint8_t *file, size_t size,
                 uint64_t bytes = u64(sec + 40u);
                 uint32_t offset = u32(sec + 48u);
                 uint32_t nreloc = u32(sec + 60u);
+                uint32_t type = u32(sec + 64u) & 0xffu;
+                uint64_t delta = addr >= segment->vmaddr ?
+                                 addr - segment->vmaddr : UINT64_MAX;
                 if (memcmp(sec + 16u, cmd + 8u, 16u) ||
-                    nreloc || !bytes || addr < segment->vmaddr ||
-                    bytes > segment->vmsize ||
-                    addr - segment->vmaddr > segment->vmsize - bytes ||
-                    offset < segment->fileoff ||
-                    bytes > segment->filesize ||
-                    (uint64_t)offset - segment->fileoff >
-                        segment->filesize - bytes ||
-                    !within(offset, bytes, size) ||
-                    addr - segment->vmaddr !=
-                        (uint64_t)offset - segment->fileoff)
+                    nreloc || !bytes || delta > segment->vmsize ||
+                    bytes > segment->vmsize - delta)
                     return fail(error, cap, "unresolved relocation or invalid section");
+                if (type == 1u) {
+                    /* S_ZEROFILL describes VM only; section.offset is
+                     * conventionally zero even when filesize is page-rounded. */
+                    if (segment->initprot & 4u)
+                        return fail(error, cap, "executable BSS section");
+                } else if (type != 0u && type != 2u &&
+                           type != 4u && type != 5u && type != 14u) {
+                    return fail(error, cap, "dyld-managed linked section");
+                } else if (delta > segment->filesize ||
+                           bytes > segment->filesize - delta ||
+                           segment->fileoff > UINT64_MAX - delta ||
+                           (uint64_t)offset != segment->fileoff + delta ||
+                           !within(offset, bytes, size)) {
+                    return fail(error, cap, "invalid file-backed linked section");
+                }
                 if (memcmp(sec, "__text\0", 7u) == 0 &&
                     strcmp(name, "__TEXT") == 0) {
                     if (saw_text++ || (u32(sec + 64u) & 0xffu) != 0u ||

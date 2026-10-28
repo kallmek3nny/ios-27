@@ -176,10 +176,58 @@ static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
         uint32_t cmd = u32(p), bytes = u32(p + 4u);
         if (cmd == LC_SEGMENT_64) {
             uint32_t sections = u32(p + 64u);
+            uint64_t vmaddr = u64(p + 24u), vmsize = u64(p + 32u);
+            uint64_t fileoff = u64(p + 40u), filesize = u64(p + 48u);
+            uint32_t initprot = u32(p + 60u);
+            /*
+             * A linked image's section records must describe the bytes we
+             * actually stage, not merely fit inside the load command.
+             * S_ZEROFILL has a VM range but must not consume file bytes.
+             */
+            if (memcmp(p + 8u, "__PAGEZERO", 10u) == 0 && sections)
+                return bad(error, capacity, "sections in __PAGEZERO");
             for (uint32_t j = 0u; j < sections; ++j) {
                 const uint8_t *section = p + 72u + (size_t)j * 80u;
-                if (u32(section + 60u) != 0u)
-                    return bad(error, capacity, "unlinked section relocations");
+                uint64_t addr = u64(section + 32u);
+                uint64_t length = u64(section + 40u);
+                uint64_t delta, expected;
+                uint32_t offset = u32(section + 48u);
+                uint32_t flags = u32(section + 64u);
+                uint32_t type = flags & 0xffu;
+                int zerofill = type == 1u;
+                if (memcmp(section + 16u, p + 8u, 16u) != 0 ||
+                    u32(section + 60u) != 0u ||
+                    addr < vmaddr || length > vmsize ||
+                    addr - vmaddr > vmsize - length)
+                    return bad(error, capacity, "unlinked or out-of-range section");
+                delta = addr - vmaddr;
+                /* Reject indirect pointers, TLV and other dyld-managed types. */
+                if (type != 0u && type != 1u && type != 2u &&
+                    type != 4u && type != 5u && type != 14u)
+                    return bad(error, capacity, "section needs dyld/runtime fixups");
+                if ((flags & UINT32_C(0xc0000000)) != 0u &&
+                    (initprot & 4u) == 0u)
+                    return bad(error, capacity, "instructions in non-executable segment");
+                if (zerofill) {
+                    if ((initprot & 4u) != 0u)
+                        return bad(error, capacity, "invalid zero-fill section");
+                } else {
+                    if (delta > filesize || length > filesize - delta ||
+                        fileoff > UINT64_MAX - delta)
+                        return bad(error, capacity, "section outside segment file");
+                    expected = fileoff + delta;
+                    if (expected != (uint64_t)offset ||
+                        !within(expected, length, size))
+                        return bad(error, capacity, "section/file mapping mismatch");
+                }
+                for (uint32_t k = 0u; k < j; ++k) {
+                    const uint8_t *previous = p + 72u + (size_t)k * 80u;
+                    uint64_t start = u64(previous + 32u);
+                    uint64_t count_bytes = u64(previous + 40u);
+                    if (length && count_bytes &&
+                        start < addr + length && addr < start + count_bytes)
+                        return bad(error, capacity, "overlapping linked sections");
+                }
             }
         } else if (cmd == LC_MAIN) {
             if (bytes != 24u)
@@ -209,12 +257,28 @@ static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
                 imports < 28u || imports > length ||
                 symbols < 28u || symbols > length ||
                 u32(data + offset + 16u) != 0u ||
-                u32(data + offset + 20u) != 0u ||
+                u32(data + offset + 20u) > 3u ||
                 u32(data + offset + 24u) != 0u)
                 return bad(error, capacity, "unsupported chained fixup metadata");
-            if (starts < length &&
-                (length - starts < 4u || u32(data + offset + starts) != 0u))
-                return bad(error, capacity, "chained rebases require dyld");
+            /*
+             * LLD may encode an empty starts_in_image table containing
+             * one zero offset per segment, instead of a bare zero count.
+             * Accept only those provably empty chains. imports_count=0
+             * makes the (possibly nonzero) imports format inert.
+             */
+            if (starts < length) {
+                uint32_t count;
+                if (length - starts < 4u)
+                    return bad(error, capacity, "truncated chained starts");
+                count = u32(data + offset + starts);
+                if (count > IOS27_MAX_SEGMENTS ||
+                    (uint64_t)count * 4u > length - starts - 4u)
+                    return bad(error, capacity, "invalid chained starts count");
+                for (uint32_t j = 0u; j < count; ++j) {
+                    if (u32(data + offset + starts + 4u + (size_t)j * 4u))
+                        return bad(error, capacity, "chained rebases require dyld");
+                }
+            }
         } else if (cmd == LC_DYLD_INFO || cmd == LC_DYLD_INFO_ONLY) {
             if (bytes != 48u)
                 return bad(error, capacity, "invalid dyld info command");
