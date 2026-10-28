@@ -41,6 +41,16 @@ int ios27_mach_v2_destroy(ios27_mach_v2 *space, uint32_t owner,
  * This is not OS task termination or an authentication boundary. */
 int ios27_mach_v2_task_teardown(ios27_mach_v2 *space, uint32_t task);
 
+/* Optional synthetic dead-name observation. Subscribes an existing local
+ * send/send-once alias. Destruction or task teardown queues the retired
+ * name for surviving watchers, with bounded FIFO capacity. Saturated
+ * event queues reject retirement atomically with LIMIT; polling an empty
+ * queue returns TIMEOUT without modifying the output. Not XNU notify RPC. */
+int ios27_mach_v2_watch_dead_name(ios27_mach_v2 *space, uint32_t task,
+                                  uint32_t local_name);
+int ios27_mach_v2_poll_dead_name(ios27_mach_v2 *space, uint32_t task,
+                                 uint32_t *local_name);
+
 /*
  * Header bits: remote disposition MOVE_SEND(17), MOVE_SEND_ONCE(18),
  * or COPY_SEND(19). MOVE_SEND consumes one local send uref only after
