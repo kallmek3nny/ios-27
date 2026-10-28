@@ -118,6 +118,38 @@ int main(int argc, char **argv) {
         ios27_images_unload(images);
         images = NULL;
     }
+    /* The graph must behave identically with the image catalog reversed:
+     * dependency order comes from Mach-O, not the caller's input order. */
+    {
+        ios27_image_spec reordered[4] = {
+            specs[3], specs[2], specs[1], specs[0]
+        };
+        const char *reordered_paths[4] = {
+            paths[3], paths[2], paths[1], paths[0]
+        };
+        const char *image_name = NULL;
+        uintptr_t function;
+        assert(!ios27_images_load_with_paths(reordered, 4u,
+                                              reordered_paths, paths[0],
+                                              &images, error, sizeof(error)));
+        for (size_t i = 0u; i < 4u; ++i) {
+            assert(!ios27_images_initialization_image(images, i, &image_name));
+            assert(!strcmp(image_name, names[3u - i]));
+        }
+        assert(!ios27_images_symbol(images, names[0],
+                                    "_phase19b_root_value", &function));
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+        {
+            int (*call)(void);
+            memcpy(&call, &function, sizeof(call));
+            assert(call() == 166);
+        }
+#else
+        (void)function;
+#endif
+        ios27_images_unload(images);
+        images = NULL;
+    }
     altered_paths[3] = "/App/Missing/Base.dylib";
     reject(specs, 4u, altered_paths, paths[0]);
     altered_paths[3] = paths[3];
