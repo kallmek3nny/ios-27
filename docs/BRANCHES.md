@@ -8,14 +8,14 @@ candidate branches with mapped changes: **3** · audited base: `5b35123eb11f`
 
 ### [feat/phase21b-native-lifecycle-20261028](https://github.com/kallmek3nny/ios-27/pull/71)
 
-head: `0ea0dc7f2d57` · ci: **running** · unmerged, not credited.
+head: `0ea0dc7f2d57` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 3 test/fixture files, +692/-0 lines
   - candidate declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `dd315afa77e6` · ci: **running** · unmerged, not credited.
+head: `dd315afa77e6` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +641/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_destroy`, `ios27_21a_validate`
