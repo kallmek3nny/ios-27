@@ -81,6 +81,25 @@ int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address);
  * No Darwin TLS, runtime, dyld, syscalls or process isolation is provided.
  * Guest entry must return normally. Failure never updates exit_code.
  */
+/* Phase 19a: the LC_MAIN C ABI receives argc/argv/envp/apple in x0-x3.
+ * Each vector is independently NULL-terminated on the isolated guest stack.
+ * Inputs are copied before the image is mapped and never retained.
+ * The apple vector is explicit: host platform/secret values are not leaked.
+ * These calls execute trusted freestanding code, NOT a Darwin process sandbox.
+ */
+typedef struct {
+    int argc;
+    const char *const *argv;
+    const char *const *envp;
+    const char *const *apple;
+} ios27_startup_context;
+
+int ios27_run_executable_context(const uint8_t *data, size_t size,
+                                 const ios27_macho_info *info,
+                                 const ios27_startup_context *context,
+                                 int *exit_code, char *error,
+                                 size_t error_size);
+
 int ios27_run_executable_argv(const uint8_t *data, size_t size,
                              const ios27_macho_info *info,
                              int argc, const char *const argv[],

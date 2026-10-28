@@ -2,14 +2,49 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "0a7f89465131ba71bf0eaef6bb9e4883f306735d",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/0a7f89465131ba71bf0eaef6bb9e4883f306735d",
-    "committed_at": "2026-10-28T17:50:22Z"
+    "sha": "c4d79d3c960f2cf5c454f07ca86b60e3dc49b89f",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/c4d79d3c960f2cf5c454f07ca86b60e3dc49b89f",
+    "committed_at": "2026-10-28T18:01:04Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
+  "open_pull_requests": [
+    {
+      "number": 53,
+      "branch": "phase19b-native-dyld-lifecycle",
+      "sha": "cf4c65d005114c350fd2e3ff44dc4e34b9684ba0",
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "updated_at": "2026-10-28T18:03:08Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 55,
+      "branch": "phase19d-arm64-relocs-20261028",
+      "sha": "17f8526cd43d68604652d3fba03092a459f87615",
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "updated_at": "2026-10-28T18:02:49Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 54,
+      "branch": "phase19a-native-startup-20261028",
+      "sha": "61b4062eb85b0605542b3b87f629d3859f60ee02",
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "updated_at": "2026-10-28T18:02:34Z",
+      "status": "unmerged: not counted"
+    }
+  ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 56,
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
+      "merged_at": "2026-10-28T18:01:05Z"
+    },
     {
       "number": 52,
       "title": "fix: exclude stale squash-merged refs from recent branch candidates",
@@ -58,20 +93,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/46",
       "head_sha": "1b559faa531085739ae22268398f27245f38edd5",
       "merged_at": "2026-10-28T17:21:48Z"
-    },
-    {
-      "number": 45,
-      "title": "feat: AnyPS5-style API block tracker with scoped compatibility ceilings",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/45",
-      "head_sha": "571ce308e57cecc3d22bab14dbbc09accda986f7",
-      "merged_at": "2026-10-28T17:11:54Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 46,
+    "branches_scanned": 48,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T17:51:04Z"
+  "observed_at": "2026-10-28T18:03:18Z"
 }

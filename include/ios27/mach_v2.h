@@ -11,6 +11,9 @@
 #define IOS27_MACH_V2_NAMES 64u
 #define IOS27_MACH_V2_DESCRIPTORS 4u
 #define IOS27_MACH_V2_PORT_SETS 16u
+#define IOS27_MACH_V2_THREADS 16u
+#define IOS27_MACH_V2_EXCEPTION_SLOTS 8u
+#define IOS27_MACH_V2_EXCEPTION_MSG_ID UINT32_C(0x495319c0)
 /* mach_msg_seqno_trailer_t: type, size, sequence number (little-endian). */
 #define IOS27_MACH_SEQNO_TRAILER_SIZE 12u
 #define IOS27_MACH_MOVE_SEND_ONCE 18u
@@ -25,6 +28,32 @@ void ios27_mach_v2_free(ios27_mach_v2 *space);
  * cannot alias private IPC state. Also rejects overflowing host spans. */
 int ios27_mach_v2_validate_external(const ios27_mach_v2 *space,
                                      const void *ptr, size_t length);
+
+/*
+ * Bounded task-owned thread identities. IDs are unique across the space,
+ * monotonically allocated, and never recycled even after task teardown.
+ * These are fixture identities, not host pthreads or XNU thread ports.
+ */
+int ios27_mach_v2_thread_create(ios27_mach_v2 *space, uint32_t task,
+                                uint32_t *thread_id);
+int ios27_mach_v2_thread_destroy(ios27_mach_v2 *space, uint32_t task,
+                                 uint32_t thread_id);
+int ios27_mach_v2_thread_identity(const ios27_mach_v2 *space, uint32_t task,
+                                  uint32_t thread_id, uint32_t *owner);
+
+/*
+ * Task-local exception-port registrations, one entry per exception bit.
+ * Registrations do not fabricate send rights or persist after their right
+ * expires. Delivery enqueues a bounded private fixture message containing
+ * thread ID, task ID, exception slot and code; not an XNU exception RPC.
+ */
+int ios27_mach_v2_exception_set(ios27_mach_v2 *space, uint32_t task,
+                                uint32_t mask, uint32_t send_name);
+int ios27_mach_v2_exception_get(const ios27_mach_v2 *space, uint32_t task,
+                                uint32_t slot, uint32_t *send_name);
+int ios27_mach_v2_exception_raise(ios27_mach_v2 *space, uint32_t task,
+                                  uint32_t thread_id, uint32_t slot,
+                                  uint32_t code);
 
 /* Receive names are task-local and never recycled; no implicit grants. */
 int ios27_mach_v2_allocate(ios27_mach_v2 *space, uint32_t owner,
