@@ -2,7 +2,7 @@
 <style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>
 <text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3" class="gh-text">ios-27 / compatibility</text>
 <text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">component area = tracked targets · color = test evidence</text>
-<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">4 WIP · 6 merged source PRs (review pending)</text>
+<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">3 WIP · 6 merged source PRs (review pending)</text>
 <text x="18" y="119" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">system libraries / api targets</text>
 <text x="742" y="120" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">9.2%</text>
 <text x="18" y="138" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">13 components · 249 tracked</text>
@@ -770,7 +770,7 @@
 </g>
 <text x="526.80" y="425.92" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">Security / k…</text>
 </g>
-<g><title>libSystem guest model (not dylib) · 8 tracked targets · conditional ceiling · 4 unmerged branches · 3 recently merged source PRs awaiting compatibility review</title>
+<g><title>libSystem guest model (not dylib) · 8 tracked targets · conditional ceiling · 3 unmerged branches · 3 recently merged source PRs awaiting compatibility review</title>
 <rect x="616.46" y="410.92" width="123.54" height="68.04" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libSystem guest model (not dylib) / guest offset-checked read trap: synthetic parser/model/probe</title>
 <rect x="619.06" y="442.52" width="28.69" height="16.32" rx="1" fill="#d29922"/>
@@ -798,7 +798,7 @@
 </g>
 <rect x="616.46" y="410.92" width="123.54" height="68.04" rx="3" fill="none" stroke="#58a6ff" stroke-width="2"/>
 <rect x="618.46" y="412.92" width="119.54" height="64.04" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>
-<text x="733.00" y="471.96" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="600" fill="#c9a7ff">4 WIP · 3 merged</text>
+<text x="733.00" y="471.96" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="600" fill="#c9a7ff">3 WIP · 3 merged</text>
 <text x="622.46" y="425.92" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libSystem guest m…</text>
 <rect x="622.46" y="432.92" width="111.54" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 <rect x="622.46" y="432.92" width="111.54" height="2.00" rx="1" fill="#d29922"/>
