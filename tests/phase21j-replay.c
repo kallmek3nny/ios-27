@@ -136,6 +136,10 @@ int main(void) {
     const uint64_t b = run(UINT64_C(0x21feed));
     const uint64_t c = run(UINT64_C(0x21fede));
     CHECK(a == b && a != c);
-    printf("phase21j replay: 3 x 4096 scheduled mutex/cond transitions, reproducible journal; PASS\n");
+    /* Independently computed SplitMix/FIFO replay golden digests. */
+    CHECK(a == UINT64_C(0xf04b4f8b18cea5d7));
+    CHECK(c == UINT64_C(0xf9b2b343cc836760));
+    printf("phase21j replay: 3 x 4096 mutex/cond turns, hashes %016llx / %016llx; PASS\n",
+           (unsigned long long)a, (unsigned long long)c);
     return 0;
 }
