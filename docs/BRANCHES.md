@@ -4,21 +4,21 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **7** · audited base: `dd39b3167594`
-
-### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
-
-head: `621ff5cf91ee` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +739/-0 lines
-  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
+candidate branches with mapped changes: **6** · audited base: `dd39b3167594`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
-head: `85f4a5eb1937` · ci: **running** · unmerged, not credited.
+head: `d379716ee2a2` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 4 source files, 3 test/fixture files, +999/-0 lines
+- **libSystem guest model (not dylib)**: 4 source files, 4 test/fixture files, +1136/-0 lines
   - candidate declarations: `ios27_21j_acquire`, `ios27_21j_acquire_injected`, `ios27_21j_create`, `ios27_21j_destroy`, `ios27_21j_note_contention`, `ios27_21j_probe`, `ios27_21j_read`, `ios27_21j_record`, `ios27_21j_release`, `ios27_21j_schedule_create`, `ios27_21j_schedule_destroy`, `ios27_21j_schedule_snapshot`
+
+### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/pull/80)
+
+head: `620f69913ed5` · ci: **running** · unmerged, not credited.
+
+- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +771/-0 lines
+  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
 
 ### [phase21f-fifo-mutex-20261028](https://github.com/kallmek3nny/ios-27/pull/78)
 
@@ -48,13 +48,6 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 1 source files, 4 test/fixture files, +282/-11 lines
 - **libsystem_pthread**: 0 source files, 1 test/fixture files, +76/-0 lines
-
-### [agent/phase21i-darwin-pthread-abi](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase21i-darwin-pthread-abi)
-
-head: `9fa736ae1aa2` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 4 test/fixture files, +755/-0 lines
-  - candidate declarations: `ios27_21i_create`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
