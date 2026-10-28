@@ -61,7 +61,7 @@ int main(void) {
     assert(ios27_21a_register_once(rt, BASE + 1024u, initialize, &initialized) == EEXIST);
     assert(ios27_21a_register_once(rt, BASE + 1025u, initialize, &initialized) == EINVAL);
     assert(ios27_21a_register_once(rt, BASE + 1032u, NULL, NULL) == EINVAL);
-    assert(ios27_21a_register_once(rt, BASE + 99999u, initialize, NULL) == EFAULT);
+    assert(ios27_21a_register_once(rt, BASE + 100000u, initialize, NULL) == EFAULT);
     assert(ios27_21a_register_once(rt, BASE + 1032u, flaky, &attempts) == 0);
     assert(ios27_21a_register_once(rt, BASE + 1056u, recursive, NULL) == 0);
     assert(invoke(BASE + 128u, BASE + 1032u) == EAGAIN);
