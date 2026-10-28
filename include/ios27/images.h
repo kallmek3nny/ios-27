@@ -54,6 +54,11 @@ int ios27_images_load_with_paths(const ios27_image_spec *specs, size_t count,
 int ios27_images_initialization_image(const ios27_images *images,
                                       size_t position, const char **name);
 
+/* Reverse dependency order for caller-managed finalizers. This is an
+ * observation API only: no untrusted guest callbacks run on unload. */
+int ios27_images_finalization_image(const ios27_images *images,
+                                    size_t position, const char **name);
+
 /*
  * Return an RX entry pointer for a loaded freestanding MH_EXECUTE with
  * validated LC_MAIN. Caller must keep the graph alive while using it.

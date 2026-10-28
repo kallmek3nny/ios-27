@@ -292,16 +292,60 @@ typedef struct {
     ios27_images *images;
     size_t importing_index;
 } import_context;
+/* dyld's special two-level namespace ordinals are signed. All candidates
+ * must belong to the explicit catalog; never fall back to host dlsym(). */
 static int resolve(void *opaque, const char *symbol,
                    int32_t ordinal, uint64_t *address) {
     import_context *ctx = opaque;
-    const image_node *importer = &ctx->images->nodes[ctx->importing_index];
-    uintptr_t location;
-    if (ordinal <= 0 || (size_t)ordinal > importer->dep_count ||
-        resolve_export(ctx->images,
-                       importer->dep_index[(size_t)ordinal - 1u],
-                       symbol, &location))
+    const ios27_images *images = ctx->images;
+    const image_node *importer = &images->nodes[ctx->importing_index];
+    uintptr_t location = 0u;
+    size_t index;
+    if (!symbol || !address || !symbol[0]) return -1;
+    if (ordinal > 0) {
+        if ((size_t)ordinal > importer->dep_count) return -1;
+        index = importer->dep_index[(size_t)ordinal - 1u];
+        if (index == SIZE_MAX || resolve_export(images, index, symbol, &location))
+            return -1;
+    } else if (ordinal == 0) {
+        if (resolve_export(images, ctx->importing_index, symbol, &location))
+            return -1;
+    } else if (ordinal == -1) {
+        /* MAIN_EXECUTABLE: fail closed if the catalog has none or more than one. */
+        size_t main_index = SIZE_MAX;
+        for (size_t i = 0u; i < images->count; ++i) {
+            if (images->nodes[i].info.filetype == IOS27_MH_EXECUTE) {
+                if (main_index != SIZE_MAX) return -1;
+                main_index = i;
+            }
+        }
+        if (main_index == SIZE_MAX ||
+            resolve_export(images, main_index, symbol, &location))
+            return -1;
+    } else if (ordinal == -2 || ordinal == -3) {
+        /* FLAT_LOOKUP / WEAK_LOOKUP: prefer the main executable, then
+         * declaration order. Weak imports may remain absent at the caller. */
+        size_t main_index = SIZE_MAX;
+        for (size_t i = 0u; i < images->count; ++i) {
+            if (images->nodes[i].info.filetype == IOS27_MH_EXECUTE) {
+                if (main_index != SIZE_MAX) return -1;
+                main_index = i;
+            }
+        }
+        if (main_index != SIZE_MAX &&
+            !resolve_export(images, main_index, symbol, &location)) {
+            *address = (uint64_t)location;
+            return 0;
+        }
+        for (size_t i = 0u; i < images->count; ++i) {
+            if (i != main_index &&
+                !resolve_export(images, i, symbol, &location)) {
+                *address = (uint64_t)location;
+                return 0;
+            }
+        }
         return -1;
+    } else return -1;
     *address = (uint64_t)location;
     return 0;
 }
@@ -572,7 +616,8 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
                 goto rollback;
             for (size_t imported = 0u; imported < node->chained->import_count; ++imported) {
                 int32_t ordinal = node->chained->imports[imported].ordinal;
-                if (ordinal <= 0 || (size_t)ordinal > node->dep_count) {
+                if (ordinal < -3 ||
+                    (ordinal > 0 && (size_t)ordinal > node->dep_count)) {
                     (void)fail(error, cap, "invalid chained dependency ordinal");
                     goto rollback;
                 }
@@ -676,6 +721,13 @@ int ios27_images_initialization_image(const ios27_images *images,
                                       size_t position, const char **name) {
     if (!images || !name || position >= images->init_count) return -1;
     *name = images->nodes[images->init_order[position]].name;
+    return 0;
+}
+
+int ios27_images_finalization_image(const ios27_images *images,
+                                    size_t position, const char **name) {
+    if (!images || !name || position >= images->init_count) return -1;
+    *name = images->nodes[images->init_order[images->init_count - 1u - position]].name;
     return 0;
 }
 

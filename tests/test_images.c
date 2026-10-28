@@ -356,6 +356,11 @@ static void check_phase18b_virtual_paths(void) {
     assert(ios27_images_initialization_image(images, 1u, &name) == 0);
     assert(strcmp(name, "consumer.dylib") == 0);
     assert(ios27_images_initialization_image(images, 2u, &name) == -1);
+    assert(ios27_images_finalization_image(images, 0u, &name) == 0);
+    assert(strcmp(name, "consumer.dylib") == 0);
+    assert(ios27_images_finalization_image(images, 1u, &name) == 0);
+    assert(strcmp(name, "provider.dylib") == 0);
+    assert(ios27_images_finalization_image(images, 2u, &name) == -1);
     assert(ios27_images_symbol(images, "provider.dylib", "_answer", &target) == 0);
     assert(ios27_images_symbol(images, "consumer.dylib", "_call", &code) == 0);
     assert(rd64((const uint8_t *)(code - CODE_OFF + DATA_OFF)) == target);
@@ -404,6 +409,70 @@ static void check_phase18b_virtual_paths(void) {
     assert(ios27_images_load_with_paths(specs, 2u, paths, paths[0],
                                         &images, error, sizeof(error)) != 0);
     assert(images == NULL);
+}
+
+/* Special Mach-O ordinals, stable flat lookup and repeated clean reload.
+ * All images are locally constructed and never looked up on the host. */
+static void check_phase19b_special_ordinals(void) {
+    static uint8_t main_bytes[IMAGE_SIZE], provider_bytes[IMAGE_SIZE];
+    const char *deps[] = {"provider.dylib"};
+    ios27_image_spec specs[] = {
+        {"main.exe", main_bytes, IMAGE_SIZE, deps, 1u},
+        {"provider.dylib", provider_bytes, IMAGE_SIZE, NULL, 0u}
+    };
+    ios27_images *images = NULL;
+    uintptr_t caller, answer;
+    char error[128];
+    provider(provider_bytes, NULL);
+    for (unsigned iteration = 0u; iteration < 32u; ++iteration) {
+        consumer(main_bytes, 4096u);
+        /* Ordinal -2: flat lookup of the real provider. */
+        le32(main_bytes + FIXUPS_OFF + 64u, 0xfeu);
+        assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+        assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+        assert(!ios27_images_symbol(images, "provider.dylib", "_answer", &answer));
+        assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == answer);
+        ios27_images_unload(images);
+        images = NULL;
+    }
+    consumer(main_bytes, 4096u);
+    /* Ordinal 0: self lookup, no cross-image dependency needed. */
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_call", 6u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0u);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == caller);
+    ios27_images_unload(images);
+    images = NULL;
+    /* Ordinal -1: MAIN_EXECUTABLE resolves only against MH_EXECUTE. */
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xffu);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == caller);
+    ios27_images_unload(images);
+    images = NULL;
+    /* Weak lookup of absent symbol is exactly null; strong lookup fails. */
+    consumer(main_bytes, 4096u);
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_absent", 8u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0x1fdu);
+    assert(!ios27_images_load(specs, 2u, &images, error, sizeof(error)));
+    assert(!ios27_images_symbol(images, "main.exe", "_call", &caller));
+    assert(rd64((const uint8_t *)(caller - CODE_OFF + DATA_OFF)) == 0u);
+    ios27_images_unload(images);
+    images = NULL;
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xfdu);
+    expect_failure(specs, 2u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xfcu);
+    expect_failure(specs, 2u);
+    /* A second MH_EXECUTE makes MAIN_EXECUTABLE ambiguous, never guessed. */
+    consumer(main_bytes, 4096u);
+    memcpy(main_bytes + FIXUPS_OFF + 68u, "_call", 6u);
+    le32(main_bytes + FIXUPS_OFF + 64u, 0xffu);
+    consumer(provider_bytes, 4096u);
+    specs[1].name = "another.exe";
+    specs[1].dependencies = deps;
+    specs[1].dependency_count = 1u;
+    expect_failure(specs, 2u);
 }
 
 int main(void) {
@@ -542,6 +611,7 @@ int main(void) {
     check_graph(provider_bytes, consumer_bytes, 1);
     check_phase17b_graph();
     check_phase18b_virtual_paths();
-    puts("native multi-image entry, W^X, weak, reexports and rollback tests passed");
+    check_phase19b_special_ordinals();
+    puts("native multi-image entry, W^X, special ordinals, reload and rollback tests passed");
     return 0;
 }
