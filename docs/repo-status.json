@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 62,
+      "branch": "phase20e-libsystem-userspace",
+      "sha": "f9c32e904074e3dc8d37a30a9a1dfa56f6c941ff",
+      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "updated_at": "2026-10-28T19:17:14Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 61,
       "branch": "fix/phase20-live-branch-classification",
       "sha": "b5426b59b512011e8e635d5fad17c6547d8fab29",
@@ -20,21 +29,30 @@
   ],
   "ahead_branches": [
     {
-      "branch": "phase20b-native-objc-dispatch-20261028",
-      "sha": "1abf00a81340f7b344af315b476ad73919f2cd1a",
-      "ahead_by": 5,
+      "branch": "phase20d-darwin-threading",
+      "sha": "d821203a5c42bf6c0de693bb2a98ffc0522e7bc0",
+      "ahead_by": 8,
       "behind_by": 4,
-      "last_commit_at": "2026-10-28T19:16:27Z",
+      "last_commit_at": "2026-10-28T19:17:35Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "phase20b-native-objc-dispatch-20261028",
+      "sha": "1e28eebda685e160cfbcec0b1023b4e9a81f6908",
+      "ahead_by": 9,
+      "behind_by": 4,
+      "last_commit_at": "2026-10-28T19:17:32Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase20b-native-objc-dispatch-20261028",
       "status": "unmerged: not counted"
     },
     {
-      "branch": "phase20d-darwin-threading",
-      "sha": "05200605523eae8581b1e2c2b3fc8672cdeddb48",
-      "ahead_by": 6,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T19:16:20Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase20d-darwin-threading",
+      "branch": "agent/phase20a-objc-metadata-20261028",
+      "sha": "1e07f898a800bb2760385b94dbb8fe3369bb0bcc",
+      "ahead_by": 2,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T19:16:54Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase20a-objc-metadata-20261028",
       "status": "unmerged: not counted"
     }
   ],
@@ -102,5 +120,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:16:51Z"
+  "observed_at": "2026-10-28T19:17:51Z"
 }
