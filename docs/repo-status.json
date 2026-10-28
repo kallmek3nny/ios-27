@@ -2,28 +2,19 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "1f951ef63b55b979654d85c24408b1a396f25875",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/1f951ef63b55b979654d85c24408b1a396f25875",
-    "committed_at": "2026-10-28T19:56:53Z"
+    "sha": "44b3774ace8ee487734efe86c7e6182f525c9920",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/44b3774ace8ee487734efe86c7e6182f525c9920",
+    "committed_at": "2026-10-28T19:59:37Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
       "number": 69,
       "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "eac09b88ce81aa68e29c6b6449f1c62e91dfffc4",
+      "sha": "59b032ce2982981b5eddcbca282093977e4a2acf",
       "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T19:59:02Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 70,
-      "branch": "phase21c-pthread-sync-20261028",
-      "sha": "51d84a022f677e53100ca2d0ab5ed050dfa9c80e",
-      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
-      "updated_at": "2026-10-28T19:58:46Z",
+      "updated_at": "2026-10-28T19:59:38Z",
       "status": "unmerged: not counted"
     },
     {
@@ -38,6 +29,13 @@
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 70,
+      "title": "phase 21c: bounded native pthread synchronization and stress coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "head_sha": "51d84a022f677e53100ca2d0ab5ed050dfa9c80e",
+      "merged_at": "2026-10-28T19:59:38Z"
+    },
     {
       "number": 72,
       "title": "phase21e: bounded generation-safe TLS and cooperative cancellation",
@@ -86,20 +84,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/63",
       "head_sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
       "merged_at": "2026-10-28T19:21:00Z"
-    },
-    {
-      "number": 64,
-      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
-      "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
-      "merged_at": "2026-10-28T19:20:45Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 30,
+    "branches_scanned": 31,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:59:07Z"
+  "observed_at": "2026-10-28T19:59:49Z"
 }

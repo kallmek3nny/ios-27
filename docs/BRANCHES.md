@@ -4,21 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **3** · audited base: `1f951ef63b55`
+candidate branches with mapped changes: **2** · audited base: `44b3774ace8e`
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/pull/69)
 
-head: `eac09b88ce81` · ci: **running** · unmerged, not credited.
+head: `59b032ce2982` · ci: **running** · unmerged, not credited.
 
-- **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +1040/-0 lines
+- **libSystem guest model (not dylib)**: 2 source files, 5 test/fixture files, +1055/-0 lines
   - candidate declarations: `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_validate`, `ios27_21a_validate_access`
-
-### [phase21c-pthread-sync-20261028](https://github.com/kallmek3nny/ios-27/pull/70)
-
-head: `51d84a022f67` · ci: **passing_checks** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 6 test/fixture files, +1004/-0 lines
-  - candidate declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
 
 ### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
@@ -32,6 +25,13 @@ head: `1fd3dc09051a` · ci: **passing_checks** · unmerged, not credited.
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
 recent merged PRs with source changes: **6**
+
+### [merged PR #70](https://github.com/kallmek3nny/ios-27/pull/70)
+
+merged: 2026-10-28T19:59:38Z · source changes awaiting function-level audit.
+
+- **libSystem guest model (not dylib)**: 2 source files, 6 fixtures, +1004/-0 lines
+  - added declarations: `ios27_21c_cond_broadcast`, `ios27_21c_cond_signal`, `ios27_21c_cond_timedwait`, `ios27_21c_cond_wait`, `ios27_21c_mutex_lock`, `ios27_21c_mutex_trylock`, `ios27_21c_mutex_unlock`, `ios27_21c_runtime_create`, `ios27_21c_runtime_destroy`, `ios27_21c_sync_create`, `ios27_21c_sync_destroy`, `ios27_21c_usage`
 
 ### [merged PR #72](https://github.com/kallmek3nny/ios-27/pull/72)
 
@@ -67,13 +67,6 @@ merged: 2026-10-28T19:21:00Z · source changes awaiting function-level audit.
 
 - **ObjC host prototype (not Apple libobjc)**: 2 source files, 4 fixtures, +596/-0 lines
   - added declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
-
-### [merged PR #64](https://github.com/kallmek3nny/ios-27/pull/64)
-
-merged: 2026-10-28T19:20:45Z · source changes awaiting function-level audit.
-
-- **libsystem_pthread**: 2 source files, 4 fixtures, +983/-0 lines
-  - added declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
 
 ## verification policy
 
