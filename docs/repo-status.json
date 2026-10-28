@@ -11,10 +11,19 @@
     {
       "number": 77,
       "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "8cbf96974e0617cf775c9208c64dbcc61515ab56",
+      "sha": "7ffd32c0cd2045e9cee242dad225d13a3cf4b8b9",
       "title": "phase 21j: deterministic synchronization fault injection and integration stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
-      "updated_at": "2026-10-28T21:27:22Z",
+      "updated_at": "2026-10-28T21:27:39Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 78,
+      "branch": "phase21f-fifo-mutex-20261028",
+      "sha": "a501970f33dad845ae826049cc935cb891146607",
+      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
+      "updated_at": "2026-10-28T21:27:23Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +33,6 @@
       "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:26:51Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 78,
-      "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "852760eef1526a92f8153bab75d9382f143d49d4",
-      "title": "phase 21f: fifo mutex handoff, deadlock graph and stress validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
-      "updated_at": "2026-10-28T21:20:22Z",
       "status": "unmerged: not counted"
     },
     {
@@ -63,17 +63,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "a501970f33dad845ae826049cc935cb891146607",
-      "ahead_by": 6,
-      "behind_by": 4,
-      "last_commit_at": "2026-10-28T21:27:19Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21f-fifo-mutex-20261028",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 81,
@@ -134,9 +124,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 36,
+    "branches_scanned": 35,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T21:27:28Z"
+  "observed_at": "2026-10-28T21:28:00Z"
 }

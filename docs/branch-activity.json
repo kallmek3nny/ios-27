@@ -3,12 +3,12 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "dd39b31675943da242866870fa133461c8bade3b",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 7,
-  "candidate_count": 7,
+  "candidates_checked": 6,
+  "candidate_count": 6,
   "candidates": [
     {
       "branch": "phase21j-deterministic-sync-diagnostics",
-      "sha": "8cbf96974e0617cf775c9208c64dbcc61515ab56",
+      "sha": "7ffd32c0cd2045e9cee242dad225d13a3cf4b8b9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/77",
       "pr_number": 77,
       "ci": "running",
@@ -20,7 +20,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 6,
           "fixture_files": 7,
-          "additions": 1745,
+          "additions": 1797,
           "deletions": 0,
           "symbols_preview": [
             "ios27_21j_acquire",
@@ -46,42 +46,8 @@
       ]
     },
     {
-      "branch": "agent/phase21i-darwin-pthread-abi",
-      "sha": "42721d346266f2579d3ce471c0fa3a4498d5c6d9",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-      "pr_number": 80,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 4,
-          "fixture_files": 7,
-          "additions": 1141,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21i_create",
-            "ios27_21i_destroy",
-            "ios27_21i_dispatch",
-            "ios27_21i_dispatch_arm64",
-            "ios27_21i_get_stats",
-            "ios27_21i_lookup",
-            "ios27_21i_verify"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21i_abi.h",
-            "include/ios27/libsystem21i_arm64.h",
-            "src/libsystem21i_abi.c",
-            "src/libsystem21i_arm64.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "852760eef1526a92f8153bab75d9382f143d49d4",
+      "sha": "a501970f33dad845ae826049cc935cb891146607",
       "url": "https://github.com/kallmek3nny/ios-27/pull/78",
       "pr_number": 78,
       "ci": "passing_checks",
@@ -111,6 +77,40 @@
             "src/libsystem21f_mutex.c",
             "tests/phase21f-adversarial.c",
             "tests/phase21f-darwin-calls.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase21i-darwin-pthread-abi",
+      "sha": "42721d346266f2579d3ce471c0fa3a4498d5c6d9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "pr_number": 80,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 4,
+          "fixture_files": 7,
+          "additions": 1141,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21i_create",
+            "ios27_21i_destroy",
+            "ios27_21i_dispatch",
+            "ios27_21i_dispatch_arm64",
+            "ios27_21i_get_stats",
+            "ios27_21i_lookup",
+            "ios27_21i_verify"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21i_abi.h",
+            "include/ios27/libsystem21i_arm64.h",
+            "src/libsystem21i_abi.c",
+            "src/libsystem21i_arm64.c"
           ]
         }
       ]
@@ -238,42 +238,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase21f-fifo-mutex-20261028",
-      "sha": "a501970f33dad845ae826049cc935cb891146607",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21f-fifo-mutex-20261028",
-      "pr_number": null,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 8,
-          "additions": 1135,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_21f_mutex_create",
-            "ios27_21f_mutex_destroy",
-            "ios27_21f_mutex_info",
-            "ios27_21f_mutex_lock",
-            "ios27_21f_mutex_trylock",
-            "ios27_21f_mutex_unlock",
-            "ios27_21f_runtime_create",
-            "ios27_21f_runtime_destroy",
-            "ios27_21f_runtime_stats"
-          ],
-          "example_paths": [
-            "include/ios27/libsystem21f_mutex.h",
-            "src/libsystem21f_mutex.c",
-            "tests/phase21f-adversarial.c",
-            "tests/phase21f-darwin-calls.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -286,17 +250,17 @@
         "ci": "running"
       },
       {
-        "branch": "agent/phase21i-darwin-pthread-abi",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
-        "source_files": 4,
-        "fixture_files": 7,
-        "ci": "running"
-      },
-      {
         "branch": "phase21f-fifo-mutex-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/78",
         "source_files": 2,
         "fixture_files": 8,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase21i-darwin-pthread-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+        "source_files": 4,
+        "fixture_files": 7,
         "ci": "passing_checks"
       },
       {
@@ -319,13 +283,6 @@
         "source_files": 1,
         "fixture_files": 4,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase21f-fifo-mutex-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21f-fifo-mutex-20261028",
-        "source_files": 2,
-        "fixture_files": 8,
-        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -654,5 +611,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T21:27:39Z"
+  "observed_at": "2026-10-28T21:28:08Z"
 }
