@@ -7,7 +7,17 @@
     "committed_at": "2026-10-28T19:24:38Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
-  "open_pull_requests": [],
+  "open_pull_requests": [
+    {
+      "number": 68,
+      "branch": "fix/show-merged-agent-work-in-blocks",
+      "sha": "731cb58dd835868d6c1b494680bb1926ca01a644",
+      "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/68",
+      "updated_at": "2026-10-28T19:31:33Z",
+      "status": "unmerged: not counted"
+    }
+  ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
@@ -73,5 +83,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T19:25:10Z"
+  "observed_at": "2026-10-28T19:32:23Z"
 }
