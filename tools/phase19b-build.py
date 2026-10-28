@@ -143,7 +143,7 @@ def main():
             options += ["-rpath", "@loader_path/Plugins",
                         "-rpath", "@loader_path/Frameworks"]
         link(args.linker, options, obj, *(stubs[x] for x in dependencies[stem]))
-        commands = check(dylib)
+        commands = check_dylib(dylib)
         if dependencies[stem] and 0x0c not in commands:
             raise ValueError("missing linked LC_LOAD_DYLIB for " + stem)
         paths[stem] = dylib
