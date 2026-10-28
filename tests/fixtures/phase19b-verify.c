@@ -99,6 +99,8 @@ int main(int argc, char **argv) {
             assert(!ios27_images_finalization_image(images, i, &name));
             assert(!strcmp(name, names[i]));
         }
+        assert(ios27_images_initialization_image(images, 4u, &name) == -1);
+        assert(ios27_images_finalization_image(images, 4u, &name) == -1);
         assert(!ios27_images_symbol(images, names[0],
                                     "_phase19b_root_value", &root));
         assert(!ios27_images_symbol(images, names[3],
