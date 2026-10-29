@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 84,
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "63d7c42bae6df4d8a88ffc51615c1c1ac74af01c",
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "updated_at": "2026-10-29T00:17:00Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 83,
       "branch": "agent/phase22c-transactional-dyld-graph",
       "sha": "9350787f27c3ea761abe7d67a379b9ac95b259aa",
       "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "updated_at": "2026-10-29T00:16:27Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 84,
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "d9d07302bb01fe0b8b1169ca3d8d556e35a14943",
-      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "updated_at": "2026-10-29T00:16:23Z",
       "status": "unmerged: not counted"
     },
     {
@@ -84,10 +84,10 @@
   "ahead_branches": [
     {
       "branch": "phase22a-guest-address-spaces",
-      "sha": "d576125691d9059f9ce30f76f702a490d3295a1b",
-      "ahead_by": 2,
+      "sha": "338acee7ba2f1964b0292b1301c623af9c54eb3f",
+      "ahead_by": 3,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T00:16:06Z",
+      "last_commit_at": "2026-10-29T00:16:55Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
       "status": "unmerged: not counted"
     },
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:16:50Z"
+  "observed_at": "2026-10-29T00:17:13Z"
 }
