@@ -1,0 +1,67 @@
+name: phase23e standalone native app integration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase23e_*'
+      - 'include/ios27/phase23e_*'
+      - 'tests/phase23e-*'
+      - 'tools/phase23e-*'
+      - 'docs/phase23e-*'
+      - '.github/workflows/phase23e-native-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: phase23e / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: frozen-head and compiler provenance
+        run: |
+          timeout 30s git rev-parse HEAD
+          timeout 30s uname -m
+          timeout 30s clang --version
+          timeout 30s cc --version
+      - name: install open-source linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
+      - name: configure unchanged merged core with strict warnings
+        shell: bash
+        run: |
+          if [ "${{ matrix.mode }}" = sanitizers ]; then
+            timeout 120s cmake -S . -B build/phase23e-core -DIOS27_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
+          else
+            timeout 120s cmake -S . -B build/phase23e-core -DIOS27_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror"
+          fi
+      - name: build unchanged merged core
+        run: timeout 300s cmake --build build/phase23e-core --parallel 2
+      - name: three compiler-linked MH_EXECUTEs and six dylib integration suites
+        shell: bash
+        run: |
+          if [ "${{ matrix.mode }}" = sanitizers ]; then
+            timeout 300s python3 tools/phase23e-build.py --core build/phase23e-core/libios27_core.a --output-dir build/phase23e-results --runs 100 --sanitizers
+          else
+            timeout 300s python3 tools/phase23e-build.py --core build/phase23e-core/libios27_core.a --output-dir build/phase23e-results --runs 100
+          fi
+      - name: retain evidence-backed JSON capability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase23e-${{ matrix.runner }}-${{ matrix.mode }}
+          path: build/phase23e-results/phase23e-report.json
+          if-no-files-found: ignore
