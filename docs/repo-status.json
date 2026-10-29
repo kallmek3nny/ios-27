@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 98,
+      "branch": "phase24e-native-application-startup",
+      "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
+      "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/98",
+      "updated_at": "2026-10-29T21:53:07Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
       "sha": "5348ae699ee716f20a4df706e7b80c3788a9ae49",
@@ -24,15 +33,6 @@
       "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/99",
       "updated_at": "2026-10-29T21:52:31Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 98,
-      "branch": "phase24e-native-application-startup",
-      "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
-      "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/98",
-      "updated_at": "2026-10-29T21:51:40Z",
       "status": "unmerged: not counted"
     },
     {
@@ -385,5 +385,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:52:59Z"
+  "observed_at": "2026-10-29T21:53:25Z"
 }
