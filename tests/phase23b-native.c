@@ -148,9 +148,11 @@ static void order_concurrency_and_stress(ios27_23b_runtime *r, harness *h) {
         ios27_23b_handle a, b;
         assert(!ios27_23b_open(r, 5, &a));
         assert(!ios27_23b_open(r, 5, &b));
+        assert(a.ticket != b.ticket);
         assert(!ios27_23b_ensure(r, a, dispatch, h));
         assert(!ios27_23b_ensure(r, b, dispatch, h));
         assert(!ios27_23b_close(r, a, dispatch, h));
+        assert(ios27_23b_close(r, a, dispatch, h) == ESTALE);
         assert(!ios27_23b_close(r, b, dispatch, h));
     }
     for (unsigned i = 0; i < 6; ++i) {

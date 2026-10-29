@@ -193,17 +193,33 @@ int ios27_23b_open(ios27_23b_runtime *r, unsigned id,
         if (s->refs == IOS27_23B_MAX_REFS) e = EOVERFLOW;
         if (s->state == IOS27_23B_STOPPING) e = EBUSY;
     }
+    size_t lease = IOS27_23B_MAX_HANDLES;
+    if (!e) {
+        for (size_t i = 0; i < IOS27_23B_MAX_HANDLES; ++i)
+            if (!r->leases[i].ticket) { lease = i; break; }
+        if (lease == IOS27_23B_MAX_HANDLES) e = EMFILE;
+        if (r->next_ticket == UINT64_MAX) e = EOVERFLOW;
+    }
     if (!e) {
         for (size_t i = 0; i < n; ++i) ++r->slot[order[i]].refs;
-        *out = (ios27_23b_handle){id, r->slot[id].generation};
+        uint64_t ticket = ++r->next_ticket;
+        r->leases[lease] = (ios27_23b_lease){ticket, id, 0};
+        *out = (ios27_23b_handle){id, r->slot[id].generation, ticket};
     }
     pthread_mutex_unlock(&r->mutex);
     return e;
 }
-static int token_ok(ios27_23b_runtime *r, ios27_23b_handle h) {
-    return h.index < r->count && r->slot[h.index].registered &&
-           h.generation == r->slot[h.index].generation &&
-           r->slot[h.index].refs > 0;
+/* The per-open ticket prevents a duplicate close from consuming another
+   handle's dependency references in the same image generation. */
+static int lease_index(ios27_23b_runtime *r, ios27_23b_handle h) {
+    if (!h.ticket || h.index >= r->count ||
+        !r->slot[h.index].registered ||
+        h.generation != r->slot[h.index].generation ||
+        !r->slot[h.index].refs) return -1;
+    for (size_t i = 0; i < IOS27_23B_MAX_HANDLES; ++i)
+        if (r->leases[i].ticket == h.ticket &&
+            r->leases[i].index == h.index) return (int)i;
+    return -1;
 }
 static int await_slot(ios27_23b_runtime *r, ios27_23b_slot *s) {
     struct timespec deadline;
@@ -277,21 +293,30 @@ int ios27_23b_ensure(ios27_23b_runtime *r, ios27_23b_handle handle,
     unsigned order[IOS27_23B_MAX_IMAGES]; size_t n;
     if (!r || !r->initialized || !fn) return EINVAL;
     pthread_mutex_lock(&r->mutex);
-    int e = token_ok(r, handle) ? graph(r, handle.index, order, &n) : ESTALE;
+    int lease = lease_index(r, handle);
+    int e = lease < 0 ? ESTALE : graph(r, handle.index, order, &n);
+    if (!e) ++r->leases[lease].active;
     pthread_mutex_unlock(&r->mutex);
     if (e) return e;
     for (size_t i = 0; i < n; ++i) {
         e = ensure_one(r, order[i], fn, ctx);
-        if (e) return e;
+        if (e) break;
     }
-    return 0;
+    pthread_mutex_lock(&r->mutex);
+    --r->leases[lease].active;
+    pthread_mutex_unlock(&r->mutex);
+    return e;
 }
 int ios27_23b_close(ios27_23b_runtime *r, ios27_23b_handle handle,
                     ios27_23b_dispatch fn, void *ctx) {
     unsigned order[IOS27_23B_MAX_IMAGES]; size_t n;
+    unsigned char retiring[IOS27_23B_MAX_IMAGES] = {0};
+    unsigned char needs_term[IOS27_23B_MAX_IMAGES] = {0};
     if (!r || !r->initialized || !fn) return EINVAL;
     pthread_mutex_lock(&r->mutex);
-    int e = token_ok(r, handle) ? graph(r, handle.index, order, &n) : ESTALE;
+    int lease = lease_index(r, handle);
+    int e = lease < 0 ? ESTALE : graph(r, handle.index, order, &n);
+    if (!e && r->leases[lease].active) e = EBUSY;
     if (!e) for (size_t i = 0; i < n; ++i) {
         ios27_23b_slot *s = &r->slot[order[i]];
         if (!s->refs) e = ESTALE;
@@ -299,21 +324,23 @@ int ios27_23b_close(ios27_23b_runtime *r, ios27_23b_handle handle,
             s->state == IOS27_23B_STOPPING) e = EBUSY;
     }
     if (e) { pthread_mutex_unlock(&r->mutex); return e; }
+    r->leases[lease].ticket = 0;
     for (size_t i = 0; i < n; ++i) --r->slot[order[i]].refs;
     for (size_t i = 0; i < n; ++i) {
-        ios27_23b_slot *s = &r->slot[order[i]];
-        if (!s->refs && s->state == IOS27_23B_READY)
+        unsigned id = order[i];
+        ios27_23b_slot *s = &r->slot[id];
+        if (!s->refs) {
+            retiring[id] = 1;
+            needs_term[id] = s->state == IOS27_23B_READY;
             s->state = IOS27_23B_STOPPING;
+        }
     }
     pthread_mutex_unlock(&r->mutex);
     /* Reverse topological order: consumers finish before providers. */
     int first = 0;
     for (size_t i = n; i > 0; --i) {
         unsigned id = order[i - 1]; ios27_23b_slot *s = &r->slot[id];
-        pthread_mutex_lock(&r->mutex);
-        int stopping = s->state == IOS27_23B_STOPPING && !s->refs;
-        pthread_mutex_unlock(&r->mutex);
-        if (stopping) for (size_t k = s->image.term_count; k > 0; --k) {
+        if (needs_term[id]) for (size_t k = s->image.term_count; k > 0; --k) {
             pthread_mutex_lock(&r->mutex); ++s->active;
             pthread_mutex_unlock(&r->mutex);
             int result = fn(ctx, id, IOS27_23B_DESTRUCT, s->image.term[k - 1], k - 1);
@@ -323,7 +350,7 @@ int ios27_23b_close(ios27_23b_runtime *r, ios27_23b_handle handle,
             pthread_mutex_unlock(&r->mutex);
         }
         pthread_mutex_lock(&r->mutex);
-        if (!s->refs) {
+        if (retiring[id]) {
             s->state = IOS27_23B_NEW;
             s->failure = 0;
             ++s->generation;

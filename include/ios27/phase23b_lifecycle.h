@@ -9,6 +9,7 @@
 #define IOS27_23B_MAX_CALLBACKS 64u
 #define IOS27_23B_MAX_SEGMENTS 24u
 #define IOS27_23B_MAX_REFS 65535u
+#define IOS27_23B_MAX_HANDLES 128u
 
 typedef struct { uint64_t start, end; } ios27_23b_exec_range;
 typedef struct {
@@ -29,7 +30,8 @@ typedef enum { IOS27_23B_CONSTRUCT, IOS27_23B_DESTRUCT,
 typedef int (*ios27_23b_dispatch)(void *context, unsigned image,
                                   ios27_23b_action action, uint64_t target,
                                   size_t ordinal);
-typedef struct { unsigned index; uint32_t generation; } ios27_23b_handle;
+typedef struct { unsigned index; uint32_t generation; uint64_t ticket; } ios27_23b_handle;
+typedef struct { uint64_t ticket; unsigned index, active; } ios27_23b_lease;
 typedef enum { IOS27_23B_NEW, IOS27_23B_STARTING, IOS27_23B_READY,
                IOS27_23B_FAILED, IOS27_23B_STOPPING } ios27_23b_state;
 typedef struct {
@@ -47,6 +49,8 @@ typedef struct {
     pthread_mutex_t mutex;
     pthread_cond_t changed;
     ios27_23b_slot slot[IOS27_23B_MAX_IMAGES];
+    ios27_23b_lease leases[IOS27_23B_MAX_HANDLES];
+    uint64_t next_ticket;
     size_t count;
     unsigned initialized;
 } ios27_23b_runtime;
