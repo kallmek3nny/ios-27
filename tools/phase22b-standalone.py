@@ -24,7 +24,8 @@ def main():
         raise RuntimeError(f"compiler missing: {CC}")
     with tempfile.TemporaryDirectory(prefix="ios27-phase22b-") as tmp:
         exe = Path(tmp) / "integration"
-        opts = ["-std=c11", "-Wall", "-Wextra", "-Werror", "-Wpedantic", "-pthread", "-O1" if SAN else "-O2"]
+        # Existing phase20e sources have no final newline; keep -Werror on semantic diagnostics.
+        opts = ["-std=c11", "-Wall", "-Wextra", "-Werror", "-Wpedantic", "-Wno-newline-eof", "-pthread", "-O1" if SAN else "-O2"]
         if SAN:
             opts += ["-fno-omit-frame-pointer", "-fsanitize=address,undefined"]
         run([CC, *opts, "-I" + str(ROOT / "include"),
@@ -39,7 +40,7 @@ def main():
             obj = Path(tmp) / "darwin.o"
             run(["clang", "--target=arm64-apple-darwin", "-ffreestanding",
                  "-fno-stack-protector", "-std=c11", "-Wall", "-Wextra", "-Werror",
-                 "-Wpedantic", "-I" + str(ROOT / "include"), "-c",
+                 "-Wpedantic", "-Wno-newline-eof", "-I" + str(ROOT / "include"), "-c",
                  ROOT / "tests/phase22b-darwin-fixture.c", "-o", obj], timeout=120)
             data = obj.read_bytes()
             assert data[:4] == b"\xcf\xfa\xed\xfe", "not a little-endian Mach-O object"
