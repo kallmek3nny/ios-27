@@ -25,7 +25,7 @@ def run(cmd, seconds):
 
 print("host:", platform.system(), platform.machine(), "sanitizer:", SANITIZE or "none", flush=True)
 run([sys.executable, ROOT / "tools" / "phase22e-generate.py", "--check"], 30)
-for name in ("stress", "negative", "ordering"):
+for name in ("stress", "negative", "ordering", "replies"):
     exe = OUT / (name + ("-san" if SANITIZE else ""))
     run([CC, *FLAGS, ROOT / "src" / "phase22e_ipc.c",
          ROOT / "tests" / ("phase22e-" + name + ".c"), "-o", exe], 300)

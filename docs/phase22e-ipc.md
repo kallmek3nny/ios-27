@@ -51,7 +51,8 @@ Only files owned by phase 22e and its independent workflow are changed.
    saturation, OOL snapshots, atomic transfer rollback, dead names,
    cancellation, FIFO waiters, concurrent registration, exhaustion,
    send-once reuse rejection, duplicate MOVE_SEND rollback, timeout
-   boundaries, and repeated namespace startup/teardown.
+   boundaries, a deliberately out-of-order 32-reply burst with request/reply
+   ID correlation, and repeated namespace startup/teardown.
 
 ## Building and reproducing
 
