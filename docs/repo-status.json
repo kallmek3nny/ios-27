@@ -11,10 +11,10 @@
     {
       "number": 93,
       "branch": "phase23e/native-app-integration-harness",
-      "sha": "ceaa664632b3a49df1c4fd013f10db5527caca4f",
+      "sha": "77cb73c4836cd336218143d689d1d27ed5c9b8a9",
       "title": "phase 23e: standalone compiler-linked darwin app integration harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
-      "updated_at": "2026-10-29T21:22:40Z",
+      "updated_at": "2026-10-29T21:22:52Z",
       "status": "unmerged: not counted"
     },
     {
@@ -358,5 +358,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:22:44Z"
+  "observed_at": "2026-10-29T21:23:04Z"
 }

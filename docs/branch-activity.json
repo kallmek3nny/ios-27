@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase23e/native-app-integration-harness",
-      "sha": "ceaa664632b3a49df1c4fd013f10db5527caca4f",
+      "sha": "77cb73c4836cd336218143d689d1d27ed5c9b8a9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
       "pr_number": 93,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -20,7 +20,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 3,
-          "additions": 960,
+          "additions": 961,
           "deletions": 0,
           "symbols_preview": [
             "ios27_23e_application_probe",
@@ -40,7 +40,7 @@
       "sha": "dbb5f523978df5b3cf6b476d14bdfd498e886250",
       "url": "https://github.com/kallmek3nny/ios-27/pull/96",
       "pr_number": 96,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 13,
       "possibly_truncated": false,
@@ -76,7 +76,7 @@
       "sha": "c065254d066b2cadceaaee837ac517aacbfbd693",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
       "pr_number": 94,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -661,21 +661,21 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/93",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "agent/phase23b-lifecycle-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/96",
         "source_files": 2,
         "fixture_files": 9,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase23c-objc-native-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase23a-incremental-dyld-namespaces",
@@ -1549,5 +1549,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:22:47Z"
+  "observed_at": "2026-10-29T21:23:09Z"
 }
