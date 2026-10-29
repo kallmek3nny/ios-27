@@ -207,7 +207,7 @@ def main():
                      [fixtures[x] for x in order], 180, env)
     records = [json.loads(line) for line in output.splitlines()
                if line.startswith("{")]
-    if len(records) != 5:
+    if len(records) != 6:
         raise RuntimeError("missing application/library/fuzz test reports: " + output)
     result = {"fixtures": {"dylibs": len(FIXTURES),
                            "applications": len(APPS)},
