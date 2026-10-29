@@ -250,6 +250,26 @@ int main(void) {
     assert(d.reason == IOS27_22C_FIXUP);
     ios27_22c_destroy(g);
     assert(!memcmp(mutate + FIXUPS + 64u, "\x02\x01\x00\x00", 4u));
-    printf("phase22c: 50000 pinned image closures plus graph/fixup/rollback tests passed\n");
+    /* Mutate linked-format load commands and exercise full preflight
+     * and mapping rollback on caller-owned copies with a deterministic seed. */
+    {
+        uint32_t seed = UINT32_C(0x22c15eed);
+        specs[0].file = mutate;
+        for (size_t iteration = 0u; iteration < 2500u; ++iteration) {
+            ios27_22c_graph *trial = NULL;
+            memcpy(mutate, a, BYTES);
+            seed ^= seed << 13u;
+            seed ^= seed >> 17u;
+            seed ^= seed << 5u;
+            size_t offset = (size_t)seed % 448u;
+            mutate[offset] ^= (uint8_t)(1u << (iteration % 8u));
+            if (!ios27_22c_create(specs, 2u, &trial, &d)) {
+                if (!ios27_22c_load(trial, &d))
+                    assert(!ios27_22c_unload(trial, &d));
+                ios27_22c_destroy(trial);
+            }
+        }
+    }
+    printf("phase22c: 50000 pins, 2500 malformed graph loads and rollback passed\n");
     return 0;
 }
