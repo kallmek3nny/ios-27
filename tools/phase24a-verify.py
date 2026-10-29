@@ -130,7 +130,7 @@ def link(linker, output, obj, options, dependencies, build):
     except RuntimeError as exc:
         if "does not support linking for platform macOS" not in str(exc):
             raise
-        cmd[cmd.index(str(obj))] = str(strip_platform_command(obj))
+        cmd[cmd.index(obj)] = strip_platform_command(obj)
         run(cmd, 30)
 
 
