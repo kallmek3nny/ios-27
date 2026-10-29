@@ -6,25 +6,25 @@
 
 candidate branches with mapped changes: **16** · audited base: `1dd112410e43`
 
+### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
+
+head: `1646e36b3b8b` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +720/-0 lines
+
+### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
+
+head: `72e3f24e5f81` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 7 test/fixture files, +1021/-0 lines
+  - candidate declarations: `ios27_23d_free`, `ios27_23d_get_stats`, `ios27_23d_memory_protect`, `ios27_23d_memory_read`, `ios27_23d_memory_write`, `ios27_23d_new`, `ios27_23d_process_create`, `ios27_23d_process_destroy`, `ios27_23d_seed`, `ios27_23d_service_destroy`, `ios27_23d_service_grant`, `ios27_23d_service_register`
+
 ### [agent/phase23b-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/96)
 
 head: `311ef96195d2` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 9 test/fixture files, +995/-0 lines
   - candidate declarations: `ios27_23b_add`, `ios27_23b_bind`, `ios27_23b_close`, `ios27_23b_ensure`, `ios27_23b_open`, `ios27_23b_parse`, `ios27_23b_runtime_destroy`, `ios27_23b_runtime_init`, `ios27_23b_snapshot`
-
-### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
-
-head: `e8c3f4b220e4` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 7 test/fixture files, +1011/-0 lines
-  - candidate declarations: `ios27_23d_free`, `ios27_23d_get_stats`, `ios27_23d_memory_protect`, `ios27_23d_memory_read`, `ios27_23d_memory_write`, `ios27_23d_new`, `ios27_23d_process_create`, `ios27_23d_process_destroy`, `ios27_23d_seed`, `ios27_23d_service_destroy`, `ios27_23d_service_grant`, `ios27_23d_service_register`
-
-### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
-
-head: `59a43148eb07` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +695/-0 lines
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
