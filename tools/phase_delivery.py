@@ -113,7 +113,6 @@ def ledger(repo_status, branch_activity, previous=None):
         "schema": 1, "scope": "phase20-22",
         "method": "merged source-bearing PR workstreams / fixed 20 planned phase workstreams; not iOS compatibility",
         "repository": repo_status["repository"], "source_sha": sha,
-        "observed_at": branch_activity.get("observed_at"),
         "delivered": done, "active": active, "total": len(result),
         "percent": int(round(100.0 * done / len(result))),
         "groups": groups, "workstreams": result,
