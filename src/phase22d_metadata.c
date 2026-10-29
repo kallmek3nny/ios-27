@@ -13,7 +13,9 @@ static int matches_signature(phase22d_signature s, const char *encoding) {
      * guess the calling convention for C structs, vectors, long doubles,
      * unions, varargs or unknown encodings. Darwin LP64 only. */
     switch (s) {
-    case PHASE22D_WORD0: return !strcmp(encoding, "Q16@0:8");
+    case PHASE22D_WORD0: return !strcmp(encoding, "Q16@0:8") ||
+                               !strcmp(encoding, "q16@0:8") ||
+                               !strcmp(encoding, "@16@0:8");
     case PHASE22D_WORD1: return !strcmp(encoding, "Q24@0:8Q16");
     case PHASE22D_WORD2: return !strcmp(encoding, "Q32@0:8Q16Q24");
     case PHASE22D_WORD3: return !strcmp(encoding, "Q40@0:8Q16Q24Q32");
