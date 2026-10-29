@@ -24,8 +24,8 @@ timeout 180s "$build/phase22c-compiled" "$build/phase22c-provider.o" "$build/pha
 # Some installed ld64.lld variants are stubs without a Mach-O backend.
 linker="${DARWIN_LINKER:-ld64.lld}"
 # Never claim linked dylib or native guest execution coverage in that case.
-if command -v "$linker" >/dev/null && timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -install_name provider.dylib -o "$build/phase22c-provider.dylib" "$build/phase22c-provider.o"; then
-  timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -install_name consumer.dylib "$build/phase22c-provider.dylib" -o "$build/phase22c-consumer.dylib" "$build/phase22c-consumer.o"
+if command -v "$linker" >/dev/null && timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -fixup_chains -install_name provider.dylib -o "$build/phase22c-provider.dylib" "$build/phase22c-provider.o"; then
+  timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -fixup_chains -install_name consumer.dylib "$build/phase22c-provider.dylib" -o "$build/phase22c-consumer.dylib" "$build/phase22c-consumer.o"
   timeout 180s "$build/phase22c-compiled" "$build/phase22c-provider.o" "$build/phase22c-consumer.o" "$build/phase22c-provider.dylib" "$build/phase22c-consumer.dylib"
 else
   printf '%s\n' 'phase22c NOT VERIFIED: compiler-linked MH_DYLIB tests unavailable (ld64.lld missing or unsupported)' >&2
