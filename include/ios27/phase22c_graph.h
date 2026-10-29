@@ -37,6 +37,14 @@ typedef struct { uint64_t serial; } ios27_22c_lease;
 int ios27_22c_create(const ios27_image_spec *specs, size_t count,
                       ios27_22c_graph **out, ios27_22c_diagnostic *diag);
 
+/* Path-aware variant resolves guest-virtual install names and inherited runpaths
+ * against a caller-supplied catalog. No host filesystem is inspected. */
+int ios27_22c_create_with_paths(const ios27_image_spec *specs, size_t count,
+                                 const char *const *guest_paths,
+                                 const char *main_executable,
+                                 ios27_22c_graph **out,
+                                 ios27_22c_diagnostic *diag);
+
 /* Preflight uses Mach-O metadata and export trie; actual relocation and W^X
  * mapping are delegated, without editing them, to ios27_images_load. */
 int ios27_22c_load(ios27_22c_graph *graph, ios27_22c_diagnostic *diag);
