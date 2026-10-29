@@ -4,18 +4,18 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **15** · audited base: `1dd112410e43`
+candidate branches with mapped changes: **16** · audited base: `1dd112410e43`
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
-head: `90d13d4307ef` · ci: **running** · unmerged, not credited.
+head: `90d13d4307ef` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +920/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
-head: `280b1daed6f8` · ci: **running** · unmerged, not credited.
+head: `280b1daed6f8` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +991/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
@@ -107,6 +107,12 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge)
+
+head: `c065254d066b` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

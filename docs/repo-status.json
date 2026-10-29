@@ -144,7 +144,17 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "c065254d066b2cadceaaee837ac517aacbfbd693",
+      "ahead_by": 4,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-29T21:22:04Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -345,9 +355,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 11,
+    "branches_scanned": 12,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:21:35Z"
+  "observed_at": "2026-10-29T21:22:08Z"
 }
