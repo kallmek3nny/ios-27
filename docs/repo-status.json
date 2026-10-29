@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "f2e9c8d8d15d58d0bd75d0e733e8d227ffdb8ccf",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:21:45Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 86,
+      "branch": "phase22b-darwin-bsd-capability-20261028",
+      "sha": "e909e8faed23689941bd13caebc97e7b3e5d6c69",
+      "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+      "updated_at": "2026-10-29T00:21:40Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 85,
       "branch": "phase22a-guest-address-spaces",
       "sha": "51ac77fa8f9c4f603590c2134a5536877845b32b",
@@ -24,24 +42,6 @@
       "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "updated_at": "2026-10-29T00:20:42Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 83,
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "c432c865d43bf41e0262da77e7631d2da0f00613",
-      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:20:29Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 86,
-      "branch": "phase22b-darwin-bsd-capability-20261028",
-      "sha": "e909e8faed23689941bd13caebc97e7b3e5d6c69",
-      "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
-      "updated_at": "2026-10-29T00:20:23Z",
       "status": "unmerged: not counted"
     },
     {
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:21:36Z"
+  "observed_at": "2026-10-29T00:21:57Z"
 }
