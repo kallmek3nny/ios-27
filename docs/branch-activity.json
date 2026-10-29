@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "9193cdee3bd7b21e95b70ac024b3efbd764e64c5",
+  "main_source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 8,
-  "candidate_count": 7,
+  "candidates_checked": 10,
+  "candidate_count": 10,
   "candidates": [
     {
       "branch": "phase22e-mach-ipc-mig",
@@ -17,7 +17,7 @@
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "mach-ipc",
           "source_files": 2,
           "fixture_files": 7,
           "additions": 1448,
@@ -43,7 +43,7 @@
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "dyld-engine",
           "source_files": 2,
           "fixture_files": 5,
           "additions": 1302,
@@ -82,7 +82,7 @@
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "sandbox",
           "source_files": 3,
           "fixture_files": 9,
           "additions": 1109,
@@ -121,7 +121,7 @@
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "bsd-calls",
           "source_files": 2,
           "fixture_files": 3,
           "additions": 642,
@@ -260,9 +260,129 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "pr_number": 73,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 17,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 13,
+          "additions": 2534,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21d_create",
+            "ios27_21d_destroy",
+            "ios27_21d_once",
+            "ios27_21d_rdlock",
+            "ios27_21d_runtime_create",
+            "ios27_21d_runtime_destroy",
+            "ios27_21d_timedrdlock",
+            "ios27_21d_timedwrlock",
+            "ios27_21d_tryrdlock",
+            "ios27_21d_trywrlock",
+            "ios27_21d_unlock",
+            "ios27_21d_usage"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21d_rw_once.h",
+            "src/libsystem21d_rw_once.c",
+            "tests/phase21d-cancel.c",
+            "tests/phase21d-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "pr_number": 69,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 24,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 20,
+          "additions": 3007,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21a_attach_thread",
+            "ios27_21a_call",
+            "ios27_21a_create",
+            "ios27_21a_create_regions",
+            "ios27_21a_destroy",
+            "ios27_21a_detach_thread",
+            "ios27_21a_register_once",
+            "ios27_21a_release_once",
+            "ios27_21a_validate",
+            "ios27_21a_validate_access"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21a_abi.h",
+            "src/libsystem21a_abi.c",
+            "tests/phase21a-adversarial.c",
+            "tests/phase21a-arm64-cpp.cpp"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase21e-exit-cancellation-20261028",
+      "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/76",
+      "pr_number": 76,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 1,
+          "fixture_files": 5,
+          "additions": 358,
+          "deletions": 11,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/libsystem21e_tls.c",
+            "tests/phase21e-cross-runtime-thread-exit.c",
+            "tests/phase21e-exit-token-boundary.c",
+            "tests/phase21e-pthread-error-rollback.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
+    "bsd-calls": [
+      {
+        "branch": "phase22b-darwin-bsd-capability-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "passing_checks"
+      }
+    ],
+    "dyld-engine": [
+      {
+        "branch": "agent/phase22c-transactional-dyld-graph",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "passing_checks"
+      }
+    ],
     "libsystem-pthread": [
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
@@ -284,40 +404,49 @@
         "source_files": 6,
         "fixture_files": 17,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "feat/phase21d-fair-rwlock-once",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+        "source_files": 2,
+        "fixture_files": 13,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21a/darwin-pthread-abi-bridge",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+        "source_files": 2,
+        "fixture_files": 20,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "phase21e-exit-cancellation-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/76",
+        "source_files": 1,
+        "fixture_files": 5,
+        "ci": "passing_checks"
       }
     ],
-    "unclassified": [
+    "mach-ipc": [
       {
         "branch": "phase22e-mach-ipc-mig",
         "url": "https://github.com/kallmek3nny/ios-27/pull/87",
         "source_files": 2,
         "fixture_files": 7,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "agent/phase22c-transactional-dyld-graph",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "passing_checks"
-      },
+      }
+    ],
+    "sandbox": [
       {
         "branch": "phase22a-guest-address-spaces",
         "url": "https://github.com/kallmek3nny/ios-27/pull/85",
         "source_files": 3,
         "fixture_files": 9,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase22b-darwin-bsd-capability-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/86",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "passing_checks"
       }
     ]
   },
-  "recent_merged_count": 7,
+  "recent_merged_count": 18,
   "recent_merged": [
     {
       "branch": "merged-pr-84",
@@ -330,7 +459,7 @@
       "possibly_truncated": false,
       "groups": [
         {
-          "group_id": "unclassified",
+          "group_id": "objc-host-model",
           "source_files": 4,
           "fixture_files": 4,
           "additions": 1334,
@@ -556,9 +685,461 @@
         }
       ],
       "merged_at": "2026-10-28T19:56:54Z"
+    },
+    {
+      "branch": "merged-pr-71",
+      "sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+      "pr_number": 71,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 774,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_21b_attr_init",
+            "ios27_21b_attr_validate",
+            "ios27_21b_runtime_create",
+            "ios27_21b_runtime_destroy",
+            "ios27_21b_runtime_usage",
+            "ios27_21b_runtime_wait_idle",
+            "ios27_21b_thread_create",
+            "ios27_21b_thread_detach",
+            "ios27_21b_thread_equal",
+            "ios27_21b_thread_info",
+            "ios27_21b_thread_join",
+            "ios27_21b_thread_self"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem21b_lifecycle.h",
+            "src/libsystem21b_lifecycle.c",
+            "tests/phase21b-darwin-arm64.c",
+            "tests/phase21b-native.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:54:07Z"
+    },
+    {
+      "branch": "merged-pr-67",
+      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "pr_number": 67,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 938,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20c_alloc",
+            "ios27_objc20c_autorelease",
+            "ios27_objc20c_create",
+            "ios27_objc20c_destroy",
+            "ios27_objc20c_get_stats",
+            "ios27_objc20c_pool_pop",
+            "ios27_objc20c_pool_push",
+            "ios27_objc20c_release",
+            "ios27_objc20c_retain",
+            "ios27_objc20c_retain_count",
+            "ios27_objc20c_strong_store",
+            "ios27_objc20c_validate"
+          ],
+          "example_paths": [
+            "include/ios27/objc20c_lifetime.h",
+            "src/objc20c_lifetime.c",
+            "tests/phase20c-compiled-host.c",
+            "tests/phase20c-compiled.m"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:24:38Z"
+    },
+    {
+      "branch": "merged-pr-62",
+      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "pr_number": 62,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 558,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20e_advance_time",
+            "ios27_20e_calloc",
+            "ios27_20e_close",
+            "ios27_20e_free",
+            "ios27_20e_getenv",
+            "ios27_20e_gettimeofday",
+            "ios27_20e_guest_ptr",
+            "ios27_20e_init",
+            "ios27_20e_lseek",
+            "ios27_20e_malloc",
+            "ios27_20e_mmap",
+            "ios27_20e_mprotect"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h",
+            "src/libsystem20e_services.c",
+            "tests/phase20e-darwin-fixture.c",
+            "tests/phase20e-standalone.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:22:22Z"
+    },
+    {
+      "branch": "merged-pr-63",
+      "sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "pr_number": 63,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 3,
+          "fixture_files": 4,
+          "additions": 655,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20b_alloc",
+            "ios27_objc20b_bind",
+            "ios27_objc20b_create",
+            "ios27_objc20b_destroy",
+            "ios27_objc20b_register",
+            "ios27_objc20b_release",
+            "ios27_objc20b_replace",
+            "ios27_objc20b_resolve",
+            "ios27_objc20b_resolve_global",
+            "ios27_objc20b_resolve_super_global",
+            "ios27_objc20b_selector",
+            "ios27_objc20b_send_words"
+          ],
+          "example_paths": [
+            "include/ios27/objc20b_dispatch.h",
+            "src/objc20b_dispatch.c",
+            "src/objc20b_entry.S",
+            "tests/phase20b-clang.m"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:21:00Z"
+    },
+    {
+      "branch": "merged-pr-64",
+      "sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "pr_number": 64,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-pthread",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 983,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_20d_cancel_point",
+            "ios27_20d_cancel_request",
+            "ios27_20d_cond_signal",
+            "ios27_20d_cond_wait",
+            "ios27_20d_create",
+            "ios27_20d_destroy",
+            "ios27_20d_getspecific",
+            "ios27_20d_key_create",
+            "ios27_20d_key_delete",
+            "ios27_20d_mutex_lock",
+            "ios27_20d_mutex_trylock",
+            "ios27_20d_mutex_unlock"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20d_threads.h",
+            "src/libsystem20d_threads.c",
+            "tests/phase20d-arm64-abi.c",
+            "tests/phase20d-edge.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:20:45Z"
+    },
+    {
+      "branch": "merged-pr-65",
+      "sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "pr_number": 65,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 3,
+          "fixture_files": 5,
+          "additions": 1002,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc20a_counts",
+            "ios27_objc20a_find_class",
+            "ios27_objc20a_inspect",
+            "ios27_objc20a_register",
+            "ios27_objc20a_register_image",
+            "ios27_objc20a_registry_create",
+            "ios27_objc20a_registry_destroy"
+          ],
+          "example_paths": [
+            "include/ios27/objc20a_metadata.h",
+            "src/objc20a_reader.c",
+            "src/objc20a_registry.c",
+            "tests/phase20a-category.m"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T19:20:17Z"
+    },
+    {
+      "branch": "merged-pr-57",
+      "sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+      "pr_number": 57,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 192,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_libsystem_create",
+            "ios27_libsystem_destroy",
+            "ios27_libsystem_free",
+            "ios27_libsystem_guest",
+            "ios27_libsystem_heap_state",
+            "ios27_libsystem_malloc",
+            "ios27_libsystem_output",
+            "ios27_libsystem_stdin",
+            "ios27_libsystem_syscall"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem_user.h",
+            "src/libsystem_user.c"
+          ]
+        },
+        {
+          "group_id": "objc-host-model",
+          "source_files": 6,
+          "fixture_files": 3,
+          "additions": 1080,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_objc_alloc",
+            "ios27_objc_class_index",
+            "ios27_objc_counts",
+            "ios27_objc_lookup",
+            "ios27_objc_metadata_inspect",
+            "ios27_objc_register_classes",
+            "ios27_objc_register_metadata",
+            "ios27_objc_release",
+            "ios27_objc_runtime_create",
+            "ios27_objc_runtime_destroy",
+            "ios27_objc_selector",
+            "ios27_objc_send"
+          ],
+          "example_paths": [
+            "include/ios27/objc_bridge.h",
+            "include/ios27/objc_metadata.h",
+            "include/ios27/objc_runtime.h",
+            "src/objc_bridge.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T18:10:37Z"
+    },
+    {
+      "branch": "merged-pr-53",
+      "sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "pr_number": 53,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "dyld-engine",
+          "source_files": 3,
+          "fixture_files": 7,
+          "additions": 697,
+          "deletions": 72,
+          "symbols_preview": [
+            "ios27_images_finalization_image"
+          ],
+          "example_paths": [
+            "include/ios27/images.h",
+            "src/chained.c",
+            "src/images.c",
+            "tests/fixtures/phase19b-base.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T18:08:09Z"
+    },
+    {
+      "branch": "merged-pr-55",
+      "sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "pr_number": 55,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 5,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-o",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 1111,
+          "deletions": 9,
+          "symbols_preview": [
+            "ios27_darwin_arm64_apply_batch",
+            "ios27_darwin_link_objects"
+          ],
+          "example_paths": [
+            "include/ios27/darwin_branch26.h",
+            "src/darwin_branch26.c",
+            "tests/test_compiled_darwin_got.c",
+            "tests/test_compiled_darwin_reloc.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T18:06:20Z"
+    },
+    {
+      "branch": "merged-pr-54",
+      "sha": "61b4062eb85b0605542b3b87f629d3859f60ee02",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "pr_number": 54,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-o",
+          "source_files": 3,
+          "fixture_files": 4,
+          "additions": 737,
+          "deletions": 28,
+          "symbols_preview": [
+            "ios27_arm64_enter_main",
+            "ios27_run_executable_argv",
+            "ios27_run_executable_context"
+          ],
+          "example_paths": [
+            "include/ios27/macho.h",
+            "src/macho.c",
+            "src/runner.c",
+            "tests/fixtures/phase19a-process.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T18:03:44Z"
+    },
+    {
+      "branch": "merged-pr-56",
+      "sha": "681fef8b390096eb7253c4029e491e59e0446389",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "pr_number": 56,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-ipc",
+          "source_files": 4,
+          "fixture_files": 2,
+          "additions": 852,
+          "deletions": 22,
+          "symbols_preview": [
+            "ios27_mach_v2_allocate",
+            "ios27_mach_v2_allocate_unlocked",
+            "ios27_mach_v2_destroy",
+            "ios27_mach_v2_destroy_unlocked",
+            "ios27_mach_v2_drop_send",
+            "ios27_mach_v2_drop_send_once",
+            "ios27_mach_v2_drop_send_once_unlocked",
+            "ios27_mach_v2_drop_send_unlocked",
+            "ios27_mach_v2_exception_get",
+            "ios27_mach_v2_exception_get_unlocked",
+            "ios27_mach_v2_exception_raise",
+            "ios27_mach_v2_exception_raise_unlocked"
+          ],
+          "example_paths": [
+            "include/ios27/darwin_mach_abi.h",
+            "include/ios27/mach_v2.h",
+            "src/darwin_mach_abi.c",
+            "src/mach_v2.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-28T18:01:05Z"
     }
   ],
   "merged_groups": {
+    "dyld-engine": [
+      {
+        "pr_number": 53,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+        "source_files": 3,
+        "fixture_files": 7,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
+    "libsystem-host-model": [
+      {
+        "pr_number": 62,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+        "source_files": 2,
+        "fixture_files": 3,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 57,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+        "source_files": 2,
+        "fixture_files": 0,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
     "libsystem-pthread": [
       {
         "pr_number": 81,
@@ -601,17 +1182,84 @@
         "source_files": 2,
         "fixture_files": 4,
         "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 71,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+        "source_files": 2,
+        "fixture_files": 3,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 64,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+        "source_files": 2,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
       }
     ],
-    "unclassified": [
+    "mach-ipc": [
+      {
+        "pr_number": 56,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+        "source_files": 4,
+        "fixture_files": 2,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
+    "mach-o": [
+      {
+        "pr_number": 55,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+        "source_files": 2,
+        "fixture_files": 2,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 54,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+        "source_files": 3,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      }
+    ],
+    "objc-host-model": [
       {
         "pr_number": 84,
         "url": "https://github.com/kallmek3nny/ios-27/pull/84",
         "source_files": 4,
         "fixture_files": 4,
         "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 67,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+        "source_files": 2,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 63,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+        "source_files": 3,
+        "fixture_files": 4,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 65,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+        "source_files": 3,
+        "fixture_files": 5,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
+        "pr_number": 57,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+        "source_files": 6,
+        "fixture_files": 3,
+        "status": "merged source, not necessarily compatible"
       }
     ]
   },
-  "observed_at": "2026-10-29T00:48:15Z"
+  "observed_at": "2026-10-29T00:49:20Z"
 }

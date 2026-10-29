@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "9193cdee3bd7b21e95b70ac024b3efbd764e64c5",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/9193cdee3bd7b21e95b70ac024b3efbd764e64c5",
-    "committed_at": "2026-10-29T00:22:28Z"
+    "sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/2cd40791b17acdf757fcea1102d7e705cbf645e6",
+    "committed_at": "2026-10-29T00:48:44Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 88,
-      "branch": "fix/track-all-phase21-22-agent-pushes",
-      "sha": "214c3ec92fd658a0d0801963d82c0cd06b661028",
-      "title": "fix: track all phase21/22 agent pushes and classify subsystem diffs",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/88",
-      "updated_at": "2026-10-29T00:47:27Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 87,
       "branch": "phase22e-mach-ipc-mig",
@@ -79,10 +70,44 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:47:23Z",
       "status": "unmerged: not counted"
+    },
+    {
+      "number": 73,
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
+      "title": "phase 21d: fair reader-writer lock and safe once initialization",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "updated_at": "2026-10-28T20:38:04Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 69,
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
+      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "updated_at": "2026-10-28T20:27:18Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 76,
+      "branch": "phase21e-exit-cancellation-20261028",
+      "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
+      "title": "phase21e: retire cancellation at exit start, fuzz lifecycle and test host failures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/76",
+      "updated_at": "2026-10-28T20:18:54Z",
+      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 88,
+      "title": "fix: track all phase21/22 agent pushes and classify subsystem diffs",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/88",
+      "head_sha": "214c3ec92fd658a0d0801963d82c0cd06b661028",
+      "merged_at": "2026-10-29T00:48:45Z"
+    },
     {
       "number": 84,
       "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
@@ -138,13 +163,146 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/72",
       "head_sha": "86645688a035874587739102189f9a8014a6e3e1",
       "merged_at": "2026-10-28T19:56:54Z"
+    },
+    {
+      "number": 71,
+      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+      "head_sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
+      "merged_at": "2026-10-28T19:54:07Z"
+    },
+    {
+      "number": 68,
+      "title": "fix: keep merged phase20 agent progress visible in compatibility blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/68",
+      "head_sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
+      "merged_at": "2026-10-28T19:33:53Z"
+    },
+    {
+      "number": 67,
+      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
+      "merged_at": "2026-10-28T19:24:38Z"
+    },
+    {
+      "number": 62,
+      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "merged_at": "2026-10-28T19:22:22Z"
+    },
+    {
+      "number": 66,
+      "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/66",
+      "head_sha": "63818f8893f292b70487ba83742be14de305319b",
+      "merged_at": "2026-10-28T19:22:03Z"
+    },
+    {
+      "number": 63,
+      "title": "phase 20b: native arm64 Objective-C message dispatch and compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "head_sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
+      "merged_at": "2026-10-28T19:21:00Z"
+    },
+    {
+      "number": 64,
+      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "merged_at": "2026-10-28T19:20:45Z"
+    },
+    {
+      "number": 65,
+      "title": "phase 20a: clang ARM64 ObjC2 metadata graphs and transactional registration",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "head_sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "merged_at": "2026-10-28T19:20:17Z"
+    },
+    {
+      "number": 61,
+      "title": "fix: recognize new phase-numbered agent sources in live progress map",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/61",
+      "head_sha": "c6895b72bfa50f6b83e22686ffe655ce3418b6ce",
+      "merged_at": "2026-10-28T19:18:52Z"
+    },
+    {
+      "number": 60,
+      "title": "feat: parse active agent branch diffs into live provisional progress blocks",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/60",
+      "head_sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
+      "merged_at": "2026-10-28T19:14:10Z"
+    },
+    {
+      "number": 59,
+      "title": "fix: handle progress refresh/main races and remove stale phase references",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
+      "head_sha": "788e8882e16c628a33eb735117680d9fbc286336",
+      "merged_at": "2026-10-28T18:51:52Z"
+    },
+    {
+      "number": 58,
+      "title": "fix: audit phase19 progress and verify standalone Objective-C/libSystem CI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/58",
+      "head_sha": "6167c8a3fa848b39e2aa36cb84a5f3bc60446594",
+      "merged_at": "2026-10-28T18:49:37Z"
+    },
+    {
+      "number": 57,
+      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
+      "head_sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
+      "merged_at": "2026-10-28T18:10:37Z"
+    },
+    {
+      "number": 53,
+      "title": "phase 19b: native dyld symbol namespaces and dependency lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/53",
+      "head_sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
+      "merged_at": "2026-10-28T18:08:09Z"
+    },
+    {
+      "number": 55,
+      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
+      "head_sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
+      "merged_at": "2026-10-28T18:06:20Z"
+    },
+    {
+      "number": 54,
+      "title": "phase19a: native ARM64 Darwin startup context and real compiler workload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/54",
+      "head_sha": "61b4062eb85b0605542b3b87f629d3859f60ee02",
+      "merged_at": "2026-10-28T18:03:44Z"
+    },
+    {
+      "number": 56,
+      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
+      "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
+      "merged_at": "2026-10-28T18:01:05Z"
+    },
+    {
+      "number": 52,
+      "title": "fix: exclude stale squash-merged refs from recent branch candidates",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/52",
+      "head_sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
+      "merged_at": "2026-10-28T17:50:23Z"
+    },
+    {
+      "number": 51,
+      "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/51",
+      "head_sha": "f340541b0622159f80cf12411fe11a16ef795926",
+      "merged_at": "2026-10-28T17:47:44Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 40,
-    "open_pr_page": 25,
-    "merged_pr_page": 40
+    "branches_scanned": 8,
+    "open_pr_page": 50,
+    "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T00:48:05Z"
+  "observed_at": "2026-10-29T00:49:17Z"
 }

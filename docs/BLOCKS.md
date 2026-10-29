@@ -47,9 +47,8 @@ The displayed percentages are **sample evidence coverage**: native fixtures plus
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `9193cdee3bd7`
+main source: `2cd40791b17a`
 
-- [PR #88](https://github.com/kallmek3nny/ios-27/pull/88) · incoming, not counted
 - [PR #87](https://github.com/kallmek3nny/ios-27/pull/87) · incoming, not counted
 - [PR #83](https://github.com/kallmek3nny/ios-27/pull/83) · incoming, not counted
 - [PR #85](https://github.com/kallmek3nny/ios-27/pull/85) · incoming, not counted
@@ -57,22 +56,32 @@ main source: `9193cdee3bd7`
 - [PR #77](https://github.com/kallmek3nny/ios-27/pull/77) · incoming, not counted
 - [PR #78](https://github.com/kallmek3nny/ios-27/pull/78) · incoming, not counted
 - [PR #80](https://github.com/kallmek3nny/ios-27/pull/80) · incoming, not counted
+- [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 7 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 10 active candidate(s) with recognized code changes.
 
-- **libsystem_pthread**: 3 unmerged candidate branch(es), not counted
+- **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
+- **dyld / image graph**: 1 unmerged candidate branch(es), not counted
+- **mach ipc model**: 1 unmerged candidate branch(es), not counted
+- **bsd syscall boundary**: 1 unmerged candidate branch(es), not counted
+- **guest security / isolation**: 1 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
 blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
 
-latest scanned merged PRs: **7** · [source diffs](BRANCHES.md).
+latest scanned merged PRs: **18** · [source diffs](BRANCHES.md).
 
-- **libsystem_pthread**: 6 recently merged code PR(s), compatibility review pending
+- **libsystem_pthread**: 8 recently merged code PR(s), compatibility review pending
+- **mach-o parser and native loader**: 2 recently merged code PR(s), compatibility review pending
+- **dyld / image graph**: 1 recently merged code PR(s), compatibility review pending
+- **mach ipc model**: 1 recently merged code PR(s), compatibility review pending
+- **ObjC host prototype (not Apple libobjc)**: 5 recently merged code PR(s), compatibility review pending
+- **libSystem guest model (not dylib)**: 2 recently merged code PR(s), compatibility review pending
 
 ## realistic ceilings for every tracked area
 
