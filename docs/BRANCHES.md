@@ -15,7 +15,7 @@ head: `91ea9d21113e` · ci: **running** · unmerged, not credited.
 
 ### [agent/phase24b-native-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/99)
 
-head: `c7be84a7721c` · ci: **running** · unmerged, not credited.
+head: `c7be84a7721c` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 8 test/fixture files, +1228/-0 lines
   - candidate declarations: `ios27_24b_bind`, `ios27_24b_close`, `ios27_24b_ensure`, `ios27_24b_inspect`, `ios27_24b_open`, `ios27_24b_parse`, `ios27_24b_register`, `ios27_24b_runtime_destroy`, `ios27_24b_runtime_init`
