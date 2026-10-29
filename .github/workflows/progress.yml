@@ -34,3 +34,35 @@ jobs:
       - uses: actions/checkout@v4
       - name: compile and test compiler-produced objc2 and guest libsystem fixtures
         run: timeout 180s python3 tools/phase19e-standalone.py
+
+  independent-compat-prototypes:
+    name: phase20/21 standalone evidence (${{ matrix.suite }} / ${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 16
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        suite: [objc-metadata-dispatch, ownership-services, threading-lifecycle]
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile and execute compiler-produced phase20/21 fixtures with -Werror
+        run: |
+          case "${{ matrix.suite }}" in
+            objc-metadata-dispatch)
+              timeout 180s python3 tools/phase20a-standalone.py
+              timeout 300s bash tools/phase20b-verify.sh
+              ;;
+            ownership-services)
+              timeout 180s python3 tools/phase20c-build.py
+              timeout 180s python3 tools/phase20e-standalone.py
+              ;;
+            threading-lifecycle)
+              timeout 180s python3 tools/phase20d-standalone.py
+              timeout 300s python3 tools/phase21g-standalone.py
+              timeout 300s python3 tools/phase21h-standalone.py
+              ;;
+            *)
+              exit 1
+              ;;
+          esac
