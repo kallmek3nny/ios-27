@@ -22,6 +22,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: install bounded clang test dependencies
         run: timeout 120s bash -c 'command -v clang; command -v python3'
+      - name: install linker for genuine arm64 Darwin Mach-O fixtures
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
       - name: compile and exercise objc2 registry and real arm64 Darwin objects
         env:
           PHASE24C_SANITIZE: ${{ matrix.sanitize }}

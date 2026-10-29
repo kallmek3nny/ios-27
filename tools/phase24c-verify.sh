@@ -35,3 +35,4 @@ assert b'__objc_' in p and b'_objc_msgSend' in p or b'__objc_' in p
 PY
 done
 printf 'phase24c: compiled 9 compiler-produced arm64 Darwin MH_OBJECT fixtures\n'
+timeout 240s python3 "$root/tools/phase24c-link.py"

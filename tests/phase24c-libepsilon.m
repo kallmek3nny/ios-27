@@ -8,3 +8,4 @@
 - (unsigned long)late:(unsigned long)n { return [self number:n] + 9u; }
 + (void)load { }
 @end
+unsigned long phase24c_epsilon_anchor(unsigned long n) { return n + 5u; }

@@ -1,22 +1,16 @@
-# phase24c: objc2 metadata namespace and fail-closed typed resolver (partial)
+# phase24c: objc2 metadata, typed resolution, and real linked Darwin binary graphs (partial)
 
-## implemented and reproduced locally
+## locally verified milestones
+1. Fail-closed ABI type-encoding whitelist with unsupported aggregate/variadic/block/mixed-FP rejection.
+2. Transactional cross-image class registration with checked ivar bounds, superclass cycle and duplicate class rejection, and protocol/category record checks.
+3. Deterministic instance/class method, inherited, category and lexical-super lookup under concurrency: 200,006 metadata resolutions across eight threads.
+4. Actual Clang-produced ARM64 Darwin ObjC MH_OBJECT compilation followed by LLD linking of SIX MH_DYLIBs and THREE MH_EXECUTEs, with real dependency load commands and chained fixups verified by bounded Mach-O parser. No Darwin method bodies were run.
+5. x86_64 local -Werror ordinary and ASAN/UBSAN tests both passed. CI includes x86_64 and ARM64 Linux + sanitizer lanes. Check exact PR head before claiming CI complete.
 
-- strict, complete objc2 method-encoding whitelist: void no-arg, 64-bit word/pointer up to four arguments, one float or double argument. rejects aggregates, small scalars, blocks, variadics, mixed fp arguments and unverified type encodings.
-- transactional cross-image class registration using prevalidated ios27_objc20a_image descriptions from existing read-only objc2 parser, checked ivar bounds, duplicate rejection and superclass cycle checks.
-- deterministic category order, class versus instance method search, lexical-super validation and separate unresolved-superclass errors.
-- eight-thread stress test for 200,006 metadata resolutions, compiled with -Werror; six arm64 Darwin objc library translation units and three application translation units compiled to genuine MH_OBJECT files.
+## linker provenance and restrictions
+Swift-built LLD 17 rejects linking Mach-O objects with LC_BUILD_VERSION targeting macOS. The linker verifier uses the existing phase19b method of bounded MH_OBJECT platform-command removal and build-time TAPI .tbd export declarations; it does NOT change the linked binary's ObjC implementation body. Genuine Clang/LLD binaries contain linked ObjC sections and dependencies; unimplemented libobjc symbols may remain unresolved via -undefined dynamic_lookup. Native runtime execution is NOT verified.
+All test commands have bounded timeouts. Run: timeout 600s bash tools/phase24c-verify.sh; sanitizers: timeout 600s env PHASE24C_SANITIZE=1 bash tools/phase24c-verify.sh.
 
-## local verification
-
-Run: timeout 600s bash tools/phase24c-verify.sh
-Sanitizers: timeout 600s env PHASE24C_SANITIZE=1 bash tools/phase24c-verify.sh
-Both commands passed locally on x86_64 with Clang 17. GitHub Actions checks remain head-specific; x86_64 and arm64 Ubuntu both have normal and sanitizer lanes.
-
-## blocked and not claimed
-
-NO Darwin native IMPs executed. The local ld64.lld failed on -platform_version macos with: This version of lld does not support linking for platform macOS.
-Zero real linked Darwin dylibs, zero real linked Darwin apps, zero native method calls, zero real runtime ownership transitions. The 200k operations are metadata lookup, not objc dispatch.
-Still unimplemented: real dynamic image relocation/mapping; address ownership and arm64e authentication; compiler-linked objc_msgSend execution; object alloc/retain/release/weak/finalization; +load/+initialize semantics; unload pins; full application startup.
-Input must already have been checked by the read-only objc20a parser. No integration to the loader yet; this code accepts in-memory metadata descriptions and never casts method offsets to host function pointers.
-No claim of three genuine active engineering hours. Do not merge before frozen-head CI is completely green AND fresh expected-SHA verification against an unchanged main.
+## unimplemented
+Zero actual Darwin IMP calls and zero real retain/release/weak transitions. Native objc_msgSend entrypoint, mapped relocation and ownership-checked executable pages, +load/+initialize coordination, ownership, weak/finalization, generation-safe unload and runtime app startup remain missing. Metadata lookups must not be presented as method calls. Do not claim Apple libobjc compatibility.
+Three genuine active engineering hours were not completed or claimed. Retain as draft until missing functionality and all frozen-head CI gates pass, and main can be verified unchanged with expected-SHA lease.
