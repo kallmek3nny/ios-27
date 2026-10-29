@@ -7,34 +7,8 @@
   "candidate_count": 9,
   "candidates": [
     {
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
-      "pr_number": 87,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 7,
-          "additions": 1448,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase22e_ipc.h",
-            "src/phase22e_ipc.c",
-            "tests/phase22e-generated.h",
-            "tests/phase22e-negative.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "ed94ef2111e2311cac5c9311e763986f237bb239",
+      "sha": "1a277ef5e8293a193339be238dc917f805771342",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "pr_number": 83,
       "ci": "running",
@@ -106,6 +80,32 @@
             "src/phase22a_child.c",
             "src/phase22a_space.c",
             "tests/phase22a-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "pr_number": 87,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 7,
+          "additions": 1448,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase22e_ipc.h",
+            "src/phase22e_ipc.c",
+            "tests/phase22e-generated.h",
+            "tests/phase22e-negative.c"
           ]
         }
       ]
@@ -398,13 +398,6 @@
     ],
     "unclassified": [
       {
-        "branch": "phase22e-mach-ipc-mig",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/87",
-        "source_files": 2,
-        "fixture_files": 7,
-        "ci": "running"
-      },
-      {
         "branch": "agent/phase22c-transactional-dyld-graph",
         "url": "https://github.com/kallmek3nny/ios-27/pull/83",
         "source_files": 2,
@@ -417,6 +410,13 @@
         "source_files": 3,
         "fixture_files": 9,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase22e-mach-ipc-mig",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+        "source_files": 2,
+        "fixture_files": 7,
+        "ci": "running"
       },
       {
         "branch": "phase22b-darwin-bsd-capability-20261028",
@@ -723,5 +723,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:23:50Z"
+  "observed_at": "2026-10-29T00:24:19Z"
 }
