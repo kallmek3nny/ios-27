@@ -248,6 +248,7 @@ int main(void) {
     assert(!ios27_22c_create(specs, 2u, &g, &d));
     assert(ios27_22c_load(g, &d) == -1);
     assert(d.reason == IOS27_22C_FIXUP);
+    assert(d.image == 0u && strstr(d.message, "_answer"));
     ios27_22c_destroy(g);
     assert(!memcmp(mutate + FIXUPS + 64u, "\x02\x01\x00\x00", 4u));
     /* Mutate linked-format load commands and exercise full preflight
