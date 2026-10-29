@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 99,
-      "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "f1064a7910d16d7672d056e3b46c63813df2b00e",
-      "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/99",
-      "updated_at": "2026-10-29T21:55:27Z",
-      "status": "unmerged: not counted"
-    },
-    {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
       "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
       "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "updated_at": "2026-10-29T21:55:37Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 99,
+      "branch": "agent/phase24b-native-lifecycle-20261029",
+      "sha": "f1064a7910d16d7672d056e3b46c63813df2b00e",
+      "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/99",
+      "updated_at": "2026-10-29T21:55:27Z",
       "status": "unmerged: not counted"
     },
     {
@@ -394,5 +394,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:55:41Z"
+  "observed_at": "2026-10-29T21:56:01Z"
 }
