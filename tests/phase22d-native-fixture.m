@@ -2,12 +2,13 @@
  * Mach-O MH_OBJECT code and metadata, never run as host x86_64 code. */
 __attribute__((objc_root_class))
 @interface Phase22dRoot
+{ @public unsigned long payload; }
 + (unsigned long)ping;
 - (unsigned long)value;
 @end
 @implementation Phase22dRoot
 + (unsigned long)ping { return 91; }
-- (unsigned long)value { return 11; }
+- (unsigned long)value { return payload + 11; }
 @end
 
 @interface Phase22dChild : Phase22dRoot
