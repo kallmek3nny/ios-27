@@ -141,8 +141,8 @@ def check(path):
             raise ValueError("invalid linked load command")
         cmds.append(cmd)
         cursor += size
-    if cursor != 32 + cmdbytes or 0x80000034 not in cmds or 0x80000033 not in cmds:
-        raise ValueError("missing real chained fixups/exports trie")
+    if cursor != 32 + cmdbytes or not any(cmd in cmds for cmd in (0x80000034, 0x80000022, 0x22)) or not any(cmd in cmds for cmd in (0x80000033, 0x80000022, 0x22)):
+        raise ValueError("missing real supported dyld fixup/export metadata: " + repr([hex(x) for x in cmds]))
     return cmds
 
 
