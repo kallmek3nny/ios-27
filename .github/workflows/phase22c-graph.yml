@@ -1,0 +1,35 @@
+name: phase22c isolated dyld graph
+on:
+  pull_request:
+    paths:
+      - 'src/phase22c_*'
+      - 'include/ios27/phase22c_*'
+      - 'tests/phase22c-*'
+      - 'tools/phase22c-*'
+      - 'docs/phase22c-*'
+      - '.github/workflows/phase22c-graph.yml'
+  workflow_dispatch:
+jobs:
+  graph:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitizer: [0, 1]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: install functional open-source LLVM Mach-O linker
+        run: |
+          timeout 180s sudo apt-get update -qq
+          timeout 180s sudo apt-get install -y lld-18
+          command -v ld64.lld-18
+      - name: bounded independent graph and compiler-produced Mach-O tests
+        env:
+          IOS27_PHASE22C_SANITIZE: ${{ matrix.sanitizer }}
+          IOS27_PHASE22C_REQUIRE_LINKED: '1'
+          DARWIN_LINKER: /usr/bin/ld64.lld-18
+        run: timeout 1200s bash tools/phase22c-test.sh
