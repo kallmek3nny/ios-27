@@ -3,15 +3,50 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 13,
-  "candidate_count": 13,
+  "candidates_checked": 14,
+  "candidate_count": 14,
   "candidates": [
+    {
+      "branch": "phase23a-incremental-dyld-namespaces",
+      "sha": "3957ff3da9e88e1a6d35a637e962afb4e90a2fc7",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+      "pr_number": 92,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 938,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase23a_close",
+            "ios27_phase23a_create",
+            "ios27_phase23a_destroy",
+            "ios27_phase23a_diagnostics_read",
+            "ios27_phase23a_flat_symbol",
+            "ios27_phase23a_open",
+            "ios27_phase23a_reference_count",
+            "ios27_phase23a_symbol"
+          ],
+          "example_paths": [
+            "include/ios27/phase23a_loader.h",
+            "src/phase23a_loader.c",
+            "tests/phase23a-integration.c",
+            "tools/phase23a-verify.py"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase23e/native-app-integration-harness",
       "sha": "754f47bb9bf05d8eee6a561960948ecbc9e1a7e0",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
       "pr_number": 93,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -31,41 +66,6 @@
             "src/phase23e_harness.c",
             "tests/phase23e-check.c",
             "tests/phase23e-fixtures.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "1440092f7988b82c66aed240867ad36874e05d46",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "pr_number": 92,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 6,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 2,
-          "additions": 937,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase23a_close",
-            "ios27_phase23a_create",
-            "ios27_phase23a_destroy",
-            "ios27_phase23a_diagnostics_read",
-            "ios27_phase23a_flat_symbol",
-            "ios27_phase23a_open",
-            "ios27_phase23a_reference_count",
-            "ios27_phase23a_symbol"
-          ],
-          "example_paths": [
-            "include/ios27/phase23a_loader.h",
-            "src/phase23a_loader.c",
-            "tests/phase23a-integration.c",
-            "tools/phase23a-verify.py"
           ]
         }
       ]
@@ -462,6 +462,35 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase23e/native-app-integration-harness",
+      "sha": "0c32cf6df050f42c68f7170c2851528117236df9",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 15,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 916,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_23e_application_probe",
+            "ios27_23e_library_stress"
+          ],
+          "example_paths": [
+            "include/ios27/phase23e_harness.h",
+            "src/phase23e_harness.c",
+            "tests/phase23e-check.c",
+            "tests/phase23e-fixtures.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -556,17 +585,17 @@
     ],
     "unclassified": [
       {
-        "branch": "phase23e/native-app-integration-harness",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/93",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "running"
-      },
-      {
         "branch": "phase23a-incremental-dyld-namespaces",
         "url": "https://github.com/kallmek3nny/ios-27/pull/92",
         "source_files": 2,
         "fixture_files": 2,
+        "ci": "running"
+      },
+      {
+        "branch": "phase23e/native-app-integration-harness",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/93",
+        "source_files": 2,
+        "fixture_files": 3,
         "ci": "passing_checks"
       },
       {
@@ -575,6 +604,13 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase23e/native-app-integration-harness",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "not_checked"
       }
     ]
   },
@@ -1427,5 +1463,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:19:21Z"
+  "observed_at": "2026-10-29T21:19:51Z"
 }

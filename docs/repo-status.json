@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 92,
+      "branch": "phase23a-incremental-dyld-namespaces",
+      "sha": "3957ff3da9e88e1a6d35a637e962afb4e90a2fc7",
+      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+      "updated_at": "2026-10-29T21:19:35Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 93,
       "branch": "phase23e/native-app-integration-harness",
       "sha": "754f47bb9bf05d8eee6a561960948ecbc9e1a7e0",
       "title": "phase 23e: standalone compiler-linked darwin app integration harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
       "updated_at": "2026-10-29T21:19:10Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 92,
-      "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "1440092f7988b82c66aed240867ad36874e05d46",
-      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "updated_at": "2026-10-29T21:18:40Z",
       "status": "unmerged: not counted"
     },
     {
@@ -126,7 +126,17 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "phase23e/native-app-integration-harness",
+      "sha": "0c32cf6df050f42c68f7170c2851528117236df9",
+      "ahead_by": 12,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-29T21:19:44Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -327,9 +337,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 13,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:19:17Z"
+  "observed_at": "2026-10-29T21:19:48Z"
 }
