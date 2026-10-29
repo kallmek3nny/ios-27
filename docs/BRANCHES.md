@@ -4,20 +4,20 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **8** · audited base: `0d9edb176c31`
-
-### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
-
-head: `a738ae982602` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 4 source files, 4 test/fixture files, +1251/-0 lines
+candidate branches with mapped changes: **9** · audited base: `0d9edb176c31`
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `b010a40cfc42` · ci: **passing_checks** · unmerged, not credited.
+head: `0fd74051cd4e` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 4 test/fixture files, +865/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
+
+### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
+
+head: `a738ae982602` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 4 source files, 4 test/fixture files, +1284/-0 lines
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -60,6 +60,13 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces)
+
+head: `d576125691d9` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 0 test/fixture files, +503/-0 lines
+  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_snapshot`, `ios27_22a_unmap`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

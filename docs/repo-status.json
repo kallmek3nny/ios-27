@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "0fd74051cd4e341858d9a55087e03bab74742acd",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:16:13Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 84,
       "branch": "phase22d-objc-runtime-concurrency-20261028",
       "sha": "a738ae98260203c4b8a95398cfe3ab3839a4a7bf",
       "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "updated_at": "2026-10-29T00:15:47Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 83,
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "b010a40cfc42d5dc1e8b7f54d2189056cd576f1a",
-      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:15:25Z",
       "status": "unmerged: not counted"
     },
     {
@@ -83,21 +83,21 @@
   ],
   "ahead_branches": [
     {
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "d576125691d9059f9ce30f76f702a490d3295a1b",
+      "ahead_by": 2,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-29T00:16:06Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
+      "status": "unmerged: not counted"
+    },
+    {
       "branch": "phase22e-mach-ipc-mig",
       "sha": "e8124a374e04114c218028d82ce300ab70d9631e",
       "ahead_by": 1,
       "behind_by": 0,
       "last_commit_at": "2026-10-28T23:25:02Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "e8124a374e04114c218028d82ce300ab70d9631e",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T23:25:02Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
       "status": "unmerged: not counted"
     }
   ],
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:16:02Z"
+  "observed_at": "2026-10-29T00:16:25Z"
 }
