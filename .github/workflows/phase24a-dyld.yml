@@ -27,6 +27,10 @@ jobs:
         mode: [normal, sanitizers]
     steps:
       - uses: actions/checkout@v4
+      - name: install llvm Mach-O linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y -qq lld
       - name: report compiler and host
         run: |
           timeout 30s uname -m
