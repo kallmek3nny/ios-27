@@ -1,5 +1,6 @@
 #include "ios27/phase22d_runtime.h"
 #include <assert.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdint.h>
@@ -13,7 +14,7 @@ typedef struct {
     phase22d_sel selector;
     atomic_int *errors;
 } worker_args;
-static atomic_int root_inits, child_inits, failures, destructors;
+static atomic_int root_inits, child_inits, failures, destructors, racing_inits;
 static phase22d_runtime *initializing_runtime;
 static phase22d_sel init_selector;
 
@@ -54,6 +55,11 @@ static int initialize_child(void *context, void *cls) {
     (void)context; (void)cls;
     if (atomic_load(&root_inits) != 1) return -1;
     atomic_fetch_add(&child_inits, 1);
+    return 0;
+}
+static int initialize_racing(void *context, void *cls) {
+    (void)context; (void)cls;
+    atomic_fetch_add(&racing_inits, 1);
     return 0;
 }
 static int failing_initializer(void *context, void *cls) {
@@ -186,6 +192,23 @@ int main(void) {
     for (unsigned i = 0; i < REGISTER_THREADS; ++i)
         CHECK(!pthread_join(registrations[i], NULL));
     CHECK(atomic_load(&errors) == 0);
+    /* First-message initialization must be one-time across concurrent sends. */
+    const phase22d_class_spec racing =
+        {.name = "Racing", .superclass = "Root",
+         .instance_size = 2u * sizeof(void *),
+         .initialize = initialize_racing};
+    void *racing_object = NULL;
+    CHECK(phase22d_register(r, &racing, 1) == 0);
+    CHECK(phase22d_allocate(r, "Racing", &racing_object) == 0);
+    for (unsigned i = 0; i < WORKERS; ++i) {
+        args[i] = (worker_args){r, racing_object, sel_value, &errors};
+        CHECK(!pthread_create(&workers[i], NULL, send_worker, &args[i]));
+    }
+    for (unsigned i = 0; i < WORKERS; ++i)
+        CHECK(!pthread_join(workers[i], NULL));
+    CHECK(atomic_load(&errors) == 0);
+    CHECK(atomic_load(&racing_inits) == 1);
+    CHECK(phase22d_release(r, racing_object) == 0);
     const phase22d_class_spec flaky =
         {.name = "Flaky", .instance_size = sizeof(void *),
          .initialize = failing_initializer,
@@ -224,10 +247,20 @@ int main(void) {
     CHECK(phase22d_retain(r, object) != 0);
     CHECK(phase22d_weak_load_retained(r, &weak, &locked) == 0 && locked == NULL);
     CHECK(phase22d_weak_unregister(r, &weak) == 0);
+    /* Bounded live-object quota plus repeated cleanup and stale-id rejection. */
+    void **bulk = calloc(PHASE22D_LIVE_LIMIT + 1u, sizeof(*bulk));
+    CHECK(bulk != NULL);
+    for (size_t i = 0; i < PHASE22D_LIVE_LIMIT; ++i)
+        CHECK(phase22d_allocate(r, "Root", &bulk[i]) == 0);
+    CHECK(phase22d_allocate(r, "Root", &bulk[PHASE22D_LIVE_LIMIT]) != 0);
+    for (size_t i = PHASE22D_LIVE_LIMIT; i > 0; --i)
+        CHECK(phase22d_release(r, bulk[i - 1u]) == 0);
+    CHECK(phase22d_retain(r, bulk[0]) != 0);
+    free(bulk);
     CHECK(phase22d_validate(r) == 0);
     CHECK(phase22d_statistics(r, &stats) == 0);
     CHECK(stats.live_objects == 0 && stats.weak_locations == 0);
-    CHECK(stats.sends >= (uint64_t)WORKERS * CALLS_PER_WORKER);
+    CHECK(stats.sends >= 2u * (uint64_t)WORKERS * CALLS_PER_WORKER);
     CHECK(stats.initializations >= 3 && stats.categories == 1);
     (void)printf("phase22d ok: sends=%llu failures=%llu init=%llu waits=%llu "
                  "alloc=%llu dealloc=%llu classes=%zu selectors=%zu\\n",
