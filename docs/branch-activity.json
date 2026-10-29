@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase24e-native-application-startup",
-      "sha": "b978df309a7efb17e7ec3ce9f51286b193571022",
+      "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "pr_number": 98,
-      "ci": "running",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -37,10 +37,10 @@
     },
     {
       "branch": "phase24a-global-dyld-identity",
-      "sha": "349de82ee74530d91921b487e7480de43909f94f",
+      "sha": "d0e1d630c08eb231c9c979bc0542be2ae6f249ad",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "pr_number": 97,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -631,7 +631,7 @@
     },
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "0b2f4c19144b2ce84b7ba8de7badb23a8018e014",
+      "sha": "1f1ac111cefc5312313e9812b9439ba8d45afc9a",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "pr_number": null,
       "ci": "not_checked",
@@ -643,7 +643,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 8,
-          "additions": 1213,
+          "additions": 1216,
           "deletions": 0,
           "symbols_preview": [
             "ios27_24b_bind",
@@ -762,14 +762,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "not_checked"
       },
       {
         "branch": "phase24a-global-dyld-identity",
         "url": "https://github.com/kallmek3nny/ios-27/pull/97",
         "source_files": 2,
         "fixture_files": 2,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase23c-objc-native-bridge",
@@ -1671,5 +1671,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:51:31Z"
+  "observed_at": "2026-10-29T21:51:49Z"
 }

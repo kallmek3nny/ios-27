@@ -11,19 +11,19 @@
     {
       "number": 98,
       "branch": "phase24e-native-application-startup",
-      "sha": "b978df309a7efb17e7ec3ce9f51286b193571022",
+      "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
       "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
-      "updated_at": "2026-10-29T21:51:06Z",
+      "updated_at": "2026-10-29T21:51:40Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
-      "sha": "349de82ee74530d91921b487e7480de43909f94f",
+      "sha": "d0e1d630c08eb231c9c979bc0542be2ae6f249ad",
       "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:50:56Z",
+      "updated_at": "2026-10-29T21:51:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -174,10 +174,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "0b2f4c19144b2ce84b7ba8de7badb23a8018e014",
-      "ahead_by": 45,
+      "sha": "1f1ac111cefc5312313e9812b9439ba8d45afc9a",
+      "ahead_by": 46,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:50:59Z",
+      "last_commit_at": "2026-10-29T21:51:42Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "status": "unmerged: not counted"
     }
@@ -386,5 +386,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:51:27Z"
+  "observed_at": "2026-10-29T21:51:45Z"
 }
