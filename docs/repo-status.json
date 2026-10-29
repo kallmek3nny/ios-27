@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 96,
+      "branch": "agent/phase23b-lifecycle-20261029",
+      "sha": "311ef96195d22c4098ce0b8a86f6504cecaa3deb",
+      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
+      "updated_at": "2026-10-29T21:24:49Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 95,
       "branch": "phase23d-syscall-mach-bridge-20261029",
       "sha": "e8c3f4b220e416a08b77f7e7d1404e5a0cec3239",
@@ -42,15 +51,6 @@
       "title": "phase23a: transactional incremental macho loading and symbol namespaces",
       "url": "https://github.com/kallmek3nny/ios-27/pull/92",
       "updated_at": "2026-10-29T21:23:07Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 96,
-      "branch": "agent/phase23b-lifecycle-20261029",
-      "sha": "dbb5f523978df5b3cf6b476d14bdfd498e886250",
-      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
-      "updated_at": "2026-10-29T21:22:27Z",
       "status": "unmerged: not counted"
     },
     {
@@ -153,17 +153,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase23b-lifecycle-20261029",
-      "sha": "311ef96195d22c4098ce0b8a86f6504cecaa3deb",
-      "ahead_by": 3,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:24:40Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase23b-lifecycle-20261029",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -364,9 +354,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 11,
+    "branches_scanned": 10,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:24:50Z"
+  "observed_at": "2026-10-29T21:25:07Z"
 }
