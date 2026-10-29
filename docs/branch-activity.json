@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase24c-objc2-typed-metadata-dispatch",
-      "sha": "613c3f589d6329068f741ca2f0b93de273316656",
+      "sha": "70e7d2abbd928b3a98101279cc4d2bcebdbb68d9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/100",
       "pr_number": 100,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 17,
       "possibly_truncated": false,
@@ -20,7 +20,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 12,
-          "additions": 834,
+          "additions": 841,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -827,7 +827,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/100",
         "source_files": 2,
         "fixture_files": 12,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24d-darwin-services-20261029",
@@ -1750,5 +1750,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T22:03:30Z"
+  "observed_at": "2026-10-29T22:04:19Z"
 }

@@ -11,10 +11,10 @@
     {
       "number": 100,
       "branch": "phase24c-objc2-typed-metadata-dispatch",
-      "sha": "613c3f589d6329068f741ca2f0b93de273316656",
+      "sha": "70e7d2abbd928b3a98101279cc4d2bcebdbb68d9",
       "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
       "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-      "updated_at": "2026-10-29T22:02:50Z",
+      "updated_at": "2026-10-29T22:03:45Z",
       "status": "unmerged: not counted"
     },
     {
@@ -403,5 +403,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T22:03:27Z"
+  "observed_at": "2026-10-29T22:04:14Z"
 }
