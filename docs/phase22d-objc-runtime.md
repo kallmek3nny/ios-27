@@ -47,9 +47,10 @@ deterministic mutated images per host/compiler/optimization combination.
 Sanitizer mode uses AddressSanitizer + UndefinedBehaviorSanitizer under Clang.
 Dedicated PR CI runs on x86_64 and ARM64 Ubuntu runners.
 
-The stress program performs 120,000 actual typed C IMP invocations across
-six workers, at least 240,000 explicit retain/release requests, plus automatic
-receiver pins. It covers parent/child +initialize recursion and ordering,
+The stress program performs at least 240,000 actual typed C IMP invocations
+across two six-worker rounds, at least 480,000 explicit retain/release requests,
+plus automatic receiver pins. It also exhausts the 4,096 live-object quota
+and verifies more than 4,000 destructor/teardown transitions. It covers parent/child +initialize recursion and ordering,
 class/metaclass methods, inherited and super dispatch, method ABI mismatch,
 runtime category replacement during dispatch, concurrent class registration,
 cycles, duplicates, invalid selectors, failed initializers, weak zeroing,
@@ -79,3 +80,10 @@ calls, not ARM64 Mach-O guest execution.
   threads attempting first-message initialization in the same runtime.
   Registration is rejected while initialization is active.
 - Timing claims must be taken from actual CI logs, not estimated or padded.
+
+## work-duration audit
+
+The requested **3+ hours of genuine active engineering was not completed**
+within this execution session. Do not extrapolate CI CPU time, queue time or
+elapsed wall time into active engineering hours. The authoritative test results
+are the exact per-job timestamps and compiler provenance in GitHub Actions.
