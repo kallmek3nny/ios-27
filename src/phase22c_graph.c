@@ -69,7 +69,7 @@ static int valid_dep_name(const char *s) {
     for (size_t i = 0; i < IOS27_DYLD_PATH_MAX; ++i) {
         unsigned char ch = (unsigned char)s[i];
         if (!ch) return i > 0u;
-        if (ch <= 0x20u || ch >= 0x7fu || ch == '\\\\') return 0;
+        if (ch <= 0x20u || ch >= 0x7fu || ch == '\\') return 0;
     }
     return 0;
 }
