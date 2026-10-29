@@ -53,6 +53,9 @@ typedef struct {
 int ios27_22a_create(const ios27_22a_config *config, ios27_22a_space **out);
 int ios27_22a_map(ios27_22a_space *space, uint64_t address, uint64_t bytes,
                   unsigned permissions, unsigned guards, uint64_t *handle);
+/* A non-executable stack with both hardware-backed guard pages. */
+int ios27_22a_map_stack(ios27_22a_space *space, uint64_t address,
+                        uint64_t bytes, uint64_t *handle);
 int ios27_22a_protect(ios27_22a_space *space, uint64_t handle,
                       unsigned permissions);
 int ios27_22a_unmap(ios27_22a_space *space, uint64_t handle);

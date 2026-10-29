@@ -12,7 +12,7 @@ independently because shared CMakeLists.txt is owned by other workstreams.
 
 1. **bounded mappings:** fixed 128 region slots, configured region/byte quotas,
    guest page zero rejection, guard-page reservations with host PROT_NONE,
-   collision rejection and mmap/mprotect rollback.
+   collision rejection, non-executable guard-wrapped stacks and mmap/mprotect rollback.
 2. **checked translation:** overflow and alignment checks, contiguous
    cross-mapping preflight, permission-checked atomic copyin/copyout, RX/RW
    separation, and single-mapping borrows pinned against removal.

@@ -217,6 +217,13 @@ done:
     return result;
 }
 
+int ios27_22a_map_stack(ios27_22a_space *s, uint64_t address,
+                        uint64_t bytes, uint64_t *handle) {
+    return ios27_22a_map(s, address, bytes, IOS27_22A_READ | IOS27_22A_WRITE,
+                         IOS27_22A_GUARD_BEFORE | IOS27_22A_GUARD_AFTER,
+                         handle);
+}
+
 int ios27_22a_protect(ios27_22a_space *s, uint64_t handle,
                       unsigned permissions) {
     region *r = NULL;
