@@ -195,7 +195,7 @@ def main():
              "-Wpedantic", "-O1", "-g", "-I" + str(ROOT / "include")]
     if args.sanitizers:
         flags += ["-fno-omit-frame-pointer", "-fsanitize=address,undefined"]
-    command([cc, *flags, ROOT / "src/phase24e_harness.c",
+    command([cc, *flags, ROOT / "src/phase24e_application.c",
              ROOT / "tests/phase24e-check.c", core, "-o", test], 120)
     env = os.environ.copy()
     if args.sanitizers:
