@@ -4,7 +4,13 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **11** · audited base: `2cd40791b17a`
+candidate branches with mapped changes: **12** · audited base: `2cd40791b17a`
+
+### [feat/live-phase-delivery-percent](https://github.com/kallmek3nny/ios-27/pull/90)
+
+head: `04953463d2b7` · ci: **failing** · unmerged, not credited.
+
+- **unclassified**: 0 source files, 1 test/fixture files, +247/-0 lines
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
 

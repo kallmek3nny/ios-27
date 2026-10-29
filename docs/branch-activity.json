@@ -3,9 +3,32 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 11,
-  "candidate_count": 11,
+  "candidates_checked": 13,
+  "candidate_count": 12,
   "candidates": [
+    {
+      "branch": "feat/live-phase-delivery-percent",
+      "sha": "04953463d2b744640157512deef73163d8746c99",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
+      "pr_number": 90,
+      "ci": "failing",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 1,
+          "additions": 247,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tools/phase_delivery.py"
+          ]
+        }
+      ]
+    },
     {
       "branch": "fix/external-build-fixtures",
       "sha": "6ca4a3188311207a6196b5adeabcb24110fef7cd",
@@ -491,6 +514,13 @@
       }
     ],
     "unclassified": [
+      {
+        "branch": "feat/live-phase-delivery-percent",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/90",
+        "source_files": 0,
+        "fixture_files": 1,
+        "ci": "failing"
+      },
       {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
@@ -1315,5 +1345,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T10:17:20Z"
+  "observed_at": "2026-10-29T10:38:34Z"
 }
