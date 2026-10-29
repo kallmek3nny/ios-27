@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 97,
+      "branch": "phase24a-global-dyld-identity",
+      "sha": "5348ae699ee716f20a4df706e7b80c3788a9ae49",
+      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+      "updated_at": "2026-10-29T21:52:51Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 99,
+      "branch": "agent/phase24b-native-lifecycle-20261029",
+      "sha": "9cb878ef8a055a86cf99eedb7c6e25d6715ae632",
+      "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/99",
+      "updated_at": "2026-10-29T21:52:31Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 98,
       "branch": "phase24e-native-application-startup",
       "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
       "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "updated_at": "2026-10-29T21:51:40Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 97,
-      "branch": "phase24a-global-dyld-identity",
-      "sha": "d0e1d630c08eb231c9c979bc0542be2ae6f249ad",
-      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:51:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -171,17 +180,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "9cb878ef8a055a86cf99eedb7c6e25d6715ae632",
-      "ahead_by": 47,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:52:16Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -382,9 +381,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 11,
+    "branches_scanned": 10,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:52:24Z"
+  "observed_at": "2026-10-29T21:52:59Z"
 }
