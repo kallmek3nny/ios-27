@@ -1,0 +1,38 @@
+name: phase22d objc runtime and native metadata
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase22d_*'
+      - 'include/ios27/phase22d_*'
+      - 'tests/phase22d-*'
+      - 'tools/phase22d-*'
+      - 'docs/phase22d-*'
+      - '.github/workflows/phase22d-objc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  objc:
+    name: objc runtime / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+      - name: compiler and machine provenance
+        run: |
+          timeout 30s uname -m
+          timeout 30s clang --version
+          timeout 30s gcc --version
+      - name: real arm64 objc2 MH_OBJECT and native stress verification
+        env:
+          PHASE22D_SANITIZE: ${{ matrix.mode == 'sanitizers' && '1' || '0' }}
+        run: timeout 900s python3 tools/phase22d-verify.py
