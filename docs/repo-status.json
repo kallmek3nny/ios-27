@@ -9,12 +9,12 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 97,
-      "branch": "phase24a-global-dyld-identity",
-      "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
-      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:55:37Z",
+      "number": 100,
+      "branch": "phase24c-objc2-typed-metadata-dispatch",
+      "sha": "6c969603e63556d1dd5eeac24a17596a0fe04dca",
+      "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
+      "updated_at": "2026-10-29T21:58:31Z",
       "status": "unmerged: not counted"
     },
     {
@@ -23,16 +23,16 @@
       "sha": "f1064a7910d16d7672d056e3b46c63813df2b00e",
       "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/99",
-      "updated_at": "2026-10-29T21:55:27Z",
+      "updated_at": "2026-10-29T21:56:31Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 100,
-      "branch": "phase24c-objc2-typed-metadata-dispatch",
-      "sha": "cf8cb149e17475edf96afd0900cda201cdbee035",
-      "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-      "updated_at": "2026-10-29T21:53:48Z",
+      "number": 97,
+      "branch": "phase24a-global-dyld-identity",
+      "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
+      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+      "updated_at": "2026-10-29T21:55:37Z",
       "status": "unmerged: not counted"
     },
     {
@@ -394,5 +394,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:56:01Z"
+  "observed_at": "2026-10-29T21:58:57Z"
 }
