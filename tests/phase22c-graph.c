@@ -179,8 +179,25 @@ static void check_fixture(uint8_t *main_bytes, uint8_t *lib_bytes,
     assert(cb.n == 2u && cb.trace[0] == 1u && cb.trace[1] == 0u);
     assert(!ios27_22c_unload(g, &d));
     assert(cb.n == 4u && cb.trace[2] == 100u && cb.trace[3] == 101u);
-    if (stress) {
+    {
+        callback_state failed = {{0}, 0u, 0u};
         assert(!ios27_22c_load(g, &d));
+        assert(ios27_22c_initialize(g, init, fini, &failed, &d) == -1);
+        assert(d.reason == IOS27_22C_LIFECYCLE);
+        assert(failed.n == 2u && failed.trace[0] == 1u &&
+               failed.trace[1] == 101u);
+        assert(!ios27_22c_unload(g, &d));
+    }
+    if (stress) {
+        ios27_22c_lease slots[IOS27_22C_MAX_LEASES];
+        assert(!ios27_22c_load(g, &d));
+        for (size_t i = 0u; i < IOS27_22C_MAX_LEASES; ++i)
+            assert(!ios27_22c_acquire(g, 0u, &slots[i], &d));
+        assert(ios27_22c_acquire(g, 0u, &token, &d) == -1);
+        assert(token.serial == 0u && d.reason == IOS27_22C_BUSY);
+        assert(ios27_22c_pins(g, 1u) == IOS27_22C_MAX_LEASES);
+        for (size_t i = 0u; i < IOS27_22C_MAX_LEASES; ++i)
+            assert(!ios27_22c_release(g, slots[i]));
         for (size_t k = 0; k < 50000u; ++k) {
             assert(!ios27_22c_acquire(g, 0u, &token, &d));
             assert(!ios27_22c_release(g, token));
