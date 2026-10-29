@@ -68,13 +68,14 @@ static void patch_middle_cycle(uint8_t *image, size_t size) {
     count = (uint32_t)image[16] | ((uint32_t)image[17] << 8u);
     for (uint32_t i = 0u; i < count; ++i) {
         uint32_t command, length, off;
-        assert(cursor <= size && size - cursor >= 24u);
+        assert(cursor <= size && size - cursor >= 8u);
         command = (uint32_t)image[cursor] |
                   ((uint32_t)image[cursor + 1u] << 8u);
         length = (uint32_t)image[cursor + 4u] |
                  ((uint32_t)image[cursor + 5u] << 8u);
-        assert(length >= 24u && length <= size - cursor);
+        assert(length >= 8u && length <= size - cursor);
         if (command == 0x0cu) {
+            assert(length >= 24u);
             off = (uint32_t)image[cursor + 8u];
             assert(off >= 24u && off + sizeof("top.dylib") <= length);
             assert(strcmp((const char *)(image + cursor + off),
