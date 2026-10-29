@@ -45,7 +45,8 @@ def main():
                     sources.insert(0, ROOT / "src/phase22a_space.c")
                 opts = list(opt)
                 env = None
-                if sanitizer:
+                # Seccomp probe must run without sanitizer runtime syscalls.
+                if sanitizer and case != "sandbox":
                     opts += ["-g", "-fno-omit-frame-pointer",
                              "-fsanitize=address,undefined"]
                     env = dict(os.environ,
