@@ -6,7 +6,7 @@ Every child command has a hard timeout, and all linked fixtures are inspected.
 """
 import argparse
 import pathlib
-import runpy
+import struct
 import subprocess
 import sys
 
@@ -84,6 +84,68 @@ def stub(path, lib):
         ", ".join(EXPORTS[lib]) + " ]\n...\n", encoding="ascii")
 
 
+
+def strip_platform_command(obj):
+    """Remove one original Clang MH_OBJECT platform record for old Swift LLD."""
+    data = bytearray(obj.read_bytes())
+    if len(data) < 32:
+        raise ValueError("truncated compiler object")
+    magic, cpu, _, kind, count, size = struct.unpack_from("<6I", data)
+    if (magic, cpu, kind) != (0xfeedfacf, 0x0100000c, 1) or size > len(data) - 32:
+        raise ValueError("invalid compiler Mach-O object")
+    end, cursor = 32 + size, 32
+    for _ in range(count):
+        if cursor + 8 > end:
+            raise ValueError("truncated object commands")
+        cmd, length = struct.unpack_from("<II", data, cursor)
+        if length < 8 or length % 8 or cursor + length > end:
+            raise ValueError("invalid object command")
+        if cmd in (0x32, 0x24):
+            data[cursor:end - length] = data[cursor + length:end]
+            data[end - length:end] = bytes(length)
+            struct.pack_into("<II", data, 16, count - 1, size - length)
+            patched = obj.with_suffix(".link.o")
+            patched.write_bytes(data)
+            return patched
+        cursor += length
+    raise ValueError("object has no removable platform command")
+
+
+def link(linker, options, obj, *dependencies):
+    base = [linker, "-arch", "arm64", "-platform_version",
+            "macos", "13.0", "13.0", "-fatal_warnings"] + options
+    extra = [str(p) for p in dependencies]
+    try:
+        run(base + [str(obj)] + extra, 30)
+    except RuntimeError as exception:
+        if "does not support linking for platform macOS" not in str(exception):
+            raise
+        run(base + [str(strip_platform_command(obj))] + extra, 30)
+
+
+def check(path):
+    image = path.read_bytes()
+    if len(image) < 32 or len(image) > 4 * 1024 * 1024:
+        raise ValueError("invalid linked dylib length")
+    magic, cpu, subtype, kind, count, cmdbytes = struct.unpack_from("<6I", image)
+    if (magic, cpu, subtype & 255, kind) != (0xfeedfacf, 0x0100000c, 0, 6):
+        raise ValueError("not compiler-linked arm64 MH_DYLIB")
+    if count > 64 or cmdbytes > len(image) - 32:
+        raise ValueError("linked load commands outside file")
+    cursor, cmds = 32, []
+    for _ in range(count):
+        if cursor + 8 > 32 + cmdbytes:
+            raise ValueError("truncated linked load command")
+        cmd, size = struct.unpack_from("<II", image, cursor)
+        if size < 8 or size % 8 or cursor + size > 32 + cmdbytes:
+            raise ValueError("invalid linked load command")
+        cmds.append(cmd)
+        cursor += size
+    if cursor != 32 + cmdbytes or 0x80000034 not in cmds or 0x80000033 not in cmds:
+        raise ValueError("missing real chained fixups/exports trie")
+    return cmds
+
+
 def main():
     argp = argparse.ArgumentParser()
     argp.add_argument("--output-dir", default="build/phase23a")
@@ -95,8 +157,6 @@ def main():
     root = pathlib.Path(__file__).resolve().parent.parent
     dest = pathlib.Path(args.output_dir).resolve()
     dest.mkdir(parents=True, exist_ok=True)
-    helpers = runpy.run_path(str(root / "tools/phase17b-build.py"))
-    link, check = helpers["link"], helpers["check_dylib"]
 
     for lib in ORDER:
         source = dest / ("phase23a-" + lib + ".c")
