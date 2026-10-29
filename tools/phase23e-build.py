@@ -139,7 +139,7 @@ def build_fixtures(out, clang, ld):
         install_name = "@rpath/" + name.title() + ".dylib"
         linker_call(ld, ["-dylib", "-fixup_chains",
                          "-install_name", install_name,
-                         "-rpath", "@loader_path", "-o", lib], obj,
+                         "-rpath", "@loader_path/.", "-o", lib], obj,
                     [stubs[x] for x in DEPS[name]])
         commands = linked_file(lib, 6)
         if DEPS[name] and 0x0c not in commands:
