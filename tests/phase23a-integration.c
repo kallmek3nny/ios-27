@@ -89,6 +89,34 @@ static void patch_middle_cycle(uint8_t *image, size_t size) {
     assert(seen);
 }
 
+
+/* A valid load-command shape with an impossible chained-fixup payload.
+ * The existing loader must reject it before publishing any mapping. */
+static void patch_invalid_fixup(uint8_t *image, size_t size) {
+    size_t cursor = 32u;
+    uint32_t count;
+    assert(size >= 32u);
+    count = (uint32_t)image[16] | ((uint32_t)image[17] << 8u);
+    for (uint32_t i = 0u; i < count; ++i) {
+        uint32_t command, length;
+        assert(cursor <= size && size - cursor >= 8u);
+        command = (uint32_t)image[cursor] |
+                  ((uint32_t)image[cursor + 1u] << 8u) |
+                  ((uint32_t)image[cursor + 2u] << 16u) |
+                  ((uint32_t)image[cursor + 3u] << 24u);
+        length = (uint32_t)image[cursor + 4u] |
+                 ((uint32_t)image[cursor + 5u] << 8u);
+        assert(length >= 8u && length <= size - cursor);
+        if (command == 0x80000034u) {
+            assert(length >= 16u);
+            memset(image + cursor + 8u, 0xff, 4u);
+            return;
+        }
+        cursor += (size_t)length;
+    }
+    assert(!"missing linked fixup command");
+}
+
 int main(int argc, char **argv) {
     static const char *const top_deps[] = {"facade.dylib", "base.dylib"};
     static const char *const facade_deps[] = {"mid.dylib", "util.dylib"};
@@ -231,6 +259,31 @@ int main(int argc, char **argv) {
         ios27_phase23a_destroy(cycle_loader);
         free(cyclic);
     }
+
+    /* Unsupported/out-of-bounds relocations never leak a partially loaded
+     * closure; a healthy library remains loadable after the failed open. */
+    {
+        ios27_phase23a_loader *bad_loader = NULL;
+        ios27_image_spec changed[PHASE23A_IMAGES];
+        uint8_t *invalid = malloc(files[0].size);
+        assert(invalid != NULL);
+        memcpy(invalid, files[0].data, files[0].size);
+        patch_invalid_fixup(invalid, files[0].size);
+        memcpy(changed, specs, sizeof(changed));
+        changed[0].file = invalid;
+        assert(ios27_phase23a_create(changed, PHASE23A_IMAGES, &bad_loader,
+                                     error, sizeof(error)) == 0);
+        assert(ios27_phase23a_open(bad_loader, "top.dylib", &top,
+                                  error, sizeof(error)) == IOS27_PHASE23A_LOAD_FAILED);
+        assert(top == 0u);
+        assert(ios27_phase23a_open(bad_loader, "base.dylib", &base,
+                                  error, sizeof(error)) == 0);
+        assert(ios27_phase23a_close(bad_loader, base,
+                                   error, sizeof(error)) == 0);
+        ios27_phase23a_destroy(bad_loader);
+        free(invalid);
+    }
+
     assert(ios27_phase23a_diagnostics_read(loader, &diag) == 0);
     assert(diag.lookups >= 240000u);
     assert(diag.opens == diag.closes);
