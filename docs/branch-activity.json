@@ -7,6 +7,42 @@
   "candidate_count": 20,
   "candidates": [
     {
+      "branch": "phase24a-global-dyld-identity",
+      "sha": "91ea9d21113e271d21ec7b193f9d0275ad570a29",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+      "pr_number": 97,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 970,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase24a_close",
+            "ios27_phase24a_create",
+            "ios27_phase24a_destroy",
+            "ios27_phase24a_flat_symbol",
+            "ios27_phase24a_open",
+            "ios27_phase24a_refs",
+            "ios27_phase24a_release",
+            "ios27_phase24a_stats_read",
+            "ios27_phase24a_symbol"
+          ],
+          "example_paths": [
+            "include/ios27/phase24a_registry.h",
+            "src/phase24a_registry.c",
+            "tests/phase24a-integration.c",
+            "tools/phase24a-verify.py"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "agent/phase24b-native-lifecycle-20261029",
       "sha": "c7be84a7721c2defa8a36ad2b0d506c6eca97835",
       "url": "https://github.com/kallmek3nny/ios-27/pull/99",
@@ -64,42 +100,6 @@
             "src/phase24c_registry.c",
             "tests/phase24c-appone.m",
             "tests/phase24c-appthree.m"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase24a-global-dyld-identity",
-      "sha": "4b4e789dff20f8d86f4eda30b22877c14fb29a39",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "pr_number": 97,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 6,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 2,
-          "additions": 955,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase24a_close",
-            "ios27_phase24a_create",
-            "ios27_phase24a_destroy",
-            "ios27_phase24a_flat_symbol",
-            "ios27_phase24a_open",
-            "ios27_phase24a_refs",
-            "ios27_phase24a_release",
-            "ios27_phase24a_stats_read",
-            "ios27_phase24a_symbol"
-          ],
-          "example_paths": [
-            "include/ios27/phase24a_registry.h",
-            "src/phase24a_registry.c",
-            "tests/phase24a-integration.c",
-            "tools/phase24a-verify.py"
           ]
         }
       ]
@@ -784,6 +784,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase24a-global-dyld-identity",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+        "source_files": 2,
+        "fixture_files": 2,
+        "ci": "running"
+      },
+      {
         "branch": "agent/phase24b-native-lifecycle-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/99",
         "source_files": 2,
@@ -796,13 +803,6 @@
         "source_files": 2,
         "fixture_files": 10,
         "ci": "running"
-      },
-      {
-        "branch": "phase24a-global-dyld-identity",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-        "source_files": 2,
-        "fixture_files": 2,
-        "ci": "passing_checks"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1704,5 +1704,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:54:06Z"
+  "observed_at": "2026-10-29T21:54:21Z"
 }
