@@ -3,35 +3,9 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 17,
-  "candidate_count": 17,
+  "candidates_checked": 16,
+  "candidate_count": 16,
   "candidates": [
-    {
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "abf21ef9a6f4d6586acf36193f1efcd7ecae6336",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-      "pr_number": 94,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 11,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 6,
-          "additions": 771,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase23c_bridge.h",
-            "src/phase23c_bridge.c",
-            "tests/phase23c-category.m",
-            "tests/phase23c-other.m"
-          ]
-        }
-      ]
-    },
     {
       "branch": "agent/phase23b-lifecycle-20261029",
       "sha": "7988310ebdb2d3b238810dedcb7d3b457101f54e",
@@ -64,6 +38,32 @@
             "src/phase23b_lifecycle.c",
             "tests/phase23b-lib0.c",
             "tests/phase23b-lib1.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "e5e46c8da4662d6f8d7f65abcb94648f49e8045d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
+      "pr_number": 94,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 6,
+          "additions": 771,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase23c_bridge.h",
+            "src/phase23c_bridge.c",
+            "tests/phase23c-category.m",
+            "tests/phase23c-other.m"
           ]
         }
       ]
@@ -563,32 +563,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "e5e46c8da4662d6f8d7f65abcb94648f49e8045d",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 6,
-          "additions": 771,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase23c_bridge.h",
-            "src/phase23c_bridge.c",
-            "tests/phase23c-category.m",
-            "tests/phase23c-other.m"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -683,17 +657,17 @@
     ],
     "unclassified": [
       {
-        "branch": "phase23c-objc-native-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-        "source_files": 2,
-        "fixture_files": 6,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "agent/phase23b-lifecycle-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/96",
         "source_files": 2,
         "fixture_files": 9,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "phase23c-objc-native-bridge",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/94",
+        "source_files": 2,
+        "fixture_files": 6,
         "ci": "passing_checks"
       },
       {
@@ -723,13 +697,6 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase23c-objc-native-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
-        "source_files": 2,
-        "fixture_files": 6,
-        "ci": "not_checked"
       }
     ]
   },
@@ -1582,5 +1549,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:29:18Z"
+  "observed_at": "2026-10-29T21:29:51Z"
 }
