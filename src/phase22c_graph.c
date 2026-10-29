@@ -1,5 +1,7 @@
 #include "ios27/phase22c_graph.h"
 #include "ios27/dyld_paths.h"
+#include "ios27/binds.h"
+#include "ios27/chained.h"
 #include "ios27/macho.h"
 
 #include <stdatomic.h>
@@ -9,6 +11,9 @@
 
 #define NO_INDEX SIZE_MAX
 #define MH_DYLIB 6u
+#define LC_DYLD_INFO 0x22u
+#define LC_DYLD_INFO_ONLY 0x80000022u
+#define LC_DYLD_CHAINED_FIXUPS 0x80000034u
 
 typedef struct {
     uint64_t id;
@@ -36,6 +41,10 @@ struct ios27_22c_graph {
     void *fini_context;
 };
 static atomic_uint_fast64_t graph_epoch = ATOMIC_VAR_INIT(1u);
+static uint32_t u32(const uint8_t *p) {
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8u) |
+           ((uint32_t)p[2] << 16u) | ((uint32_t)p[3] << 24u);
+}
 
 static int report(ios27_22c_diagnostic *d, ios27_22c_reason r,
                   size_t i, size_t dep, const char *detail) {
@@ -286,6 +295,11 @@ static int create_impl(const ios27_image_spec *specs, size_t count,
             (void)report(diag, IOS27_22C_MACHO, i, NO_INDEX, error);
             goto failed;
         }
+        if (g->machos[i].encrypted || specs[i].size > (16u * 1024u * 1024u)) {
+            (void)report(diag, IOS27_22C_MACHO, i, NO_INDEX,
+                         "encrypted or oversized linked image unsupported");
+            goto failed;
+        }
         if (g->machos[i].filetype != IOS27_MH_EXECUTE &&
             g->machos[i].filetype != MH_DYLIB) {
             (void)report(diag, IOS27_22C_MACHO, i, NO_INDEX,
@@ -359,12 +373,102 @@ int ios27_22c_order(const ios27_22c_graph *g, size_t pos,
     *name = g->names[g->order[reverse ? g->order_count - 1u - pos : pos]];
     return 0;
 }
+
+/* Read-only fixup diagnostics. Existing src/binds.c and src/chained.c
+ * validate the bytecode and relocation footprint, while this gate
+ * identifies the exact importing image and missing symbol before mmap. */
+static int preflight_fixups(const ios27_22c_graph *g,
+                           ios27_22c_diagnostic *diag) {
+    for (size_t i = 0; i < g->count; ++i) {
+        const uint8_t *file = g->specs[i].file;
+        const size_t length = g->specs[i].size;
+        size_t cursor = 32u;
+        unsigned classic = 0u, chained = 0u;
+        char error[IOS27_22C_DIAG_SIZE] = {0};
+        for (uint32_t cmd = 0u; cmd < u32(file + 16u); ++cmd) {
+            uint32_t opcode = u32(file + cursor);
+            if (opcode == LC_DYLD_INFO || opcode == LC_DYLD_INFO_ONLY) ++classic;
+            if (opcode == LC_DYLD_CHAINED_FIXUPS) ++chained;
+            cursor += u32(file + cursor + 4u);
+        }
+        if (classic > 1u || chained > 1u || (classic && chained))
+            return report(diag, IOS27_22C_FIXUP, i, NO_INDEX,
+                          "duplicate or mixed classic/chained fixup commands");
+        if (chained) {
+            ios27_chained_plan *plan = calloc(1u, sizeof(*plan));
+            if (!plan) return report(diag, IOS27_22C_INPUT, i, NO_INDEX,
+                                     "chained plan allocation failed");
+            int parsed = ios27_chained_parse(file, length, &g->machos[i],
+                                             plan, error, sizeof(error));
+            if (parsed) {
+                free(plan);
+                return report(diag, IOS27_22C_FIXUP, i, NO_INDEX, error);
+            }
+            for (size_t p = 0; p < plan->count; ++p) {
+                if (!plan->patches[p].is_bind) continue;
+                if (plan->patches[p].import_index >= plan->import_count) {
+                    free(plan);
+                    return report(diag, IOS27_22C_FIXUP, i, p,
+                                  "chained relocation import outside table");
+                }
+                const ios27_chained_import *import =
+                    &plan->imports[plan->patches[p].import_index];
+                ios27_export_resolution symbol;
+                ios27_22c_diagnostic detail;
+                int resolved = ios27_22c_resolve(g, i, import->ordinal,
+                                                  import->symbol, &symbol, &detail);
+                if (resolved < 0 || (resolved > 0 && !import->weak_import &&
+                                      import->ordinal != -3)) {
+                    char message[IOS27_22C_DIAG_SIZE];
+                    (void)snprintf(message, sizeof(message),
+                                   "image %zu chained import %.96s: %.64s", i,
+                                   import->symbol, resolved < 0 ? detail.message :
+                                   "unresolved mandatory symbol");
+                    free(plan);
+                    return report(diag, IOS27_22C_FIXUP, i, p, message);
+                }
+            }
+            free(plan);
+        } else if (classic) {
+            ios27_bind_plan *plan = calloc(1u, sizeof(*plan));
+            if (!plan) return report(diag, IOS27_22C_INPUT, i, NO_INDEX,
+                                     "classic plan allocation failed");
+            int parsed = ios27_binds_parse(file, length, &g->machos[i],
+                                           plan, error, sizeof(error));
+            if (parsed) {
+                free(plan);
+                return report(diag, IOS27_22C_FIXUP, i, NO_INDEX, error);
+            }
+            for (size_t p = 0; p < plan->count; ++p) {
+                ios27_export_resolution symbol;
+                ios27_22c_diagnostic detail;
+                int resolved = ios27_22c_resolve(g, i,
+                               plan->entries[p].ordinal, plan->entries[p].symbol,
+                               &symbol, &detail);
+                if (resolved != 0) {
+                    char message[IOS27_22C_DIAG_SIZE];
+                    (void)snprintf(message, sizeof(message),
+                                   "image %zu classic import %.96s: %.64s", i,
+                                   plan->entries[p].symbol,
+                                   resolved < 0 ? detail.message :
+                                   "unresolved mandatory symbol");
+                    free(plan);
+                    return report(diag, IOS27_22C_FIXUP, i, p, message);
+                }
+            }
+            free(plan);
+        }
+    }
+    return 0;
+}
+
 int ios27_22c_load(ios27_22c_graph *g, ios27_22c_diagnostic *diag) {
     char error[IOS27_22C_DIAG_SIZE] = {0};
     clear_diag(diag);
     if (!g || g->loaded) return report(diag, IOS27_22C_LIFECYCLE,
                                        NO_INDEX, NO_INDEX,
                                        "graph absent or already loaded");
+    if (preflight_fixups(g, diag)) return -1;
     int rc = g->using_paths ?
         ios27_images_load_with_paths(g->specs, g->count, g->guest_path_ptrs,
                                       g->main_executable, &g->loaded,
