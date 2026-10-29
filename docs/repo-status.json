@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 93,
+      "branch": "phase23e/native-app-integration-harness",
+      "sha": "0c32cf6df050f42c68f7170c2851528117236df9",
+      "title": "phase 23e: standalone compiler-linked darwin app integration harness",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/93",
+      "updated_at": "2026-10-29T21:19:46Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 92,
       "branch": "phase23a-incremental-dyld-namespaces",
       "sha": "3957ff3da9e88e1a6d35a637e962afb4e90a2fc7",
       "title": "phase23a: transactional incremental macho loading and symbol namespaces",
       "url": "https://github.com/kallmek3nny/ios-27/pull/92",
       "updated_at": "2026-10-29T21:19:35Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 93,
-      "branch": "phase23e/native-app-integration-harness",
-      "sha": "754f47bb9bf05d8eee6a561960948ecbc9e1a7e0",
-      "title": "phase 23e: standalone compiler-linked darwin app integration harness",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/93",
-      "updated_at": "2026-10-29T21:19:10Z",
       "status": "unmerged: not counted"
     },
     {
@@ -128,12 +128,12 @@
   ],
   "ahead_branches": [
     {
-      "branch": "phase23e/native-app-integration-harness",
-      "sha": "0c32cf6df050f42c68f7170c2851528117236df9",
-      "ahead_by": 12,
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "b4fc93ce60972c0a2450c712fb1e9f3af31fd5ab",
+      "ahead_by": 2,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:19:44Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
+      "last_commit_at": "2026-10-29T21:19:59Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
       "status": "unmerged: not counted"
     }
   ],
@@ -337,9 +337,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 13,
+    "branches_scanned": 12,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:19:48Z"
+  "observed_at": "2026-10-29T21:20:11Z"
 }
