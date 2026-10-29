@@ -10,7 +10,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-CASES = ("native", "faults", "stress", "races", "sandbox")
+CASES = ("native", "faults", "stress", "races", "isolation", "sandbox")
 FLAGS = ("-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread")
 
 
@@ -46,7 +46,7 @@ def main():
                 opts = list(opt)
                 env = None
                 # Seccomp probe must run without sanitizer runtime syscalls.
-                if sanitizer and case != "sandbox":
+                if sanitizer and case not in ("sandbox", "isolation"):
                     opts += ["-g", "-fno-omit-frame-pointer",
                              "-fsanitize=address,undefined"]
                     env = dict(os.environ,

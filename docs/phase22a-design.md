@@ -24,7 +24,8 @@ independently because shared CMakeLists.txt is owned by other workstreams.
 4. **native concurrency and test evidence:** seeded 309,020-operation stress
    across four threads, close-vs-copy workers, quota/fault regression,
    two optimizations and two compilers under x86_64/ARM64 CI, ASan/UBSan,
-   and a real compiler-produced ARM64 Darwin Mach-O callsite check.
+   a real compiler-produced ARM64 Darwin Mach-O callsite check, and three
+   child-only native protection faults verifying both guards and RX write denial.
 5. **restricted child probe (Linux x86_64/AArch64 only):** pre-compiled trusted
    child is forked and checked with NO_NEW_PRIVS plus a seccomp BPF policy.
    Whitelist: exit, exit_group, rt_sigreturn, and write to precisely
