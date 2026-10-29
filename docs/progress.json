@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "as_of": "2026-10-28",
-  "baseline_commit": "75d631ff507debdeb5ce07e61d77fe5e32c4f6a1",
-  "method": "curated evidence-backed milestone gates; a gate is not a percentage of real iOS compatibility, and repository test names do not independently prove on-device success",
+  "as_of": "2026-10-29",
+  "baseline_commit": "d324a591aa929d48b8d6aba022a57144c991d79c",
+  "method": "curated scoped evidence-backed milestone gates; phase20/21 standalone suites are independently required by x86_64 and ARM64 progress CI; gates are not overall iOS compatibility",
   "groups": [
     {
       "id": "macho",
@@ -45,6 +45,12 @@
           "done": true,
           "evidence": "docs/phase19d-relocation-linker.md",
           "test": "compiled-darwin-branch26"
+        },
+        {
+          "title": "bounded compiler-produced ARM64 LC_MAIN argv/envp/apple stack and guard-page fixture",
+          "done": true,
+          "evidence": "docs/phase19a-startup.md",
+          "test": "compiled-darwin-real-mh-execute"
         }
       ]
     },
@@ -187,6 +193,48 @@
           "done": true,
           "evidence": "docs/phase19e-architecture.md",
           "standalone_test": "tools/phase19e-standalone.py"
+        },
+        {
+          "title": "standalone Clang-generated ObjC2 metadata graphs and transactional registration (phase20a)",
+          "done": true,
+          "evidence": "docs/phase20a-objective-c-metadata.md",
+          "standalone_test": "tools/phase20a-standalone.py"
+        },
+        {
+          "title": "bounded native host ObjC message dispatch and compiled ARM64 Darwin entrypoints (phase20b)",
+          "done": true,
+          "evidence": "docs/phase20b-dispatch.md",
+          "standalone_test": "tools/phase20b-verify.sh"
+        },
+        {
+          "title": "host-only Objective-C retain, weak and autorelease ownership with compiled fixtures (phase20c)",
+          "done": true,
+          "evidence": "docs/phase20c-ownership.md",
+          "standalone_test": "tools/phase20c-build.py"
+        },
+        {
+          "title": "bounded host-native threading, synchronization and TLS with Darwin callsite fixture (phase20d)",
+          "done": true,
+          "evidence": "docs/phase20d-threading.md",
+          "standalone_test": "tools/phase20d-standalone.py"
+        },
+        {
+          "title": "bounded Darwin-numbered userspace calls and capability-backed guest file descriptors (phase20e)",
+          "done": true,
+          "evidence": "docs/phase20e-services.md",
+          "standalone_test": "tools/phase20e-standalone.py"
+        },
+        {
+          "title": "host-backed FIFO condition-variable semantics with compiled stress fixtures (phase21g)",
+          "done": true,
+          "evidence": "docs/phase21g-design.md",
+          "standalone_test": "tools/phase21g-standalone.py"
+        },
+        {
+          "title": "generation-safe host synchronization-object teardown under cancellation (phase21h)",
+          "done": true,
+          "evidence": "docs/phase21h-lifecycle.md",
+          "standalone_test": "tools/phase21h-standalone.py"
         }
       ]
     },
