@@ -7,11 +7,47 @@
   "candidate_count": 20,
   "candidates": [
     {
+      "branch": "agent/phase24b-native-lifecycle-20261029",
+      "sha": "f1064a7910d16d7672d056e3b46c63813df2b00e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/99",
+      "pr_number": 99,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 8,
+          "additions": 1315,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_24b_bind",
+            "ios27_24b_close",
+            "ios27_24b_ensure",
+            "ios27_24b_inspect",
+            "ios27_24b_open",
+            "ios27_24b_parse",
+            "ios27_24b_register",
+            "ios27_24b_runtime_destroy",
+            "ios27_24b_runtime_init"
+          ],
+          "example_paths": [
+            "include/ios27/phase24b_lifecycle.h",
+            "src/phase24b_lifecycle.c",
+            "tests/phase24b-lib0.c",
+            "tests/phase24b-lib1.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase24a-global-dyld-identity",
       "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "pr_number": 97,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -38,42 +74,6 @@
             "src/phase24a_registry.c",
             "tests/phase24a-integration.c",
             "tools/phase24a-verify.py"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "3ac6adeb00e9df5fedc54bca8952f905ad8265e5",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/99",
-      "pr_number": 99,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 8,
-          "additions": 1307,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_24b_bind",
-            "ios27_24b_close",
-            "ios27_24b_ensure",
-            "ios27_24b_inspect",
-            "ios27_24b_open",
-            "ios27_24b_parse",
-            "ios27_24b_register",
-            "ios27_24b_runtime_destroy",
-            "ios27_24b_runtime_init"
-          ],
-          "example_paths": [
-            "include/ios27/phase24b_lifecycle.h",
-            "src/phase24b_lifecycle.c",
-            "tests/phase24b-lib0.c",
-            "tests/phase24b-lib1.c"
           ]
         }
       ]
@@ -784,18 +784,18 @@
     ],
     "unclassified": [
       {
-        "branch": "phase24a-global-dyld-identity",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-        "source_files": 2,
-        "fixture_files": 2,
-        "ci": "running"
-      },
-      {
         "branch": "agent/phase24b-native-lifecycle-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/99",
         "source_files": 2,
         "fixture_files": 8,
         "ci": "running"
+      },
+      {
+        "branch": "phase24a-global-dyld-identity",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+        "source_files": 2,
+        "fixture_files": 2,
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
@@ -1704,5 +1704,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:55:29Z"
+  "observed_at": "2026-10-29T21:55:46Z"
 }
