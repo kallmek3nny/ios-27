@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define LIBS 6u
 #define THREADS 4u
@@ -33,6 +34,12 @@ static fixture load(const char *path) {
     assert(fread(data.bytes, 1u, data.size, f) == data.size);
     assert(fclose(f) == 0);
     return data;
+}
+
+static uint64_t monotonic_ns(void) {
+    struct timespec ts;
+    assert(!clock_gettime(CLOCK_MONOTONIC, &ts));
+    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
 }
 
 static void *worker(void *context) {
@@ -91,7 +98,7 @@ int main(int argc, char **argv) {
     ios27_phase24a_pin pin = 0, second_pin = 0;
     ios27_phase24a_stats stats;
     uintptr_t entry = 0, data_ptr = 0;
-    uint64_t refs = 0;
+    uint64_t refs = 0, lookup_elapsed = 0, map_elapsed = 0;
     pthread_t threads[THREADS];
     worker_context workers[THREADS];
     char err[256] = {0};
@@ -137,6 +144,7 @@ int main(int argc, char **argv) {
                                        &data_ptr, &second_pin, err, sizeof(err)));
     check_callable(data_ptr, 11); /* strong core outranks right's weak */
     assert(!ios27_phase24a_release(r, second_pin, err, sizeof(err)));
+    uint64_t lookup_start = monotonic_ns();
     for (unsigned i = 0; i < LOOKUP_ITERATIONS; ++i) {
         ios27_phase24a_pin p = 0;
         uintptr_t resolved = 0;
@@ -145,6 +153,7 @@ int main(int argc, char **argv) {
         assert(resolved == entry);
         assert(!ios27_phase24a_release(r, p, err, sizeof(err)));
     }
+    lookup_elapsed = monotonic_ns() - lookup_start;
     for (size_t t = 0u; t < THREADS; ++t) {
         workers[t].registry = r;
         workers[t].failures = 0u;
@@ -172,7 +181,9 @@ int main(int argc, char **argv) {
     assert(ios27_phase24a_close(r, obsolete, err, sizeof(err)) == IOS27_PHASE24A_INVALID);
     assert(!ios27_phase24a_close(r, front, err, sizeof(err)));
     for (unsigned cycle = 0u; cycle < 12u; ++cycle) {
+        uint64_t start = monotonic_ns();
         assert(!ios27_phase24a_open(r, paths[0], &tmp, err, sizeof(err)));
+        map_elapsed += monotonic_ns() - start;
         assert(!ios27_phase24a_close(r, tmp, err, sizeof(err)));
     }
     assert(!ios27_phase24a_stats_read(r, &stats));
@@ -186,6 +197,10 @@ int main(int argc, char **argv) {
             (unsigned long long)stats.closes,
             (unsigned long long)stats.graph_maps,
             (unsigned long long)stats.graph_unmaps);
+    fprintf(stdout, "phase24a profile: pinned lookup=%llu ns/op, "
+                    "fresh graph open including fixups=%llu ns/op (12 maps)\\n",
+            (unsigned long long)(lookup_elapsed / LOOKUP_ITERATIONS),
+            (unsigned long long)(map_elapsed / 12u));
     ios27_phase24a_destroy(r);
     /* Deterministic, bounded malformed-header fault campaign. Every mutation
      * changes one of the four magic bytes and must fail without publishing
