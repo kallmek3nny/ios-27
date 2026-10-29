@@ -38,12 +38,12 @@ does not depend on phase23a headers or implementation. Only
    exercises 160,000 direct pinned lookups and 48,000 additional concurrent
    pinned lookups, over 96,000 combined open/close transitions, reference
    accounting, ABA handling, cross-image identities, fault rejection,
-   and repeated clean map/unmap. On ARM64 Linux it calls the trusted
+   and repeated clean map/unmap. The negative test adds 1,024 seeded\n   corrupted-Mach-O-header cases followed by a successful fresh load.\n   On ARM64 Linux it calls the trusted
    mapped compiler-produced functions (expected return values 47 and 21).
    On x86_64 hosts it does **not** execute ARM64 instructions. The CI
    workflow separately runs standard and ASan/UBSan on x86_64 and arm64.
 
-Commands (all children and outer wrapper bounded):
+Profiling records real monotonic-clock nanoseconds per pinned lookup and\nper *fresh graph open*, including graph mapping, export parsing, fixups and\nW^X sealing. The latter is not a separately isolated relocation benchmark.\n\nCommands (all children and outer wrapper bounded):
 
 ```sh
 timeout 900s python3 tools/phase24a-verify.py --output-dir build/phase24a
@@ -83,3 +83,14 @@ still equals the known base SHA. Any movement of `main` requires explicit
 reconciliation and a new validation run. Never synthesize three hours of
 activity: document real elapsed active engineering time separately from
 the requested duration, and leave PR open when the requirement is not met.
+
+## Activity and evidence provenance
+
+The first implementation commit was recorded at
+`2026-10-29T21:45:46Z` and the profiling commit at
+`2026-10-29T21:54:09Z`, an **8m 23s observed commit span**.
+This shows implementation activity but is not a wall-clock tracker for
+individual coding time, and does **not** satisfy the requested three
+genuine active hours. The PR must remain draft/unmerged. The CI logs,
+compiler-produced Mach-O metadata, and test result lines are stronger
+evidence of functionality than the commit interval alone.
