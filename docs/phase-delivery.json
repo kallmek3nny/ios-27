@@ -4,7 +4,6 @@
   "method": "merged source-bearing PR workstreams / fixed 20 planned phase workstreams; not iOS compatibility",
   "repository": "kallmek3nny/ios-27",
   "source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
-  "observed_at": "2026-10-29T10:17:20Z",
   "delivered": 11,
   "active": 9,
   "total": 20,
