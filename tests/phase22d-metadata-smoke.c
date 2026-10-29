@@ -50,10 +50,10 @@ int main(int argc, char **argv) {
     }
     REQUIRE(root_size >= sizeof(void *) && child_size >= root_size);
     const phase22d_class_spec bindings[] = {
-        {.name = "Phase22dChild", .superclass = "Phase22dRoot",
+        {.name = "Child", .superclass = "Root",
          .instance_size = child_size,
          .instance_methods = child_methods, .instance_count = 1u},
-        {.name = "Phase22dRoot", .instance_size = root_size,
+        {.name = "Root", .instance_size = root_size,
          .instance_methods = root_methods, .instance_count = 3u}
     };
     REQUIRE(phase22d_create(&runtime) == 0);
