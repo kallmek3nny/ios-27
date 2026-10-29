@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 97,
+      "branch": "phase24a-global-dyld-identity",
+      "sha": "d51fb9f15c3cece94e58339830e53a3cdedd4284",
+      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
+      "updated_at": "2026-10-29T21:50:30Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 98,
       "branch": "phase24e-native-application-startup",
       "sha": "55463f985c2de57e0b0a6360705a538bdb0d22ab",
       "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "updated_at": "2026-10-29T21:50:06Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 97,
-      "branch": "phase24a-global-dyld-identity",
-      "sha": "f4c71d697266c5c238363a37145b9725498132d3",
-      "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:49:52Z",
       "status": "unmerged: not counted"
     },
     {
@@ -174,10 +174,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "8a29817b808ccbc1eba19b06c25a555da4bb8d56",
-      "ahead_by": 43,
+      "sha": "26510b3e3e05811ae5a9478e1667938d9dfb1323",
+      "ahead_by": 44,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:49:42Z",
+      "last_commit_at": "2026-10-29T21:50:32Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "status": "unmerged: not counted"
     }
@@ -386,5 +386,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:50:29Z"
+  "observed_at": "2026-10-29T21:50:47Z"
 }
