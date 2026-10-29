@@ -101,7 +101,11 @@ static int has_initializer_section(const uint8_t *data, size_t size) {
             for (uint32_t j = 0u; j < sections; ++j) {
                 const uint8_t *s = data + p + 72u + 80u * (size_t)j;
                 uint32_t type = r32(s + 64u) & 255u;
-                if ((type == 9u || type == 10u) && r64(s + 40u))
+                if ((type == 9u || type == 10u || type == 0x16u ||
+                     memcmp(s, "__init_offsets", 14u) == 0 ||
+                     memcmp(s, "__mod_init_func", 15u) == 0 ||
+                     memcmp(s, "__mod_term_func", 15u) == 0) &&
+                    r64(s + 40u))
                     return 1;
             }
         }
