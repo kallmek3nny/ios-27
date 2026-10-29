@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "5e23d48274291f89aafd5e936cd59d9bc14cac4d",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:23:01Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 85,
       "branch": "phase22a-guest-address-spaces",
       "sha": "7e29a48f2fd65611aa586af647bd15cd030ee370",
@@ -24,15 +33,6 @@
       "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/87",
       "updated_at": "2026-10-29T00:21:58Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 83,
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "f2e9c8d8d15d58d0bd75d0e733e8d227ffdb8ccf",
-      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:21:45Z",
       "status": "unmerged: not counted"
     },
     {
@@ -156,5 +156,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:22:51Z"
+  "observed_at": "2026-10-29T00:23:14Z"
 }

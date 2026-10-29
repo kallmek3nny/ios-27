@@ -7,11 +7,50 @@
   "candidate_count": 9,
   "candidates": [
     {
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "5e23d48274291f89aafd5e936cd59d9bc14cac4d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "pr_number": 83,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 10,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 1301,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22c_acquire",
+            "ios27_22c_create",
+            "ios27_22c_create_with_paths",
+            "ios27_22c_destroy",
+            "ios27_22c_initialize",
+            "ios27_22c_load",
+            "ios27_22c_order",
+            "ios27_22c_pins",
+            "ios27_22c_release",
+            "ios27_22c_resolve",
+            "ios27_22c_symbol",
+            "ios27_22c_unload"
+          ],
+          "example_paths": [
+            "include/ios27/phase22c_graph.h",
+            "src/phase22c_graph.c",
+            "tests/phase22c-compiled.c",
+            "tests/phase22c-fixture-consumer.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase22a-guest-address-spaces",
       "sha": "7e29a48f2fd65611aa586af647bd15cd030ee370",
       "url": "https://github.com/kallmek3nny/ios-27/pull/85",
       "pr_number": 85,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -67,45 +106,6 @@
             "src/phase22e_ipc.c",
             "tests/phase22e-generated.h",
             "tests/phase22e-negative.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "f2e9c8d8d15d58d0bd75d0e733e8d227ffdb8ccf",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "pr_number": 83,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 1197,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_22c_acquire",
-            "ios27_22c_create",
-            "ios27_22c_create_with_paths",
-            "ios27_22c_destroy",
-            "ios27_22c_initialize",
-            "ios27_22c_load",
-            "ios27_22c_order",
-            "ios27_22c_pins",
-            "ios27_22c_release",
-            "ios27_22c_resolve",
-            "ios27_22c_symbol",
-            "ios27_22c_unload"
-          ],
-          "example_paths": [
-            "include/ios27/phase22c_graph.h",
-            "src/phase22c_graph.c",
-            "tests/phase22c-compiled.c",
-            "tests/phase22c-fixture-consumer.c"
           ]
         }
       ]
@@ -398,24 +398,24 @@
     ],
     "unclassified": [
       {
+        "branch": "agent/phase22c-transactional-dyld-graph",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "running"
+      },
+      {
         "branch": "phase22a-guest-address-spaces",
         "url": "https://github.com/kallmek3nny/ios-27/pull/85",
         "source_files": 3,
         "fixture_files": 9,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase22e-mach-ipc-mig",
         "url": "https://github.com/kallmek3nny/ios-27/pull/87",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "agent/phase22c-transactional-dyld-graph",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-        "source_files": 2,
-        "fixture_files": 5,
         "ci": "passing_checks"
       },
       {
@@ -723,5 +723,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:22:59Z"
+  "observed_at": "2026-10-29T00:23:24Z"
 }
