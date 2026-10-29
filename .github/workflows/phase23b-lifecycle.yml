@@ -1,0 +1,42 @@
+name: phase23b mach-o lifecycle native
+on:
+  pull_request:
+    paths:
+      - 'src/phase23b_*'
+      - 'include/ios27/phase23b_*'
+      - 'tests/phase23b-*'
+      - 'tools/phase23b-*'
+      - 'docs/phase23b-*'
+      - '.github/workflows/phase23b-*.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: assert checkout is frozen PR head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(timeout 30s git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SHA"
+          uname -m
+      - name: compile genuine six-dylib fixtures and run strict native tests
+        run: timeout 300s python3 tools/phase23b-check.py
+      - name: address and undefined behavior sanitizers
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE23B_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase23b-check.py
