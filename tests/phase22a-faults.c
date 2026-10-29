@@ -20,6 +20,13 @@ int main(void) {
     assert(unused == 0u);
     OK(ios27_22a_snapshot(s, &after));
     assert(after.committed == before.committed && after.regions == before.regions);
+    for (unsigned stage = 1u; stage <= 2u; ++stage) {
+        OK(ios27_22a_fail_stage(s, stage));
+        ERR(ios27_22a_map(s, 0x8000u, 4096u, 3u, 0u, &unused), IOS27_22A_LIMIT);
+        assert(unused == 0u);
+        OK(ios27_22a_snapshot(s, &after));
+        assert(after.regions == before.regions && after.committed == before.committed);
+    }
     OK(ios27_22a_map(s, 0x8000u, 4096u, 3u, 0u, &second));
     ERR(ios27_22a_map(s, 0xc000u, 4096u, 3u, 0u, &unused), IOS27_22A_LIMIT);
     OK(ios27_22a_pin(s, 0x4000u, 16u, 1u, 3u, &a));

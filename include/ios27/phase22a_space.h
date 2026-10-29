@@ -78,6 +78,8 @@ int ios27_22a_snapshot(ios27_22a_space *space, ios27_22a_stats *stats);
  * Test-only and deterministic under serialized calls, not a security control.
  */
 int ios27_22a_fail_map_after(ios27_22a_space *space, uint32_t count);
+/* Test-only: fail after host reservation (1) or after mprotect (2). */
+int ios27_22a_fail_stage(ios27_22a_space *space, unsigned stage);
 int ios27_22a_close(ios27_22a_space *space);
 int ios27_22a_destroy(ios27_22a_space **space);
 #endif

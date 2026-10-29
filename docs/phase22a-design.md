@@ -19,7 +19,8 @@ independently because shared CMakeLists.txt is owned by other workstreams.
 3. **lifetime and failure handling:** generation-checked region and pin IDs,
    stale reference rejection, bounded pin slots, deterministic map-failure
    injection, closed state, atomic metadata under a mutex, resource snapshots,
-   and teardown that refuses active borrows.
+   post-reservation and post-mprotect rollback injection, and teardown that
+   refuses active borrows.
 4. **native concurrency and test evidence:** seeded 309,020-operation stress
    across four threads, close-vs-copy workers, quota/fault regression,
    two optimizations and two compilers under x86_64/ARM64 CI, ASan/UBSan,

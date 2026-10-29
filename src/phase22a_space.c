@@ -37,6 +37,7 @@ struct ios27_22a_space {
     uint32_t pins;
     uint32_t failure_countdown;
     int inject_failure;
+    unsigned failure_stage;
     int closed;
 };
 
@@ -191,8 +192,20 @@ int ios27_22a_map(ios27_22a_space *s, uint64_t address, uint64_t bytes,
     p = mmap(NULL, (size_t)reserved, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS,
              -1, 0);
     if (p == MAP_FAILED) { result = IOS27_22A_LIMIT; goto done; }
+    if (s->failure_stage == 1u) {
+        s->failure_stage = 0u;
+        (void)munmap(p, (size_t)reserved);
+        result = IOS27_22A_LIMIT;
+        goto done;
+    }
     if (mprotect((uint8_t *)p + before, (size_t)bytes,
                  host_protection(permissions)) != 0) {
+        (void)munmap(p, (size_t)reserved);
+        result = IOS27_22A_LIMIT;
+        goto done;
+    }
+    if (s->failure_stage == 2u) {
+        s->failure_stage = 0u;
         (void)munmap(p, (size_t)reserved);
         result = IOS27_22A_LIMIT;
         goto done;
@@ -389,6 +402,15 @@ int ios27_22a_fail_map_after(ios27_22a_space *s, uint32_t count) {
     if (s->closed) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
     s->failure_countdown = count;
     s->inject_failure = 1;
+    pthread_mutex_unlock(&s->mutex);
+    return IOS27_22A_OK;
+}
+
+int ios27_22a_fail_stage(ios27_22a_space *s, unsigned stage) {
+    if (!s || stage > 2u) return IOS27_22A_INVALID;
+    pthread_mutex_lock(&s->mutex);
+    if (s->closed) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
+    s->failure_stage = stage;
     pthread_mutex_unlock(&s->mutex);
     return IOS27_22A_OK;
 }
