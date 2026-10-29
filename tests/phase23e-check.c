@@ -207,7 +207,8 @@ int main(int argc, char **argv) {
         rng ^= rng << 5u;
         /* Exercise magic, CPU, Mach-O type, count and command-byte bounds. */
         {
-            static const size_t offsets[] = {0u, 1u, 2u, 3u, 4u, 5u,\n                6u, 7u, 12u, 13u, 14u, 15u, 16u, 17u, 18u, 19u,
+            static const size_t offsets[] = {0u, 1u, 2u, 3u, 4u, 5u,
+                6u, 7u, 12u, 13u, 14u, 15u, 16u, 17u, 18u, 19u,
                 20u, 21u, 22u, 23u};
             mutant[offsets[trial % (sizeof(offsets) / sizeof(offsets[0])) ]] ^=
                 (uint8_t)((rng & 255u) | 1u);
