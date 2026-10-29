@@ -11,10 +11,10 @@
     {
       "number": 92,
       "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "d04f6460f505f71db88a8c9a35cbaff010a15827",
+      "sha": "12d519806590877b5ee8dea4ce8f47606ab54e3c",
       "title": "phase23a: transactional incremental macho loading and symbol namespaces",
       "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "updated_at": "2026-10-29T21:15:10Z",
+      "updated_at": "2026-10-29T21:16:14Z",
       "status": "unmerged: not counted"
     },
     {
@@ -328,9 +328,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 11,
+    "branches_scanned": 12,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:16:10Z"
+  "observed_at": "2026-10-29T21:16:50Z"
 }

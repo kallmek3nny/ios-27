@@ -8,7 +8,7 @@ candidate branches with mapped changes: **13** · audited base: `1dd112410e43`
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
-head: `d04f6460f505` · ci: **passing_checks** · unmerged, not credited.
+head: `12d519806590` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +876/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
