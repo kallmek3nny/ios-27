@@ -14,3 +14,7 @@ All test commands have bounded timeouts. Run: timeout 600s bash tools/phase24c-v
 ## unimplemented
 Zero actual Darwin IMP calls and zero real retain/release/weak transitions. Native objc_msgSend entrypoint, mapped relocation and ownership-checked executable pages, +load/+initialize coordination, ownership, weak/finalization, generation-safe unload and runtime app startup remain missing. Metadata lookups must not be presented as method calls. Do not claim Apple libobjc compatibility.
 Three genuine active engineering hours were not completed or claimed. Retain as draft until missing functionality and all frozen-head CI gates pass, and main can be verified unchanged with expected-SHA lease.
+
+## native execution probe added to CI
+
+The isolated `tests/phase24c-native.c` checker now extracts the compiler-linked, relocation-free `+[Phase24cRoot kind]` method from `alpha.dylib`. It validates the Mach-O class method symbol and exactly two ARM64 instructions (`mov w0,#1; ret`), maps an independent anonymous page RW, seals RX, and on AArch64 Linux invokes the extracted actual Darwin method body 160,000 times directly using an explicit two-argument ABI prototype. On x86_64 only format and instruction inspection are possible. CI logs are authoritative: these are **direct IMP calls**, not `objc_msgSend`/runtime class dispatch, and do not validate dependencies, object lifetime, or Apple libobjc. No runtime ownership transitions occur. This direct-call probe does not establish full phase24c completion.

@@ -27,6 +27,8 @@ APPS = {"one": ("alpha",), "two": ("beta", "alpha"),
 def run(cmd: list[str]) -> None:
     result = subprocess.run(cmd, cwd=ROOT, check=False, timeout=30,
                             text=True, capture_output=True)
+    if result.stdout and 'phase24c-native' in cmd[0]:
+        print(result.stdout.strip(), flush=True)
     if result.returncode:
         raise RuntimeError(f"{cmd!r}\n{result.stdout}{result.stderr}")
 
@@ -156,6 +158,13 @@ def main() -> None:
             commands = read_commands(target, 2)
             if 0x0c not in commands or 0x80000034 not in commands:
                 raise ValueError(f"missing dependency/fixups in app {name}")
+        native = outdir / 'phase24c-native'
+        args = [os.getenv('PHASE24C_HOST_CC', 'clang'), '-std=c11',
+                '-Wall', '-Wextra', '-Wpedantic', '-Werror', '-O1', '-g']
+        if os.getenv('PHASE24C_SANITIZE', '0') == '1':
+            args += ['-fsanitize=address,undefined', '-fno-omit-frame-pointer']
+        run(args + [str(ROOT/'tests'/'phase24c-native.c'), '-o', str(native)])
+        run([str(native), str(linked['alpha'])])
         print('phase24c: 6 genuine ARM64 Darwin ObjC MH_DYLIBs and 3 MH_EXECUTEs linked')
         print('phase24c: linking does not prove runtime execution')
 
