@@ -171,11 +171,38 @@ int main(int argc, char **argv) {
             (unsigned long long)stats.graph_maps,
             (unsigned long long)stats.graph_unmaps);
     ios27_phase24a_destroy(r);
-    /* Caller-side malformed header must not poison a later valid registry. */
-    files[0].bytes[0] = 0u;
-    assert(ios27_phase24a_create(specs, paths, LIBS, "/app/bin/launcher",
-                                  &bad, err, sizeof(err)) == IOS27_PHASE24A_INVALID);
-    assert(bad == NULL);
+    /* Deterministic, bounded malformed-header fault campaign. Every mutation
+     * changes one of the four magic bytes and must fail without publishing
+     * an image handle, graph, or registry. Seed recorded for reproduction. */
+    {
+        uint32_t seed = 0x24a52b19u;
+        for (unsigned iter = 0u; iter < 1024u; ++iter) {
+            size_t index;
+            uint8_t saved, delta;
+            seed = seed * 1664525u + 1013904223u;
+            index = (size_t)((seed >> 8u) & 3u);
+            delta = (uint8_t)(1u << ((seed >> 16u) & 7u));
+            saved = files[0].bytes[index];
+            files[0].bytes[index] ^= delta;
+            bad = NULL;
+            assert(ios27_phase24a_create(specs, paths, LIBS,
+                                          "/app/bin/launcher", &bad,
+                                          err, sizeof(err)) == IOS27_PHASE24A_INVALID);
+            assert(bad == NULL);
+            files[0].bytes[index] = saved;
+        }
+    }
+    /* Recovery from all rejected images must leave clean mappings and
+     * ordinary symbol lookup functional on a fresh manager. */
+    assert(!ios27_phase24a_create(specs, paths, LIBS,
+                                   "/app/bin/launcher", &bad, err, sizeof(err)));
+    assert(!ios27_phase24a_open(bad, paths[0], &tmp, err, sizeof(err)));
+    assert(!ios27_phase24a_symbol(bad, tmp, "_phase24a_front",
+                                  &entry, &pin, err, sizeof(err)));
+    check_callable(entry, 47);
+    assert(!ios27_phase24a_close(bad, tmp, err, sizeof(err)));
+    assert(!ios27_phase24a_release(bad, pin, err, sizeof(err)));
+    ios27_phase24a_destroy(bad);
     for (size_t i = 0u; i < LIBS; ++i) free(files[i].bytes);
     return 0;
 }
