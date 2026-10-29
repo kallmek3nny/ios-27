@@ -52,7 +52,7 @@ def load():
                     }
                     if standalone not in allowed or not (ROOT / standalone).is_file():
                         raise ValueError("invalid standalone suite for " + gate["title"])
-                if test and not re.search(r"add_test\\s*\\(\\s*NAME\\s+" + re.escape(test) + r"(?:\\s|\\))", cmake):
+                if test and not re.search(r"add_test\s*\(\s*NAME\s+" + re.escape(test) + r"(?:\s|\))", cmake):
                     raise ValueError(f"unregistered ctest for {gate['title']}: {test}")
     return data
 
