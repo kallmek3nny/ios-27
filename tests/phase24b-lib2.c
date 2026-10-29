@@ -8,9 +8,11 @@ __attribute__((constructor)) static void phase24b_ctor2(void) {
     phase24b_init_seen2 += 3;
     phase24b_global2 += phase24b_value1() + phase24b_global1;
 }
-__attribute__((destructor)) static void phase24b_dtor2(void) {
+static void phase24b_dtor2(void) {
     phase24b_term_seen2 += phase24b_global2;
 }
 int phase24b_value2(void) {
     return (int)phase24b_global2 + (int)phase24b_init_seen2;
 }
+__attribute__((used, section("__DATA,__mod_term_func")))
+static void (*const phase24b_term_entry2)(void) = phase24b_dtor2;
