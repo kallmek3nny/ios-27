@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "feat/live-phase-delivery-percent",
-      "sha": "263a3392cea9a1a95e441c60e8bc12756e1e323f",
+      "sha": "fd290126c6859090427a7c2fa6a3be181269824f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/90",
       "pr_number": 90,
       "ci": "failing",
@@ -20,7 +20,7 @@
           "group_id": "unclassified",
           "source_files": 0,
           "fixture_files": 1,
-          "additions": 247,
+          "additions": 256,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -1345,5 +1345,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T10:39:19Z"
+  "observed_at": "2026-10-29T10:39:58Z"
 }

@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 90,
+      "branch": "feat/live-phase-delivery-percent",
+      "sha": "fd290126c6859090427a7c2fa6a3be181269824f",
+      "title": "feat: make agent phase delivery percentages automatically update from merged PRs",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
+      "updated_at": "2026-10-29T10:39:22Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 91,
       "branch": "fix/progress-count-tested-phases20-21",
       "sha": "0f4e8edcc81c6681fc5b379ca739eb1915602df1",
       "title": "fix: actually advance scoped progress percentages for tested phases 19a, 20 and 21",
       "url": "https://github.com/kallmek3nny/ios-27/pull/91",
       "updated_at": "2026-10-29T10:39:08Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 90,
-      "branch": "feat/live-phase-delivery-percent",
-      "sha": "263a3392cea9a1a95e441c60e8bc12756e1e323f",
-      "title": "feat: make agent phase delivery percentages automatically update from merged PRs",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
-      "updated_at": "2026-10-29T10:38:43Z",
       "status": "unmerged: not counted"
     },
     {
@@ -331,5 +331,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T10:39:14Z"
+  "observed_at": "2026-10-29T10:39:53Z"
 }
