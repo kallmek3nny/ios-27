@@ -8,9 +8,9 @@ candidate branches with mapped changes: **21** · audited base: `1dd112410e43`
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
 
-head: `70e7d2abbd92` · ci: **running** · unmerged, not credited.
+head: `4b7fe765e9b8` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 12 test/fixture files, +841/-0 lines
+- **unclassified**: 2 source files, 12 test/fixture files, +847/-0 lines
 
 ### [phase24d-darwin-services-20261029](https://github.com/kallmek3nny/ios-27/pull/101)
 
