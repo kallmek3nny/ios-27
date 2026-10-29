@@ -113,7 +113,8 @@ def strip_platform_command(obj):
 
 def link(linker, options, obj, *dependencies):
     base = [linker, "-arch", "arm64", "-platform_version",
-            "macos", "13.0", "13.0", "-fatal_warnings"] + options
+            "macos", "13.0", "13.0", "-fatal_warnings",
+            "-fixup_chains"] + options
     extra = [str(p) for p in dependencies]
     try:
         run(base + [str(obj)] + extra, 30)
