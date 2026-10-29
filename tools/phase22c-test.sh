@@ -29,5 +29,6 @@ if command -v "$linker" >/dev/null && timeout 30s "$linker" -arch arm64 -platfor
   timeout 180s "$build/phase22c-compiled" "$build/phase22c-provider.o" "$build/phase22c-consumer.o" "$build/phase22c-provider.dylib" "$build/phase22c-consumer.dylib"
 else
   printf '%s\n' 'phase22c NOT VERIFIED: compiler-linked MH_DYLIB tests unavailable (ld64.lld missing or unsupported)' >&2
+  if [[ "${IOS27_PHASE22C_REQUIRE_LINKED:-0}" == 1 ]]; then exit 1; fi
 fi
 printf 'phase22c end=%s\n' "$(date -u +%FT%TZ)"
