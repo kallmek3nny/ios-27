@@ -50,7 +50,8 @@ Dedicated PR CI runs on x86_64 and ARM64 Ubuntu runners.
 The stress program performs at least 240,000 actual typed C IMP invocations
 across two six-worker rounds, at least 480,000 explicit retain/release requests,
 plus automatic receiver pins. It also exhausts the 4,096 live-object quota
-and verifies more than 4,000 destructor/teardown transitions. It covers parent/child +initialize recursion and ordering,
+and verifies more than 4,000 destructor/teardown transitions. Six additional
+threads race 60,000 weak-load-retained operations against terminal release. It covers parent/child +initialize recursion and ordering,
 class/metaclass methods, inherited and super dispatch, method ABI mismatch,
 runtime category replacement during dispatch, concurrent class registration,
 cycles, duplicates, invalid selectors, failed initializers, weak zeroing,
@@ -73,7 +74,8 @@ calls, not ARM64 Mach-O guest execution.
   own weak-location storage and must unregister it before freeing that storage.
 - Methods must not use an object after its last owned release. Dispatch pins
   objects for its own call duration, but callers must keep a separate strong
-  reference while submitting calls.
+  reference while submitting calls. Deallocator callbacks may inspect or
+  clean up payload state, but must **not** free the runtime-owned payload.
 - Per-runtime object allocations are tombstoned until destroy, trading a
   bounded memory quota for stable identity / stale-pointer rejection.
 - Initialization callbacks must not wait for completion of foreign worker
