@@ -8,7 +8,7 @@ candidate branches with mapped changes: **9** · audited base: `9193cdee3bd7`
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `1a277ef5e829` · ci: **running** · unmerged, not credited.
+head: `1a277ef5e829` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +1302/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
@@ -22,7 +22,7 @@ head: `7e29a48f2fd6` · ci: **passing_checks** · unmerged, not credited.
 
 ### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
 
-head: `ad180562e914` · ci: **running** · unmerged, not credited.
+head: `ad180562e914` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 7 test/fixture files, +1448/-0 lines
 
