@@ -11,10 +11,19 @@
     {
       "number": 83,
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "48259fad41ddd8eaf07468a564a4de732d1035e5",
+      "sha": "e77d0883538f8b69af4e79609c9e54bc127aca35",
       "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:18:30Z",
+      "updated_at": "2026-10-29T00:18:53Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 84,
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "1ffab75a725a2421cfe53d62f8e8492d79f7225a",
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "updated_at": "2026-10-29T00:18:41Z",
       "status": "unmerged: not counted"
     },
     {
@@ -23,15 +32,6 @@
       "sha": "fc79c2a82bba6cc8596106de4e12c1053d179364",
       "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "updated_at": "2026-10-29T00:18:20Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 84,
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "baf5e8806d7af145f8ae06cd7e4e1f4f248097c4",
-      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "updated_at": "2026-10-29T00:18:20Z",
       "status": "unmerged: not counted"
     },
@@ -84,10 +84,10 @@
   "ahead_branches": [
     {
       "branch": "phase22b-darwin-bsd-capability-20261028",
-      "sha": "f345f33a5ac427de9437ffc350daf0ceae1d3f59",
-      "ahead_by": 6,
+      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
+      "ahead_by": 13,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T00:17:48Z",
+      "last_commit_at": "2026-10-29T00:18:58Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase22b-darwin-bsd-capability-20261028",
       "status": "unmerged: not counted"
     },
@@ -98,15 +98,6 @@
       "behind_by": 0,
       "last_commit_at": "2026-10-28T23:25:02Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "phase21e-exit-cancellation-20261028",
-      "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
-      "ahead_by": 1,
-      "behind_by": 56,
-      "last_commit_at": "2026-10-28T20:18:43Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
       "status": "unmerged: not counted"
     }
   ],
@@ -174,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:18:38Z"
+  "observed_at": "2026-10-29T00:19:10Z"
 }

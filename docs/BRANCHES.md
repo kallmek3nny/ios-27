@@ -4,27 +4,27 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **10** · audited base: `0d9edb176c31`
+candidate branches with mapped changes: **9** · audited base: `0d9edb176c31`
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `48259fad41dd` · ci: **running** · unmerged, not credited.
+head: `e77d0883538f` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 4 test/fixture files, +1026/-0 lines
+- **unclassified**: 2 source files, 5 test/fixture files, +1160/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
-
-### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
-
-head: `fc79c2a82bba` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 7 test/fixture files, +959/-0 lines
-  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`, `ios27_22a_snapshot`
 
 ### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
 
-head: `baf5e8806d7a` · ci: **running** · unmerged, not credited.
+head: `1ffab75a725a` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 4 source files, 4 test/fixture files, +1285/-0 lines
+
+### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
+
+head: `fc79c2a82bba` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 3 source files, 7 test/fixture files, +959/-0 lines
+  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`, `ios27_22a_snapshot`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -64,16 +64,10 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 
 ### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/tree/phase22b-darwin-bsd-capability-20261028)
 
-head: `f345f33a5ac4` · ci: **not_checked** · unmerged, not credited.
+head: `476bd3c9a1f5` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 1 test/fixture files, +578/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +641/-0 lines
   - candidate declarations: `ios27_22b_advance`, `ios27_22b_capture`, `ios27_22b_create`, `ios27_22b_destroy`, `ios27_22b_dispatch`, `ios27_22b_errno`, `ios27_22b_interrupt`, `ios27_22b_metadata_fd`, `ios27_22b_preopen`, `ios27_22b_set_clock`, `ios27_22b_stdin`
-
-### [phase21e-exit-cancellation-20261028](https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028)
-
-head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
-
-- **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
