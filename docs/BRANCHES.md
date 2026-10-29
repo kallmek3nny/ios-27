@@ -4,19 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **13** · audited base: `2cd40791b17a`
-
-### [feat/live-phase-delivery-percent](https://github.com/kallmek3nny/ios-27/pull/90)
-
-head: `34ea791f6d48` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 0 source files, 1 test/fixture files, +255/-0 lines
-
-### [fix/progress-count-tested-phases20-21](https://github.com/kallmek3nny/ios-27/pull/91)
-
-head: `fc6267fc4c10` · ci: **running** · unmerged, not credited.
-
-- **libSystem guest model (not dylib)**: 2 source files, 2 test/fixture files, +4/-4 lines
+candidate branches with mapped changes: **11** · audited base: `1dd112410e43`
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
 
@@ -97,7 +85,13 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **18**
+recent merged PRs with source changes: **19**
+
+### [merged PR #91](https://github.com/kallmek3nny/ios-27/pull/91)
+
+merged: 2026-10-29T10:41:02Z · source changes awaiting function-level audit.
+
+- **libSystem guest model (not dylib)**: 2 source files, 2 fixtures, +4/-4 lines
 
 ### [merged PR #84](https://github.com/kallmek3nny/ios-27/pull/84)
 

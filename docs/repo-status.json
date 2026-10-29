@@ -2,30 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/2cd40791b17acdf757fcea1102d7e705cbf645e6",
-    "committed_at": "2026-10-29T00:48:44Z"
+    "sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/1dd112410e43de08b9de228e43a87f8b5cc93369",
+    "committed_at": "2026-10-29T10:41:02Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 90,
-      "branch": "feat/live-phase-delivery-percent",
-      "sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
-      "title": "feat: make agent phase delivery percentages automatically update from merged PRs",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
-      "updated_at": "2026-10-29T10:40:10Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 91,
-      "branch": "fix/progress-count-tested-phases20-21",
-      "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
-      "title": "fix: actually advance scoped progress percentages for tested phases 19a, 20 and 21",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/91",
-      "updated_at": "2026-10-29T10:40:03Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 89,
       "branch": "fix/external-build-fixtures",
@@ -128,6 +110,20 @@
   ],
   "ahead_branches": [],
   "recent_merged_pull_requests": [
+    {
+      "number": 91,
+      "title": "fix: actually advance scoped progress percentages for tested phases 19a, 20 and 21",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/91",
+      "head_sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
+      "merged_at": "2026-10-29T10:41:02Z"
+    },
+    {
+      "number": 90,
+      "title": "feat: make agent phase delivery percentages automatically update from merged PRs",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
+      "head_sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
+      "merged_at": "2026-10-29T10:40:55Z"
+    },
     {
       "number": 88,
       "title": "fix: track all phase21/22 agent pushes and classify subsystem diffs",
@@ -309,27 +305,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/56",
       "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
       "merged_at": "2026-10-28T18:01:05Z"
-    },
-    {
-      "number": 52,
-      "title": "fix: exclude stale squash-merged refs from recent branch candidates",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/52",
-      "head_sha": "7cd2bddb946a4c0bbae67a5e8f908cd7d799bd75",
-      "merged_at": "2026-10-28T17:50:23Z"
-    },
-    {
-      "number": 51,
-      "title": "feat: live main/branch progress provenance and audited compatibility ceilings",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/51",
-      "head_sha": "f340541b0622159f80cf12411fe11a16ef795926",
-      "merged_at": "2026-10-28T17:47:44Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 8,
+    "branches_scanned": 10,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T10:40:13Z"
+  "observed_at": "2026-10-29T10:41:26Z"
 }

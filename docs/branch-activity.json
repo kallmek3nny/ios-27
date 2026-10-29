@@ -1,60 +1,11 @@
 {
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
+  "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 13,
-  "candidate_count": 13,
+  "candidates_checked": 11,
+  "candidate_count": 11,
   "candidates": [
-    {
-      "branch": "feat/live-phase-delivery-percent",
-      "sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/90",
-      "pr_number": 90,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 0,
-          "fixture_files": 1,
-          "additions": 255,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tools/phase_delivery.py"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "fix/progress-count-tested-phases20-21",
-      "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/91",
-      "pr_number": 91,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "libsystem-host-model",
-          "source_files": 2,
-          "fixture_files": 2,
-          "additions": 4,
-          "deletions": 4,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/libsystem20e_services.h",
-            "src/libsystem20e_services.c",
-            "tests/phase20e-darwin-fixture.c",
-            "tests/phase20e-standalone.c"
-          ]
-        }
-      ]
-    },
     {
       "branch": "fix/external-build-fixtures",
       "sha": "6ca4a3188311207a6196b5adeabcb24110fef7cd",
@@ -468,15 +419,6 @@
         "ci": "passing_checks"
       }
     ],
-    "libsystem-host-model": [
-      {
-        "branch": "fix/progress-count-tested-phases20-21",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/91",
-        "source_files": 2,
-        "fixture_files": 2,
-        "ci": "running"
-      }
-    ],
     "libsystem-pthread": [
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
@@ -550,13 +492,6 @@
     ],
     "unclassified": [
       {
-        "branch": "feat/live-phase-delivery-percent",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/90",
-        "source_files": 0,
-        "fixture_files": 1,
-        "ci": "running"
-      },
-      {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
         "source_files": 0,
@@ -565,8 +500,35 @@
       }
     ]
   },
-  "recent_merged_count": 18,
+  "recent_merged_count": 19,
   "recent_merged": [
+    {
+      "branch": "merged-pr-91",
+      "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/91",
+      "pr_number": 91,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 4,
+          "deletions": 4,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h",
+            "src/libsystem20e_services.c",
+            "tests/phase20e-darwin-fixture.c",
+            "tests/phase20e-standalone.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-29T10:41:02Z"
+    },
     {
       "branch": "merged-pr-84",
       "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
@@ -1245,6 +1207,13 @@
     ],
     "libsystem-host-model": [
       {
+        "pr_number": 91,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/91",
+        "source_files": 2,
+        "fixture_files": 2,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
         "pr_number": 62,
         "url": "https://github.com/kallmek3nny/ios-27/pull/62",
         "source_files": 2,
@@ -1380,5 +1349,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T10:40:39Z"
+  "observed_at": "2026-10-29T10:41:31Z"
 }
