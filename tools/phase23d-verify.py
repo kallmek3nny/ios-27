@@ -34,42 +34,10 @@ def native_check(where):
             raise RuntimeError(f"{obj}: not ARM64 Mach-O MH_OBJECT")
         objects.append(obj)
     print("PASS: 4 compiler-produced ARM64 Darwin Mach-O objects validated")
-    linker = shutil.which("ld64.lld")
-    if not linker:
-        print("UNVERIFIED: no Darwin linker; dylib/client linking not performed")
-        return
-    # This linker is optional: some distribution builds expressly disable
-    # Darwin linking. Never silently call those objects linked dylibs.
-    try:
-        libs = []
-        for name in ("echo", "sum", "relay"):
-            dylib = where / ("libphase23d_" + name + ".dylib")
-            cmd = [linker, "-arch", "arm64", "-platform_version", "macos",
-                   "13.0", "13.0", "-dylib", "-install_name",
-                   "@rpath/" + dylib.name, "-o", dylib]
-            if name == "relay":
-                cmd += ["-L", where, "-lphase23d_echo"]
-            run(cmd + [where / (name + ".o")], seconds=30,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            libs.append(dylib)
-        exe = where / "phase23d-client"
-        run([linker, "-arch", "arm64", "-platform_version", "macos",
-             "13.0", "13.0", "-e", "_phase23d_start", "-L", where,
-             "-lphase23d_echo", "-lphase23d_sum", "-lphase23d_relay",
-             "-o", exe, where / "client.o"], seconds=30,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        for name, filetype in [(lib, 6) for lib in libs] + [(exe, 2)]:
-            hdr = name.read_bytes()
-            if len(hdr) < 32 or struct.unpack_from("<I", hdr, 0)[0] != 0xfeedfacf or \
-               struct.unpack_from("<I", hdr, 12)[0] != filetype:
-                raise RuntimeError(f"bad Mach-O type in {name}")
-        print("PASS: 3 arm64 Darwin dylibs and 1 arm64 Darwin executable linked")
-    except subprocess.CalledProcessError as error:
-        detail = (error.stderr or b"").decode(errors="replace").strip()
-        if "does not support linking for platform" in detail:
-            print("UNVERIFIED: installed ld64.lld does not support Darwin linking:", detail)
-        else:
-            raise
+    # Linked Mach-O artifacts are now mandatory, not best-effort: this
+    # also validates dependent dylib load commands and MH_EXECUTE type.
+    run([sys.executable, ROOT / "tools/phase23d-link.py",
+         "--output-dir", where], seconds=180)
 
 
 def main():

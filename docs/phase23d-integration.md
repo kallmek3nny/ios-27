@@ -39,14 +39,18 @@ C structure layout; the wire size is enforced by a compile-time assertion.
 
 Run `timeout 300s python3 tools/phase23d-verify.py`, and for sanitizers use
 `PHASE23D_SANITIZE=1 timeout 300s python3 tools/phase23d-verify.py`.
-The workflow runs the same checks on x86_64 and arm64 Ubuntu in normal and
-ASan/UBSan modes. Commands run with individual finite timeouts.
+The workflow installs the required LLVM linker if absent, then runs the
+same checks on x86_64 and arm64 Ubuntu in normal and ASan/UBSan modes. Commands run with individual finite timeouts.
 
 SDK-free Clang compiles four real ARM64 Darwin Mach-O client/service *objects*.
-The verifier attempts to link 3 independent dylibs and an executable if
-`ld64.lld` exists. If the available linker explicitly lacks Darwin support,
-it emits **UNVERIFIED**, not a success claim. The linked Darwin binaries are
-not executed on Linux, and a compatibility-layer runner is not implemented.
+The verifier **requires** linking three independent ARM64 Darwin MH_DYLIB
+images and a native MH_EXECUTE with direct and transitive dependency commands.
+It verifies bounded Mach-O headers, library load commands, exports, and
+symbol-resolution via LLVM `ld64.lld`. The linker script includes a narrowly
+validated **MH_OBJECT copy-only** workaround for Swift-built linker distributions
+that reject Clang's platform metadata. Neither the source objects nor linked
+artifacts are rewritten afterward. The linked binaries are not executed on
+Linux; the host-compiled compatibility model is exercised separately.
 The C integration test instead drives the host-compiled model.
 
 Timeouts represent a logical per-call service-hop budget, not wall-clock waits.
