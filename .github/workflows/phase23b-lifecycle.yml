@@ -33,6 +33,12 @@ jobs:
           actual="$(timeout 30s git rev-parse HEAD)"
           test "$actual" = "$EXPECTED_SHA"
           uname -m
+      - name: install bounded llvm mach-o linker tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 240s sudo apt-get update -qq
+          timeout 240s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends lld clang
       - name: compile genuine six-dylib fixtures and run strict native tests
         run: timeout 300s python3 tools/phase23b-check.py
       - name: address and undefined behavior sanitizers

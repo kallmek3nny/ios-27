@@ -5,6 +5,7 @@ No binary is executed by this tool. Each command has a hard timeout.
 """
 import argparse
 import pathlib
+import shutil
 import struct
 import subprocess
 import sys
@@ -98,9 +99,18 @@ def inspect(path, needs_dependency):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clang", default="clang")
-    parser.add_argument("--linker", default="ld64.lld")
+    parser.add_argument("--linker", default=None)
     parser.add_argument("--output-dir", default="build/phase23b")
     args = parser.parse_args()
+    if args.linker is None:
+        # Ubuntu LLVM packages install versioned ld64.lld executables.
+        args.linker = next(
+            (path for name in ("ld64.lld", "ld64.lld-21", "ld64.lld-20",
+                               "ld64.lld-19", "ld64.lld-18", "ld64.lld-17",
+                               "ld64.lld-16", "ld64.lld-15")
+             if (path := shutil.which(name))), None)
+    if args.linker is None:
+        raise RuntimeError("ld64.lld not installed (LLVM lld required)")
     dest = pathlib.Path(args.output_dir).resolve()
     dest.mkdir(parents=True, exist_ok=True)
     prior = None
