@@ -7,6 +7,9 @@
 static uintptr_t word0(void *r, phase22d_sel s) {
     (void)r; (void)s; return 11u;
 }
+static uintptr_t word1(void *r, phase22d_sel s, uintptr_t a) {
+    (void)r; (void)s; return a + 12u;
+}
 #define REQUIRE(p) do { if (!(p)) { \
     (void)fprintf(stderr, "metadata check failed: %s (%d)\\n", #p, __LINE__); \
     return 1; } } while (0)
@@ -35,26 +38,26 @@ int main(int argc, char **argv) {
                                         parsed, error, sizeof(error)) == 0);
     REQUIRE(parsed->class_count == 2u);
     const phase22d_method_spec root_methods[] = {
-        {"init", PHASE22D_WORD0, {.word0 = word0}},
-        {"number", PHASE22D_WORD0, {.word0 = word0}},
-        {"answer", PHASE22D_WORD0, {.word0 = word0}}
+        {"value", PHASE22D_WORD0, {.word0 = word0}}
     };
     const phase22d_method_spec child_methods[] = {
-        {"number", PHASE22D_WORD0, {.word0 = word0}}
+        {"value", PHASE22D_WORD0, {.word0 = word0}},
+        {"over:", PHASE22D_WORD1, {.word1 = word1}},
+        {"superValue", PHASE22D_WORD0, {.word0 = word0}}
     };
     size_t root_size = 0, child_size = 0;
     for (size_t i = 0; i < parsed->class_count; ++i) {
         const ios27_objc_metadata_class *c = &parsed->classes[i];
-        if (!strcmp(c->name, "Root")) root_size = c->instance_size;
-        if (!strcmp(c->name, "Child")) child_size = c->instance_size;
+        if (!strcmp(c->name, "Phase22dRoot")) root_size = c->instance_size;
+        if (!strcmp(c->name, "Phase22dChild")) child_size = c->instance_size;
     }
     REQUIRE(root_size >= sizeof(void *) && child_size >= root_size);
     const phase22d_class_spec bindings[] = {
-        {.name = "Child", .superclass = "Root",
+        {.name = "Phase22dChild", .superclass = "Phase22dRoot",
          .instance_size = child_size,
-         .instance_methods = child_methods, .instance_count = 1u},
-        {.name = "Root", .instance_size = root_size,
-         .instance_methods = root_methods, .instance_count = 3u}
+         .instance_methods = child_methods, .instance_count = 3u},
+        {.name = "Phase22dRoot", .instance_size = root_size,
+         .instance_methods = root_methods, .instance_count = 1u}
     };
     REQUIRE(phase22d_create(&runtime) == 0);
     /* Strict metadata verification before any registration side effect. */
