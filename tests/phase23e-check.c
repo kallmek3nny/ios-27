@@ -77,6 +77,40 @@ static int check_app(const char *kind, ios27_23e_image *all,
                again.status == report.status,
                "non-deterministic app replay trace"))
         return -1;
+    /* These ABI conditions must be rejected before any guest mappings. */
+    {
+        char oversized[IOS27_23E_MAX_STRING + 1u];
+        const char *const invalid_args[] = {"phase23e", oversized, NULL};
+        memset(oversized, 'z', sizeof(oversized) - 1u);
+        oversized[sizeof(oversized) - 1u] = 0;
+        app.argc = (int)IOS27_23E_MAX_ARGS + 1;
+        if (ensure(ios27_23e_application_probe(&app, &again) == -1 &&
+                   again.status == IOS27_23E_REJECTED &&
+                   again.mapped_graphs_live == 0u,
+                   "oversized argc was not rejected")) return -1;
+        app.argc = 2;
+        app.argv = invalid_args;
+        if (ensure(ios27_23e_application_probe(&app, &again) == -1 &&
+                   again.status == IOS27_23E_REJECTED &&
+                   again.mapped_graphs_live == 0u,
+                   "unterminated guest argument was not rejected")) return -1;
+        app.argv = actual_args;
+        app.needs_mach = 1u;
+        if (ensure(ios27_23e_application_probe(&app, &again) == -1 &&
+                   again.status == IOS27_23E_UNSUPPORTED_ABI,
+                   "unverified Mach service request was accepted")) return -1;
+        app.needs_mach = 0u;
+        app.needs_threads = 1u;
+        if (ensure(ios27_23e_application_probe(&app, &again) == -1 &&
+                   again.status == IOS27_23E_UNSUPPORTED_ABI,
+                   "unverified pthread startup was accepted")) return -1;
+        app.needs_threads = 0u;
+        app.needs_objc = 1u;
+        if (ensure(ios27_23e_application_probe(&app, &again) == -1 &&
+                   again.status == IOS27_23E_UNSUPPORTED_ABI,
+                   "unverified ObjC startup was accepted")) return -1;
+        app.needs_objc = 0u;
+    }
     (void)printf("{\"case\":\"%s\",\"status\":\"unsupported_abi\","
                  "\"images\":%zu,\"native_ops\":0,"
                  "\"replay_trace\":\"%016" PRIx64 "\"}\n",
@@ -171,7 +205,13 @@ int main(int argc, char **argv) {
         rng ^= rng << 13u;
         rng ^= rng >> 17u;
         rng ^= rng << 5u;
-        mutant[trial % 4u] ^= (uint8_t)((rng & 255u) | 1u);
+        /* Exercise magic, CPU, Mach-O type, count and command-byte bounds. */
+        {
+            static const size_t offsets[] = {0u, 1u, 2u, 3u, 4u, 5u,\n                6u, 7u, 12u, 13u, 14u, 15u, 16u, 17u, 18u, 19u,
+                20u, 21u, 22u, 23u};
+            mutant[offsets[trial % (sizeof(offsets) / sizeof(offsets[0])) ]] ^=
+                (uint8_t)((rng & 255u) | 1u);
+        }
         memcpy(faulty, libs, sizeof(faulty));
         faulty[4].data = mutant;
         if (ensure(ios27_23e_library_stress(faulty, 5u, "pipeline.dylib",
