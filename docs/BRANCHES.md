@@ -8,7 +8,7 @@ candidate branches with mapped changes: **15** · audited base: `1dd112410e43`
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
-head: `90d13d4307ef` · ci: **not_checked** · unmerged, not credited.
+head: `90d13d4307ef` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +920/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
@@ -22,7 +22,7 @@ head: `280b1daed6f8` · ci: **running** · unmerged, not credited.
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
 
-head: `393c1b85a963` · ci: **running** · unmerged, not credited.
+head: `393c1b85a963` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 

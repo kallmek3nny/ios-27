@@ -11,7 +11,7 @@
       "sha": "90d13d4307ef84484ef1e135e72f4997f5d5c8a5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
       "pr_number": 93,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -75,7 +75,7 @@
       "sha": "393c1b85a9639525e1b57320cd3be458782f027c",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
       "pr_number": 94,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -625,7 +625,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/93",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "phase23a-incremental-dyld-namespaces",
@@ -639,7 +639,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase23d-syscall-mach-bridge-20261029",
@@ -1506,5 +1506,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:21:38Z"
+  "observed_at": "2026-10-29T21:21:55Z"
 }
