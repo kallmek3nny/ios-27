@@ -6,19 +6,19 @@
 
 candidate branches with mapped changes: **13** · audited base: `1dd112410e43`
 
-### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
-
-head: `60d5fa22404a` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 2 test/fixture files, +936/-0 lines
-  - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
-
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
-head: `54551e6a7a3a` · ci: **running** · unmerged, not credited.
+head: `67ff6b76ecaf` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +910/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
+
+### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
+
+head: `60d5fa22404a` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 2 test/fixture files, +936/-0 lines
+  - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
 
