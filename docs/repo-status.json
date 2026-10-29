@@ -14,7 +14,7 @@
       "sha": "6ca4a3188311207a6196b5adeabcb24110fef7cd",
       "title": "fix: support external build directories for Darwin startup tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/89",
-      "updated_at": "2026-10-29T10:16:33Z",
+      "updated_at": "2026-10-29T10:18:02Z",
       "status": "unmerged: not counted"
     },
     {
@@ -313,5 +313,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T10:17:15Z"
+  "observed_at": "2026-10-29T10:27:13Z"
 }
