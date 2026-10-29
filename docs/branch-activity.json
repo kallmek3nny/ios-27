@@ -11,7 +11,7 @@
       "sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
       "url": "https://github.com/kallmek3nny/ios-27/pull/90",
       "pr_number": 90,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -554,7 +554,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/90",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "fix/external-build-fixtures",
@@ -1380,5 +1380,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T10:40:17Z"
+  "observed_at": "2026-10-29T10:40:39Z"
 }

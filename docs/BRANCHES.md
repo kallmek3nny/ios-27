@@ -8,7 +8,7 @@ candidate branches with mapped changes: **13** · audited base: `2cd40791b17a`
 
 ### [feat/live-phase-delivery-percent](https://github.com/kallmek3nny/ios-27/pull/90)
 
-head: `34ea791f6d48` · ci: **not_checked** · unmerged, not credited.
+head: `34ea791f6d48` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 0 source files, 1 test/fixture files, +255/-0 lines
 
