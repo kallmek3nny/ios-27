@@ -64,6 +64,13 @@ int main(int argc, char **argv) {
     REQUIRE(phase22d_register_compiled(runtime, bytes, (size_t)length,
                                        bindings, 1u, error, sizeof(error)) != 0);
     REQUIRE(phase22d_statistics(runtime, &stats) == 0 && stats.classes == 0);
+    phase22d_class_spec unverified[2];
+    memcpy(unverified, bindings, sizeof(bindings));
+    unverified[0].class_methods = child_methods;
+    unverified[0].class_count = 1u;
+    REQUIRE(phase22d_register_compiled(runtime, bytes, (size_t)length,
+                                       unverified, 2u, error, sizeof(error)) != 0);
+    REQUIRE(phase22d_statistics(runtime, &stats) == 0 && stats.classes == 0);
     REQUIRE(phase22d_register_compiled(runtime, bytes, (size_t)length,
                                        bindings, 2u, error, sizeof(error)) == 0);
     REQUIRE(phase22d_statistics(runtime, &stats) == 0 && stats.classes == 2);
