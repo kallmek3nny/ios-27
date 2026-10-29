@@ -4,7 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **11** · audited base: `1dd112410e43`
+candidate branches with mapped changes: **13** · audited base: `1dd112410e43`
+
+### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
+
+head: `d04f6460f505` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 2 test/fixture files, +876/-0 lines
+  - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
 
@@ -80,6 +87,13 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness)
+
+head: `9ce492a36d57` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 2 test/fixture files, +700/-0 lines
+  - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
