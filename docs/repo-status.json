@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 94,
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "8c0c19462685572c9986f825e1d50715da07d351",
+      "title": "phase23c: bounded compiler-validated objc image bridge and concurrent tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
+      "updated_at": "2026-10-29T21:23:10Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 92,
+      "branch": "phase23a-incremental-dyld-namespaces",
+      "sha": "280b1daed6f8724213e1e036eae17601b372cd85",
+      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+      "updated_at": "2026-10-29T21:23:07Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 93,
       "branch": "phase23e/native-app-integration-harness",
       "sha": "77cb73c4836cd336218143d689d1d27ed5c9b8a9",
@@ -24,24 +42,6 @@
       "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
       "url": "https://github.com/kallmek3nny/ios-27/pull/96",
       "updated_at": "2026-10-29T21:22:27Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 94,
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "c065254d066b2cadceaaee837ac517aacbfbd693",
-      "title": "phase23c: bounded compiler-validated objc image bridge and concurrent tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-      "updated_at": "2026-10-29T21:22:06Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 92,
-      "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "280b1daed6f8724213e1e036eae17601b372cd85",
-      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "updated_at": "2026-10-29T21:21:27Z",
       "status": "unmerged: not counted"
     },
     {
@@ -358,5 +358,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:23:04Z"
+  "observed_at": "2026-10-29T21:23:21Z"
 }
