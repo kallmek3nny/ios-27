@@ -8,7 +8,7 @@ candidate branches with mapped changes: **20** · audited base: `1dd112410e43`
 
 ### [phase24a-global-dyld-identity](https://github.com/kallmek3nny/ios-27/pull/97)
 
-head: `91ea9d21113e` · ci: **running** · unmerged, not credited.
+head: `91ea9d21113e` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +970/-0 lines
   - candidate declarations: `ios27_phase24a_close`, `ios27_phase24a_create`, `ios27_phase24a_destroy`, `ios27_phase24a_flat_symbol`, `ios27_phase24a_open`, `ios27_phase24a_refs`, `ios27_phase24a_release`, `ios27_phase24a_stats_read`, `ios27_phase24a_symbol`
@@ -22,7 +22,7 @@ head: `c7be84a7721c` · ci: **passing_checks** · unmerged, not credited.
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
 
-head: `cf8cb149e174` · ci: **running** · unmerged, not credited.
+head: `cf8cb149e174` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 10 test/fixture files, +534/-0 lines
 

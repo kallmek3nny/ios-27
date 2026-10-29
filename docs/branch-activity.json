@@ -11,7 +11,7 @@
       "sha": "91ea9d21113e271d21ec7b193f9d0275ad570a29",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "pr_number": 97,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -83,7 +83,7 @@
       "sha": "cf8cb149e17475edf96afd0900cda201cdbee035",
       "url": "https://github.com/kallmek3nny/ios-27/pull/100",
       "pr_number": 100,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 15,
       "possibly_truncated": false,
@@ -788,7 +788,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/97",
         "source_files": 2,
         "fixture_files": 2,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase24b-native-lifecycle-20261029",
@@ -802,7 +802,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/100",
         "source_files": 2,
         "fixture_files": 10,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1704,5 +1704,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:54:39Z"
+  "observed_at": "2026-10-29T21:54:56Z"
 }
