@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define CHECK(c) do { if (!(c)) { \
     fprintf(stderr, "phase24b assert %s at %s:%d\n", #c, __FILE__, __LINE__); \
@@ -93,6 +94,8 @@ static void stress_graph(void) {
     populate(&r, im);
     reset_log(&m);
     m.runtime = &r;
+    struct timespec before, after;
+    CHECK(clock_gettime(CLOCK_MONOTONIC, &before) == 0);
     for (unsigned round = 0; round < 10000; ++round) {
         reset_log(&m); m.runtime = &r;
         CHECK(ios27_24b_open(&r, 5, &h) == 0);
@@ -107,8 +110,13 @@ static void stress_graph(void) {
                   snapshot.references == 0);
         }
     }
+    CHECK(clock_gettime(CLOCK_MONOTONIC, &after) == 0);
+    double elapsed_ns = (double)(after.tv_sec - before.tv_sec) * 1e9 +
+                        (double)(after.tv_nsec - before.tv_nsec);
+    printf("phase24b: modeled six-image graph start+stop average %.2f us/cycle\n",
+           elapsed_ns / 10000.0 / 1000.0);
     CHECK(r.startups == 60000 && r.shutdowns == 60000);
-    CHECK(r.callbacks >= 120000 && r.transitions >= 20000);
+    CHECK(r.callbacks >= 120000 && r.transitions >= 140000);
     /* Every handle pins each transitive dependency exactly once. */
     reset_log(&m); m.runtime = &r;
     CHECK(ios27_24b_open(&r, 5, &h) == 0);
