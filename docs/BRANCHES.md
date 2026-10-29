@@ -90,9 +90,9 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness)
 
-head: `9ce492a36d57` · ci: **not_checked** · unmerged, not credited.
+head: `ea498c25c117` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 2 test/fixture files, +700/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +910/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ## recently merged agent source changes · not yet compatibility-reviewed

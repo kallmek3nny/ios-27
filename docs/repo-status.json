@@ -120,10 +120,10 @@
   "ahead_branches": [
     {
       "branch": "phase23e/native-app-integration-harness",
-      "sha": "9ce492a36d57ad3ce40e19a908a399c140698e3d",
-      "ahead_by": 5,
+      "sha": "ea498c25c1174b1444ce4208074092398a9f0306",
+      "ahead_by": 6,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:15:05Z",
+      "last_commit_at": "2026-10-29T21:15:56Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
       "status": "unmerged: not counted"
     }
@@ -332,5 +332,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:15:51Z"
+  "observed_at": "2026-10-29T21:16:10Z"
 }
