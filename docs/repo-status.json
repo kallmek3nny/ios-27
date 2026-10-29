@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 85,
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "51ac77fa8f9c4f603590c2134a5536877845b32b",
+      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "updated_at": "2026-10-29T00:21:10Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 84,
       "branch": "phase22d-objc-runtime-concurrency-20261028",
       "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
@@ -33,15 +42,6 @@
       "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/86",
       "updated_at": "2026-10-29T00:20:23Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 85,
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "5da9a7f7583cbf2ce8396abff7e7a3e34c05e379",
-      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "updated_at": "2026-10-29T00:20:12Z",
       "status": "unmerged: not counted"
     },
     {
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:21:09Z"
+  "observed_at": "2026-10-29T00:21:36Z"
 }

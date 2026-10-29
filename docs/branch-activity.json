@@ -7,11 +7,50 @@
   "candidate_count": 10,
   "candidates": [
     {
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "51ac77fa8f9c4f603590c2134a5536877845b32b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "pr_number": 85,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 3,
+          "fixture_files": 8,
+          "additions": 1060,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22a_close",
+            "ios27_22a_copyin",
+            "ios27_22a_copyout",
+            "ios27_22a_create",
+            "ios27_22a_destroy",
+            "ios27_22a_fail_map_after",
+            "ios27_22a_fail_stage",
+            "ios27_22a_map",
+            "ios27_22a_map_stack",
+            "ios27_22a_pin",
+            "ios27_22a_probe",
+            "ios27_22a_protect"
+          ],
+          "example_paths": [
+            "include/ios27/phase22a_space.h",
+            "src/phase22a_child.c",
+            "src/phase22a_space.c",
+            "tests/phase22a-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase22d-objc-runtime-concurrency-20261028",
       "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "pr_number": 84,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 10,
       "possibly_truncated": false,
@@ -105,45 +144,6 @@
             "src/phase22b_syscalls.c",
             "tests/phase22b-darwin-fixture.c",
             "tests/phase22b-integration.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "5da9a7f7583cbf2ce8396abff7e7a3e34c05e379",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "pr_number": 85,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 3,
-          "fixture_files": 8,
-          "additions": 1060,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_22a_close",
-            "ios27_22a_copyin",
-            "ios27_22a_copyout",
-            "ios27_22a_create",
-            "ios27_22a_destroy",
-            "ios27_22a_fail_map_after",
-            "ios27_22a_fail_stage",
-            "ios27_22a_map",
-            "ios27_22a_map_stack",
-            "ios27_22a_pin",
-            "ios27_22a_probe",
-            "ios27_22a_protect"
-          ],
-          "example_paths": [
-            "include/ios27/phase22a_space.h",
-            "src/phase22a_child.c",
-            "src/phase22a_space.c",
-            "tests/phase22a-darwin.c"
           ]
         }
       ]
@@ -424,11 +424,18 @@
     ],
     "unclassified": [
       {
+        "branch": "phase22a-guest-address-spaces",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+        "source_files": 3,
+        "fixture_files": 8,
+        "ci": "running"
+      },
+      {
         "branch": "phase22d-objc-runtime-concurrency-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/84",
         "source_files": 4,
         "fixture_files": 4,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase22c-transactional-dyld-graph",
@@ -442,13 +449,6 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/86",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase22a-guest-address-spaces",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-        "source_files": 3,
-        "fixture_files": 8,
         "ci": "passing_checks"
       },
       {
@@ -767,5 +767,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:21:18Z"
+  "observed_at": "2026-10-29T00:21:45Z"
 }
