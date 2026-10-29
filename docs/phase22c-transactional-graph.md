@@ -18,10 +18,12 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
    `ios27_exports_resolve`. strong definitions outrank weak definitions
    during flat lookup. missing results have an explicit return code.
    symbols are *metadata offsets*, not guest executable host pointers.
-3. **transactional loader handoff**: only after metadata validation does
-   `ios27_images_load` stage existing classic/chained fixes and W^X
-   mappings. if the existing loader rejects an image, no graph mapping is
-   retained. errors are surfaced rather than silently substituting stubs.
+3. **transactional loader handoff**: a read-only preflight validates classic
+   binds and active chained-fixup import ordinals/names, including missing
+   mandatory imports, identifying the importer index, patch index, and
+   symbol where available. only after preflight does `ios27_images_load`
+   stage existing fixups and W^X mappings. if the loader rejects any image,
+   no graph mapping is retained. errors are surfaced, never stubbed.
 4. **lifecycle and unload**: per-lease transitive dependency pin tracking,
    64-slot quota, generation-tagged leases and double-release detection;
    pinned images prevent unload. initializer/finalizer ordering uses
@@ -33,7 +35,8 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
 
 - `tests/phase22c-graph.c`: linked-format synthetic ARM64 Mach-O images
   with a real fixup pointer, dependency ordering, actual mapped export
-  lookup, invalid import rollback, resource pins, invalid catalog rejection,
+  lookup, importer-indexed missing-symbol diagnostics, invalid import rollback,
+  resource pins, invalid catalog rejection,
   cycle rejection, 64-slot lease exhaustion, initializers' rollback, 2,500
   seeded malformed graph preflight/load mutations, and 50,000
   live-graph acquire/release operations.
@@ -56,7 +59,8 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
   and sets `IOS27_PHASE22C_REQUIRE_LINKED=1`, so linked fixture failures
   fail the job instead of being silently skipped.
 
-as verified on head `c432c865d43bf41e0262da77e7631d2da0f00613`:
+as verified on head `c432c865d43bf41e0262da77e7631d2da0f00613` before the
+subsequent preflight-diagnostic changes:
 CI run `40793418699` had **four of four successful** independent jobs,
 covering x86_64 and native ARM64 Linux with and without ASAN/UBSAN;
 the native ARM64 log reports genuine 4-dylib execution and 32 teardowns.
