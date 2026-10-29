@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 93,
+      "branch": "phase23e/native-app-integration-harness",
+      "sha": "90d13d4307ef84484ef1e135e72f4997f5d5c8a5",
+      "title": "phase 23e: standalone compiler-linked darwin app integration harness",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/93",
+      "updated_at": "2026-10-29T21:21:32Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 92,
+      "branch": "phase23a-incremental-dyld-namespaces",
+      "sha": "280b1daed6f8724213e1e036eae17601b372cd85",
+      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+      "updated_at": "2026-10-29T21:21:27Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 94,
       "branch": "phase23c-objc-native-bridge",
       "sha": "393c1b85a9639525e1b57320cd3be458782f027c",
@@ -18,30 +36,12 @@
       "status": "unmerged: not counted"
     },
     {
-      "number": 93,
-      "branch": "phase23e/native-app-integration-harness",
-      "sha": "5f09be302a9abf0f026f8420dc1a8b5843c38a58",
-      "title": "phase 23e: standalone compiler-linked darwin app integration harness",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/93",
-      "updated_at": "2026-10-29T21:20:48Z",
-      "status": "unmerged: not counted"
-    },
-    {
       "number": 95,
       "branch": "phase23d-syscall-mach-bridge-20261029",
       "sha": "369b6e5dea55e8776f3e1ae2a8adc23ac126df7d",
       "title": "phase 23d: bounded syscall-to-Mach services and guest descriptor bridge",
       "url": "https://github.com/kallmek3nny/ios-27/pull/95",
       "updated_at": "2026-10-29T21:20:45Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 92,
-      "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "3957ff3da9e88e1a6d35a637e962afb4e90a2fc7",
-      "title": "phase23a: transactional incremental macho loading and symbol namespaces",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "updated_at": "2026-10-29T21:19:35Z",
       "status": "unmerged: not counted"
     },
     {
@@ -349,5 +349,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:21:18Z"
+  "observed_at": "2026-10-29T21:21:35Z"
 }
