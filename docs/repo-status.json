@@ -14,7 +14,7 @@
       "sha": "4b7fe765e9b80dc88f2f20b1790c504c17a3cf4a",
       "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
       "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-      "updated_at": "2026-10-29T22:05:58Z",
+      "updated_at": "2026-10-29T22:06:58Z",
       "status": "unmerged: not counted"
     },
     {
@@ -403,5 +403,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T22:06:17Z"
+  "observed_at": "2026-10-29T22:16:15Z"
 }
