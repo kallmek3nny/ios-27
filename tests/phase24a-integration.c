@@ -110,6 +110,22 @@ int main(int argc, char **argv) {
     assert(!ios27_phase24a_open(r, paths[2], &right, err, sizeof(err)));
     assert(front != right);
     assert(!ios27_phase24a_refs(r, paths[5], &refs) && refs == 2u);
+    /* Both code and writable data exports come from real mapped Mach-O
+     * segments. A separately opened provider must reuse their identity. */
+    {
+        ios27_phase24a_handle core_handle = 0;
+        ios27_phase24a_pin data_pin = 0;
+        uintptr_t global = 0;
+        int value = -1;
+        assert(!ios27_phase24a_open(r, paths[5], &core_handle, err, sizeof(err)));
+        assert(!ios27_phase24a_symbol(r, core_handle, "_phase24a_core_value",
+                                      &global, &data_pin, err, sizeof(err)));
+        assert(global != 0u);
+        memcpy(&value, (const void *)global, sizeof(value));
+        assert(value == 7);
+        assert(!ios27_phase24a_close(r, core_handle, err, sizeof(err)));
+        assert(!ios27_phase24a_release(r, data_pin, err, sizeof(err)));
+    }
     assert(!ios27_phase24a_symbol(r, front, "_phase24a_front",
                                   &entry, &pin, err, sizeof(err)));
     check_callable(entry, 47);
@@ -161,8 +177,8 @@ int main(int argc, char **argv) {
     }
     assert(!ios27_phase24a_stats_read(r, &stats));
     assert(stats.lookups >= 160000u + THREADS * WORKER_ITERATIONS);
-    assert(stats.opens >= THREADS * WORKER_ITERATIONS + 15u);
-    assert(stats.closes >= THREADS * WORKER_ITERATIONS + 15u);
+    assert(stats.opens >= THREADS * WORKER_ITERATIONS + 16u);
+    assert(stats.closes >= THREADS * WORKER_ITERATIONS + 16u);
     assert(stats.graph_maps == stats.graph_unmaps);
     fprintf(stdout, "phase24a: lookups=%llu opens=%llu closes=%llu maps=%llu unmaps=%llu\n",
             (unsigned long long)stats.lookups,
