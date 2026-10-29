@@ -20,7 +20,11 @@ struct ios27_22c_graph {
     uint64_t nonce, serial;
     ios27_image_spec specs[IOS27_22C_MAX_IMAGES];
     char names[IOS27_22C_MAX_IMAGES][IOS27_IMAGE_NAME_MAX];
-    char dep_names[IOS27_22C_MAX_IMAGES][IOS27_22C_MAX_IMAGES][IOS27_IMAGE_NAME_MAX];
+    char dep_names[IOS27_22C_MAX_IMAGES][IOS27_22C_MAX_IMAGES][IOS27_DYLD_PATH_MAX];
+    char guest_paths[IOS27_22C_MAX_IMAGES][IOS27_DYLD_PATH_MAX];
+    const char *guest_path_ptrs[IOS27_22C_MAX_IMAGES];
+    char main_executable[IOS27_DYLD_PATH_MAX];
+    unsigned using_paths;
     const char *dep_ptrs[IOS27_22C_MAX_IMAGES][IOS27_22C_MAX_IMAGES];
     size_t dependencies[IOS27_22C_MAX_IMAGES][IOS27_22C_MAX_IMAGES];
     size_t order[IOS27_22C_MAX_IMAGES], refs[IOS27_22C_MAX_IMAGES];
@@ -58,6 +62,17 @@ static int valid_name(const char *s) {
     }
     return 0;
 }
+static int valid_dep_name(const char *s) {
+    if (!s) return 0;
+    if (valid_name(s)) return 1;
+    if (s[0] != '/' && s[0] != '@') return 0;
+    for (size_t i = 0; i < IOS27_DYLD_PATH_MAX; ++i) {
+        unsigned char ch = (unsigned char)s[i];
+        if (!ch) return i > 0u;
+        if (ch <= 0x20u || ch >= 0x7fu || ch == '\\\\') return 0;
+    }
+    return 0;
+}
 static int valid_symbol(const char *s) {
     if (!s) return 0;
     for (size_t i = 0; i < IOS27_EXPORT_NAME_MAX; ++i) {
@@ -84,14 +99,124 @@ static int visit(ios27_22c_graph *g, size_t i, unsigned char *colors,
     g->order[g->order_count++] = i;
     return 0;
 }
+
+typedef struct {
+    ios27_dyld_image_metadata meta;
+    char search[IOS27_DYLD_MAX_CANDIDATES][IOS27_DYLD_PATH_MAX];
+    size_t count;
+    unsigned queued;
+} path_state;
+static int add_runpath(path_state *state, const char *value) {
+    for (size_t j = 0; j < state->count; ++j)
+        if (!strcmp(state->search[j], value)) return 0;
+    if (state->count == IOS27_DYLD_MAX_CANDIDATES) return -1;
+    (void)snprintf(state->search[state->count++],
+                   IOS27_DYLD_PATH_MAX, "%s", value);
+    return 0;
+}
+static int resolve_catalog_paths(ios27_22c_graph *g, const char *const *paths,
+                                 const char *main, ios27_22c_diagnostic *diag) {
+    path_state *states = calloc(g->count, sizeof(*states));
+    size_t queue[IOS27_22C_MAX_IMAGES], nqueue = 0u, pos = 0u;
+    size_t main_index = NO_INDEX;
+    char error[IOS27_22C_DIAG_SIZE];
+    int result = -1;
+    if (!states) return report(diag, IOS27_22C_INPUT, NO_INDEX, NO_INDEX,
+                                "runpath state allocation failed");
+    for (size_t i = 0; i < g->count; ++i) {
+        ios27_dyld_candidates candidate;
+        if (!paths[i] ||
+            ios27_dyld_paths(paths[i], paths[i], main, NULL, 0u,
+                             &candidate, error, sizeof(error)) ||
+            candidate.count != 1u || strcmp(candidate.paths[0], paths[i])) {
+            (void)report(diag, IOS27_22C_DEPENDENCY, i, NO_INDEX,
+                         "noncanonical or missing guest image path");
+            goto done;
+        }
+        for (size_t j = 0; j < i; ++j)
+            if (!strcmp(paths[j], paths[i])) {
+                (void)report(diag, IOS27_22C_DEPENDENCY, i, j,
+                             "ambiguous duplicate guest image path");
+                goto done;
+            }
+        (void)snprintf(g->guest_paths[i], IOS27_DYLD_PATH_MAX, "%s", paths[i]);
+        g->guest_path_ptrs[i] = g->guest_paths[i];
+        if (!strcmp(paths[i], main)) main_index = i;
+        if (ios27_dyld_inspect_image(g->specs[i].file, g->specs[i].size,
+                                     &states[i].meta, error, sizeof(error))) {
+            (void)report(diag, IOS27_22C_MACHO, i, NO_INDEX, error);
+            goto done;
+        }
+        for (size_t r = 0; r < states[i].meta.rpath_count; ++r) {
+            if (ios27_dyld_paths(states[i].meta.rpaths[r], paths[i], main,
+                                 NULL, 0u, &candidate, error, sizeof(error)) ||
+                candidate.count != 1u ||
+                add_runpath(&states[i], candidate.paths[0])) {
+                (void)report(diag, IOS27_22C_DEPENDENCY, i, r,
+                             "malformed or excessive guest runpath");
+                goto done;
+            }
+        }
+    }
+    if (main_index != NO_INDEX) {
+        states[main_index].queued = 1u;
+        queue[nqueue++] = main_index;
+    }
+    for (size_t root = 0; root <= g->count; ++root) {
+        if (root && !states[root - 1u].queued) {
+            states[root - 1u].queued = 1u;
+            queue[nqueue++] = root - 1u;
+        }
+        while (pos < nqueue) {
+            size_t parent = queue[pos++];
+            path_state *s = &states[parent];
+            ios27_dyld_image_metadata meta = s->meta;
+            meta.rpath_count = s->count;
+            for (size_t r = 0; r < s->count; ++r)
+                (void)snprintf(meta.rpaths[r], IOS27_DYLD_PATH_MAX,
+                               "%s", s->search[r]);
+            for (size_t k = 0; k < g->specs[parent].dependency_count; ++k) {
+                ios27_dyld_catalog_match found;
+                int rc = ios27_dyld_match_dependency(
+                    &meta, k, paths[parent], main, g->guest_path_ptrs,
+                    g->count, &found, error, sizeof(error));
+                if (rc != 0 || found.image_index == parent) {
+                    (void)report(diag, IOS27_22C_DEPENDENCY, parent, k,
+                                 rc < 0 ? error :
+                                 "dependency absent, ambiguous or self-referential");
+                    goto done;
+                }
+                g->dependencies[parent][k] = found.image_index;
+                if (!states[found.image_index].queued) {
+                    path_state *child = &states[found.image_index];
+                    for (size_t r = 0; r < s->count; ++r)
+                        if (add_runpath(child, s->search[r])) {
+                            (void)report(diag, IOS27_22C_DEPENDENCY, parent, k,
+                                         "transitive runpath quota exceeded");
+                            goto done;
+                        }
+                    child->queued = 1u;
+                    queue[nqueue++] = found.image_index;
+                }
+            }
+        }
+    }
+    result = 0;
+done:
+    free(states);
+    return result;
+}
+
 static void release_tables(ios27_22c_graph *g) {
     for (size_t i = 0; i < g->count; ++i) {
         free(g->exports[i]);
         g->exports[i] = NULL;
     }
 }
-int ios27_22c_create(const ios27_image_spec *specs, size_t count,
-                      ios27_22c_graph **out, ios27_22c_diagnostic *diag) {
+static int create_impl(const ios27_image_spec *specs, size_t count,
+                       const char *const *guest_paths,
+                       const char *main_executable,
+                       ios27_22c_graph **out, ios27_22c_diagnostic *diag) {
     ios27_22c_graph *g;
     unsigned char colors[IOS27_22C_MAX_IMAGES] = {0};
     char error[IOS27_22C_DIAG_SIZE];
@@ -104,6 +229,16 @@ int ios27_22c_create(const ios27_image_spec *specs, size_t count,
     if (!g) return report(diag, IOS27_22C_INPUT, NO_INDEX, NO_INDEX,
                           "graph allocation failed");
     g->count = count;
+    g->using_paths = guest_paths != NULL;
+    if (!!guest_paths != !!main_executable ||
+        (main_executable && strlen(main_executable) >= IOS27_DYLD_PATH_MAX)) {
+        (void)report(diag, IOS27_22C_INPUT, NO_INDEX, NO_INDEX,
+                     "guest catalog and main path must be supplied together");
+        goto failed;
+    }
+    if (main_executable)
+        (void)snprintf(g->main_executable, sizeof(g->main_executable),
+                       "%s", main_executable);
     g->nonce = atomic_fetch_add_explicit(&graph_epoch, 1u, memory_order_relaxed);
     if (g->nonce == 0u || g->nonce > UINT32_MAX) {
         (void)report(diag, IOS27_22C_INPUT, NO_INDEX, NO_INDEX,
@@ -130,12 +265,13 @@ int ios27_22c_create(const ios27_image_spec *specs, size_t count,
         g->specs[i].name = g->names[i];
         g->specs[i].dependencies = g->dep_ptrs[i];
         for (size_t k = 0; k < specs[i].dependency_count; ++k) {
-            if (!valid_name(specs[i].dependencies[k])) {
+            if (!valid_dep_name(specs[i].dependencies[k]) ||
+                (!guest_paths && !valid_name(specs[i].dependencies[k]))) {
                 (void)report(diag, IOS27_22C_INPUT, i, k,
                              "invalid dependency install name");
                 goto failed;
             }
-            (void)snprintf(g->dep_names[i][k], IOS27_IMAGE_NAME_MAX,
+            (void)snprintf(g->dep_names[i][k], IOS27_DYLD_PATH_MAX,
                            "%s", specs[i].dependencies[k]);
             g->dep_ptrs[i][k] = g->dep_names[i][k];
             for (size_t p = 0; p < k; ++p)
@@ -185,7 +321,10 @@ int ios27_22c_create(const ios27_image_spec *specs, size_t count,
             goto failed;
         }
     }
-    for (size_t i = 0; i < count; ++i) {
+    if (guest_paths) {
+        if (resolve_catalog_paths(g, guest_paths, main_executable, diag))
+            goto failed;
+    } else for (size_t i = 0; i < count; ++i) {
         for (size_t k = 0; k < g->specs[i].dependency_count; ++k) {
             size_t dep = find_name(g, g->dep_ptrs[i][k]);
             if (dep == NO_INDEX) {
@@ -205,6 +344,15 @@ failed:
     free(g);
     return -1;
 }
+int ios27_22c_create(const ios27_image_spec *specs, size_t count,
+                      ios27_22c_graph **out, ios27_22c_diagnostic *diag) {
+    return create_impl(specs, count, NULL, NULL, out, diag);
+}
+int ios27_22c_create_with_paths(const ios27_image_spec *specs, size_t count,
+                                 const char *const *paths, const char *main,
+                                 ios27_22c_graph **out, ios27_22c_diagnostic *diag) {
+    return create_impl(specs, count, paths, main, out, diag);
+}
 int ios27_22c_order(const ios27_22c_graph *g, size_t pos,
                      int reverse, const char **name) {
     if (!g || !name || pos >= g->order_count) return -1;
@@ -217,8 +365,13 @@ int ios27_22c_load(ios27_22c_graph *g, ios27_22c_diagnostic *diag) {
     if (!g || g->loaded) return report(diag, IOS27_22C_LIFECYCLE,
                                        NO_INDEX, NO_INDEX,
                                        "graph absent or already loaded");
-    if (ios27_images_load(g->specs, g->count, &g->loaded,
-                          error, sizeof(error))) {
+    int rc = g->using_paths ?
+        ios27_images_load_with_paths(g->specs, g->count, g->guest_path_ptrs,
+                                      g->main_executable, &g->loaded,
+                                      error, sizeof(error)) :
+        ios27_images_load(g->specs, g->count, &g->loaded,
+                          error, sizeof(error));
+    if (rc) {
         g->loaded = NULL;
         return report(diag, IOS27_22C_FIXUP, NO_INDEX, NO_INDEX, error);
     }
