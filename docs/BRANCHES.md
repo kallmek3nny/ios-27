@@ -8,16 +8,23 @@ candidate branches with mapped changes: **15** · audited base: `1dd112410e43`
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
 
-head: `b4fc93ce6097` · ci: **passing_checks** · unmerged, not credited.
+head: `393c1b85a963` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 6 test/fixture files, +669/-0 lines
+- **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
-head: `0c32cf6df050` · ci: **passing_checks** · unmerged, not credited.
+head: `5f09be302a9a` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +916/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +920/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
+
+### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
+
+head: `369b6e5dea55` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +910/-0 lines
+  - candidate declarations: `ios27_23d_free`, `ios27_23d_get_stats`, `ios27_23d_memory_protect`, `ios27_23d_memory_read`, `ios27_23d_memory_write`, `ios27_23d_new`, `ios27_23d_process_create`, `ios27_23d_process_destroy`, `ios27_23d_seed`, `ios27_23d_service_destroy`, `ios27_23d_service_grant`, `ios27_23d_service_register`
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
@@ -100,13 +107,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/tree/phase23d-syscall-mach-bridge-20261029)
-
-head: `58e7fe1e9a34` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +910/-0 lines
-  - candidate declarations: `ios27_23d_free`, `ios27_23d_get_stats`, `ios27_23d_memory_protect`, `ios27_23d_memory_read`, `ios27_23d_memory_write`, `ios27_23d_new`, `ios27_23d_process_create`, `ios27_23d_process_destroy`, `ios27_23d_seed`, `ios27_23d_service_destroy`, `ios27_23d_service_grant`, `ios27_23d_service_register`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

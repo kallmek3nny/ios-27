@@ -11,19 +11,28 @@
     {
       "number": 94,
       "branch": "phase23c-objc-native-bridge",
-      "sha": "b4fc93ce60972c0a2450c712fb1e9f3af31fd5ab",
+      "sha": "393c1b85a9639525e1b57320cd3be458782f027c",
       "title": "phase23c: bounded compiler-validated objc image bridge and concurrent tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-      "updated_at": "2026-10-29T21:20:13Z",
+      "updated_at": "2026-10-29T21:21:13Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 93,
       "branch": "phase23e/native-app-integration-harness",
-      "sha": "0c32cf6df050f42c68f7170c2851528117236df9",
+      "sha": "5f09be302a9abf0f026f8420dc1a8b5843c38a58",
       "title": "phase 23e: standalone compiler-linked darwin app integration harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
-      "updated_at": "2026-10-29T21:19:46Z",
+      "updated_at": "2026-10-29T21:20:48Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 95,
+      "branch": "phase23d-syscall-mach-bridge-20261029",
+      "sha": "369b6e5dea55e8776f3e1ae2a8adc23ac126df7d",
+      "title": "phase 23d: bounded syscall-to-Mach services and guest descriptor bridge",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/95",
+      "updated_at": "2026-10-29T21:20:45Z",
       "status": "unmerged: not counted"
     },
     {
@@ -135,17 +144,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase23d-syscall-mach-bridge-20261029",
-      "sha": "58e7fe1e9a34e4531640bbb7b719c00932c9dc27",
-      "ahead_by": 13,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:20:32Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23d-syscall-mach-bridge-20261029",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -346,9 +345,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 11,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:20:43Z"
+  "observed_at": "2026-10-29T21:21:18Z"
 }
