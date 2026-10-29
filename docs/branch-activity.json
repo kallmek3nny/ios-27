@@ -11,7 +11,7 @@
       "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "pr_number": 98,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -762,7 +762,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "phase24a-global-dyld-identity",
@@ -1671,5 +1671,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:51:49Z"
+  "observed_at": "2026-10-29T21:52:12Z"
 }

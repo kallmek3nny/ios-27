@@ -8,7 +8,7 @@ candidate branches with mapped changes: **19** · audited base: `1dd112410e43`
 
 ### [phase24e-native-application-startup](https://github.com/kallmek3nny/ios-27/pull/98)
 
-head: `872607e045f9` · ci: **not_checked** · unmerged, not credited.
+head: `872607e045f9` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +1056/-0 lines
   - candidate declarations: `ios27_24e_enter_main`, `ios27_24e_run`
