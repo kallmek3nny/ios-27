@@ -7,6 +7,7 @@ when a PR with source changes is merged into main. No unmerged branch
 increases the delivery numerator. The audit-only progress.svg remains separate.
 """
 import argparse
+import difflib
 import html
 import json
 from pathlib import Path
@@ -232,6 +233,14 @@ def main():
         stale = [str(p) for p, value in generated
                  if not p.exists() or p.read_text(encoding="utf-8") != value]
         if stale:
+            for path, value in generated:
+                if str(path) not in stale or not path.exists():
+                    continue
+                before = path.read_text(encoding="utf-8").splitlines()
+                after = value.splitlines()
+                for line in list(difflib.unified_diff(before, after,
+                        fromfile=str(path), tofile="generated", lineterm=""))[:45]:
+                    print(line, file=sys.stderr)
             raise ValueError("stale phase delivery outputs: " + ", ".join(stale))
     else:
         for path, value in generated:
