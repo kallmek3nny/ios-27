@@ -12,9 +12,12 @@ Swift-built LLD 17 rejects linking Mach-O objects with LC_BUILD_VERSION targetin
 All test commands have bounded timeouts. Run: timeout 600s bash tools/phase24c-verify.sh; sanitizers: timeout 600s env PHASE24C_SANITIZE=1 bash tools/phase24c-verify.sh.
 
 ## unimplemented
-Zero actual Darwin IMP calls and zero real retain/release/weak transitions. Native objc_msgSend entrypoint, mapped relocation and ownership-checked executable pages, +load/+initialize coordination, ownership, weak/finalization, generation-safe unload and runtime app startup remain missing. Metadata lookups must not be presented as method calls. Do not claim Apple libobjc compatibility.
+160,000 direct calls to an isolated, compiler-linked zero-relocation Darwin `+kind` IMP verified on ARM64 normal CI (not runtime-dispatched). Zero `objc_msgSend` calls and zero real retain/release/weak transitions. Native objc_msgSend entrypoint, mapped relocation and ownership-checked executable pages, +load/+initialize coordination, ownership, weak/finalization, generation-safe unload and runtime app startup remain missing. Metadata lookups must not be presented as method calls. Do not claim Apple libobjc compatibility.
 Three genuine active engineering hours were not completed or claimed. Retain as draft until missing functionality and all frozen-head CI gates pass, and main can be verified unchanged with expected-SHA lease.
 
 ## native execution probe added to CI
 
 The isolated `tests/phase24c-native.c` checker now extracts the compiler-linked, relocation-free `+[Phase24cRoot kind]` method from `alpha.dylib`. It validates the Mach-O class method symbol and exactly two ARM64 instructions (`mov w0,#1; ret`), maps an independent anonymous page RW, seals RX, and on AArch64 Linux invokes the extracted actual Darwin method body 160,000 times directly using an explicit two-argument ABI prototype. On x86_64 only format and instruction inspection are possible. CI logs are authoritative: these are **direct IMP calls**, not `objc_msgSend`/runtime class dispatch, and do not validate dependencies, object lifetime, or Apple libobjc. No runtime ownership transitions occur. This direct-call probe does not establish full phase24c completion.
+
+### sanitizer follow-up
+ARM64 sanitizer CI identified a pre-entry read at the indirect function pointer, consistent with UBSan function-type instrumentation. The native probe now maps a separate read-only preamble page immediately before the RX method page without disabling sanitizers. Final outcomes must be checked against the new frozen head.

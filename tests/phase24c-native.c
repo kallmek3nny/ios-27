@@ -101,11 +101,17 @@ int main(int argc, char **argv) {
 #if defined(__aarch64__) && defined(__linux__)
     long pagesize=sysconf(_SC_PAGESIZE);
     MUST(pagesize >= 4096 && pagesize <= 65536);
-    void *page=mmap(NULL,(size_t)pagesize,PROT_READ|PROT_WRITE,
-                    MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
-    MUST(page != MAP_FAILED);
+    size_t span=(size_t)pagesize*2u;
+    void *mapping=mmap(NULL,span,PROT_READ|PROT_WRITE,
+                       MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    MUST(mapping != MAP_FAILED);
+    unsigned char *page=(unsigned char *)mapping+(size_t)pagesize;
     memcpy(page,buf+(size_t)at,8u);
     __builtin___clear_cache((char *)page,(char *)page+8);
+    /* UBSan function-type checks inspect bytes immediately before indirect
+     * code pointers. Keep a separate read-only zero preamble page mapped;
+     * the guest method itself remains on its own RX, never writable page. */
+    MUST(mprotect(mapping,(size_t)pagesize,PROT_READ)==0);
     MUST(mprotect(page,(size_t)pagesize,PROT_READ|PROT_EXEC)==0);
     uintptr_t ip=(uintptr_t)page;
     uint64_t (*imp)(void *,const void *)=NULL;
@@ -114,7 +120,7 @@ int main(int argc, char **argv) {
     volatile uint64_t total=0;
     for (unsigned i=0;i<160000u;++i) total+=imp(NULL,NULL);
     MUST(total==160000u);
-    MUST(munmap(page,(size_t)pagesize)==0);
+    MUST(munmap(mapping,span)==0);
     puts("phase24c: 160000 direct native calls to compiler-linked Darwin +[Phase24cRoot kind]");
 #else
     puts("phase24c: genuine linked Darwin method inspected; execution requires aarch64 Linux");
