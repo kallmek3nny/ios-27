@@ -6,18 +6,18 @@
 
 candidate branches with mapped changes: **16** · audited base: `1dd112410e43`
 
+### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
+
+head: `f6c0ee963e39` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +771/-0 lines
+
 ### [agent/phase23b-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/96)
 
 head: `7988310ebdb2` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 9 test/fixture files, +1005/-0 lines
   - candidate declarations: `ios27_23b_add`, `ios27_23b_bind`, `ios27_23b_close`, `ios27_23b_ensure`, `ios27_23b_open`, `ios27_23b_parse`, `ios27_23b_runtime_destroy`, `ios27_23b_runtime_init`, `ios27_23b_snapshot`
-
-### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
-
-head: `e5e46c8da466` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +771/-0 lines
 
 ### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
 
