@@ -8,7 +8,7 @@ candidate branches with mapped changes: **16** · audited base: `1dd112410e43`
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
 
-head: `1646e36b3b8b` · ci: **not_checked** · unmerged, not credited.
+head: `1646e36b3b8b` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 6 test/fixture files, +720/-0 lines
 

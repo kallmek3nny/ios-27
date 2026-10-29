@@ -11,7 +11,7 @@
       "sha": "1646e36b3b8b6bf6ecb77fc114a0844434abd4ed",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
       "pr_number": 94,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -661,7 +661,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "phase23d-syscall-mach-bridge-20261029",
@@ -1549,5 +1549,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:26:39Z"
+  "observed_at": "2026-10-29T21:26:54Z"
 }
