@@ -232,7 +232,7 @@ int ios27_24b_register(ios27_24b_runtime *r, unsigned index,
         if (deps[i] == index || deps[i] >= IOS27_24B_IMAGES) return EINVAL;
     pthread_mutex_lock(&r->mutex);
     ios27_24b_slot *slot = &r->slots[index];
-    int err = slot->registered ? EEXIST : 0;
+    int err = r->gate ? EBUSY : slot->registered ? EEXIST : 0;
     if (!err) {
         slot->image = *im;
         if (dep_count) memcpy(slot->deps, deps, dep_count * sizeof(*deps));
@@ -420,13 +420,16 @@ int ios27_24b_close(ios27_24b_runtime *r, ios27_24b_handle h,
                     ios27_24b_dispatch execute, void *context) {
     unsigned order[IOS27_24B_IMAGES];
     size_t n = 0;
-    int err, lease, first = 0;
+    int err, lease, first = 0, acquired = 0;
     if (!r || !r->initialized || !execute) return EINVAL;
     pthread_mutex_lock(&r->mutex);
     lease = locate(r, h);
     err = lease < 0 ? ESTALE : graph(r, h.index, order, &n);
     if (!err && r->leases[lease].active) err = EBUSY;
-    if (!err) err = gating(r, 0, h.index);
+    if (!err) {
+        err = gating(r, 0, h.index);
+        acquired = !err;
+    }
     if (!err) for (size_t j = 0; j < n; ++j) {
         ios27_24b_slot *s = &r->slots[order[j]];
         if (!s->refs) err = ESTALE;
@@ -434,8 +437,7 @@ int ios27_24b_close(ios27_24b_runtime *r, ios27_24b_handle h,
             err = ENOTRECOVERABLE;
     }
     if (err) {
-        if (r->gate && pthread_equal(r->gate_owner, pthread_self()) &&
-            lease >= 0 && !r->leases[lease].active) ungate(r);
+        if (acquired) ungate(r);
         pthread_mutex_unlock(&r->mutex);
         return err;
     }
@@ -467,6 +469,7 @@ int ios27_24b_close(ios27_24b_runtime *r, ios27_24b_handle h,
                     diagnostic(r, id, IOS27_24B_DIAG_TERMINATOR_FAILED,
                                result);
                     pthread_mutex_unlock(&r->mutex);
+                    break; /* unknown side effects: stop finalizing this image */
                 }
             }
             if (!first) ++r->shutdowns;
@@ -492,7 +495,7 @@ int ios27_24b_inspect(ios27_24b_runtime *r, unsigned id,
         return EINVAL;
     pthread_mutex_lock(&r->mutex);
     const ios27_24b_slot *s = &r->slots[id];
-    int err = !s->registered ? ENOENT : 0;
+    int err = r->gate ? EBUSY : !s->registered ? ENOENT : 0;
     if (!err) *out = (ios27_24b_snapshot){
         s->state, s->refs, s->active, s->completed, s->poisoned,
         s->generation, s->failure};
