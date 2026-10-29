@@ -49,14 +49,14 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `0d9edb176c31`
 
-- [PR #85](https://github.com/kallmek3nny/ios-27/pull/85) · incoming, not counted
-- [PR #86](https://github.com/kallmek3nny/ios-27/pull/86) · incoming, not counted
 - [PR #83](https://github.com/kallmek3nny/ios-27/pull/83) · incoming, not counted
 - [PR #84](https://github.com/kallmek3nny/ios-27/pull/84) · incoming, not counted
+- [PR #87](https://github.com/kallmek3nny/ios-27/pull/87) · incoming, not counted
+- [PR #85](https://github.com/kallmek3nny/ios-27/pull/85) · incoming, not counted
+- [PR #86](https://github.com/kallmek3nny/ios-27/pull/86) · incoming, not counted
 - [PR #77](https://github.com/kallmek3nny/ios-27/pull/77) · incoming, not counted
 - [PR #78](https://github.com/kallmek3nny/ios-27/pull/78) · incoming, not counted
 - [PR #80](https://github.com/kallmek3nny/ios-27/pull/80) · incoming, not counted
-- [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 

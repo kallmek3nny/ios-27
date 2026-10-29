@@ -7,85 +7,8 @@
   "candidate_count": 10,
   "candidates": [
     {
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "9f8b736998f96fae4f5e4d66b39428a4ba846c12",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "pr_number": 85,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 3,
-          "fixture_files": 7,
-          "additions": 984,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_22a_close",
-            "ios27_22a_copyin",
-            "ios27_22a_copyout",
-            "ios27_22a_create",
-            "ios27_22a_destroy",
-            "ios27_22a_fail_map_after",
-            "ios27_22a_map",
-            "ios27_22a_map_stack",
-            "ios27_22a_pin",
-            "ios27_22a_probe",
-            "ios27_22a_protect",
-            "ios27_22a_restricted_probe"
-          ],
-          "example_paths": [
-            "include/ios27/phase22a_space.h",
-            "src/phase22a_child.c",
-            "src/phase22a_space.c",
-            "tests/phase22a-darwin.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase22b-darwin-bsd-capability-20261028",
-      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
-      "pr_number": 86,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 3,
-          "additions": 641,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_22b_advance",
-            "ios27_22b_capture",
-            "ios27_22b_create",
-            "ios27_22b_destroy",
-            "ios27_22b_dispatch",
-            "ios27_22b_errno",
-            "ios27_22b_interrupt",
-            "ios27_22b_metadata_fd",
-            "ios27_22b_preopen",
-            "ios27_22b_set_clock",
-            "ios27_22b_stdin"
-          ],
-          "example_paths": [
-            "include/ios27/phase22b_syscalls.h",
-            "src/phase22b_syscalls.c",
-            "tests/phase22b-darwin-fixture.c",
-            "tests/phase22b-integration.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "df1d28dcb1d4da288b633d770a4daf058698dbd6",
+      "sha": "d34a167c242f5c4c0bae8bcd52abc85d1380273b",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "pr_number": 83,
       "ci": "running",
@@ -124,10 +47,10 @@
     },
     {
       "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "1ffab75a725a2421cfe53d62f8e8492d79f7225a",
+      "sha": "550b2d785a8ec214ca7b1888ed9bf15e56064938",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "pr_number": 84,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 10,
       "possibly_truncated": false,
@@ -136,7 +59,7 @@
           "group_id": "unclassified",
           "source_files": 4,
           "fixture_files": 4,
-          "additions": 1285,
+          "additions": 1321,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -144,6 +67,109 @@
             "include/ios27/phase22d_runtime.h",
             "src/phase22d_metadata.c",
             "src/phase22d_runtime.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "pr_number": 87,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 6,
+          "additions": 1273,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase22e_ipc.h",
+            "src/phase22e_ipc.c",
+            "tests/phase22e-generated.h",
+            "tests/phase22e-negative.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "9f8b736998f96fae4f5e4d66b39428a4ba846c12",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "pr_number": 85,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 3,
+          "fixture_files": 7,
+          "additions": 984,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22a_close",
+            "ios27_22a_copyin",
+            "ios27_22a_copyout",
+            "ios27_22a_create",
+            "ios27_22a_destroy",
+            "ios27_22a_fail_map_after",
+            "ios27_22a_map",
+            "ios27_22a_map_stack",
+            "ios27_22a_pin",
+            "ios27_22a_probe",
+            "ios27_22a_protect",
+            "ios27_22a_restricted_probe"
+          ],
+          "example_paths": [
+            "include/ios27/phase22a_space.h",
+            "src/phase22a_child.c",
+            "src/phase22a_space.c",
+            "tests/phase22a-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22b-darwin-bsd-capability-20261028",
+      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+      "pr_number": 86,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 641,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22b_advance",
+            "ios27_22b_capture",
+            "ios27_22b_create",
+            "ios27_22b_destroy",
+            "ios27_22b_dispatch",
+            "ios27_22b_errno",
+            "ios27_22b_interrupt",
+            "ios27_22b_metadata_fd",
+            "ios27_22b_preopen",
+            "ios27_22b_set_clock",
+            "ios27_22b_stdin"
+          ],
+          "example_paths": [
+            "include/ios27/phase22b_syscalls.h",
+            "src/phase22b_syscalls.c",
+            "tests/phase22b-darwin-fixture.c",
+            "tests/phase22b-integration.c"
           ]
         }
       ]
@@ -264,8 +290,8 @@
     {
       "branch": "feat/phase21d-fair-rwlock-once",
       "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "pr_number": 73,
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
+      "pr_number": null,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 17,
@@ -307,32 +333,6 @@
           "symbols_preview": [],
           "example_paths": [
             "tests/phase21d-objc.m"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
-      "pr_number": null,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 18,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 6,
-          "additions": 1273,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase22e_ipc.h",
-            "src/phase22e_ipc.c",
-            "tests/phase22e-generated.h",
-            "tests/phase22e-negative.c"
           ]
         }
       ]
@@ -400,7 +400,7 @@
       },
       {
         "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
         "source_files": 2,
         "fixture_files": 12,
         "ci": "passing_checks"
@@ -416,27 +416,13 @@
     "objc-host-model": [
       {
         "branch": "feat/phase21d-fair-rwlock-once",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
         "source_files": 0,
         "fixture_files": 1,
         "ci": "passing_checks"
       }
     ],
     "unclassified": [
-      {
-        "branch": "phase22a-guest-address-spaces",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-        "source_files": 3,
-        "fixture_files": 7,
-        "ci": "running"
-      },
-      {
-        "branch": "phase22b-darwin-bsd-capability-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/86",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "running"
-      },
       {
         "branch": "agent/phase22c-transactional-dyld-graph",
         "url": "https://github.com/kallmek3nny/ios-27/pull/83",
@@ -449,14 +435,28 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/84",
         "source_files": 4,
         "fixture_files": 4,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase22e-mach-ipc-mig",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/87",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "running"
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "phase22a-guest-address-spaces",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+        "source_files": 3,
+        "fixture_files": 7,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "phase22b-darwin-bsd-capability-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "passing_checks"
       }
     ]
   },
@@ -767,5 +767,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:19:54Z"
+  "observed_at": "2026-10-29T00:20:20Z"
 }

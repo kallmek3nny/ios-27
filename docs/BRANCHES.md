@@ -6,32 +6,38 @@
 
 candidate branches with mapped changes: **10** · audited base: `0d9edb176c31`
 
-### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
-
-head: `9f8b736998f9` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 7 test/fixture files, +984/-0 lines
-  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`
-
-### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/pull/86)
-
-head: `476bd3c9a1f5` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 3 test/fixture files, +641/-0 lines
-  - candidate declarations: `ios27_22b_advance`, `ios27_22b_capture`, `ios27_22b_create`, `ios27_22b_destroy`, `ios27_22b_dispatch`, `ios27_22b_errno`, `ios27_22b_interrupt`, `ios27_22b_metadata_fd`, `ios27_22b_preopen`, `ios27_22b_set_clock`, `ios27_22b_stdin`
-
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `df1d28dcb1d4` · ci: **running** · unmerged, not credited.
+head: `d34a167c242f` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +1177/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
 
 ### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
 
-head: `1ffab75a725a` · ci: **passing_checks** · unmerged, not credited.
+head: `550b2d785a8e` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 4 source files, 4 test/fixture files, +1285/-0 lines
+- **unclassified**: 4 source files, 4 test/fixture files, +1321/-0 lines
+
+### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
+
+head: `387d873308d0` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +1273/-0 lines
+
+### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
+
+head: `9f8b736998f9` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 3 source files, 7 test/fixture files, +984/-0 lines
+  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`
+
+### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/pull/86)
+
+head: `476bd3c9a1f5` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 3 test/fixture files, +641/-0 lines
+  - candidate declarations: `ios27_22b_advance`, `ios27_22b_capture`, `ios27_22b_create`, `ios27_22b_destroy`, `ios27_22b_dispatch`, `ios27_22b_errno`, `ios27_22b_interrupt`, `ios27_22b_metadata_fd`, `ios27_22b_preopen`, `ios27_22b_set_clock`, `ios27_22b_stdin`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -54,19 +60,13 @@ head: `b552d8499416` · ci: **passing_checks** · unmerged, not credited.
 - **libsystem_pthread**: 6 source files, 17 test/fixture files, +2688/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_create_apple_lp64_attrs`, `ios27_21i_create_checked`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_dispatch_arm64`, `ios27_21i_dispatch_arm64_n`, `ios27_21i_errno_to_darwin`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
 
-### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
+### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once)
 
 head: `9ef58a1bf4cc` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 2 source files, 12 test/fixture files, +2487/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
-
-### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig)
-
-head: `387d873308d0` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +1273/-0 lines
 
 ### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge)
 

@@ -9,6 +9,33 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "d34a167c242f5c4c0bae8bcd52abc85d1380273b",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:19:40Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 84,
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "550b2d785a8ec214ca7b1888ed9bf15e56064938",
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "updated_at": "2026-10-29T00:19:37Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 87,
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
+      "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "updated_at": "2026-10-29T00:19:36Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 85,
       "branch": "phase22a-guest-address-spaces",
       "sha": "9f8b736998f96fae4f5e4d66b39428a4ba846c12",
@@ -24,24 +51,6 @@
       "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/86",
       "updated_at": "2026-10-29T00:19:14Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 83,
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "df1d28dcb1d4da288b633d770a4daf058698dbd6",
-      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:19:08Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 84,
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "1ffab75a725a2421cfe53d62f8e8492d79f7225a",
-      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "updated_at": "2026-10-29T00:18:41Z",
       "status": "unmerged: not counted"
     },
     {
@@ -70,25 +79,16 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:47:23Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 73,
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
-      "title": "phase 21d: fair reader-writer lock and safe once initialization",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:38:04Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
       "ahead_by": 2,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-29T00:19:22Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
+      "behind_by": 36,
+      "last_commit_at": "2026-10-28T20:38:00Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
       "status": "unmerged: not counted"
     },
     {
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:19:38Z"
+  "observed_at": "2026-10-29T00:20:08Z"
 }
