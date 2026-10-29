@@ -77,13 +77,6 @@ def main() -> None:
                  str(fixture), "-o", str(native)], 90)
             data = native.read_bytes()
             check_macho(data)
-            metadata_native = temp / f"objc-reader-O{opt}.o"
-            run([clang, "--target=arm64-apple-darwin",
-                 "-fobjc-runtime=macosx-13.0", "-fno-objc-arc",
-                 "-ffreestanding", "-fno-builtin", "-fno-stack-protector",
-                 "-Werror", "-O1", "-c",
-                 str(ROOT / "tests/fixtures/phase19e-objc-classes.m"),
-                 "-o", str(metadata_native)], 90)
             for compiler in [clang] + ([gcc] if gcc else []):
                 tag = pathlib.Path(compiler).name
                 app = temp / f"stress-{tag}-O{opt}"
@@ -94,7 +87,7 @@ def main() -> None:
                 run([compiler, *flags, "src/phase22d_runtime.c",
                      "src/phase22d_metadata.c", "src/objc_metadata.c",
                      "tests/phase22d-metadata-smoke.c", "-o", str(smoke)], 120)
-                run([str(smoke), str(metadata_native)], 180)
+                run([str(smoke), str(native)], 180)
     print("phase22d standalone verification passed", flush=True)
 
 if __name__ == "__main__":
