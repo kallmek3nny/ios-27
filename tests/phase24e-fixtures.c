@@ -37,8 +37,9 @@ int phase24e_pipeline_eval(int n) {
 __attribute__((visibility("default"))) volatile int phase24e_ctor_state;
 __attribute__((constructor))
 static void phase24e_constructor(void) { phase24e_ctor_state = 91; }
-__attribute__((destructor))
 static void phase24e_destructor(void) { phase24e_ctor_state = -1; }
+__attribute__((used, section("__DATA,__mod_term_func")))
+static void (*const phase24e_term_callback)(void) = phase24e_destructor;
 __attribute__((visibility("default"), noinline))
 int phase24e_ctor_value(void) { return phase24e_ctor_state; }
 #elif defined(PHASE24E_APP_CALC) || defined(PHASE24E_APP_STATE) || defined(PHASE24E_APP_PIPELINE)
