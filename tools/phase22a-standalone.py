@@ -10,7 +10,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-CASES = ("native", "faults", "stress", "races", "isolation", "sandbox")
+CASES = ("native", "faults", "stress", "races", "isolation", "quiesce", "sandbox")
 FLAGS = ("-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread")
 
 

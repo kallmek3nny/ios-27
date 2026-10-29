@@ -19,8 +19,8 @@ independently because shared CMakeLists.txt is owned by other workstreams.
 3. **lifetime and failure handling:** generation-checked region and pin IDs,
    stale reference rejection, bounded pin slots, deterministic map-failure
    injection, closed state, atomic metadata under a mutex, resource snapshots,
-   post-reservation and post-mprotect rollback injection, and teardown that
-   refuses active borrows.
+   post-reservation and post-mprotect rollback injection, and two-stage
+   quiesce/drain/close process lifecycle.
 4. **native concurrency and test evidence:** seeded 309,020-operation stress
    across four threads, close-vs-copy workers, quota/fault regression,
    two optimizations and two compilers under x86_64/ARM64 CI, ASan/UBSan,
@@ -48,7 +48,8 @@ independently because shared CMakeLists.txt is owned by other workstreams.
 - Pin leases are single-use and generation checked. Active pins prevent
   protect, unmap, close, and destroy. External users must not retain
   or dereference a borrowed pointer after unpin.
-- close may race with operations, which return CLOSED after closing.
+- quiesce stops new operations and permits already-issued pin releases;
+  close may race with operations, which return CLOSED after closing.
   **destroy requires external threads joined first**, as no C API can
   safely free its own control block while unknown callers still hold it.
 - Hard failure and allocation limits matter more than full VM performance;

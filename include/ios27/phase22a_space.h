@@ -43,6 +43,7 @@ typedef struct {
     uint32_t regions;
     uint32_t pins;
     uint32_t closed;
+    uint32_t quiescing;
 } ios27_22a_stats;
 
 /* Synthetic 64-bit guest offsets, NOT host addresses or Darwin process isolation.
@@ -80,6 +81,8 @@ int ios27_22a_snapshot(ios27_22a_space *space, ios27_22a_stats *stats);
 int ios27_22a_fail_map_after(ios27_22a_space *space, uint32_t count);
 /* Test-only: fail after host reservation (1) or after mprotect (2). */
 int ios27_22a_fail_stage(ios27_22a_space *space, unsigned stage);
+/* Reject new operations while draining pinned references. */
+int ios27_22a_quiesce(ios27_22a_space *space);
 int ios27_22a_close(ios27_22a_space *space);
 int ios27_22a_destroy(ios27_22a_space **space);
 #endif

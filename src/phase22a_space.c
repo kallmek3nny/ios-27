@@ -39,6 +39,7 @@ struct ios27_22a_space {
     int inject_failure;
     unsigned failure_stage;
     int closed;
+    int quiescing;
 };
 
 static int valid_permissions(unsigned perms) {
@@ -154,7 +155,7 @@ int ios27_22a_map(ios27_22a_space *s, uint64_t address, uint64_t bytes,
     if (!s || !handle) return result;
     *handle = 0u;
     pthread_mutex_lock(&s->mutex);
-    if (s->closed) { result = IOS27_22A_CLOSED; goto done; }
+    if (s->closed || s->quiescing) { result = IOS27_22A_CLOSED; goto done; }
     if (!valid_permissions(permissions) ||
         (guards & ~(IOS27_22A_GUARD_BEFORE | IOS27_22A_GUARD_AFTER)) ||
         address % IOS27_22A_PAGE || bytes % IOS27_22A_PAGE ||
@@ -243,7 +244,7 @@ int ios27_22a_protect(ios27_22a_space *s, uint64_t handle,
     int result;
     if (!s) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    result = s->closed ? IOS27_22A_CLOSED : resolve_region(s, handle, &r);
+    result = (s->closed || s->quiescing) ? IOS27_22A_CLOSED : resolve_region(s, handle, &r);
     if (!result) {
         if (!valid_permissions(permissions)) result = IOS27_22A_INVALID;
         else if (r->pins) result = IOS27_22A_BUSY;
@@ -261,7 +262,7 @@ int ios27_22a_unmap(ios27_22a_space *s, uint64_t handle) {
     int result;
     if (!s) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    result = s->closed ? IOS27_22A_CLOSED : resolve_region(s, handle, &r);
+    result = (s->closed || s->quiescing) ? IOS27_22A_CLOSED : resolve_region(s, handle, &r);
     if (!result) {
         if (r->pins) result = IOS27_22A_BUSY;
         else if (munmap(r->host, (size_t)r->reserved_length) != 0)
@@ -282,7 +283,7 @@ int ios27_22a_probe(ios27_22a_space *s, uint64_t address,
     int result;
     if (!s) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    result = s->closed ? IOS27_22A_CLOSED :
+    result = (s->closed || s->quiescing) ? IOS27_22A_CLOSED :
              check_range(s, address, bytes, alignment, permissions);
     pthread_mutex_unlock(&s->mutex);
     return result;
@@ -296,7 +297,7 @@ static int copy_bytes(ios27_22a_space *s, uint64_t address, void *host,
     int result;
     if (!s || !host) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    result = s->closed ? IOS27_22A_CLOSED : check_range(s, address,
+    result = (s->closed || s->quiescing) ? IOS27_22A_CLOSED : check_range(s, address,
                     (uint64_t)bytes, 1u, to_guest ?
                     IOS27_22A_WRITE : IOS27_22A_READ);
     if (result) goto done;
@@ -335,7 +336,7 @@ int ios27_22a_pin(ios27_22a_space *s, uint64_t address,
     if (!s || !view) return IOS27_22A_INVALID;
     memset(view, 0, sizeof(*view));
     pthread_mutex_lock(&s->mutex);
-    result = s->closed ? IOS27_22A_CLOSED :
+    result = (s->closed || s->quiescing) ? IOS27_22A_CLOSED :
              check_range(s, address, (uint64_t)bytes, alignment, permissions);
     if (result) goto done;
     r = find_at(s, address);
@@ -392,6 +393,7 @@ int ios27_22a_snapshot(ios27_22a_space *s, ios27_22a_stats *stats) {
     stats->regions = s->active;
     stats->pins = s->pins;
     stats->closed = (uint32_t)s->closed;
+    stats->quiescing = (uint32_t)s->quiescing;
     pthread_mutex_unlock(&s->mutex);
     return IOS27_22A_OK;
 }
@@ -399,7 +401,7 @@ int ios27_22a_snapshot(ios27_22a_space *s, ios27_22a_stats *stats) {
 int ios27_22a_fail_map_after(ios27_22a_space *s, uint32_t count) {
     if (!s) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    if (s->closed) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
+    if (s->closed || s->quiescing) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
     s->failure_countdown = count;
     s->inject_failure = 1;
     pthread_mutex_unlock(&s->mutex);
@@ -409,10 +411,20 @@ int ios27_22a_fail_map_after(ios27_22a_space *s, uint32_t count) {
 int ios27_22a_fail_stage(ios27_22a_space *s, unsigned stage) {
     if (!s || stage > 2u) return IOS27_22A_INVALID;
     pthread_mutex_lock(&s->mutex);
-    if (s->closed) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
+    if (s->closed || s->quiescing) { pthread_mutex_unlock(&s->mutex); return IOS27_22A_CLOSED; }
     s->failure_stage = stage;
     pthread_mutex_unlock(&s->mutex);
     return IOS27_22A_OK;
+}
+
+int ios27_22a_quiesce(ios27_22a_space *s) {
+    int result;
+    if (!s) return IOS27_22A_INVALID;
+    pthread_mutex_lock(&s->mutex);
+    s->quiescing = 1;
+    result = s->pins ? IOS27_22A_BUSY : IOS27_22A_OK;
+    pthread_mutex_unlock(&s->mutex);
+    return result;
 }
 
 int ios27_22a_close(ios27_22a_space *s) {
