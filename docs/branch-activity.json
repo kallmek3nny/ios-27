@@ -3,9 +3,73 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "0d9edb176c31d7afad3b35c693415b3b140cc4c3",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 6,
-  "candidate_count": 6,
+  "candidates_checked": 9,
+  "candidate_count": 8,
   "candidates": [
+    {
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "a738ae98260203c4b8a95398cfe3ab3839a4a7bf",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "pr_number": 84,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 10,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 4,
+          "additions": 1251,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase22d_metadata.h",
+            "include/ios27/phase22d_runtime.h",
+            "src/phase22d_metadata.c",
+            "src/phase22d_runtime.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "b010a40cfc42d5dc1e8b7f54d2189056cd576f1a",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "pr_number": 83,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 4,
+          "additions": 865,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22c_acquire",
+            "ios27_22c_create",
+            "ios27_22c_destroy",
+            "ios27_22c_initialize",
+            "ios27_22c_load",
+            "ios27_22c_order",
+            "ios27_22c_pins",
+            "ios27_22c_release",
+            "ios27_22c_resolve",
+            "ios27_22c_symbol",
+            "ios27_22c_unload"
+          ],
+          "example_paths": [
+            "include/ios27/phase22c_graph.h",
+            "src/phase22c_graph.c",
+            "tests/phase22c-compiled.c",
+            "tests/phase22c-fixture-consumer.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase21j-deterministic-sync-diagnostics",
       "sha": "9e15234388e206983bdf73dd57a3628f2d6ae037",
@@ -284,6 +348,22 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/73",
         "source_files": 0,
         "fixture_files": 1,
+        "ci": "passing_checks"
+      }
+    ],
+    "unclassified": [
+      {
+        "branch": "phase22d-objc-runtime-concurrency-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+        "source_files": 4,
+        "fixture_files": 4,
+        "ci": "running"
+      },
+      {
+        "branch": "agent/phase22c-transactional-dyld-graph",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+        "source_files": 2,
+        "fixture_files": 4,
         "ci": "passing_checks"
       }
     ]
@@ -595,5 +675,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-28T23:25:02Z"
+  "observed_at": "2026-10-29T00:16:14Z"
 }

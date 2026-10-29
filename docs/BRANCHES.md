@@ -4,7 +4,20 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **6** · audited base: `0d9edb176c31`
+candidate branches with mapped changes: **8** · audited base: `0d9edb176c31`
+
+### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
+
+head: `a738ae982602` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 4 source files, 4 test/fixture files, +1251/-0 lines
+
+### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
+
+head: `b010a40cfc42` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 4 test/fixture files, +865/-0 lines
+  - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
