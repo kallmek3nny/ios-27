@@ -3,15 +3,15 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 14,
-  "candidate_count": 14,
+  "candidates_checked": 15,
+  "candidate_count": 15,
   "candidates": [
     {
       "branch": "phase23c-objc-native-bridge",
       "sha": "b4fc93ce60972c0a2450c712fb1e9f3af31fd5ab",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
       "pr_number": 94,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -488,6 +488,45 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "phase23d-syscall-mach-bridge-20261029",
+      "sha": "58e7fe1e9a34e4531640bbb7b719c00932c9dc27",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23d-syscall-mach-bridge-20261029",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 19,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 6,
+          "additions": 910,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_23d_free",
+            "ios27_23d_get_stats",
+            "ios27_23d_memory_protect",
+            "ios27_23d_memory_read",
+            "ios27_23d_memory_write",
+            "ios27_23d_new",
+            "ios27_23d_process_create",
+            "ios27_23d_process_destroy",
+            "ios27_23d_seed",
+            "ios27_23d_service_destroy",
+            "ios27_23d_service_grant",
+            "ios27_23d_service_register"
+          ],
+          "example_paths": [
+            "include/ios27/phase23d_bridge.h",
+            "src/phase23d_bridge.c",
+            "tests/phase23d-arm64-client.c",
+            "tests/phase23d-arm64-echo.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -586,7 +625,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase23e/native-app-integration-harness",
@@ -608,6 +647,13 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "phase23d-syscall-mach-bridge-20261029",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase23d-syscall-mach-bridge-20261029",
+        "source_files": 2,
+        "fixture_files": 6,
+        "ci": "not_checked"
       }
     ]
   },
@@ -1460,5 +1506,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:20:31Z"
+  "observed_at": "2026-10-29T21:20:46Z"
 }
