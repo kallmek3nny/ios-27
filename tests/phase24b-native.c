@@ -280,12 +280,91 @@ static void linked_files(int argc, char **argv) {
     }
     puts("phase24b: 6 genuine LLVM-linked Darwin dylibs parsed (not executed)");
 }
+
+static void put32(uint8_t *b, size_t off, uint32_t value) {
+    for (unsigned i = 0; i < 4; ++i)
+        b[off + i] = (uint8_t)(value >> (8u * i));
+}
+static void put64(uint8_t *b, size_t off, uint64_t value) {
+    put32(b, off, (uint32_t)value);
+    put32(b, off + 4, (uint32_t)(value >> 32));
+}
+static void offset_sections(void) {
+    /* Small strictly structured Mach-O fixture with a real 32-bit
+       S_INIT_FUNC_OFFSETS section. This is a parser test, not native code. */
+    uint8_t bytes[1024] = {0};
+    ios27_24b_image image, untouched = {0};
+    mapped m = {0};
+    put32(bytes, 0, 0xfeedfacfu);
+    put32(bytes, 4, 0x0100000cu);
+    put32(bytes, 12, 6);
+    put32(bytes, 16, 2);
+    put32(bytes, 20, 72 + 152);
+    put32(bytes, 32, 0x19);
+    put32(bytes, 36, 72);
+    memcpy(bytes + 40, "__TEXT", 6);
+    put64(bytes, 32 + 24, 0x1000);
+    put64(bytes, 32 + 32, 0x1000);
+    put64(bytes, 32 + 40, 0);
+    put64(bytes, 32 + 48, 512);
+    put32(bytes, 32 + 56, 5);
+    put32(bytes, 32 + 60, 5);
+    size_t data = 32 + 72;
+    put32(bytes, data, 0x19);
+    put32(bytes, data + 4, 152);
+    memcpy(bytes + data + 8, "__DATA", 6);
+    put64(bytes, data + 24, 0x3000);
+    put64(bytes, data + 32, 0x1000);
+    put64(bytes, data + 40, 512);
+    put64(bytes, data + 48, 512);
+    put32(bytes, data + 56, 3);
+    put32(bytes, data + 60, 3);
+    put32(bytes, data + 64, 1);
+    size_t sec = data + 72;
+    memcpy(bytes + sec, "__init_offsets", 14);
+    memcpy(bytes + sec + 16, "__DATA", 6);
+    put64(bytes, sec + 32, 0x3000);
+    put64(bytes, sec + 40, 4);
+    put32(bytes, sec + 48, 512);
+    put32(bytes, sec + 64, 0x16);
+    CHECK(ios27_24b_parse(bytes, sizeof(bytes), &image) == 0);
+    CHECK(image.offset_count == 1 && image.init_count == 0);
+    m.base = 0x3ff0;
+    m.offsets[0] = 0xc;
+    CHECK(ios27_24b_bind(&image, 0x1000, mapped_read, &m) == 0);
+    CHECK(image.init_count == 1 && image.init[0] == 0x200c);
+    put32(bytes, sec + 64, 0x17);
+    image = untouched;
+    CHECK(ios27_24b_parse(bytes, sizeof(bytes), &image) == ENOEXEC);
+    CHECK(memcmp(&untouched, &image, sizeof(image)) == 0);
+    puts("phase24b: __init_offsets valid path and invalid section type");
+}
+static void failing_destructor(void) {
+    ios27_24b_runtime r;
+    ios27_24b_image im[6];
+    ios27_24b_handle h;
+    ios27_24b_snapshot snap;
+    model m;
+    fake_images(im);
+    CHECK(ios27_24b_runtime_init(&r, IOS27_24B_MODELED) == 0);
+    populate(&r, im);
+    reset_log(&m); m.runtime = &r; m.fail_term = 3;
+    CHECK(ios27_24b_open(&r, 5, &h) == 0);
+    CHECK(ios27_24b_ensure(&r, h, callback, NULL, &m) == 0);
+    CHECK(ios27_24b_close(&r, h, callback, &m) == EIO);
+    CHECK(ios27_24b_inspect(&r, 2, &snap) == 0);
+    CHECK(snap.poisoned && snap.state == IOS27_24B_QUARANTINED);
+    CHECK(ios27_24b_runtime_destroy(&r) == EBUSY);
+    puts("phase24b: failing destructor quarantines remainder of graph");
+}
 int main(int argc, char **argv) {
     linked_files(argc, argv);
     relocation();
+    offset_sections();
     stress_graph();
     concurrency();
     failure_cases();
+    failing_destructor();
     puts("phase24b: ALL NATIVE HOST TESTS PASS; DARWIN GUEST CALLBACKS EXECUTED: 0");
     return 0;
 }
