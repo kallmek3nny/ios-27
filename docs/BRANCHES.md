@@ -4,11 +4,18 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **20** · audited base: `1dd112410e43`
+candidate branches with mapped changes: **21** · audited base: `1dd112410e43`
+
+### [phase24d-darwin-services-20261029](https://github.com/kallmek3nny/ios-27/pull/101)
+
+head: `26cfbfabc081` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 10 test/fixture files, +954/-0 lines
+  - candidate declarations: `ios27_24d_free`, `ios27_24d_get_stats`, `ios27_24d_memory_protect`, `ios27_24d_memory_read`, `ios27_24d_memory_write`, `ios27_24d_new`, `ios27_24d_poll_dead`, `ios27_24d_port_allocate`, `ios27_24d_port_destroy`, `ios27_24d_port_grant`, `ios27_24d_process_create`, `ios27_24d_process_destroy`
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
 
-head: `6c969603e635` · ci: **running** · unmerged, not credited.
+head: `6c969603e635` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 11 test/fixture files, +701/-0 lines
 
