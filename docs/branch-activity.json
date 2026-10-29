@@ -7,11 +7,37 @@
   "candidate_count": 21,
   "candidates": [
     {
+      "branch": "phase24c-objc2-typed-metadata-dispatch",
+      "sha": "613c3f589d6329068f741ca2f0b93de273316656",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
+      "pr_number": 100,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 17,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 12,
+          "additions": 834,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase24c_registry.h",
+            "src/phase24c_registry.c",
+            "tests/phase24c-appone.m",
+            "tests/phase24c-appthree.m"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase24d-darwin-services-20261029",
       "sha": "26cfbfabc081ddbe96e596c95ee300da91b9e8be",
       "url": "https://github.com/kallmek3nny/ios-27/pull/101",
       "pr_number": 101,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -41,32 +67,6 @@
             "src/phase24d_services.c",
             "tests/phase24d-arm64-client-echo.c",
             "tests/phase24d-arm64-client-relay.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase24c-objc2-typed-metadata-dispatch",
-      "sha": "6c969603e63556d1dd5eeac24a17596a0fe04dca",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-      "pr_number": 100,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 16,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 11,
-          "additions": 701,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase24c_registry.h",
-            "src/phase24c_registry.c",
-            "tests/phase24c-appone.m",
-            "tests/phase24c-appthree.m"
           ]
         }
       ]
@@ -823,17 +823,17 @@
     ],
     "unclassified": [
       {
+        "branch": "phase24c-objc2-typed-metadata-dispatch",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/100",
+        "source_files": 2,
+        "fixture_files": 12,
+        "ci": "passing_checks"
+      },
+      {
         "branch": "phase24d-darwin-services-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/101",
         "source_files": 2,
         "fixture_files": 10,
-        "ci": "running"
-      },
-      {
-        "branch": "phase24c-objc2-typed-metadata-dispatch",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-        "source_files": 2,
-        "fixture_files": 11,
         "ci": "passing_checks"
       },
       {
@@ -1750,5 +1750,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T22:01:49Z"
+  "observed_at": "2026-10-29T22:03:30Z"
 }

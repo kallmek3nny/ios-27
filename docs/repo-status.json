@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 100,
+      "branch": "phase24c-objc2-typed-metadata-dispatch",
+      "sha": "613c3f589d6329068f741ca2f0b93de273316656",
+      "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
+      "updated_at": "2026-10-29T22:02:50Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 101,
       "branch": "phase24d-darwin-services-20261029",
       "sha": "26cfbfabc081ddbe96e596c95ee300da91b9e8be",
       "title": "phase 24d: isolated Darwin process syscalls, Mach IPC, and native-linked fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/101",
-      "updated_at": "2026-10-29T22:01:19Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 100,
-      "branch": "phase24c-objc2-typed-metadata-dispatch",
-      "sha": "6c969603e63556d1dd5eeac24a17596a0fe04dca",
-      "title": "phase24c: bounded compiler-produced objc2 metadata and typed method resolution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/100",
-      "updated_at": "2026-10-29T21:58:31Z",
+      "updated_at": "2026-10-29T22:02:07Z",
       "status": "unmerged: not counted"
     },
     {
@@ -403,5 +403,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T22:01:45Z"
+  "observed_at": "2026-10-29T22:03:27Z"
 }
