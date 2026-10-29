@@ -177,7 +177,7 @@ def main():
         raise ValueError("--runs must be 1..200")
     t0 = time.monotonic()
     clang = shutil.which("clang")
-    ld = shutil.which("ld64.lld")
+    ld = next((shutil.which(name) for name in\n               ("ld64.lld", "ld64.lld-20", "ld64.lld-19",\n                "ld64.lld-18", "ld64.lld-17", "ld64.lld-16")\n               if shutil.which(name)), None)
     cc = shutil.which("clang" if args.sanitizers else os.environ.get("CC", "cc"))
     if not clang or not ld or not cc:
         raise RuntimeError("clang, ld64.lld and a host C compiler required")
