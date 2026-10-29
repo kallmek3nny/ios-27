@@ -9,6 +9,7 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
 1. **bounded dependency planning**: up to `IOS27_IMAGES_MAX` images;
    exact LC_LOAD_DYLIB count/order matching, name uniqueness, duplicate-edge
    validation, whole-catalog cycle detection, stable dependency-first order,
+   canonical guest-path matching with inherited `@rpath` search contexts,
    and structured diagnostics with image and dependency indices. invalid
    inputs never yield a graph.
 2. **cross-image lookup**: real export-trie metadata; explicit positive
@@ -33,7 +34,9 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
 - `tests/phase22c-graph.c`: linked-format synthetic ARM64 Mach-O images
   with a real fixup pointer, dependency ordering, actual mapped export
   lookup, invalid import rollback, resource pins, invalid catalog rejection,
-  cycle rejection, and 50,000 live-graph acquire/release operations.
+  cycle rejection, 64-slot lease exhaustion, initializers' rollback, 2,500
+  seeded malformed graph preflight/load mutations, and 50,000
+  live-graph acquire/release operations.
 - `tests/phase22c-fixture-{provider,consumer}.c`: original-source,
   SDK-free clang-produced arm64 Darwin Mach-O objects with an external
   function reference; no proprietary Apple SDK or framework dependency.
@@ -41,10 +44,23 @@ mach-o parser, images loader, classic binds, chained fixups and export trie are
   performs 40,000 deterministic image mutations, and, when a functional
   Mach-O `ld64.lld` is present, exercises compiled MH_DYLIB loading and
   unloading. unsupported linked fixtures are an explicit failure if linked.
+- `tests/phase22c-linked.c`: independent 4-image native integration using
+  existing read-only `tools/phase19b-build.py` compiler-produced dylibs;
+  validates inherited `@rpath`, real cross-library symbol lookup, ARM64
+  execution of trusted original-source code on native Linux ARM64, ownership
+  and 32 clean load/unload cycles on both target architectures.
 - `tools/phase22c-test.sh`: bounded configure/build/test and optional
   sanitizer run. dedicated PR CI includes x86_64 and ARM64 Linux runners,
   with and without ASAN/UBSAN. use `IOS27_PHASE22C_SANITIZE=1` locally
-  for sanitizer coverage.
+  for sanitizer coverage. PR CI installs a functional open-source linker
+  and sets `IOS27_PHASE22C_REQUIRE_LINKED=1`, so linked fixture failures
+  fail the job instead of being silently skipped.
+
+as verified on head `c432c865d43bf41e0262da77e7631d2da0f00613`:
+CI run `40793418699` had **four of four successful** independent jobs,
+covering x86_64 and native ARM64 Linux with and without ASAN/UBSAN;
+the native ARM64 log reports genuine 4-dylib execution and 32 teardowns.
+this proves the bounded freestanding fixtures, not general-purpose dyld.
 
 the linked-dylib stage prints **NOT VERIFIED** when the local linker is
 missing or is a stub. this cannot be counted as a successful linked
@@ -70,6 +86,11 @@ native multi-library execution.
   release leases and retry to prevent invalidating mapped code.
 
 ## completion criteria and time
+
+this PR remains **draft** pending the required genuine three-hour active
+engineering duration and a fresh frozen-head main lease: `main` moved after
+this work branched from `e8124a374e04114c218028d82ce300ab70d9631e`.
+CI green alone is insufficient to override those constraints.
 
 four implementation areas are present in the branch; they are **not**
 evidence of 3+ hours of continuous engineering. exact active human/agent
