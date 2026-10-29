@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **8** · audited base: `9193cdee3bd7`
+candidate branches with mapped changes: **7** · audited base: `9193cdee3bd7`
 
 ### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
 
@@ -53,14 +53,6 @@ head: `b552d8499416` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 6 source files, 17 test/fixture files, +2688/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_create_apple_lp64_attrs`, `ios27_21i_create_checked`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_dispatch_arm64`, `ios27_21i_dispatch_arm64_n`, `ios27_21i_errno_to_darwin`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
-
-### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
-
-head: `9ef58a1bf4cc` · ci: **passing_checks** · unmerged, not credited.
-
-- **libsystem_pthread**: 2 source files, 12 test/fixture files, +2487/-0 lines
-  - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
-- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

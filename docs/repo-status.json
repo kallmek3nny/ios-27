@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 88,
+      "branch": "fix/track-all-phase21-22-agent-pushes",
+      "sha": "214c3ec92fd658a0d0801963d82c0cd06b661028",
+      "title": "fix: track all phase21/22 agent pushes and classify subsystem diffs",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/88",
+      "updated_at": "2026-10-29T00:47:27Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 87,
       "branch": "phase22e-mach-ipc-mig",
       "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
@@ -69,15 +78,6 @@
       "title": "phase 21i: bounded ARM64 Darwin pthread guest ABI dispatch and Mach-O relocation checks",
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:47:23Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 73,
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
-      "title": "phase 21d: fair reader-writer lock and safe once initialization",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
-      "updated_at": "2026-10-28T20:38:04Z",
       "status": "unmerged: not counted"
     }
   ],
@@ -142,9 +142,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 39,
+    "branches_scanned": 40,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:41:17Z"
+  "observed_at": "2026-10-29T00:48:05Z"
 }
