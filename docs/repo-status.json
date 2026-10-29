@@ -9,21 +9,39 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 83,
-      "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "d34a167c242f5c4c0bae8bcd52abc85d1380273b",
-      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:19:40Z",
+      "number": 84,
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "a3a430d0abe491cb5621049465bc7ae77d7649f0",
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "updated_at": "2026-10-29T00:20:35Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 84,
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "550b2d785a8ec214ca7b1888ed9bf15e56064938",
-      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "updated_at": "2026-10-29T00:19:37Z",
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "c432c865d43bf41e0262da77e7631d2da0f00613",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:20:29Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 86,
+      "branch": "phase22b-darwin-bsd-capability-20261028",
+      "sha": "e909e8faed23689941bd13caebc97e7b3e5d6c69",
+      "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+      "updated_at": "2026-10-29T00:20:23Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 85,
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "5da9a7f7583cbf2ce8396abff7e7a3e34c05e379",
+      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "updated_at": "2026-10-29T00:20:12Z",
       "status": "unmerged: not counted"
     },
     {
@@ -33,24 +51,6 @@
       "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/87",
       "updated_at": "2026-10-29T00:19:36Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 85,
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "9f8b736998f96fae4f5e4d66b39428a4ba846c12",
-      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "updated_at": "2026-10-29T00:19:15Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 86,
-      "branch": "phase22b-darwin-bsd-capability-20261028",
-      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
-      "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
-      "updated_at": "2026-10-29T00:19:14Z",
       "status": "unmerged: not counted"
     },
     {
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:20:08Z"
+  "observed_at": "2026-10-29T00:20:41Z"
 }
