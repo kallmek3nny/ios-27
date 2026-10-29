@@ -6,11 +6,17 @@
 
 candidate branches with mapped changes: **9** · audited base: `9193cdee3bd7`
 
+### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
+
+head: `ad180562e914` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 7 test/fixture files, +1448/-0 lines
+
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `5e23d4827429` · ci: **running** · unmerged, not credited.
+head: `ed94ef2111e2` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 5 test/fixture files, +1301/-0 lines
+- **unclassified**: 2 source files, 5 test/fixture files, +1302/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
 
 ### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
@@ -19,12 +25,6 @@ head: `7e29a48f2fd6` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 3 source files, 9 test/fixture files, +1109/-0 lines
   - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_fail_stage`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`
-
-### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
-
-head: `ac95c1b75b68` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +1381/-0 lines
 
 ### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/pull/86)
 

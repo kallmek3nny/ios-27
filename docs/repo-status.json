@@ -9,12 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 87,
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
+      "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "updated_at": "2026-10-29T00:23:32Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 83,
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "5e23d48274291f89aafd5e936cd59d9bc14cac4d",
+      "sha": "ed94ef2111e2311cac5c9311e763986f237bb239",
       "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:23:01Z",
+      "updated_at": "2026-10-29T00:23:20Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +33,6 @@
       "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/85",
       "updated_at": "2026-10-29T00:22:45Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 87,
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "ac95c1b75b680c918c49e072ac283dfdbbd1a267",
-      "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
-      "updated_at": "2026-10-29T00:21:58Z",
       "status": "unmerged: not counted"
     },
     {
@@ -156,5 +156,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:23:14Z"
+  "observed_at": "2026-10-29T00:23:38Z"
 }
