@@ -2,12 +2,30 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "0d9edb176c31d7afad3b35c693415b3b140cc4c3",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/0d9edb176c31d7afad3b35c693415b3b140cc4c3",
-    "committed_at": "2026-10-28T23:24:24Z"
+    "sha": "9193cdee3bd7b21e95b70ac024b3efbd764e64c5",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/9193cdee3bd7b21e95b70ac024b3efbd764e64c5",
+    "committed_at": "2026-10-29T00:22:28Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
+    {
+      "number": 85,
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "7e29a48f2fd65611aa586af647bd15cd030ee370",
+      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "updated_at": "2026-10-29T00:22:45Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 87,
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "ac95c1b75b680c918c49e072ac283dfdbbd1a267",
+      "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "updated_at": "2026-10-29T00:21:58Z",
+      "status": "unmerged: not counted"
+    },
     {
       "number": 83,
       "branch": "agent/phase22c-transactional-dyld-graph",
@@ -24,33 +42,6 @@
       "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
       "url": "https://github.com/kallmek3nny/ios-27/pull/86",
       "updated_at": "2026-10-29T00:21:40Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 85,
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "51ac77fa8f9c4f603590c2134a5536877845b32b",
-      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "updated_at": "2026-10-29T00:21:10Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 84,
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
-      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "updated_at": "2026-10-29T00:20:42Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 87,
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
-      "title": "phase 22e: isolated bounded Mach IPC, MIG-style services, and native stress",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
-      "updated_at": "2026-10-29T00:19:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -79,29 +70,36 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/80",
       "updated_at": "2026-10-28T21:47:23Z",
       "status": "unmerged: not counted"
+    },
+    {
+      "number": 73,
+      "branch": "feat/phase21d-fair-rwlock-once",
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
+      "title": "phase 21d: fair reader-writer lock and safe once initialization",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "updated_at": "2026-10-28T20:38:04Z",
+      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "feat/phase21d-fair-rwlock-once",
-      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
-      "ahead_by": 2,
-      "behind_by": 36,
-      "last_commit_at": "2026-10-28T20:38:00Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once",
-      "status": "unmerged: not counted"
-    },
-    {
       "branch": "phase21a/darwin-pthread-abi-bridge",
       "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
       "ahead_by": 90,
-      "behind_by": 123,
+      "behind_by": 164,
       "last_commit_at": "2026-10-28T20:27:16Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
       "status": "unmerged: not counted"
     }
   ],
   "recent_merged_pull_requests": [
+    {
+      "number": 84,
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "head_sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
+      "merged_at": "2026-10-29T00:22:29Z"
+    },
     {
       "number": 82,
       "title": "fix: revive broken progress refresh and show real merged agent development prominently",
@@ -150,13 +148,6 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/72",
       "head_sha": "86645688a035874587739102189f9a8014a6e3e1",
       "merged_at": "2026-10-28T19:56:54Z"
-    },
-    {
-      "number": 71,
-      "title": "phase21b: reaper-backed Darwin-oriented pthread lifecycle foundation",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
-      "head_sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
-      "merged_at": "2026-10-28T19:54:07Z"
     }
   ],
   "scan_limits": {
@@ -165,5 +156,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:21:57Z"
+  "observed_at": "2026-10-29T00:22:51Z"
 }

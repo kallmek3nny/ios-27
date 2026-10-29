@@ -4,11 +4,24 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **10** · audited base: `0d9edb176c31`
+candidate branches with mapped changes: **9** · audited base: `9193cdee3bd7`
+
+### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
+
+head: `7e29a48f2fd6` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 3 source files, 9 test/fixture files, +1109/-0 lines
+  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_fail_stage`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`
+
+### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
+
+head: `ac95c1b75b68` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +1381/-0 lines
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `f2e9c8d8d15d` · ci: **running** · unmerged, not credited.
+head: `f2e9c8d8d15d` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +1197/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
@@ -19,25 +32,6 @@ head: `e909e8faed23` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +642/-0 lines
   - candidate declarations: `ios27_22b_advance`, `ios27_22b_capture`, `ios27_22b_create`, `ios27_22b_destroy`, `ios27_22b_dispatch`, `ios27_22b_errno`, `ios27_22b_interrupt`, `ios27_22b_metadata_fd`, `ios27_22b_preopen`, `ios27_22b_set_clock`, `ios27_22b_stdin`
-
-### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
-
-head: `51ac77fa8f9c` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 8 test/fixture files, +1060/-0 lines
-  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_fail_stage`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`
-
-### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
-
-head: `94c1c84782b4` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 4 source files, 4 test/fixture files, +1334/-0 lines
-
-### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
-
-head: `387d873308d0` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +1381/-0 lines
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -60,7 +54,7 @@ head: `b552d8499416` · ci: **passing_checks** · unmerged, not credited.
 - **libsystem_pthread**: 6 source files, 17 test/fixture files, +2688/-0 lines
   - candidate declarations: `ios27_21i_create`, `ios27_21i_create_apple_lp64_attrs`, `ios27_21i_create_checked`, `ios27_21i_destroy`, `ios27_21i_dispatch`, `ios27_21i_dispatch_arm64`, `ios27_21i_dispatch_arm64_n`, `ios27_21i_errno_to_darwin`, `ios27_21i_get_stats`, `ios27_21i_lookup`, `ios27_21i_verify`
 
-### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/tree/feat%2Fphase21d-fair-rwlock-once)
+### [feat/phase21d-fair-rwlock-once](https://github.com/kallmek3nny/ios-27/pull/73)
 
 head: `9ef58a1bf4cc` · ci: **passing_checks** · unmerged, not credited.
 
@@ -80,6 +74,12 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
 recent merged PRs with source changes: **7**
+
+### [merged PR #84](https://github.com/kallmek3nny/ios-27/pull/84)
+
+merged: 2026-10-29T00:22:29Z · source changes awaiting function-level audit.
+
+- **unclassified**: 4 source files, 4 fixtures, +1334/-0 lines
 
 ### [merged PR #81](https://github.com/kallmek3nny/ios-27/pull/81)
 
@@ -120,13 +120,6 @@ merged: 2026-10-28T19:56:54Z · source changes awaiting function-level audit.
 
 - **libsystem_pthread**: 2 source files, 4 fixtures, +975/-0 lines
   - added declarations: `ios27_21e_attach`, `ios27_21e_cancel_checkpoint`, `ios27_21e_cancel_register`, `ios27_21e_cancel_request`, `ios27_21e_cancel_setstate`, `ios27_21e_cancel_unregister`, `ios27_21e_cleanup_pop`, `ios27_21e_cleanup_push`, `ios27_21e_cleanup_unwind`, `ios27_21e_create`, `ios27_21e_destroy`, `ios27_21e_getspecific`
-
-### [merged PR #71](https://github.com/kallmek3nny/ios-27/pull/71)
-
-merged: 2026-10-28T19:54:07Z · source changes awaiting function-level audit.
-
-- **libsystem_pthread**: 2 source files, 3 fixtures, +774/-0 lines
-  - added declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
 
 ## verification policy
 
