@@ -43,6 +43,12 @@ int phase22d_register_compiled(phase22d_runtime *r,
     for (size_t i = 0; i < count; ++i) {
         const phase22d_class_spec *binding = &trusted[i];
         const ios27_objc_metadata_class *found = NULL;
+        /* The legacy parser exposes instance methods only. Never present an
+         * uninspected class-method table as metadata-verified. */
+        if (binding->class_count || binding->class_methods) {
+            (void)reject(diagnostic, cap, "class method metadata unavailable");
+            goto done;
+        }
         if (!binding->name) {
             (void)reject(diagnostic, cap, "null class binding name"); goto done;
         }
