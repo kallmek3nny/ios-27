@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase23e/native-app-integration-harness",
-      "sha": "90d13d4307ef84484ef1e135e72f4997f5d5c8a5",
+      "sha": "ceaa664632b3a49df1c4fd013f10db5527caca4f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/93",
       "pr_number": 93,
-      "ci": "passing_checks",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -20,7 +20,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 3,
-          "additions": 920,
+          "additions": 960,
           "deletions": 0,
           "symbols_preview": [
             "ios27_23e_application_probe",
@@ -31,6 +31,68 @@
             "src/phase23e_harness.c",
             "tests/phase23e-check.c",
             "tests/phase23e-fixtures.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase23b-lifecycle-20261029",
+      "sha": "dbb5f523978df5b3cf6b476d14bdfd498e886250",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
+      "pr_number": 96,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 9,
+          "additions": 962,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_23b_add",
+            "ios27_23b_bind",
+            "ios27_23b_close",
+            "ios27_23b_ensure",
+            "ios27_23b_open",
+            "ios27_23b_parse",
+            "ios27_23b_runtime_destroy",
+            "ios27_23b_runtime_init",
+            "ios27_23b_snapshot"
+          ],
+          "example_paths": [
+            "include/ios27/phase23b_lifecycle.h",
+            "src/phase23b_lifecycle.c",
+            "tests/phase23b-lib0.c",
+            "tests/phase23b-lib1.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "c065254d066b2cadceaaee837ac517aacbfbd693",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
+      "pr_number": 94,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 6,
+          "additions": 671,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase23c_bridge.h",
+            "src/phase23c_bridge.c",
+            "tests/phase23c-category.m",
+            "tests/phase23c-other.m"
           ]
         }
       ]
@@ -66,32 +128,6 @@
             "src/phase23a_loader.c",
             "tests/phase23a-integration.c",
             "tools/phase23a-verify.py"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "393c1b85a9639525e1b57320cd3be458782f027c",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-      "pr_number": 94,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 11,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 6,
-          "additions": 671,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase23c_bridge.h",
-            "src/phase23c_bridge.c",
-            "tests/phase23c-category.m",
-            "tests/phase23c-other.m"
           ]
         }
       ]
@@ -527,32 +563,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "c065254d066b2cadceaaee837ac517aacbfbd693",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 6,
-          "additions": 671,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase23c_bridge.h",
-            "src/phase23c_bridge.c",
-            "tests/phase23c-category.m",
-            "tests/phase23c-other.m"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -651,20 +661,27 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/93",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "passing_checks"
+        "ci": "not_checked"
       },
       {
-        "branch": "phase23a-incremental-dyld-namespaces",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+        "branch": "agent/phase23b-lifecycle-20261029",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/96",
         "source_files": 2,
-        "fixture_files": 2,
-        "ci": "passing_checks"
+        "fixture_files": 9,
+        "ci": "running"
       },
       {
         "branch": "phase23c-objc-native-bridge",
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
+        "ci": "running"
+      },
+      {
+        "branch": "phase23a-incremental-dyld-namespaces",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/92",
+        "source_files": 2,
+        "fixture_files": 2,
         "ci": "passing_checks"
       },
       {
@@ -680,13 +697,6 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "phase23c-objc-native-bridge",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge",
-        "source_files": 2,
-        "fixture_files": 6,
-        "ci": "not_checked"
       }
     ]
   },
@@ -1539,5 +1549,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:22:11Z"
+  "observed_at": "2026-10-29T21:22:47Z"
 }

@@ -8,10 +8,23 @@ candidate branches with mapped changes: **16** · audited base: `1dd112410e43`
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
-head: `90d13d4307ef` · ci: **passing_checks** · unmerged, not credited.
+head: `ceaa664632b3` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +920/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +960/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
+
+### [agent/phase23b-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/96)
+
+head: `dbb5f523978d` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 9 test/fixture files, +962/-0 lines
+  - candidate declarations: `ios27_23b_add`, `ios27_23b_bind`, `ios27_23b_close`, `ios27_23b_ensure`, `ios27_23b_open`, `ios27_23b_parse`, `ios27_23b_runtime_destroy`, `ios27_23b_runtime_init`, `ios27_23b_snapshot`
+
+### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
+
+head: `c065254d066b` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
@@ -19,12 +32,6 @@ head: `280b1daed6f8` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +991/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
-
-### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
-
-head: `393c1b85a963` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 
 ### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
 
@@ -107,12 +114,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/tree/phase23c-objc-native-bridge)
-
-head: `c065254d066b` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 6 test/fixture files, +671/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
