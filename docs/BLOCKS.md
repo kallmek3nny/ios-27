@@ -49,6 +49,7 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `2cd40791b17a`
 
+- [PR #89](https://github.com/kallmek3nny/ios-27/pull/89) · incoming, not counted
 - [PR #87](https://github.com/kallmek3nny/ios-27/pull/87) · incoming, not counted
 - [PR #83](https://github.com/kallmek3nny/ios-27/pull/83) · incoming, not counted
 - [PR #85](https://github.com/kallmek3nny/ios-27/pull/85) · incoming, not counted
@@ -56,15 +57,15 @@ main source: `2cd40791b17a`
 - [PR #77](https://github.com/kallmek3nny/ios-27/pull/77) · incoming, not counted
 - [PR #78](https://github.com/kallmek3nny/ios-27/pull/78) · incoming, not counted
 - [PR #80](https://github.com/kallmek3nny/ios-27/pull/80) · incoming, not counted
-- [PR #73](https://github.com/kallmek3nny/ios-27/pull/73) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 10 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 11 active candidate(s) with recognized code changes.
 
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
+- **mach-o parser and native loader**: 1 unmerged candidate branch(es), not counted
 - **dyld / image graph**: 1 unmerged candidate branch(es), not counted
 - **mach ipc model**: 1 unmerged candidate branch(es), not counted
 - **bsd syscall boundary**: 1 unmerged candidate branch(es), not counted

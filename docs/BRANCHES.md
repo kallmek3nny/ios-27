@@ -4,7 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **10** · audited base: `2cd40791b17a`
+candidate branches with mapped changes: **11** · audited base: `2cd40791b17a`
+
+### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
+
+head: `6ca4a3188311` · ci: **passing_checks** · unmerged, not credited.
+
+- **mach-o parser and native loader**: 0 source files, 2 test/fixture files, +21/-41 lines
+- **unclassified**: 0 source files, 2 test/fixture files, +4/-4 lines
 
 ### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
 

@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 89,
+      "branch": "fix/external-build-fixtures",
+      "sha": "6ca4a3188311207a6196b5adeabcb24110fef7cd",
+      "title": "fix: support external build directories for Darwin startup tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/89",
+      "updated_at": "2026-10-29T10:16:33Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 87,
       "branch": "phase22e-mach-ipc-mig",
       "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
@@ -304,5 +313,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T00:49:17Z"
+  "observed_at": "2026-10-29T10:17:15Z"
 }
