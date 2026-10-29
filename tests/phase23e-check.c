@@ -105,6 +105,9 @@ int main(int argc, char **argv) {
     uint32_t rng = UINT32_C(0x23e1029);
     unsigned runs;
     uint64_t verified = 0u;
+#if !defined(__aarch64__)
+    (void)verified;
+#endif
     if (argc != 11) {
         fputs("usage: phase23e-check RUNS BASE MATH LOGIC STATE PIPELINE "
               "CTOR APP_CALC APP_STATE APP_PIPELINE\n", stderr);
