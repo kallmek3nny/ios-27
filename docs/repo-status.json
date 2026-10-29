@@ -11,19 +11,19 @@
     {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
-      "sha": "91ea9d21113e271d21ec7b193f9d0275ad570a29",
+      "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
       "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:54:11Z",
+      "updated_at": "2026-10-29T21:55:02Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 99,
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "c7be84a7721c2defa8a36ad2b0d506c6eca97835",
+      "sha": "3ac6adeb00e9df5fedc54bca8952f905ad8265e5",
       "title": "phase24b: bounded ARM64 Darwin image lifecycle and compiler-linked stress harness",
       "url": "https://github.com/kallmek3nny/ios-27/pull/99",
-      "updated_at": "2026-10-29T21:53:53Z",
+      "updated_at": "2026-10-29T21:54:53Z",
       "status": "unmerged: not counted"
     },
     {
@@ -394,5 +394,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:54:18Z"
+  "observed_at": "2026-10-29T21:55:08Z"
 }

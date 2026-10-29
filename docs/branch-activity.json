@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase24a-global-dyld-identity",
-      "sha": "91ea9d21113e271d21ec7b193f9d0275ad570a29",
+      "sha": "982d7575cdc5cbe4dcd48024452bacf77129d5b9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "pr_number": 97,
-      "ci": "passing_checks",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -44,10 +44,10 @@
     },
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "c7be84a7721c2defa8a36ad2b0d506c6eca97835",
+      "sha": "3ac6adeb00e9df5fedc54bca8952f905ad8265e5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/99",
       "pr_number": 99,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 12,
       "possibly_truncated": false,
@@ -56,7 +56,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 8,
-          "additions": 1228,
+          "additions": 1307,
           "deletions": 0,
           "symbols_preview": [
             "ios27_24b_bind",
@@ -788,14 +788,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/97",
         "source_files": 2,
         "fixture_files": 2,
-        "ci": "passing_checks"
+        "ci": "not_checked"
       },
       {
         "branch": "agent/phase24b-native-lifecycle-20261029",
         "url": "https://github.com/kallmek3nny/ios-27/pull/99",
         "source_files": 2,
         "fixture_files": 8,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
@@ -1704,5 +1704,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:54:56Z"
+  "observed_at": "2026-10-29T21:55:11Z"
 }
