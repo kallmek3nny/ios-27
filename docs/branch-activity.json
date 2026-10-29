@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "phase24a-global-dyld-identity",
-      "sha": "d51fb9f15c3cece94e58339830e53a3cdedd4284",
+      "sha": "349de82ee74530d91921b487e7480de43909f94f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "pr_number": 97,
       "ci": "running",
@@ -47,7 +47,7 @@
       "sha": "55463f985c2de57e0b0a6360705a538bdb0d22ab",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "pr_number": 98,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -56,7 +56,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 3,
-          "additions": 1055,
+          "additions": 1056,
           "deletions": 0,
           "symbols_preview": [
             "ios27_24e_enter_main",
@@ -631,12 +631,12 @@
     },
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "26510b3e3e05811ae5a9478e1667938d9dfb1323",
+      "sha": "0b2f4c19144b2ce84b7ba8de7badb23a8018e014",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 18,
+      "files_checked": 19,
       "possibly_truncated": false,
       "groups": [
         {
@@ -769,7 +769,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase23c-objc-native-bridge",
@@ -1671,5 +1671,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:50:52Z"
+  "observed_at": "2026-10-29T21:51:12Z"
 }

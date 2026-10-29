@@ -11,10 +11,10 @@
     {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
-      "sha": "d51fb9f15c3cece94e58339830e53a3cdedd4284",
+      "sha": "349de82ee74530d91921b487e7480de43909f94f",
       "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
-      "updated_at": "2026-10-29T21:50:30Z",
+      "updated_at": "2026-10-29T21:50:56Z",
       "status": "unmerged: not counted"
     },
     {
@@ -174,10 +174,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "26510b3e3e05811ae5a9478e1667938d9dfb1323",
-      "ahead_by": 44,
+      "sha": "0b2f4c19144b2ce84b7ba8de7badb23a8018e014",
+      "ahead_by": 45,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:50:32Z",
+      "last_commit_at": "2026-10-29T21:50:59Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "status": "unmerged: not counted"
     }
@@ -386,5 +386,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:50:47Z"
+  "observed_at": "2026-10-29T21:51:07Z"
 }

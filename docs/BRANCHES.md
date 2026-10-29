@@ -8,16 +8,16 @@ candidate branches with mapped changes: **19** · audited base: `1dd112410e43`
 
 ### [phase24a-global-dyld-identity](https://github.com/kallmek3nny/ios-27/pull/97)
 
-head: `d51fb9f15c3c` · ci: **running** · unmerged, not credited.
+head: `349de82ee745` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +912/-0 lines
   - candidate declarations: `ios27_phase24a_close`, `ios27_phase24a_create`, `ios27_phase24a_destroy`, `ios27_phase24a_flat_symbol`, `ios27_phase24a_open`, `ios27_phase24a_refs`, `ios27_phase24a_release`, `ios27_phase24a_stats_read`, `ios27_phase24a_symbol`
 
 ### [phase24e-native-application-startup](https://github.com/kallmek3nny/ios-27/pull/98)
 
-head: `55463f985c2d` · ci: **running** · unmerged, not credited.
+head: `55463f985c2d` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +1055/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +1056/-0 lines
   - candidate declarations: `ios27_24e_enter_main`, `ios27_24e_run`
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
@@ -131,7 +131,7 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 ### [agent/phase24b-native-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029)
 
-head: `26510b3e3e05` · ci: **not_checked** · unmerged, not credited.
+head: `0b2f4c19144b` · ci: **not_checked** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 8 test/fixture files, +1213/-0 lines
   - candidate declarations: `ios27_24b_bind`, `ios27_24b_close`, `ios27_24b_ensure`, `ios27_24b_inspect`, `ios27_24b_open`, `ios27_24b_parse`, `ios27_24b_register`, `ios27_24b_runtime_destroy`, `ios27_24b_runtime_init`
