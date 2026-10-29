@@ -11,7 +11,7 @@
       "sha": "872607e045f985b00329b7a98208cf88b713dfc5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/98",
       "pr_number": 98,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -631,12 +631,12 @@
     },
     {
       "branch": "agent/phase24b-native-lifecycle-20261029",
-      "sha": "1f1ac111cefc5312313e9812b9439ba8d45afc9a",
+      "sha": "9cb878ef8a055a86cf99eedb7c6e25d6715ae632",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase24b-native-lifecycle-20261029",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
+      "files_checked": 20,
       "possibly_truncated": false,
       "groups": [
         {
@@ -762,7 +762,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24a-global-dyld-identity",
@@ -1671,5 +1671,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T21:52:12Z"
+  "observed_at": "2026-10-29T21:52:27Z"
 }
