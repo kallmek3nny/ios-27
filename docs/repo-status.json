@@ -11,10 +11,10 @@
     {
       "number": 84,
       "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "a3a430d0abe491cb5621049465bc7ae77d7649f0",
+      "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
       "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "updated_at": "2026-10-29T00:20:35Z",
+      "updated_at": "2026-10-29T00:20:42Z",
       "status": "unmerged: not counted"
     },
     {
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:20:41Z"
+  "observed_at": "2026-10-29T00:21:09Z"
 }

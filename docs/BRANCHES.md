@@ -8,29 +8,29 @@ candidate branches with mapped changes: **10** · audited base: `0d9edb176c31`
 
 ### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
 
-head: `a3a430d0abe4` · ci: **running** · unmerged, not credited.
+head: `94c1c84782b4` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 4 source files, 4 test/fixture files, +1327/-0 lines
+- **unclassified**: 4 source files, 4 test/fixture files, +1334/-0 lines
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
-head: `c432c865d43b` · ci: **running** · unmerged, not credited.
+head: `c432c865d43b` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +1197/-0 lines
   - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
 
 ### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/pull/86)
 
-head: `e909e8faed23` · ci: **running** · unmerged, not credited.
+head: `e909e8faed23` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +642/-0 lines
   - candidate declarations: `ios27_22b_advance`, `ios27_22b_capture`, `ios27_22b_create`, `ios27_22b_destroy`, `ios27_22b_dispatch`, `ios27_22b_errno`, `ios27_22b_interrupt`, `ios27_22b_metadata_fd`, `ios27_22b_preopen`, `ios27_22b_set_clock`, `ios27_22b_stdin`
 
 ### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
 
-head: `5da9a7f7583c` · ci: **running** · unmerged, not credited.
+head: `5da9a7f7583c` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 3 source files, 7 test/fixture files, +1015/-0 lines
+- **unclassified**: 3 source files, 8 test/fixture files, +1060/-0 lines
   - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_fail_stage`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`
 
 ### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
