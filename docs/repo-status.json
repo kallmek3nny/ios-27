@@ -9,12 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 85,
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "9f8b736998f96fae4f5e4d66b39428a4ba846c12",
+      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "updated_at": "2026-10-29T00:19:15Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 86,
+      "branch": "phase22b-darwin-bsd-capability-20261028",
+      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
+      "title": "phase 22b: bounded BSD syscall adapter and capability fd stress",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+      "updated_at": "2026-10-29T00:19:14Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 83,
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "e77d0883538f8b69af4e79609c9e54bc127aca35",
+      "sha": "df1d28dcb1d4da288b633d770a4daf058698dbd6",
       "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-      "updated_at": "2026-10-29T00:18:53Z",
+      "updated_at": "2026-10-29T00:19:08Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,15 +42,6 @@
       "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "updated_at": "2026-10-29T00:18:41Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 85,
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "fc79c2a82bba6cc8596106de4e12c1053d179364",
-      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
-      "updated_at": "2026-10-29T00:18:20Z",
       "status": "unmerged: not counted"
     },
     {
@@ -70,34 +79,25 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/73",
       "updated_at": "2026-10-28T20:38:04Z",
       "status": "unmerged: not counted"
-    },
-    {
-      "number": 69,
-      "branch": "phase21a/darwin-pthread-abi-bridge",
-      "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
-      "title": "phase21a: bounded Darwin pthread LP64 ABI bridge and cross-arch tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
-      "updated_at": "2026-10-28T20:27:18Z",
-      "status": "unmerged: not counted"
     }
   ],
   "ahead_branches": [
     {
-      "branch": "phase22b-darwin-bsd-capability-20261028",
-      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
-      "ahead_by": 13,
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "387d873308d0d8d3f78a688b6bbe44882bf3120f",
+      "ahead_by": 2,
       "behind_by": 0,
-      "last_commit_at": "2026-10-29T00:18:58Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22b-darwin-bsd-capability-20261028",
+      "last_commit_at": "2026-10-29T00:19:22Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
       "status": "unmerged: not counted"
     },
     {
-      "branch": "phase22e-mach-ipc-mig",
-      "sha": "e8124a374e04114c218028d82ce300ab70d9631e",
-      "ahead_by": 1,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-28T23:25:02Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
+      "branch": "phase21a/darwin-pthread-abi-bridge",
+      "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
+      "ahead_by": 90,
+      "behind_by": 123,
+      "last_commit_at": "2026-10-28T20:27:16Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge",
       "status": "unmerged: not counted"
     }
   ],
@@ -165,5 +165,5 @@
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-29T00:19:10Z"
+  "observed_at": "2026-10-29T00:19:38Z"
 }
