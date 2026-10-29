@@ -118,9 +118,19 @@ def main():
         stub = out / (name + ".tbd")
         make_stub(stub, name, exps[name])
         stubs[name] = stub
+    # Darwin normally resolves dyld_stub_binder through libSystem. The
+    # SDK-free fixture has no libSystem binary: the local build-time-only
+    # TAPI declaration lets LLVM generate real Mach-O imports without pulling
+    # proprietary system libraries or claiming that dyld exists here.
+    binder = out / "phase23d-system-binder.tbd"
+    binder.write_text("--- !tapi-tbd-v3\narchs: [ arm64 ]\nplatform: macosx\n"
+                      "install-name: '/usr/lib/libSystem.B.dylib'\n"
+                      "current-version: 1.0.0\ncompatibility-version: 1.0.0\n"
+                      "exports:\n  - archs: [ arm64 ]\n"
+                      "    symbols: [ _dyld_stub_binder ]\n...\n", encoding="ascii")
     executable = out / "phase23d-client"
-    link(ld, ["-e", "_phase23d_start", "-o", executable], out / "client.o",
-         [stubs[n] for n in ("echo", "sum", "relay")])
+    link(ld, ["-fixup_chains", "-e", "_phase23d_start", "-o", executable], out / "client.o",
+         [stubs[n] for n in ("echo", "sum", "relay")] + [binder])
     check(executable, 2, ("echo", "sum", "relay"))
     print("PASS: 3 real linked arm64 Darwin MH_DYLIBs, client MH_EXECUTE, and dependencies")
 

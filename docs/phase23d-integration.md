@@ -46,7 +46,9 @@ SDK-free Clang compiles four real ARM64 Darwin Mach-O client/service *objects*.
 The verifier **requires** linking three independent ARM64 Darwin MH_DYLIB
 images and a native MH_EXECUTE with direct and transitive dependency commands.
 It verifies bounded Mach-O headers, library load commands, exports, and
-symbol-resolution via LLVM `ld64.lld`. The linker script includes a narrowly
+symbol-resolution via LLVM `ld64.lld`. For linker versions which
+require `dyld_stub_binder`, the test supplies only an original-source,
+link-time TAPI symbol declaration. It does not bundle or execute libSystem. The linker script includes a narrowly
 validated **MH_OBJECT copy-only** workaround for Swift-built linker distributions
 that reject Clang's platform metadata. Neither the source objects nor linked
 artifacts are rewritten afterward. The linked binaries are not executed on
