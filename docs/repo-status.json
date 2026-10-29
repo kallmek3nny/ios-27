@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 96,
-      "branch": "agent/phase23b-lifecycle-20261029",
-      "sha": "e1f1da6670fd3592c8fa92277fba33216eeb5a34",
-      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
-      "updated_at": "2026-10-29T21:27:16Z",
+      "number": 94,
+      "branch": "phase23c-objc-native-bridge",
+      "sha": "abf21ef9a6f4d6586acf36193f1efcd7ecae6336",
+      "title": "phase23c: bounded compiler-validated objc image bridge and concurrent tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
+      "updated_at": "2026-10-29T21:28:41Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 94,
-      "branch": "phase23c-objc-native-bridge",
-      "sha": "1646e36b3b8b6bf6ecb77fc114a0844434abd4ed",
-      "title": "phase23c: bounded compiler-validated objc image bridge and concurrent tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/94",
-      "updated_at": "2026-10-29T21:26:32Z",
+      "number": 96,
+      "branch": "agent/phase23b-lifecycle-20261029",
+      "sha": "7988310ebdb2d3b238810dedcb7d3b457101f54e",
+      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
+      "updated_at": "2026-10-29T21:28:14Z",
       "status": "unmerged: not counted"
     },
     {
@@ -358,5 +358,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:27:54Z"
+  "observed_at": "2026-10-29T21:28:53Z"
 }
