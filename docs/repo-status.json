@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 98,
+      "branch": "phase24e-native-application-startup",
+      "sha": "b978df309a7efb17e7ec3ce9f51286b193571022",
+      "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/98",
+      "updated_at": "2026-10-29T21:51:06Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 97,
       "branch": "phase24a-global-dyld-identity",
       "sha": "349de82ee74530d91921b487e7480de43909f94f",
       "title": "phase24a: shared mapped image registry, safe symbol pins and native fixture verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/97",
       "updated_at": "2026-10-29T21:50:56Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 98,
-      "branch": "phase24e-native-application-startup",
-      "sha": "55463f985c2de57e0b0a6360705a538bdb0d22ab",
-      "title": "phase24e: verified LC_MAIN application entry and native multi-image startup tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/98",
-      "updated_at": "2026-10-29T21:50:06Z",
       "status": "unmerged: not counted"
     },
     {
@@ -386,5 +386,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:51:07Z"
+  "observed_at": "2026-10-29T21:51:27Z"
 }
