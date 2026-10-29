@@ -95,8 +95,8 @@ def snapshot(repo, get, previous=None):
         raise ValueError("invalid repo")
     base = "/repos/" + repo
     source = latest_source(base, get, previous.get("main_source") if previous else None)
-    open_prs = get(base + "/pulls?state=open&sort=updated&direction=desc&per_page=25")
-    closed = get(base + "/pulls?state=closed&sort=updated&direction=desc&per_page=40")
+    open_prs = get(base + "/pulls?state=open&sort=updated&direction=desc&per_page=50")
+    closed = get(base + "/pulls?state=closed&sort=updated&direction=desc&per_page=70")
     branches = get(base + "/branches?per_page=100")
     if any(not isinstance(value, list) for value in (open_prs, closed, branches)):
         raise ValueError("bad repository response")
@@ -105,14 +105,14 @@ def snapshot(repo, get, previous=None):
          "url": p["html_url"], "head_sha": p["head"]["sha"],
          "merged_at": p["merged_at"]}
         for p in closed if p.get("merged_at") and p["base"]["ref"] == "main"
-    ][:8]
+    ][:28]
     pending = [
         {"number": p["number"], "branch": p["head"]["ref"],
          "sha": p["head"]["sha"], "title": p["title"][:120],
          "url": p["html_url"], "updated_at": p["updated_at"],
          "status": "unmerged: not counted"}
         for p in open_prs if p["base"]["ref"] == "main"
-    ][:8]
+    ][:36]
     excluded_sha = {p["head"]["sha"] for p in closed if p.get("merged_at")} | {p["sha"] for p in pending}
     candidates = [
         (p["name"], p["commit"]["sha"]) for p in branches
@@ -157,10 +157,10 @@ def snapshot(repo, get, previous=None):
         "main_source": source,
         "method": "only reviewed evidence merged into main can change confirmed target statuses",
         "open_pull_requests": pending,
-        "ahead_branches": ahead[:8],
+        "ahead_branches": ahead[:24],
         "recent_merged_pull_requests": recently_merged,
         "scan_limits": {"branch_page": 100, "branches_scanned": len(candidates),
-                        "open_pr_page": 25, "merged_pr_page": 40},
+                        "open_pr_page": 50, "merged_pr_page": 70},
     }
 
 
