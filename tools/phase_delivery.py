@@ -105,7 +105,7 @@ def ledger(repo_status, branch_activity, previous=None):
         active = sum(1 for row in rows if row["state"] == "active")
         groups.append({"phase": number, "label": label,
                        "merged": done, "active": active, "total": len(rows),
-                       "percent": round(100.0 * done / len(rows), 1)})
+                       "percent": int(round(100.0 * done / len(rows)))})
     done = sum(r["state"] == "merged" for r in result)
     active = sum(r["state"] == "active" for r in result)
     return {
@@ -114,7 +114,7 @@ def ledger(repo_status, branch_activity, previous=None):
         "repository": repo_status["repository"], "source_sha": sha,
         "observed_at": branch_activity.get("observed_at"),
         "delivered": done, "active": active, "total": len(result),
-        "percent": round(100.0 * done / len(result), 1),
+        "percent": int(round(100.0 * done / len(result))),
         "groups": groups, "workstreams": result,
     }
 
