@@ -11,19 +11,19 @@
     {
       "number": 90,
       "branch": "feat/live-phase-delivery-percent",
-      "sha": "fd290126c6859090427a7c2fa6a3be181269824f",
+      "sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
       "title": "feat: make agent phase delivery percentages automatically update from merged PRs",
       "url": "https://github.com/kallmek3nny/ios-27/pull/90",
-      "updated_at": "2026-10-29T10:39:22Z",
+      "updated_at": "2026-10-29T10:40:10Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 91,
       "branch": "fix/progress-count-tested-phases20-21",
-      "sha": "0f4e8edcc81c6681fc5b379ca739eb1915602df1",
+      "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
       "title": "fix: actually advance scoped progress percentages for tested phases 19a, 20 and 21",
       "url": "https://github.com/kallmek3nny/ios-27/pull/91",
-      "updated_at": "2026-10-29T10:39:08Z",
+      "updated_at": "2026-10-29T10:40:03Z",
       "status": "unmerged: not counted"
     },
     {
@@ -331,5 +331,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T10:39:53Z"
+  "observed_at": "2026-10-29T10:40:13Z"
 }

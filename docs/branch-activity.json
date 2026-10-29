@@ -4,14 +4,14 @@
   "main_source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
   "candidates_checked": 13,
-  "candidate_count": 12,
+  "candidate_count": 13,
   "candidates": [
     {
       "branch": "feat/live-phase-delivery-percent",
-      "sha": "fd290126c6859090427a7c2fa6a3be181269824f",
+      "sha": "34ea791f6d484a0e4dd53e61c24c8b9cf7d998a7",
       "url": "https://github.com/kallmek3nny/ios-27/pull/90",
       "pr_number": 90,
-      "ci": "failing",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -20,11 +20,37 @@
           "group_id": "unclassified",
           "source_files": 0,
           "fixture_files": 1,
-          "additions": 256,
+          "additions": 255,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
             "tools/phase_delivery.py"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "fix/progress-count-tested-phases20-21",
+      "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/91",
+      "pr_number": 91,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 2,
+          "additions": 4,
+          "deletions": 4,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h",
+            "src/libsystem20e_services.c",
+            "tests/phase20e-darwin-fixture.c",
+            "tests/phase20e-standalone.c"
           ]
         }
       ]
@@ -442,6 +468,15 @@
         "ci": "passing_checks"
       }
     ],
+    "libsystem-host-model": [
+      {
+        "branch": "fix/progress-count-tested-phases20-21",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/91",
+        "source_files": 2,
+        "fixture_files": 2,
+        "ci": "running"
+      }
+    ],
     "libsystem-pthread": [
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
@@ -519,7 +554,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/90",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "failing"
+        "ci": "not_checked"
       },
       {
         "branch": "fix/external-build-fixtures",
@@ -1345,5 +1380,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T10:39:58Z"
+  "observed_at": "2026-10-29T10:40:17Z"
 }
