@@ -1,6 +1,6 @@
 # ios-27 | capability progress
 
-snapshot: 2026-10-28 · baseline: `75d631ff507d`
+snapshot: 2026-10-29 · baseline: `d324a591aa92`
 
 ![capability gate dashboard](progress.svg)
 
@@ -8,10 +8,10 @@ snapshot: 2026-10-28 · baseline: `75d631ff507d`
 
 | capability | documented gates | gate coverage |
 | --- | ---: | ---: |
-| mach-o and native arm64 | 5/7 | 71.4% |
+| mach-o and native arm64 | 6/8 | 75.0% |
 | dyld and image loading | 6/9 | 66.7% |
 | mach ipc and darwin calls | 5/8 | 62.5% |
-| objective-c swift and system libraries | 3/7 | 42.9% |
+| objective-c swift and system libraries | 10/14 | 71.4% |
 | apple graphics and liquid glass | 0/4 | 0.0% |
 | official system ui and apps | 0/4 | 0.0% |
 | android deployment and isolation | 0/4 | 0.0% |
@@ -33,6 +33,7 @@ snapshot: 2026-10-28 · baseline: `75d631ff507d`
 - [ ] general darwin process startup and stack abi
 - [ ] native device validation on 4k/16k hardware
 - [x] transactional ARM64 multi-object relocations and native cross-object calls ([evidence](../docs/phase19d-relocation-linker.md))
+- [x] bounded compiler-produced ARM64 LC_MAIN argv/envp/apple stack and guard-page fixture ([evidence](../docs/phase19a-startup.md))
 
 ### dyld and image loading
 
@@ -66,6 +67,13 @@ snapshot: 2026-10-28 · baseline: `75d631ff507d`
 - [x] standalone compiler-produced ObjC2 metadata parsing ([evidence](../docs/phase19e-architecture.md))
 - [x] standalone host class registration, lookup, initialization and dispatch ([evidence](../docs/phase19e-architecture.md))
 - [x] bounded host-only Darwin libSystem guest trap model ([evidence](../docs/phase19e-architecture.md))
+- [x] standalone Clang-generated ObjC2 metadata graphs and transactional registration (phase20a) ([evidence](../docs/phase20a-objective-c-metadata.md))
+- [x] bounded native host ObjC message dispatch and compiled ARM64 Darwin entrypoints (phase20b) ([evidence](../docs/phase20b-dispatch.md))
+- [x] host-only Objective-C retain, weak and autorelease ownership with compiled fixtures (phase20c) ([evidence](../docs/phase20c-ownership.md))
+- [x] bounded host-native threading, synchronization and TLS with Darwin callsite fixture (phase20d) ([evidence](../docs/phase20d-threading.md))
+- [x] bounded Darwin-numbered userspace calls and capability-backed guest file descriptors (phase20e) ([evidence](../docs/phase20e-services.md))
+- [x] host-backed FIFO condition-variable semantics with compiled stress fixtures (phase21g) ([evidence](../docs/phase21g-design.md))
+- [x] generation-safe host synchronization-object teardown under cancellation (phase21h) ([evidence](../docs/phase21h-lifecycle.md))
 
 ### apple graphics and liquid glass
 
