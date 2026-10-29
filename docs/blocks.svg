@@ -2,7 +2,7 @@
 <style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>
 <text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3" class="gh-text">ios-27 / compatibility</text>
 <text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">component area = tracked targets · color = test evidence</text>
-<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">6 WIP · 7 merged source PRs (review pending)</text>
+<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">9 WIP · 7 merged source PRs (review pending)</text>
 <text x="18" y="119" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">system libraries / api targets</text>
 <text x="742" y="120" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">9.2%</text>
 <text x="18" y="138" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">13 components · 249 tracked</text>
@@ -340,7 +340,7 @@
 <text x="249.89" y="175.00" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libobjc / objc runt…</text>
 <rect x="249.89" y="182.00" width="123.57" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>
-<g><title>libsystem_pthread · 21 tracked targets · conditional ceiling · 6 unmerged branches · 7 recently merged source PRs awaiting compatibility review</title>
+<g><title>libsystem_pthread · 21 tracked targets · conditional ceiling · 5 unmerged branches · 7 recently merged source PRs awaiting compatibility review</title>
 <rect x="243.89" y="382.19" width="135.57" height="168.81" rx="3" fill="#161b22" class="gh-surface"/>
 <g><title>libsystem_pthread / pthread_create: unimplemented</title>
 <rect x="246.49" y="413.79" width="25.11" height="25.96" rx="1" fill="#30363d" class="gh-missing"/>
@@ -407,7 +407,7 @@
 </g>
 <rect x="243.89" y="382.19" width="135.57" height="168.81" rx="3" fill="none" stroke="#58a6ff" stroke-width="2"/>
 <rect x="245.89" y="384.19" width="131.57" height="164.81" rx="3" fill="none" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 3"/>
-<text x="372.45" y="544.00" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="600" fill="#c9a7ff">6 WIP · 7 merged</text>
+<text x="372.45" y="544.00" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="600" fill="#c9a7ff">5 WIP · 7 merged</text>
 <text x="249.89" y="397.19" font-family="sans-serif" font-size="11.5" font-weight="500" fill="#c9d1d9" class="gh-text">libsystem_pthread</text>
 <rect x="249.89" y="404.19" width="123.57" height="2.00" rx="1" fill="#30363d" class="gh-missing"/>
 </g>

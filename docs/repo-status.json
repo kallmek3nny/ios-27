@@ -9,6 +9,33 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 83,
+      "branch": "agent/phase22c-transactional-dyld-graph",
+      "sha": "e77d0883538f8b69af4e79609c9e54bc127aca35",
+      "title": "phase22c: transactional mach-o image graph, symbol ordinals, leases and stress tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "updated_at": "2026-10-29T00:18:53Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 84,
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "1ffab75a725a2421cfe53d62f8e8492d79f7225a",
+      "title": "phase 22d: concurrent Objective-C substrate, typed dispatch and compiled ObjC2 validation",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "updated_at": "2026-10-29T00:18:41Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 85,
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "fc79c2a82bba6cc8596106de4e12c1053d179364",
+      "title": "phase 22a: bounded guest address spaces, guarded mappings and lifecycle tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "updated_at": "2026-10-29T00:18:20Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 77,
       "branch": "phase21j-deterministic-sync-diagnostics",
       "sha": "9e15234388e206983bdf73dd57a3628f2d6ae037",
@@ -52,18 +79,28 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/69",
       "updated_at": "2026-10-28T20:27:18Z",
       "status": "unmerged: not counted"
+    }
+  ],
+  "ahead_branches": [
+    {
+      "branch": "phase22b-darwin-bsd-capability-20261028",
+      "sha": "476bd3c9a1f5ebc65baa0b4f08b33238e09f6297",
+      "ahead_by": 13,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-29T00:18:58Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22b-darwin-bsd-capability-20261028",
+      "status": "unmerged: not counted"
     },
     {
-      "number": 76,
-      "branch": "phase21e-exit-cancellation-20261028",
-      "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
-      "title": "phase21e: retire cancellation at exit start, fuzz lifecycle and test host failures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/76",
-      "updated_at": "2026-10-28T20:18:54Z",
+      "branch": "phase22e-mach-ipc-mig",
+      "sha": "e8124a374e04114c218028d82ce300ab70d9631e",
+      "ahead_by": 1,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-28T23:25:02Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22e-mach-ipc-mig",
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 82,
@@ -124,9 +161,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 36,
+    "branches_scanned": 39,
     "open_pr_page": 25,
     "merged_pr_page": 40
   },
-  "observed_at": "2026-10-28T23:24:53Z"
+  "observed_at": "2026-10-29T00:19:10Z"
 }
