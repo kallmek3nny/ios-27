@@ -58,6 +58,13 @@ static int valid_name(const char *s) {
     }
     return 0;
 }
+static int valid_symbol(const char *s) {
+    if (!s) return 0;
+    for (size_t i = 0; i < IOS27_EXPORT_NAME_MAX; ++i) {
+        if (s[i] == '\0') return i != 0u;
+    }
+    return 0;
+}
 static size_t find_name(const ios27_22c_graph *g, const char *name) {
     for (size_t i = 0; i < g->count; ++i)
         if (strcmp(g->names[i], name) == 0) return i;
@@ -237,8 +244,7 @@ int ios27_22c_resolve(const ios27_22c_graph *g, size_t importer,
     if (out) memset(out, 0, sizeof(*out));
     clear_diag(diag);
     if (!g || !out || importer >= g->count ||
-        !symbol || !symbol[0] ||
-        memchr(symbol, '\0', IOS27_EXPORT_NAME_MAX) == NULL)
+        !valid_symbol(symbol))
         return report(diag, IOS27_22C_INPUT, importer, NO_INDEX,
                       "invalid symbol, importer or output");
     graph_libraries(g, libs);
