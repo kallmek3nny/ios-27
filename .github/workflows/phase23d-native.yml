@@ -1,0 +1,35 @@
+name: phase23d native syscall and mach service bridge
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase23d_*'
+      - 'include/ios27/phase23d_*'
+      - 'tests/phase23d-*'
+      - 'tools/phase23d-*'
+      - 'docs/phase23d-*'
+      - '.github/workflows/phase23d-*.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phase23d:
+    name: phase23d / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+      - name: environment provenance
+        run: |
+          timeout 30s uname -m
+          timeout 30s clang --version
+          timeout 30s cc --version
+      - name: strictly bounded native integration and Darwin ABI verification
+        env:
+          PHASE23D_SANITIZE: ${{ matrix.mode == 'sanitizers' && '1' || '0' }}
+        run: timeout 300s python3 tools/phase23d-verify.py
