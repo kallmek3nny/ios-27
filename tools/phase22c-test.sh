@@ -27,6 +27,11 @@ linker="${DARWIN_LINKER:-ld64.lld}"
 if command -v "$linker" >/dev/null && timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -fixup_chains -install_name provider.dylib -o "$build/phase22c-provider.dylib" "$build/phase22c-provider.o"; then
   timeout 30s "$linker" -arch arm64 -platform_version macos 11.0 11.0 -dylib -fixup_chains -install_name consumer.dylib "$build/phase22c-provider.dylib" -o "$build/phase22c-consumer.dylib" "$build/phase22c-consumer.o"
   timeout 180s "$build/phase22c-compiled" "$build/phase22c-provider.o" "$build/phase22c-consumer.o" "$build/phase22c-provider.dylib" "$build/phase22c-consumer.dylib"
+  if [[ "${IOS27_PHASE22C_SANITIZE:-0}" != 1 ]]; then
+    timeout 180s python3 tools/phase19b-build.py --linker "$linker" --output-dir "$build/phase22c-four" --core "$build/libios27_core.a"
+    timeout 120s "$cc" "${flags[@]}" src/phase22c_graph.c tests/phase22c-linked.c "$build/libios27_core.a" -o "$build/phase22c-linked"
+    timeout 180s "$build/phase22c-linked" "$build/phase22c-four/phase19b-root.dylib" "$build/phase22c-four/phase19b-middle.dylib" "$build/phase22c-four/phase19b-leaf.dylib" "$build/phase22c-four/phase19b-base.dylib"
+  fi
 else
   printf '%s\n' 'phase22c NOT VERIFIED: compiler-linked MH_DYLIB tests unavailable (ld64.lld missing or unsupported)' >&2
   if [[ "${IOS27_PHASE22C_REQUIRE_LINKED:-0}" == 1 ]]; then exit 1; fi
