@@ -7,37 +7,11 @@
   "candidate_count": 9,
   "candidates": [
     {
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "63d7c42bae6df4d8a88ffc51615c1c1ac74af01c",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "pr_number": 84,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 4,
-          "fixture_files": 4,
-          "additions": 1285,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase22d_metadata.h",
-            "include/ios27/phase22d_runtime.h",
-            "src/phase22d_metadata.c",
-            "src/phase22d_runtime.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "9350787f27c3ea761abe7d67a379b9ac95b259aa",
+      "sha": "b47b5c9176a637f8a284db8c99bfcd54cda8f79f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "pr_number": 83,
-      "ci": "passing_checks",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -66,6 +40,32 @@
             "src/phase22c_graph.c",
             "tests/phase22c-compiled.c",
             "tests/phase22c-fixture-consumer.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "63d7c42bae6df4d8a88ffc51615c1c1ac74af01c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "pr_number": 84,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 10,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 4,
+          "additions": 1285,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase22d_metadata.h",
+            "include/ios27/phase22d_runtime.h",
+            "src/phase22d_metadata.c",
+            "src/phase22d_runtime.c"
           ]
         }
       ]
@@ -298,19 +298,19 @@
     },
     {
       "branch": "phase22a-guest-address-spaces",
-      "sha": "338acee7ba2f1964b0292b1301c623af9c54eb3f",
+      "sha": "3c66c9606bf1a2f19bfca2bd96846f46c5cd20a5",
       "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
       "pr_number": null,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 16,
+      "files_checked": 19,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "unclassified",
           "source_files": 3,
-          "fixture_files": 6,
-          "additions": 882,
+          "fixture_files": 7,
+          "additions": 958,
           "deletions": 0,
           "symbols_preview": [
             "ios27_22a_close",
@@ -392,16 +392,16 @@
     ],
     "unclassified": [
       {
-        "branch": "phase22d-objc-runtime-concurrency-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-        "source_files": 4,
-        "fixture_files": 4,
-        "ci": "running"
-      },
-      {
         "branch": "agent/phase22c-transactional-dyld-graph",
         "url": "https://github.com/kallmek3nny/ios-27/pull/83",
         "source_files": 2,
+        "fixture_files": 4,
+        "ci": "not_checked"
+      },
+      {
+        "branch": "phase22d-objc-runtime-concurrency-20261028",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+        "source_files": 4,
         "fixture_files": 4,
         "ci": "passing_checks"
       },
@@ -409,8 +409,8 @@
         "branch": "phase22a-guest-address-spaces",
         "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
         "source_files": 3,
-        "fixture_files": 6,
-        "ci": "not_checked"
+        "fixture_files": 7,
+        "ci": "running"
       }
     ]
   },
@@ -721,5 +721,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:17:21Z"
+  "observed_at": "2026-10-29T00:17:47Z"
 }
