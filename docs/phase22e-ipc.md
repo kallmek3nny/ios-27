@@ -38,15 +38,20 @@ Only files owned by phase 22e and its independent workflow are changed.
    interface generator, request-ID and exact-size checks, response ID
    mapping, concurrent registration under lock, safe handler context
    lifetime via in-flight unregister preflight, and two concurrent native
-   service threads with nested client/server RPC. The service handler
+   service threads with nested client/server RPC. Per-port diagnostics
+   expose queued messages, waiter counts, in-flight transfers, and service
+   registration without exposing queues to unrelated tasks. Structured
+   rejection counters distinguish invalid wires, rights, quotas and timeouts.
+   The service handler
    executes outside the namespace mutex so nested RPC can progress.
 5. **Adversarial and lifecycle tests.** Compiled native C clients/servers
    perform 100,000 main RPCs and 781 nested calls, corresponding to 201,562
    successful send operations and 201,562 successful receives. Additional
    tests cover deterministic 100,000-input malformed-wire fuzzing, queue
    saturation, OOL snapshots, atomic transfer rollback, dead names,
-   cancellation, FIFO waiters, concurrent registration, exhaustion, and
-   repeated namespace startup/teardown.
+   cancellation, FIFO waiters, concurrent registration, exhaustion,
+   send-once reuse rejection, duplicate MOVE_SEND rollback, timeout
+   boundaries, and repeated namespace startup/teardown.
 
 ## Building and reproducing
 

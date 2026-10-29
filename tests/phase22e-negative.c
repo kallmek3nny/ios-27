@@ -38,6 +38,9 @@ static void test_ool(void) {
     require(!phase22e_send(s, 1, b, sizeof(b), arena, sizeof(arena), 0), "OOL send");
     phase22e_stats before = {0};
     require(!phase22e_stats_get(s, &before) && before.ool_bytes_pending == 40, "accounting");
+    phase22e_port_diag diag;
+    require(!phase22e_port_diagnostics(s, 2, p, &diag) &&
+            diag.queued == 1 && diag.next_message_id == 4321, "queue diagnostics");
     size_t n = 1, o = sizeof(payload);
     require(receive(s, 2, p, got, &n, payload, &o) == PHASE22E_SIZE,
             "short receive does not consume");
@@ -82,6 +85,58 @@ static void test_rollback_and_dead_names(void) {
     require(!phase22e_destroy(s, 2, dest), "destroy dest");
     phase22e_stats st;
     require(!phase22e_stats_get(s, &st) && !st.in_flight_transfers, "transfer fully released");
+    phase22e_free(s);
+}
+static void test_send_once_and_repeat_descriptor(void) {
+    phase22e_space *s = phase22e_new();
+    require(s != NULL, "alloc send-once");
+    uint32_t dest, reply, grant;
+    require(!phase22e_port_create(s, 2, &dest), "service port");
+    require(!phase22e_port_create(s, 1, &reply), "reply port");
+    require(!phase22e_port_create(s, 3, &grant), "descriptor port");
+    require(!phase22e_make_send(s, 2, dest, 1), "service send");
+    require(!phase22e_make_send(s, 3, grant, 1), "descriptor send");
+    uint8_t msg[52];
+    wire_header(msg, sizeof(msg), PHASE22E_COMPLEX | PHASE22E_COPY_SEND, dest);
+    write32(msg + 24, 2);
+    write32(msg + 28, grant); msg[38] = PHASE22E_MOVE_SEND;
+    write32(msg + 40, grant); msg[50] = PHASE22E_MOVE_SEND;
+    require(phase22e_send(s, 1, msg, sizeof(msg), NULL, 0, 0) == PHASE22E_RIGHT,
+            "repeated descriptor consumes two refs, not one");
+    phase22e_rights r;
+    require(!phase22e_rights_get(s, 1, grant, &r) && r.send == 1,
+            "failed transfer preserves right");
+    phase22e_stats st;
+    require(!phase22e_stats_get(s, &st) && !st.messages_pending,
+            "rejected transfer does not enqueue");
+    uint8_t request[24];
+    wire_header(request, sizeof(request), PHASE22E_COPY_SEND |
+                (PHASE22E_MAKE_SEND_ONCE << 8), dest);
+    write32(request + 12, reply);
+    require(!phase22e_send(s, 1, request, sizeof(request), NULL, 0, 0),
+            "one-shot request");
+    require(phase22e_destroy(s, 1, reply) == PHASE22E_QUOTA,
+            "in-flight reply right pins port");
+    uint8_t recv[24]; size_t n = sizeof(recv), o = 0;
+    require(!receive(s, 2, dest, recv, &n, NULL, &o), "receive one-shot");
+    require(!phase22e_rights_get(s, 2, reply, &r) && r.send_once == 1,
+            "send-once right installed at receive");
+    wire_header(request, sizeof(request), PHASE22E_MOVE_SEND_ONCE, reply);
+    require(!phase22e_send(s, 2, request, sizeof(request), NULL, 0, 0),
+            "send-once reply");
+    require(phase22e_send(s, 2, request, sizeof(request), NULL, 0, 0) == PHASE22E_RIGHT,
+            "send-once cannot be reused");
+    require(!phase22e_rights_get(s, 2, reply, &r) && r.send_once == 0,
+            "send-once consumed exactly once");
+    n = sizeof(recv); o = 0;
+    require(!receive(s, 1, reply, recv, &n, NULL, &o), "receive reply");
+    require(phase22e_receive(s, 2, dest, recv, &n, NULL, &o, 1) == PHASE22E_TIMEOUT,
+            "bounded timed receive");
+    require(!phase22e_destroy(s, 1, reply), "retire reply");
+    require(!phase22e_destroy(s, 2, dest), "retire dest");
+    require(!phase22e_destroy(s, 3, grant), "retire grant");
+    require(!phase22e_stats_get(s, &st) && !st.in_flight_transfers &&
+            !st.messages_pending && !st.live_ports, "one-shot teardown exact");
     phase22e_free(s);
 }
 static void test_drop_queued_transfer(void) {
@@ -175,13 +230,15 @@ static void test_limits_and_fuzz(void) {
     require(!phase22e_destroy(s, 2, p), "drop queued");
     phase22e_stats st;
     require(!phase22e_stats_get(s, &st) && !st.messages_pending &&
-            !st.in_flight_transfers, "queue reclamation");
+            !st.in_flight_transfers && st.bad_messages >= 100000,
+            "queue reclamation and malformed diagnostics");
     printf("malformed_fuzz=%u seed=0x%08x queue_capacity=%u rejected=%llu\n",
            rejected, initial_seed, PHASE22E_QUEUE, (unsigned long long)st.rejected);
     phase22e_free(s);
 }
 int main(void) {
-    test_ool(); test_rollback_and_dead_names(); test_drop_queued_transfer();
+    test_ool(); test_rollback_and_dead_names(); test_send_once_and_repeat_descriptor();
+    test_drop_queued_transfer();
     test_cancel(); test_limits_and_fuzz();
     puts("phase22e negative: passed");
     return 0;

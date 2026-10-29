@@ -68,6 +68,25 @@ static int valid_task(const phase22e_space *s, uint32_t t) {
 static int valid_port(const phase22e_space *s, uint32_t p) {
     return p && p <= s->last_port && s->ports[p].live;
 }
+static void mark_rejected(phase22e_space *s, int rc) {
+    if (rc == PHASE22E_OK) return;
+    ++s->stats.rejected;
+    if (rc == PHASE22E_TIMEOUT) ++s->stats.timeouts;
+    else if (rc == PHASE22E_BAD || rc == PHASE22E_SIZE ||
+             rc == PHASE22E_UNSUPPORTED) ++s->stats.bad_messages;
+    else if (rc == PHASE22E_RIGHT || rc == PHASE22E_DEAD)
+        ++s->stats.bad_rights;
+    else if (rc == PHASE22E_QUOTA) ++s->stats.quota_events;
+    else if (rc == PHASE22E_CANCELLED) ++s->stats.cancellations;
+}
+static int preflight_fail(phase22e_space *s, int rc) {
+    if (s) {
+        pthread_mutex_lock(&s->mu);
+        mark_rejected(s, rc);
+        pthread_mutex_unlock(&s->mu);
+    }
+    return rc;
+}
 static int overlap(const void *a, size_t na, const void *b, size_t nb) {
     uintptr_t x = (uintptr_t)a, y = (uintptr_t)b;
     if (!na || !nb) return 0;
@@ -235,6 +254,32 @@ int phase22e_stats_get(phase22e_space *s, phase22e_stats *out) {
     pthread_mutex_lock(&s->mu); *out = s->stats; pthread_mutex_unlock(&s->mu);
     return PHASE22E_OK;
 }
+int phase22e_port_diagnostics(phase22e_space *s, uint32_t t,
+                              uint32_t p, phase22e_port_diag *out) {
+    if (!s || !out || !external(s, out, sizeof(*out))) return PHASE22E_BAD;
+    pthread_mutex_lock(&s->mu);
+    int rc = PHASE22E_RIGHT;
+    if (valid_task(s, t) && p && p <= s->last_port &&
+        (s->ports[p].owner == t || s->send[t][p] || s->once[t][p])) {
+        port_state *ps = &s->ports[p];
+        phase22e_port_diag diag = {0};
+        diag.owner = ps->owner;
+        diag.live = ps->live;
+        diag.queued = ps->used;
+        diag.in_flight = ps->inflight;
+        diag.service_registered = !!s->services[p].count;
+        for (p22_waiter *w = ps->send_waiters; w; w = w->next)
+            ++diag.send_waiters;
+        for (p22_waiter *w = ps->recv_waiters; w; w = w->next)
+            ++diag.receive_waiters;
+        if (ps->used)
+            diag.next_message_id = (int32_t)le32(ps->queue[ps->first].wire + 20);
+        *out = diag;
+        rc = PHASE22E_OK;
+    }
+    pthread_mutex_unlock(&s->mu);
+    return rc;
+}
 int phase22e_cancel_waits(phase22e_space *s) {
     if (!s) return PHASE22E_BAD;
     pthread_mutex_lock(&s->mu);
@@ -305,18 +350,18 @@ static int can_send(phase22e_space *s, uint32_t t, uint32_t p, uint8_t mode) {
 int phase22e_send(phase22e_space *s, uint32_t t, const void *wire, size_t n,
                   const uint8_t *arena, size_t arena_n, uint32_t timeout_ms) {
     if (!s || !wire || n > PHASE22E_WIRE_MAX || !external(s, wire, n) ||
-        !external(s, arena, arena_n)) return PHASE22E_BAD;
+        !external(s, arena, arena_n)) return preflight_fail(s, PHASE22E_BAD);
     /* Preflight + snapshot external bytes before taking the lock. */
     uint8_t copy[PHASE22E_WIRE_MAX];
-    if (n < 24) return PHASE22E_SIZE;
+    if (n < 24) return preflight_fail(s, PHASE22E_SIZE);
     memcpy(copy, wire, n);
     parsed p = {0};
     int rc = parse(copy, n, arena_n, &p);
-    if (rc != PHASE22E_OK) return rc;
+    if (rc != PHASE22E_OK) return preflight_fail(s, rc);
     uint8_t ool[PHASE22E_OOL_MAX];
     if (p.ool_size) {
         if (!arena || overlap(wire, n, arena + (size_t)p.guest_offset, p.ool_size))
-            return PHASE22E_BAD;
+            return preflight_fail(s, PHASE22E_BAD);
         memcpy(ool, arena + (size_t)p.guest_offset, p.ool_size);
     }
     struct timespec until;
@@ -405,8 +450,7 @@ int phase22e_send(phase22e_space *s, uint32_t t, const void *wire, size_t n,
         leave_waiters(&wait_port->send_waiters, &waiter);
         pthread_cond_broadcast(&s->changed);
     }
-    if (rc == PHASE22E_TIMEOUT) ++s->stats.timeouts;
-    if (rc != PHASE22E_OK) ++s->stats.rejected;
+    mark_rejected(s, rc);
     pthread_mutex_unlock(&s->mu);
     return rc;
 }
@@ -414,7 +458,7 @@ int phase22e_receive(phase22e_space *s, uint32_t t, uint32_t p,
                      void *out, size_t *out_n, void *ool, size_t *ool_n,
                      uint32_t timeout_ms) {
     if (!s || !out || !out_n || !ool_n || !external(s, out_n, sizeof(*out_n)) ||
-        !external(s, ool_n, sizeof(*ool_n))) return PHASE22E_BAD;
+        !external(s, ool_n, sizeof(*ool_n))) return preflight_fail(s, PHASE22E_BAD);
     size_t cap = *out_n, oolcap = *ool_n;
     if (!external(s, out, cap) || !external(s, ool, oolcap) ||
         overlap(out, cap, out_n, sizeof(*out_n)) ||
@@ -422,7 +466,7 @@ int phase22e_receive(phase22e_space *s, uint32_t t, uint32_t p,
         overlap(ool, oolcap, out_n, sizeof(*out_n)) ||
         overlap(ool, oolcap, ool_n, sizeof(*ool_n)) ||
         overlap(out, cap, ool, oolcap) || overlap(out_n, sizeof(*out_n), ool_n, sizeof(*ool_n)))
-        return PHASE22E_BAD;
+        return preflight_fail(s, PHASE22E_BAD);
     struct timespec until;
     if (timeout_ms) deadline(&until, timeout_ms);
     pthread_mutex_lock(&s->mu);
@@ -496,8 +540,7 @@ int phase22e_receive(phase22e_space *s, uint32_t t, uint32_t p,
         leave_waiters(&wait_port->recv_waiters, &waiter);
         pthread_cond_broadcast(&s->changed);
     }
-    if (rc == PHASE22E_TIMEOUT) ++s->stats.timeouts;
-    if (rc != PHASE22E_OK) ++s->stats.rejected;
+    mark_rejected(s, rc);
     pthread_mutex_unlock(&s->mu);
     return rc;
 }

@@ -32,7 +32,13 @@ typedef struct {
     uint64_t sends, receives, timeouts, rejected, dead_ports;
     uint64_t messages_pending, ool_bytes_pending, waiters, peak_waiters;
     uint64_t in_flight_transfers, live_ports;
+    uint64_t bad_messages, bad_rights, quota_events, cancellations;
 } phase22e_stats;
+typedef struct {
+    uint32_t owner, queued, send_waiters, receive_waiters, in_flight;
+    int32_t next_message_id;
+    unsigned live, service_registered;
+} phase22e_port_diag;
 typedef enum {
     PHASE22E_OK = 0, PHASE22E_BAD = -1, PHASE22E_RIGHT = -2,
     PHASE22E_QUOTA = -3, PHASE22E_TIMEOUT = -4,
@@ -62,6 +68,8 @@ int phase22e_task_die(phase22e_space *space, uint32_t task);
 int phase22e_rights_get(phase22e_space *space, uint32_t task, uint32_t port,
                         phase22e_rights *out);
 int phase22e_stats_get(phase22e_space *space, phase22e_stats *out);
+int phase22e_port_diagnostics(phase22e_space *space, uint32_t task,
+                              uint32_t port, phase22e_port_diag *out);
 int phase22e_cancel_waits(phase22e_space *space);
 
 /* All guest offsets are copied from an explicitly bounded byte arena.
