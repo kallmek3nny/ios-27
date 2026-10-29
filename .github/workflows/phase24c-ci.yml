@@ -1,0 +1,32 @@
+name: phase24c objc2 metadata and resolution
+on:
+  pull_request:
+    paths:
+      - 'src/phase24c_*'
+      - 'include/ios27/phase24c_*'
+      - 'tests/phase24c-*'
+      - 'tools/phase24c-*'
+      - 'docs/phase24c-*'
+      - '.github/workflows/phase24c-*.yml'
+  workflow_dispatch:
+jobs:
+  inspect-and-resolve:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitize: [0, 1]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: install bounded clang test dependencies
+        run: timeout 120s bash -c 'command -v clang; command -v python3'
+      - name: install linker for genuine arm64 Darwin Mach-O fixtures
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
+      - name: compile and exercise objc2 registry and real arm64 Darwin objects
+        env:
+          PHASE24C_SANITIZE: ${{ matrix.sanitize }}
+        run: timeout 600s bash tools/phase24c-verify.sh
