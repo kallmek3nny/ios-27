@@ -10,6 +10,24 @@
 enum { WORKERS = 6, CALLS_PER_WORKER = 20000, REGISTER_THREADS = 8 };
 typedef struct {
     phase22d_runtime *runtime;
+    void **slot;
+    atomic_int *errors;
+} weak_worker_args;
+static void *weak_worker(void *arg) {
+    const weak_worker_args *a = arg;
+    for (unsigned i = 0; i < 10000u; ++i) {
+        void *retained = NULL;
+        if (phase22d_weak_load_retained(a->runtime, a->slot, &retained)) {
+            atomic_fetch_add(a->errors, 1);
+            continue;
+        }
+        if (retained && phase22d_release(a->runtime, retained))
+            atomic_fetch_add(a->errors, 1);
+    }
+    return NULL;
+}
+typedef struct {
+    phase22d_runtime *runtime;
     void *receiver;
     phase22d_sel selector;
     atomic_int *errors;
@@ -247,6 +265,24 @@ int main(void) {
     CHECK(phase22d_retain(r, object) != 0);
     CHECK(phase22d_weak_load_retained(r, &weak, &locked) == 0 && locked == NULL);
     CHECK(phase22d_weak_unregister(r, &weak) == 0);
+    /* Six concurrent weak loaders compete with the final strong release.
+     * Each successful load is atomically retained before crossing the lock. */
+    void *racing_weak_object = NULL, *racing_weak = NULL;
+    pthread_t weak_threads[WORKERS];
+    weak_worker_args weak_args[WORKERS];
+    CHECK(phase22d_allocate(r, "Child", &racing_weak_object) == 0);
+    CHECK(phase22d_weak_store(r, &racing_weak, racing_weak_object) == 0);
+    for (unsigned i = 0; i < WORKERS; ++i) {
+        weak_args[i] = (weak_worker_args){r, &racing_weak, &errors};
+        CHECK(!pthread_create(&weak_threads[i], NULL,
+                              weak_worker, &weak_args[i]));
+    }
+    CHECK(phase22d_release(r, racing_weak_object) == 0);
+    for (unsigned i = 0; i < WORKERS; ++i)
+        CHECK(!pthread_join(weak_threads[i], NULL));
+    CHECK(atomic_load(&errors) == 0 && racing_weak == NULL);
+    CHECK(atomic_load(&destructors) == 2);
+    CHECK(phase22d_weak_unregister(r, &racing_weak) == 0);
     /* Bounded live-object quota plus repeated cleanup and stale-id rejection. */
     void **bulk = calloc(PHASE22D_LIVE_LIMIT + 1u, sizeof(*bulk));
     CHECK(bulk != NULL);
