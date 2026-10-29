@@ -122,4 +122,14 @@ ctest --test-dir build --output-on-failure
 ./build/ios27 audit-ios path/to/arm64-or-fat-macho
 ```
 
+On Linux/Android, CMake also builds the SDK-free startup fixtures before
+CTest runs. The tests use absolute fixture paths, so the build directory may
+be outside the checkout and may contain spaces. For example, on Linux:
+
+```sh
+cmake -S . -B "/tmp/ios27 external build" -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
+cmake --build "/tmp/ios27 external build" --parallel 2
+ctest --test-dir "/tmp/ios27 external build" --timeout 30 --output-on-failure
+```
+
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.

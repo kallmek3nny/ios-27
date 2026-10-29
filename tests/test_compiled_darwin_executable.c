@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if defined(__linux__)
-#include <sys/wait.h>
-#endif
 #if defined(__aarch64__) && defined(__linux__)
 #include <sys/mman.h>
 #include <unistd.h>
@@ -72,16 +69,11 @@ static void rejected(const uint8_t *bytes, size_t size) {
     assert(error[0] != '\0');
 }
 
-/*
- * This test intentionally uses the existing CTest executable rather than
- * editing CMakeLists.txt. Build a second genuine LLVM-linked ARM64 MH_EXECUTE
- * from original source. Its program reads __DATA_CONST, initializes/writes
- * __DATA and reads/writes a zero-filled __bss via compiler-generated ADRP.
- */
-static void phase17a_compiler_linked_test(void) {
 #if defined(__linux__)
-    int status = system("timeout 75s python3 ../tools/phase17a-build.py "
-                        "phase17a-multisegment");
+/* CMake builds this genuine compiler-linked ARM64 MH_EXECUTE from original
+ * source. Its program reads __DATA_CONST, initializes/writes __DATA and
+ * reads/writes a zero-filled __bss via compiler-generated ADRP. */
+static void phase17a_compiler_linked_test(const char *path) {
     uint8_t *linked, *mutated;
     size_t size, rocmd, datacmd, fixcmd, maincmd, bsscmd = 0u;
     ios27_macho_info parsed;
@@ -89,13 +81,7 @@ static void phase17a_compiler_linked_test(void) {
     ios27_darwin_executable inspected;
     char error[160] = {0};
     int result = 999;
-    assert(status >= 0 && WIFEXITED(status));
-    if (WEXITSTATUS(status) == 77) {
-        puts("phase17a clang+lld integration skipped: linker unavailable");
-        return;
-    }
-    assert(WEXITSTATUS(status) == 0);
-    linked = read_file("phase17a-multisegment", &size);
+    linked = read_file(path, &size);
     mutated = malloc(size);
     assert(mutated);
     assert(ios27_macho_parse(linked, size, &parsed, error, sizeof(error)) == 0);
@@ -170,17 +156,13 @@ static void phase17a_compiler_linked_test(void) {
     free(mutated);
     free(linked);
     puts("phase17a real compiler-linked multisegment/bss/adrp tests passed");
-#endif
 }
 
 
 /* A second original Clang executable, linked as MH_EXECUTE by real LLVM
  * ld64.lld or the narrow verified fallback, checks actual Darwin main
  * registers, isolated writable stack, argv/envp copies and fresh lifecycle. */
-static void phase18a_compiler_linked_test(void) {
-#if defined(__linux__)
-    int status = system("timeout 75s python3 ../tools/phase18a-build.py "
-                        "phase18a-startup");
+static void phase18a_compiler_linked_test(const char *path) {
     uint8_t *bytes, *mutated;
     size_t length, maincmd, textcmd;
     ios27_macho_info info;
@@ -190,8 +172,7 @@ static void phase18a_compiler_linked_test(void) {
     int result = 777;
     const char *args[] = {"ios27", "oak", "pine"};
     const char *env[] = {"MODE=test", NULL};
-    assert(status >= 0 && WIFEXITED(status) && WEXITSTATUS(status) == 0);
-    bytes = read_file("phase18a-startup", &length);
+    bytes = read_file(path, &length);
     mutated = malloc(length);
     assert(mutated);
     assert(ios27_darwin_executable_inspect(bytes, length, &exe,
@@ -267,16 +248,12 @@ static void phase18a_compiler_linked_test(void) {
     free(mutated);
     free(bytes);
     puts("phase18a native Darwin main/argv/envp/guest stack tests passed");
-#endif
 }
 
 
 /* Phase 19a: real compiler-generated recursion and globals on fresh stacks,
  * with process-scoped argv/envp/apple copies, lifecycle and invalid inputs. */
-static void phase19a_compiler_linked_test(void) {
-#if defined(__linux__)
-    int status = system("timeout 75s python3 ../tools/phase19a-build.py "
-                        "phase19a-process");
+static void phase19a_compiler_linked_test(const char *path) {
     uint8_t *bytes, *mutated;
     size_t length, maincmd, datacmd;
     ios27_macho_info info;
@@ -288,10 +265,7 @@ static void phase19a_compiler_linked_test(void) {
     const char *apple[] = {"executable_path=/ios27/phase19a",
                            "ios27.mode=native", NULL};
     ios27_startup_context context = {4, args, env, apple};
-    assert(status >= 0 && WIFEXITED(status));
-    /* CI must execute the new compiler-produced workload, not skip it. */
-    assert(WEXITSTATUS(status) == 0);
-    bytes = read_file("phase19a-process", &length);
+    bytes = read_file(path, &length);
     mutated = malloc(length);
     assert(mutated);
     assert(ios27_macho_parse(bytes, length, &info, error, sizeof(error)) == 0);
@@ -425,8 +399,8 @@ static void phase19a_compiler_linked_test(void) {
     free(mutated);
     free(bytes);
     puts("phase19a real recursive Darwin startup/teardown tests passed");
-#endif
 }
+#endif
 
 int main(int argc, char **argv) {
     uint8_t *bytes, *bad;
@@ -436,7 +410,11 @@ int main(int argc, char **argv) {
     ios27_darwin_executable exe;
     char error[160] = {0};
 
+#if defined(__linux__)
+    assert(argc == 5);
+#else
     assert(argc == 2);
+#endif
     bytes = read_file(argv[1], &length);
     bad = malloc(length);
     assert(bad);
@@ -618,9 +596,11 @@ int main(int argc, char **argv) {
 #endif
     free(bad);
     free(bytes);
-    phase17a_compiler_linked_test();
-    phase18a_compiler_linked_test();
-    phase19a_compiler_linked_test();
+#if defined(__linux__)
+    phase17a_compiler_linked_test(argv[2]);
+    phase18a_compiler_linked_test(argv[3]);
+    phase19a_compiler_linked_test(argv[4]);
+#endif
     puts("genuine Clang+LLD Darwin MH_EXECUTE fixture passed");
     return 0;
 }
