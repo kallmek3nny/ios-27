@@ -8,10 +8,17 @@ candidate branches with mapped changes: **13** · audited base: `1dd112410e43`
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
-head: `12d519806590` · ci: **passing_checks** · unmerged, not credited.
+head: `60d5fa22404a` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 2 test/fixture files, +876/-0 lines
+- **unclassified**: 2 source files, 2 test/fixture files, +936/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
+
+### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
+
+head: `54551e6a7a3a` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 3 test/fixture files, +910/-0 lines
+  - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
 
@@ -87,13 +94,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness)
-
-head: `ea498c25c117` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 3 test/fixture files, +910/-0 lines
-  - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

@@ -11,10 +11,19 @@
     {
       "number": 92,
       "branch": "phase23a-incremental-dyld-namespaces",
-      "sha": "12d519806590877b5ee8dea4ce8f47606ab54e3c",
+      "sha": "60d5fa22404a4684b4eb16da8e9d3a8b93255c40",
       "title": "phase23a: transactional incremental macho loading and symbol namespaces",
       "url": "https://github.com/kallmek3nny/ios-27/pull/92",
-      "updated_at": "2026-10-29T21:16:14Z",
+      "updated_at": "2026-10-29T21:17:07Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 93,
+      "branch": "phase23e/native-app-integration-harness",
+      "sha": "54551e6a7a3a6ea22fb1615b8043e31d94a536f4",
+      "title": "phase 23e: standalone compiler-linked darwin app integration harness",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/93",
+      "updated_at": "2026-10-29T21:17:02Z",
       "status": "unmerged: not counted"
     },
     {
@@ -117,17 +126,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "phase23e/native-app-integration-harness",
-      "sha": "ea498c25c1174b1444ce4208074092398a9f0306",
-      "ahead_by": 6,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-29T21:15:56Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase23e%2Fnative-app-integration-harness",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 91,
@@ -328,9 +327,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 11,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:16:50Z"
+  "observed_at": "2026-10-29T21:17:36Z"
 }
