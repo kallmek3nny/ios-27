@@ -7,11 +7,18 @@ workaround is applied only to bounded MH_OBJECT input (as in phase19b).
 from __future__ import annotations
 import os
 import pathlib
+import shutil
 import struct
 import subprocess
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+LINKER = os.getenv('PHASE24C_LINKER') or next(
+    (name for name in ('ld64.lld', 'ld64.lld-20', 'ld64.lld-19',
+                       'ld64.lld-18', 'ld64.lld-17')
+     if shutil.which(name)), '')
+if not LINKER:
+    raise SystemExit('phase24c: missing ld64.lld (tried versioned LLVM linkers)')
 LIBS = {
     "alpha": (),
     "beta": ("alpha",),
@@ -103,7 +110,7 @@ EXPORTS = {
 
 
 def link(inputs: list[pathlib.Path], out: pathlib.Path, kind: str) -> None:
-    args = [os.getenv('PHASE24C_LINKER', 'ld64.lld'), '-arch', 'arm64',
+    args = [LINKER, '-arch', 'arm64',
             '-platform_version', 'macos', '13.0', '13.0',
             '-undefined', 'dynamic_lookup', '-fixup_chains',
             '-o', str(out)]
