@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "agent/phase22c-transactional-dyld-graph",
-      "sha": "0fd74051cd4e341858d9a55087e03bab74742acd",
+      "sha": "9350787f27c3ea761abe7d67a379b9ac95b259aa",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "pr_number": 83,
       "ci": "running",
@@ -46,10 +46,10 @@
     },
     {
       "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "a738ae98260203c4b8a95398cfe3ab3839a4a7bf",
+      "sha": "d9d07302bb01fe0b8b1169ca3d8d556e35a14943",
       "url": "https://github.com/kallmek3nny/ios-27/pull/84",
       "pr_number": 84,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 10,
       "possibly_truncated": false,
@@ -401,7 +401,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/84",
         "source_files": 4,
         "fixture_files": 4,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase22a-guest-address-spaces",
@@ -719,5 +719,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:16:33Z"
+  "observed_at": "2026-10-29T00:17:01Z"
 }
