@@ -4,7 +4,13 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **9** · audited base: `9193cdee3bd7`
+candidate branches with mapped changes: **8** · audited base: `9193cdee3bd7`
+
+### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
+
+head: `ad180562e914` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 7 test/fixture files, +1448/-0 lines
 
 ### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
 
@@ -19,12 +25,6 @@ head: `7e29a48f2fd6` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 3 source files, 9 test/fixture files, +1109/-0 lines
   - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_fail_stage`, `ios27_22a_map`, `ios27_22a_map_stack`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`
-
-### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
-
-head: `ad180562e914` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 7 test/fixture files, +1448/-0 lines
 
 ### [phase22b-darwin-bsd-capability-20261028](https://github.com/kallmek3nny/ios-27/pull/86)
 
@@ -61,13 +61,6 @@ head: `9ef58a1bf4cc` · ci: **passing_checks** · unmerged, not credited.
 - **libsystem_pthread**: 2 source files, 12 test/fixture files, +2487/-0 lines
   - candidate declarations: `ios27_21d_create`, `ios27_21d_destroy`, `ios27_21d_once`, `ios27_21d_rdlock`, `ios27_21d_runtime_create`, `ios27_21d_runtime_destroy`, `ios27_21d_timedrdlock`, `ios27_21d_timedwrlock`, `ios27_21d_tryrdlock`, `ios27_21d_trywrlock`, `ios27_21d_unlock`, `ios27_21d_usage`
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +47/-0 lines
-
-### [phase21a/darwin-pthread-abi-bridge](https://github.com/kallmek3nny/ios-27/tree/phase21a%2Fdarwin-pthread-abi-bridge)
-
-head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
-
-- **libsystem_pthread**: 2 source files, 19 test/fixture files, +2922/-0 lines
-  - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
