@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "scope": "phase20-22",
+  "method": "merged source-bearing PR workstreams / fixed 20 planned phase workstreams; not iOS compatibility",
+  "repository": "kallmek3nny/ios-27",
+  "source_sha": "2cd40791b17acdf757fcea1102d7e705cbf645e6",
+  "delivered": 11,
+  "active": 9,
+  "total": 20,
+  "percent": 55,
+  "groups": [
+    {
+      "phase": "20",
+      "label": "Objective-C / libSystem prototypes",
+      "merged": 5,
+      "active": 0,
+      "total": 5,
+      "percent": 100
+    },
+    {
+      "phase": "21",
+      "label": "Darwin pthread and synchronization",
+      "merged": 5,
+      "active": 5,
+      "total": 10,
+      "percent": 50
+    },
+    {
+      "phase": "22",
+      "label": "Guest VM, BSD, dyld, ObjC, Mach IPC",
+      "merged": 1,
+      "active": 4,
+      "total": 5,
+      "percent": 20
+    }
+  ],
+  "workstreams": [
+    {
+      "phase": "20a",
+      "state": "merged",
+      "pr": 65,
+      "sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
+      "merged_at": "2026-10-28T19:20:17Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "20b",
+      "state": "merged",
+      "pr": 63,
+      "sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/63",
+      "merged_at": "2026-10-28T19:21:00Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "20c",
+      "state": "merged",
+      "pr": 67,
+      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
+      "merged_at": "2026-10-28T19:24:38Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "20d",
+      "state": "merged",
+      "pr": 64,
+      "sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
+      "merged_at": "2026-10-28T19:20:45Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "20e",
+      "state": "merged",
+      "pr": 62,
+      "sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
+      "merged_at": "2026-10-28T19:22:22Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21a",
+      "state": "active",
+      "pr": 69,
+      "sha": "9da58aba0436a2a4427f8e73d4b09803a9134025",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/69",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "21b",
+      "state": "merged",
+      "pr": 71,
+      "sha": "f537b71ce1aba4cc1146abb46e353e1e4114e087",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/71",
+      "merged_at": "2026-10-28T19:54:07Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21c",
+      "state": "merged",
+      "pr": 70,
+      "sha": "51d84a022f677e53100ca2d0ab5ed050dfa9c80e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/70",
+      "merged_at": "2026-10-28T19:59:38Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21d",
+      "state": "active",
+      "pr": 73,
+      "sha": "9ef58a1bf4cc0eeef65853f66325720176b5a36b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/73",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "21e",
+      "state": "merged",
+      "pr": 75,
+      "sha": "bed479092c72f102aa92dbd9acef0e9aa78b1aa0",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/75",
+      "merged_at": "2026-10-28T20:14:11Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21f",
+      "state": "active",
+      "pr": 78,
+      "sha": "6acea7b2995ce6255f7e710734644940e9b225c1",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/78",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "21g",
+      "state": "merged",
+      "pr": 81,
+      "sha": "6a95c1a393c3c5e50a0bdca477880b35da436656",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/81",
+      "merged_at": "2026-10-28T21:16:51Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21h",
+      "state": "merged",
+      "pr": 79,
+      "sha": "302a34581d62fb43da479c100150c0e3cb27fe6e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/79",
+      "merged_at": "2026-10-28T21:15:49Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "21i",
+      "state": "active",
+      "pr": 80,
+      "sha": "b552d849941698465ae2030cb0e5bb0895edf449",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/80",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "21j",
+      "state": "active",
+      "pr": 77,
+      "sha": "9e15234388e206983bdf73dd57a3628f2d6ae037",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/77",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "22a",
+      "state": "active",
+      "pr": 85,
+      "sha": "7e29a48f2fd65611aa586af647bd15cd030ee370",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "22b",
+      "state": "active",
+      "pr": 86,
+      "sha": "e909e8faed23689941bd13caebc97e7b3e5d6c69",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/86",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "22c",
+      "state": "active",
+      "pr": 83,
+      "sha": "1a277ef5e8293a193339be238dc917f805771342",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+      "evidence": "unmerged PR with source-code diff"
+    },
+    {
+      "phase": "22d",
+      "state": "merged",
+      "pr": 84,
+      "sha": "94c1c84782b47959b05024d3253082ce9a212d9b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "merged_at": "2026-10-29T00:22:29Z",
+      "evidence": "merged PR with source-code diff"
+    },
+    {
+      "phase": "22e",
+      "state": "active",
+      "pr": 87,
+      "sha": "ad180562e914dcd2c74875dfb0933f4fb9ca6ab9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/87",
+      "evidence": "unmerged PR with source-code diff"
+    }
+  ]
+}

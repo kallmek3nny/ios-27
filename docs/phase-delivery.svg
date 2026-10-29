@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="370" viewBox="0 0 780 370" role="img" aria-label="phase 20-22 engineering PR delivery percentage, separate from iOS compatibility">
+<style>@media(prefers-color-scheme:light){.txt{fill:#1f2328}.muted{fill:#59636e}.track{fill:#d1d9e0}}</style>
+<text x="26" y="33" font-size="22" font-family="sans-serif" font-weight="650" fill="#e6edf3" class="txt">Agent engineering delivery</text>
+<text x="26" y="54" font-size="12" font-family="sans-serif" fill="#8b949e" class="muted">Merged workstreams / fixed phases 20a–22e · not percent of iOS compatibility</text>
+<text x="26" y="120" font-size="55" font-family="sans-serif" font-weight="750" fill="#58a6ff">55.0%</text>
+<text x="260" y="109" font-size="15" font-family="sans-serif" fill="#e6edf3" class="txt">11 / 20 workstreams merged</text>
+<text x="260" y="133" font-size="13" font-family="sans-serif" fill="#a371f7">9 open source-bearing PRs</text>
+<rect x="26" y="154" width="724" height="16" rx="7" fill="#30363d" class="track"/>
+<rect x="26" y="154" width="398.20" height="16" rx="7" fill="#58a6ff"/>
+<rect x="424.20" y="154" width="325.80" height="16" fill="#a371f7"/>
+<text x="26" y="214" font-size="14" font-family="sans-serif" fill="#e6edf3" class="txt">Phase 20 · Objective-C / libSystem prototypes</text>
+<text x="746" y="214" text-anchor="end" font-size="14" font-family="sans-serif" font-weight="600" fill="#58a6ff">100.0%</text>
+<rect x="26" y="222" width="724" height="9" rx="4" fill="#30363d" class="track"/>
+<rect x="26" y="222" width="724.00" height="9" rx="4" fill="#58a6ff"/>
+<text x="26" y="261" font-size="14" font-family="sans-serif" fill="#e6edf3" class="txt">Phase 21 · Darwin pthread and synchronization</text>
+<text x="746" y="261" text-anchor="end" font-size="14" font-family="sans-serif" font-weight="600" fill="#58a6ff">50.0%</text>
+<rect x="26" y="269" width="724" height="9" rx="4" fill="#30363d" class="track"/>
+<rect x="26" y="269" width="362.00" height="9" rx="4" fill="#58a6ff"/>
+<rect x="388.00" y="269" width="362.00" height="9" fill="#a371f7"/>
+<text x="26" y="308" font-size="14" font-family="sans-serif" fill="#e6edf3" class="txt">Phase 22 · Guest VM, BSD, dyld, ObjC, Mach IPC</text>
+<text x="746" y="308" text-anchor="end" font-size="14" font-family="sans-serif" font-weight="600" fill="#58a6ff">20.0%</text>
+<rect x="26" y="316" width="724" height="9" rx="4" fill="#30363d" class="track"/>
+<rect x="26" y="316" width="144.80" height="9" rx="4" fill="#58a6ff"/>
+<rect x="170.80" y="316" width="579.20" height="9" fill="#a371f7"/>
+<text x="26" y="361" font-size="11" font-family="sans-serif" fill="#8b949e" class="muted">Blue = merged source PR · purple = open source PR · gray = not merged</text>
+</svg>
