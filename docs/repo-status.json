@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 96,
+      "branch": "agent/phase23b-lifecycle-20261029",
+      "sha": "e1f1da6670fd3592c8fa92277fba33216eeb5a34",
+      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
+      "updated_at": "2026-10-29T21:27:16Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 94,
       "branch": "phase23c-objc-native-bridge",
       "sha": "1646e36b3b8b6bf6ecb77fc114a0844434abd4ed",
@@ -24,15 +33,6 @@
       "title": "phase 23d: bounded syscall-to-Mach services and guest descriptor bridge",
       "url": "https://github.com/kallmek3nny/ios-27/pull/95",
       "updated_at": "2026-10-29T21:26:02Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 96,
-      "branch": "agent/phase23b-lifecycle-20261029",
-      "sha": "311ef96195d22c4098ce0b8a86f6504cecaa3deb",
-      "title": "phase 23b: bounded Mach-O dylib constructor/terminator lifecycle",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/96",
-      "updated_at": "2026-10-29T21:24:49Z",
       "status": "unmerged: not counted"
     },
     {
@@ -358,5 +358,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-29T21:26:37Z"
+  "observed_at": "2026-10-29T21:27:54Z"
 }
