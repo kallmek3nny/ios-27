@@ -7,11 +7,76 @@
   "candidate_count": 9,
   "candidates": [
     {
+      "branch": "phase22d-objc-runtime-concurrency-20261028",
+      "sha": "a6e9e7db6d8d2ad5eaedf7e1ba8dbc9b22a859b9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
+      "pr_number": 84,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 10,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 4,
+          "additions": 1291,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase22d_metadata.h",
+            "include/ios27/phase22d_runtime.h",
+            "src/phase22d_metadata.c",
+            "src/phase22d_runtime.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase22a-guest-address-spaces",
+      "sha": "3c66c9606bf1a2f19bfca2bd96846f46c5cd20a5",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/85",
+      "pr_number": 85,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 3,
+          "fixture_files": 7,
+          "additions": 958,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_22a_close",
+            "ios27_22a_copyin",
+            "ios27_22a_copyout",
+            "ios27_22a_create",
+            "ios27_22a_destroy",
+            "ios27_22a_fail_map_after",
+            "ios27_22a_map",
+            "ios27_22a_pin",
+            "ios27_22a_probe",
+            "ios27_22a_protect",
+            "ios27_22a_restricted_probe",
+            "ios27_22a_snapshot"
+          ],
+          "example_paths": [
+            "include/ios27/phase22a_space.h",
+            "src/phase22a_child.c",
+            "src/phase22a_space.c",
+            "tests/phase22a-darwin.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "agent/phase22c-transactional-dyld-graph",
       "sha": "b47b5c9176a637f8a284db8c99bfcd54cda8f79f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/83",
       "pr_number": 83,
-      "ci": "not_checked",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -20,11 +85,12 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 4,
-          "additions": 865,
+          "additions": 873,
           "deletions": 0,
           "symbols_preview": [
             "ios27_22c_acquire",
             "ios27_22c_create",
+            "ios27_22c_create_with_paths",
             "ios27_22c_destroy",
             "ios27_22c_initialize",
             "ios27_22c_load",
@@ -40,32 +106,6 @@
             "src/phase22c_graph.c",
             "tests/phase22c-compiled.c",
             "tests/phase22c-fixture-consumer.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase22d-objc-runtime-concurrency-20261028",
-      "sha": "63d7c42bae6df4d8a88ffc51615c1c1ac74af01c",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/84",
-      "pr_number": 84,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 4,
-          "fixture_files": 4,
-          "additions": 1285,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase22d_metadata.h",
-            "include/ios27/phase22d_runtime.h",
-            "src/phase22d_metadata.c",
-            "src/phase22d_runtime.c"
           ]
         }
       ]
@@ -273,8 +313,8 @@
     {
       "branch": "phase21e-exit-cancellation-20261028",
       "sha": "298e5e8bcf283d9f6babba798f1f3ae0fb89505e",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/76",
-      "pr_number": 76,
+      "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
+      "pr_number": null,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
@@ -292,45 +332,6 @@
             "tests/phase21e-pthread-error-rollback.c",
             "tests/phase21e-cross-runtime-thread-exit.c",
             "tests/phase21e-exit-token-boundary.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase22a-guest-address-spaces",
-      "sha": "3c66c9606bf1a2f19bfca2bd96846f46c5cd20a5",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
-      "pr_number": null,
-      "ci": "running",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 3,
-          "fixture_files": 7,
-          "additions": 958,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_22a_close",
-            "ios27_22a_copyin",
-            "ios27_22a_copyout",
-            "ios27_22a_create",
-            "ios27_22a_destroy",
-            "ios27_22a_fail_map_after",
-            "ios27_22a_map",
-            "ios27_22a_pin",
-            "ios27_22a_probe",
-            "ios27_22a_protect",
-            "ios27_22a_restricted_probe",
-            "ios27_22a_snapshot"
-          ],
-          "example_paths": [
-            "include/ios27/phase22a_space.h",
-            "src/phase22a_child.c",
-            "src/phase22a_space.c",
-            "tests/phase22a-darwin.c"
           ]
         }
       ]
@@ -375,7 +376,7 @@
       },
       {
         "branch": "phase21e-exit-cancellation-20261028",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/76",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028",
         "source_files": 1,
         "fixture_files": 5,
         "ci": "passing_checks"
@@ -392,25 +393,25 @@
     ],
     "unclassified": [
       {
-        "branch": "agent/phase22c-transactional-dyld-graph",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
-        "source_files": 2,
-        "fixture_files": 4,
-        "ci": "not_checked"
-      },
-      {
         "branch": "phase22d-objc-runtime-concurrency-20261028",
         "url": "https://github.com/kallmek3nny/ios-27/pull/84",
         "source_files": 4,
         "fixture_files": 4,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase22a-guest-address-spaces",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/85",
         "source_files": 3,
         "fixture_files": 7,
-        "ci": "running"
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase22c-transactional-dyld-graph",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/83",
+        "source_files": 2,
+        "fixture_files": 4,
+        "ci": "passing_checks"
       }
     ]
   },
@@ -721,5 +722,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T00:17:47Z"
+  "observed_at": "2026-10-29T00:18:22Z"
 }

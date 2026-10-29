@@ -6,18 +6,25 @@
 
 candidate branches with mapped changes: **9** · audited base: `0d9edb176c31`
 
-### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
-
-head: `b47b5c9176a6` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 4 test/fixture files, +865/-0 lines
-  - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
-
 ### [phase22d-objc-runtime-concurrency-20261028](https://github.com/kallmek3nny/ios-27/pull/84)
 
-head: `63d7c42bae6d` · ci: **passing_checks** · unmerged, not credited.
+head: `a6e9e7db6d8d` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 4 source files, 4 test/fixture files, +1285/-0 lines
+- **unclassified**: 4 source files, 4 test/fixture files, +1291/-0 lines
+
+### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/pull/85)
+
+head: `3c66c9606bf1` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 3 source files, 7 test/fixture files, +958/-0 lines
+  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`, `ios27_22a_snapshot`
+
+### [agent/phase22c-transactional-dyld-graph](https://github.com/kallmek3nny/ios-27/pull/83)
+
+head: `b47b5c9176a6` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 4 test/fixture files, +873/-0 lines
+  - candidate declarations: `ios27_22c_acquire`, `ios27_22c_create`, `ios27_22c_create_with_paths`, `ios27_22c_destroy`, `ios27_22c_initialize`, `ios27_22c_load`, `ios27_22c_order`, `ios27_22c_pins`, `ios27_22c_release`, `ios27_22c_resolve`, `ios27_22c_symbol`, `ios27_22c_unload`
 
 ### [phase21j-deterministic-sync-diagnostics](https://github.com/kallmek3nny/ios-27/pull/77)
 
@@ -55,18 +62,11 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 - **libsystem_pthread**: 2 source files, 19 test/fixture files, +2922/-0 lines
   - candidate declarations: `ios27_21a_attach_thread`, `ios27_21a_call`, `ios27_21a_create`, `ios27_21a_create_regions`, `ios27_21a_destroy`, `ios27_21a_detach_thread`, `ios27_21a_register_once`, `ios27_21a_release_once`, `ios27_21a_validate`, `ios27_21a_validate_access`
 
-### [phase21e-exit-cancellation-20261028](https://github.com/kallmek3nny/ios-27/pull/76)
+### [phase21e-exit-cancellation-20261028](https://github.com/kallmek3nny/ios-27/tree/phase21e-exit-cancellation-20261028)
 
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [phase22a-guest-address-spaces](https://github.com/kallmek3nny/ios-27/tree/phase22a-guest-address-spaces)
-
-head: `3c66c9606bf1` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 7 test/fixture files, +958/-0 lines
-  - candidate declarations: `ios27_22a_close`, `ios27_22a_copyin`, `ios27_22a_copyout`, `ios27_22a_create`, `ios27_22a_destroy`, `ios27_22a_fail_map_after`, `ios27_22a_map`, `ios27_22a_pin`, `ios27_22a_probe`, `ios27_22a_protect`, `ios27_22a_restricted_probe`, `ios27_22a_snapshot`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
