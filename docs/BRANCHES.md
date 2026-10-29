@@ -8,7 +8,7 @@ candidate branches with mapped changes: **20** · audited base: `1dd112410e43`
 
 ### [phase24a-global-dyld-identity](https://github.com/kallmek3nny/ios-27/pull/97)
 
-head: `982d7575cdc5` · ci: **not_checked** · unmerged, not credited.
+head: `982d7575cdc5` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 2 test/fixture files, +970/-0 lines
   - candidate declarations: `ios27_phase24a_close`, `ios27_phase24a_create`, `ios27_phase24a_destroy`, `ios27_phase24a_flat_symbol`, `ios27_phase24a_open`, `ios27_phase24a_refs`, `ios27_phase24a_release`, `ios27_phase24a_stats_read`, `ios27_phase24a_symbol`
