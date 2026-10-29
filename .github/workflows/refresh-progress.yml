@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           timeout 120s python3 tools/refresh_repo_status.py --repo "$GITHUB_REPOSITORY" --output docs/repo-status.json
-          timeout 150s python3 tools/scan_branch_activity.py --repo "$GITHUB_REPOSITORY"
+          timeout 240s python3 tools/scan_branch_activity.py --repo "$GITHUB_REPOSITORY"
           timeout 15s python3 tools/progress.py
           timeout 15s node tools/compat_blocks.cjs
           timeout 15s python3 tools/scan_branch_activity.py --self-test

@@ -6,6 +6,7 @@ Only the reviewed compatibility catalog controls completed/verified squares.
 """
 import argparse
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import json
 import os
@@ -46,6 +47,14 @@ GROUPS = [(name, re.compile(regex)) for name, regex in GROUPS]
 ALLOWED_CI = ("native tests", "capability progress", "phase19b real linked darwin dylibs")
 
 
+# Phase-specific source and fixture prefixes are more reliable than agent
+# branch names. Never claim that a source diff proves API compatibility.
+PHASE_GROUP = {
+    "22a": "sandbox", "22b": "bsd-calls", "22c": "dyld-engine",
+    "22d": "objc-host-model", "22e": "mach-ipc",
+}
+PHASE_NAME = re.compile(r"^phase(21[a-j]|22[a-e])[-_]")
+
 def get_group(filename):
     matched = next((name for name, regex in GROUPS if regex.search(filename)), None)
     if matched:
@@ -56,6 +65,9 @@ def get_group(filename):
     if not filename.startswith(("src/", "include/ios27/", "tests/", "tools/phase")):
         return None
     name = filename.rsplit("/", 1)[-1].lower()
+    phase = PHASE_NAME.match(name)
+    if phase:
+        return "libsystem-pthread" if phase.group(1).startswith("21") else PHASE_GROUP[phase.group(1)]
     if ("pthread" in name or ("libsystem" in name and "thread" in name)
             or ("phase20d" in name and "thread" in name)):
         return "libsystem-pthread"
@@ -83,11 +95,11 @@ def get_group(filename):
 
 
 def is_source(filename):
-    return filename.startswith(("src/", "include/")) and filename.endswith((".c", ".h", ".m", ".mm"))
+    return filename.startswith(("src/", "include/")) and filename.endswith((".c", ".h", ".m", ".mm", ".cc", ".cpp", ".hpp", ".S", ".s"))
 
 
 def is_fixture(filename):
-    return filename.startswith(("tests/", "tools/phase")) and filename.endswith((".c", ".h", ".m", ".py"))
+    return filename.startswith(("tests/", "tools/phase")) and filename.endswith((".c", ".h", ".m", ".py", ".S", ".cc", ".cpp"))
 
 
 def extract_symbols(patch):
@@ -202,10 +214,10 @@ def audit(repo, provenance, get, groups):
         if cand["sha"] not in seen:
             candidates.append(cand)
             seen.add(cand["sha"])
-    candidates = candidates[:16]
+    candidates = candidates[:36]
     mapped = []
     by_group = defaultdict(list)
-    for cand in candidates:
+    def scan_candidate(cand):
         if not SHA.fullmatch(cand["sha"]):
             raise ValueError("invalid candidate hash")
         if cand.get("number"):
@@ -216,12 +228,19 @@ def audit(repo, provenance, get, groups):
         else:
             result = get("/compare/" + sha + "..." + quote(cand["branch"], safe=""))
             if result.get("status") not in ("ahead", "diverged"):
-                continue
+                return None
             files = result.get("files", [])
         if not isinstance(files, list):
             raise ValueError("bad diff response")
-        result = summarize(cand, files, check_runs(cand["sha"], get), set(groups) | {"unclassified"})
-        if result["groups"]:
+        return summarize(cand, files, check_runs(cand["sha"], get),
+                         set(groups) | {"unclassified"})
+
+    # Run bounded independent GitHub reads concurrently. Keep output in
+    # the original recent-first order, regardless of completion order.
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for cand, result in zip(candidates, pool.map(scan_candidate, candidates)):
+            if result is None or not result["groups"]:
+                continue
             mapped.append(result)
             for entry in result["groups"]:
                 by_group[entry["group_id"]].append(
@@ -233,7 +252,7 @@ def audit(repo, provenance, get, groups):
     # audit. This never turns green/amber API tiles on its own.
     merged = []
     merged_groups = defaultdict(list)
-    for item in provenance.get("recent_merged_pull_requests", [])[:12]:
+    def scan_merged(item):
         number = int(item["number"])
         merge_sha = item.get("head_sha", "")
         if number < 1 or not SHA.fullmatch(merge_sha):
@@ -245,20 +264,25 @@ def audit(repo, provenance, get, groups):
                        "url": item["url"], "number": number}
         summary = summarize(merged_cand, changed, "merged_not_compat_verified",
                             set(groups) | {"unclassified"})
-        # Source files, not documentation, CI config or test-only PRs,
-        # make a subsystem eligible for a recently-merged activity marker.
         summary["groups"] = [g for g in summary["groups"] if g["source_files"]]
         if not summary["groups"]:
-            continue
+            return None
         summary["status"] = "merged source; compatibility review pending"
         summary["merged_at"] = item.get("merged_at", "")
-        merged.append(summary)
-        for g in summary["groups"]:
-            merged_groups[g["group_id"]].append(
-                {"pr_number": number, "url": item["url"],
-                 "source_files": g["source_files"],
-                 "fixture_files": g["fixture_files"],
-                 "status": "merged source, not necessarily compatible"})
+        return summary
+
+    merged_items = provenance.get("recent_merged_pull_requests", [])[:28]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for summary in pool.map(scan_merged, merged_items):
+            if summary is None:
+                continue
+            merged.append(summary)
+            for g in summary["groups"]:
+                merged_groups[g["group_id"]].append(
+                    {"pr_number": summary["pr_number"], "url": summary["url"],
+                     "source_files": g["source_files"],
+                     "fixture_files": g["fixture_files"],
+                     "status": "merged source, not necessarily compatible"})
     return {"schema": 1, "repository": repo, "main_source_sha": sha,
             "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
             "candidates_checked": len(candidates), "candidate_count": len(mapped),
@@ -288,6 +312,13 @@ def self_test():
     assert get_group("include/ios27/libsystem21g_cond.h") == "libsystem-pthread"
     assert get_group("src/libsystem21h_lifecycle.c") == "libsystem-pthread"
     assert get_group("src/libsystem21e_tls.c") == "libsystem-pthread"
+    assert get_group("src/phase22a_vm.c") == "sandbox"
+    assert get_group("tests/phase22a-stress.c") == "sandbox"
+    assert get_group("src/phase22b_dispatch.c") == "bsd-calls"
+    assert get_group("src/phase22c_graph.c") == "dyld-engine"
+    assert get_group("src/phase22d_runtime.c") == "objc-host-model"
+    assert get_group("src/phase22e_mig.c") == "mach-ipc"
+    assert get_group("tests/phase21j-sync.c") == "libsystem-pthread"
     phase20d = summarize(
         {"branch": "phase20d-darwin-threading", "sha": "b" * 40,
          "url": "https://github.com/example/repo/tree/phase20d"},
