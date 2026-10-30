@@ -8,6 +8,70 @@
   "candidate_count": 31,
   "candidates": [
     {
+      "branch": "phase26a-native-libc-abi",
+      "sha": "872a5317c1d34ce4b55511915efb584cb222cab9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "pr_number": 109,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 731,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_26a_calloc",
+            "ios27_26a_free",
+            "ios27_26a_getenv",
+            "ios27_26a_last_error",
+            "ios27_26a_live_bytes",
+            "ios27_26a_malloc",
+            "ios27_26a_memcmp",
+            "ios27_26a_memcpy",
+            "ios27_26a_memmove",
+            "ios27_26a_memset",
+            "ios27_26a_realloc",
+            "ios27_26a_setenv"
+          ],
+          "example_paths": [
+            "include/ios27/phase26a_libc.h",
+            "src/phase26a_libc.c",
+            "tests/phase26a-client.c",
+            "tests/phase26a-executable.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase26c-headless-graphics-interop-20261030",
+      "sha": "90a78d0307facd1831c025c613467d4b3be89a0b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+      "pr_number": 111,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 736,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase26c_graphics.h",
+            "src/phase26c_graphics.c",
+            "tests/phase26c-headless.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase26d-coreanimation-compositor",
       "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
@@ -48,7 +112,7 @@
       "sha": "6fa5c1aaf74fd8214ffda5cf9d56bf84ce94f917",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
       "pr_number": 112,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -97,70 +161,6 @@
             "src/phase26b_bsd.c",
             "tests/phase26b-arm64.c",
             "tests/phase26b-bsd.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase26a-native-libc-abi",
-      "sha": "4b4de36eb4534c0706476f88a3a9d7b2afe1e3b0",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "pr_number": 109,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 731,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_26a_calloc",
-            "ios27_26a_free",
-            "ios27_26a_getenv",
-            "ios27_26a_last_error",
-            "ios27_26a_live_bytes",
-            "ios27_26a_malloc",
-            "ios27_26a_memcmp",
-            "ios27_26a_memcpy",
-            "ios27_26a_memmove",
-            "ios27_26a_memset",
-            "ios27_26a_realloc",
-            "ios27_26a_setenv"
-          ],
-          "example_paths": [
-            "include/ios27/phase26a_libc.h",
-            "src/phase26a_libc.c",
-            "tests/phase26a-client.c",
-            "tests/phase26a-executable.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase26c-headless-graphics-interop-20261030",
-      "sha": "8d27bffa9c4e534bd37526adea04154f15659343",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
-      "pr_number": 111,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 1,
-          "additions": 736,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase26c_graphics.h",
-            "src/phase26c_graphics.c",
-            "tests/phase26c-headless.c"
           ]
         }
       ]
@@ -1241,6 +1241,20 @@
     ],
     "unclassified": [
       {
+        "branch": "phase26a-native-libc-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "running"
+      },
+      {
+        "branch": "phase26c-headless-graphics-interop-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "running"
+      },
+      {
         "branch": "phase26d-coreanimation-compositor",
         "url": "https://github.com/kallmek3nny/ios-27/pull/108",
         "source_files": 2,
@@ -1252,27 +1266,13 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/112",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase26b-bsd-capabilities-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/110",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase26a-native-libc-abi",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-        "source_files": 2,
-        "fixture_files": 5,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase26c-headless-graphics-interop-20261030",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/111",
-        "source_files": 2,
-        "fixture_files": 1,
         "ci": "passing_checks"
       },
       {
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:04:07Z"
+  "observed_at": "2026-10-30T13:04:46Z"
 }
