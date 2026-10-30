@@ -61,9 +61,11 @@ jobs:
         shell: bash
         run: timeout 180s ctest --test-dir build --output-on-failure --timeout 60
       - name: link nine genuine ObjC2 Mach-O fixtures and capture fail-closed evidence
+        if: ${{ !cancelled() }}
         shell: bash
         run: timeout 300s python3 tools/phase25e-build.py --output build/phase25e --rounds 100
       - name: phase25e deterministic graph, metadata, negative, concurrency tests
+        if: ${{ !cancelled() }}
         shell: bash
         run: timeout 180s python3 tests/phase25e-integration.py -v
       - name: preserve exact phase25e evidence
