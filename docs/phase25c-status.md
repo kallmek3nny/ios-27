@@ -47,13 +47,11 @@ checks the generated assembly for `objc_retain`, `objc_release`,
 `objc_msgSend`. On a macOS worker it also requests a real arm64 Mach-O
 dynamic library from the system linker.
 
-**Critical limitation:** the ARM64 fixture is compiler-produced and linked,
+**Executed ARC evidence:** `tests/phase25c-arc-native.m` is separately compiled with ARC for the host target and linked to `src/phase25c_lifetime.c`. Its compiler-generated retain/strong-store, `objc_initWeak`, retained weak load, weak destroy and nested pool calls execute 256 times in CI, including on an Apple Silicon ARM64 macOS runner. The host checks return to exactly one reference with zero outstanding weak slots. This is genuine compiler-generated ARC execution, not handwritten simulation. `tests/phase25c-image-a.c` and `phase25c-image-b.c` additionally link as separate native shared images against one runtime and exercise 30k inter-image strong/weak transitions; these two images use typed C wrappers, not compiler-generated ARC.\n\n**Critical limitation:** the separate metadata-rich ARM64 fixture is compiler-produced and linked,
 but its machine code is not executed by the standalone x86_64 ownership
-tests. No cross-dylib Darwin ARC execution, cross-guest dispatcher binding,
+tests. No cross-dylib compiler-generated Darwin ARC execution, cross-guest dispatcher binding,
 or real ABI dispatch correctness can be claimed from symbol inspection.
-The exported `objc_*` functions tested on the host are genuine runtime
-ownership entrypoints, but are not evidence of compiler-generated Darwin
-instructions running. Integration requires phase25a image-binding, phase25b
+The executed native ARM64 ARC fixture verifies its supported ownership calls. It does not prove real Objective-C method dispatch or cross-image guest binding. Integration requires phase25a image-binding, phase25b
 typed native dispatch, and verified guest load/unload behavior.
 
 ### Explicitly unsupported / fail-closed
@@ -84,7 +82,7 @@ compile/link (120s), and test execution (180s). No configure or Git/GH
 subprocesses are spawned. The dedicated PR workflow has a 15-minute job
 timeout and separate Linux and macOS builds.
 
-Darwin ASan runs without leak detection because Apple ASan does not support that feature; Linux ASan leak detection remains enabled.\n\nThe deterministic test suite performs at least 240k reference transitions
+Darwin ASan runs without leak detection because Apple ASan does not support that feature; Linux ASan leak detection remains enabled.\n\nThe deterministic test suite and the independent shared-image integration perform at least 240k reference transitions
 and 140k synchronized weak loads, confirms weak-zeroing before dealloc,
 deferred destruction while dispatch-pinned, pool LIFO, cross-thread pool
 drains, class-unload rejection, failed-allocation rollback, 24 repeated
