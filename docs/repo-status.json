@@ -11,10 +11,19 @@
     {
       "number": 102,
       "branch": "phase25c-arc-ownership-20261030",
-      "sha": "50a4f45342118d7d4713c3169d528bd2647dcf3d",
+      "sha": "da9994cc5bd222549218e6f9ce42fa79b3cda398",
       "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "updated_at": "2026-10-30T10:51:51Z",
+      "updated_at": "2026-10-30T10:52:45Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 103,
+      "branch": "agent/phase25e-objc-app-integration-20261030",
+      "sha": "8e619cdd2dc56407abad9de74703f65fb0ee6119",
+      "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/103",
+      "updated_at": "2026-10-30T10:52:39Z",
       "status": "unmerged: not counted"
     },
     {
@@ -210,20 +219,11 @@
   "ahead_branches": [
     {
       "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "6a8e094a4779392d385ff0d0c36c7a807755e8c6",
-      "ahead_by": 70,
+      "sha": "e6928cf136c5781e00012810476cdf34853a65aa",
+      "ahead_by": 73,
       "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:52:05Z",
+      "last_commit_at": "2026-10-30T10:53:17Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "8e619cdd2dc56407abad9de74703f65fb0ee6119",
-      "ahead_by": 65,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:51:55Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
       "status": "unmerged: not counted"
     },
     {
@@ -436,9 +436,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 13,
+    "branches_scanned": 12,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:52:17Z"
+  "observed_at": "2026-10-30T10:53:19Z"
 }
