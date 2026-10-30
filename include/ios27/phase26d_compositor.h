@@ -24,6 +24,7 @@ typedef struct {
 typedef struct {
     uint8_t *pixels; /* caller-owned premultiplied RGBA8 */
     uint32_t width, height, stride;
+    size_t capacity; /* accessible bytes from pixels, including row gaps */
 } phase26d_frame;
 typedef struct {
     uint64_t commits, mutations, frames, image_bytes, live_images;
@@ -47,7 +48,7 @@ phase26d_result phase26d_destroy(phase26d_context *ctx, phase26d_id id);
 phase26d_result phase26d_set(phase26d_context *ctx, phase26d_id id, const phase26d_layer_desc *d);
 phase26d_result phase26d_parent(phase26d_context *ctx, phase26d_id child, phase26d_id parent);
 phase26d_result phase26d_upload(phase26d_context *ctx, phase26d_id id, const uint8_t *pixels,
-                                uint32_t width, uint32_t height, uint32_t stride);
+                                uint32_t width, uint32_t height, uint32_t stride, size_t source_bytes);
 phase26d_result phase26d_animate(phase26d_context *ctx, phase26d_id id, phase26d_anim_kind kind,
                                  double from, double to, uint64_t start_ns, uint64_t duration_ns);
 phase26d_result phase26d_cancel(phase26d_context *ctx, phase26d_id id, phase26d_anim_kind kind);

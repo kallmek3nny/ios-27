@@ -58,13 +58,13 @@ static void golden_test(void) {
     CHECK(phase26d_parent(c,blue,red));
     CHECK(phase26d_commit(c));
     uint8_t buf[4*4*4]; memset(buf,0xa5,sizeof buf);
-    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16}));
+    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16,sizeof buf}));
     for (unsigned y=0;y<4;y++) for (unsigned x=0;x<4;x++) {
         if (x>=1 && x<3 && y>=1 && y<3) expect_pixel(buf,16,x,y,127,0,128,255);
         else expect_pixel(buf,16,x,y,255,0,0,255);
     }
     uint8_t golden[sizeof buf]; memcpy(golden,buf,sizeof golden);
-    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16}));
+    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16,sizeof buf}));
     assert(memcmp(buf,golden,sizeof buf)==0);
 
     /* upload is a copy, not borrowed storage; bad premultiplication is rejected. */
@@ -73,18 +73,20 @@ static void golden_test(void) {
     d=phase26d_default_desc(); d.x=0; d.y=0; d.width=2; d.height=2;
     d.rgba[3]=0; d.z=10;
     phase26d_id overlay=create(c,d);
-    CHECK(phase26d_upload(c,overlay,tex,2,2,8));
+    CHECK(phase26d_upload(c,overlay,tex,2,2,8,sizeof tex));
+    assert(phase26d_upload(c,overlay,tex,2,2,8,15)==PHASE26D_INVALID);
+    assert(phase26d_render(c,(phase26d_frame){buf,4,4,16,15})==PHASE26D_INVALID);
     tex[0]=255;
     uint8_t bad[4]={255,0,0,1};
-    assert(phase26d_upload(c,overlay,bad,1,1,4)==PHASE26D_INVALID);
+    assert(phase26d_upload(c,overlay,bad,1,1,4,sizeof bad)==PHASE26D_INVALID);
     CHECK(phase26d_commit(c));
-    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16}));
+    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16,sizeof buf}));
     expect_pixel(buf,16,0,0,0,255,0,255);
     expect_pixel(buf,16,1,1,0,255,0,255);
     CHECK(phase26d_begin(c));
     CHECK(phase26d_destroy(c,overlay));
     CHECK(phase26d_commit(c));
-    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16}));
+    CHECK(phase26d_render(c,(phase26d_frame){buf,4,4,16,sizeof buf}));
     assert(memcmp(buf,golden,sizeof buf)==0);
     phase26d_free(c);
 }
@@ -134,11 +136,36 @@ static void nested_scene(void) {
     CHECK(phase26d_commit(c));
     uint8_t frame[32*32*4], again[sizeof frame];
     CHECK(phase26d_step(c,350));
-    CHECK(phase26d_render(c,(phase26d_frame){frame,32,32,128}));
-    CHECK(phase26d_render(c,(phase26d_frame){again,32,32,128}));
+    CHECK(phase26d_render(c,(phase26d_frame){frame,32,32,128,sizeof frame}));
+    CHECK(phase26d_render(c,(phase26d_frame){again,32,32,128,sizeof again}));
     assert(memcmp(frame,again,sizeof frame)==0);
     phase26d_stats stats; CHECK(phase26d_stats_read(c,&stats));
     assert(stats.model_layers==120 && stats.presented_layers==120);
+    phase26d_free(c);
+}
+typedef struct { phase26d_context *c; phase26d_id id; int accepted; } denied_args;
+static void *foreign_transaction(void *opaque) {
+    denied_args *a=opaque;
+    phase26d_layer_desc d=phase26d_default_desc();
+    if (phase26d_begin(a->c)!=PHASE26D_STATE) a->accepted=1;
+    if (phase26d_set(a->c,a->id,&d)!=PHASE26D_STATE) a->accepted=1;
+    if (phase26d_commit(a->c)!=PHASE26D_STATE) a->accepted=1;
+    if (phase26d_rollback(a->c)!=PHASE26D_STATE) a->accepted=1;
+    return NULL;
+}
+static void foreign_owner_test(void) {
+    phase26d_context *c=phase26d_new(); assert(c);
+    phase26d_layer_desc d=phase26d_default_desc();
+    CHECK(phase26d_begin(c));
+    phase26d_id id=create(c,d);
+    CHECK(phase26d_commit(c));
+    CHECK(phase26d_begin(c));
+    denied_args a={c,id,0};
+    pthread_t thread;
+    assert(pthread_create(&thread,NULL,foreign_transaction,&a)==0);
+    assert(pthread_join(thread,NULL)==0);
+    assert(!a.accepted);
+    CHECK(phase26d_commit(c));
     phase26d_free(c);
 }
 static void stress_test(void) {
@@ -213,6 +240,7 @@ int main(void) {
     golden_test();
     animation_test();
     nested_scene();
+    foreign_owner_test();
     stress_test();
     lifetime_fuzz_and_concurrency();
     puts("phase26d: transactions, exact pixels, animations, 120 layers, 50k commits, 100k mutations, lifetime races PASS");

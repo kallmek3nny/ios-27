@@ -49,3 +49,8 @@ run `timeout 120s clang -std=c11 -Wall -Wextra -Werror -Wpedantic -pthread -Iinc
 then `timeout 180s /tmp/phase26d-core`.
 the dedicated pr workflow runs on linux x86_64 and arm64, with asan/ubsan.
 no docs/progress.json or progress counters are modified by this branch.
+
+## explicit buffer bounds
+\`phase26d_upload\` requires \`source_bytes\` and rejects a last-row read
+outside the declared source span. \`phase26d_frame.capacity\` similarly
+rejects undersized output buffers before clearing or drawing any pixels.

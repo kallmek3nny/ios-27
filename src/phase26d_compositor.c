@@ -226,9 +226,10 @@ phase26d_result phase26d_destroy(phase26d_context *c, phase26d_id id) {
     return PHASE26D_OK;
 }
 phase26d_result phase26d_upload(phase26d_context *c, phase26d_id id, const uint8_t *pixels,
-                                 uint32_t w,uint32_t h,uint32_t stride) {
+                                 uint32_t w,uint32_t h,uint32_t stride,size_t source_bytes) {
     if (!c || !pixels || !w || !h || w>PHASE26D_MAX_IMAGE_DIM || h>PHASE26D_MAX_IMAGE_DIM ||
-        stride<w*4u || stride>1048576u) return PHASE26D_INVALID;
+        stride<w*4u || stride>1048576u ||
+        source_bytes < (size_t)(h-1u)*stride+(size_t)w*4u) return PHASE26D_INVALID;
     size_t bytes=(size_t)w*h*4u;
     if (bytes>PHASE26D_MAX_IMAGE_BYTES) return PHASE26D_LIMIT;
     pthread_mutex_lock(&c->mutex);
@@ -458,6 +459,7 @@ phase26d_result phase26d_render(phase26d_context *c,phase26d_frame f) {
     if (!c || !f.pixels || !f.width || !f.height ||
         f.width>PHASE26D_MAX_FRAME_DIM || f.height>PHASE26D_MAX_FRAME_DIM ||
         f.stride<f.width*4u || f.stride>1048576u ||
+        f.capacity < (size_t)(f.height-1u)*f.stride+(size_t)f.width*4u ||
         (size_t)f.stride*f.height>PHASE26D_MAX_IMAGE_BYTES)
         return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
