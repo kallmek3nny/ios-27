@@ -14,7 +14,7 @@
       "sha": "8d27bffa9c4e534bd37526adea04154f15659343",
       "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
       "url": "https://github.com/kallmek3nny/ios-27/pull/111",
-      "updated_at": "2026-10-30T13:02:26Z",
+      "updated_at": "2026-10-30T13:02:55Z",
       "status": "unmerged: not counted"
     },
     {
@@ -484,5 +484,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:02:48Z"
+  "observed_at": "2026-10-30T13:03:09Z"
 }
