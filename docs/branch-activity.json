@@ -4,9 +4,45 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "55b186d90cf6facc7d1dcdb61ad011a2e12b67d3",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 27,
-  "candidate_count": 27,
+  "candidates_checked": 28,
+  "candidate_count": 28,
   "candidates": [
+    {
+      "branch": "phase26d-coreanimation-compositor",
+      "sha": "740add7323b8cfc309dd8d20e52d4343de65fd6e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+      "pr_number": 108,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 0,
+          "fixture_files": 1,
+          "additions": 16,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase26d-objc-fixture.m"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 756,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase26d_compositor.h",
+            "src/phase26d_compositor.c",
+            "tests/phase26d-core.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
       "sha": "a9bcda8e7432e65d3b0f0a9d581163c91526a23e",
@@ -1047,6 +1083,13 @@
     ],
     "objc-host-model": [
       {
+        "branch": "phase26d-coreanimation-compositor",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+        "source_files": 0,
+        "fixture_files": 1,
+        "ci": "running"
+      },
+      {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/105",
         "source_files": 3,
@@ -1106,6 +1149,13 @@
       }
     ],
     "unclassified": [
+      {
+        "branch": "phase26d-coreanimation-compositor",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "running"
+      },
       {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
@@ -1922,5 +1972,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T12:55:28Z"
+  "observed_at": "2026-10-30T12:57:06Z"
 }

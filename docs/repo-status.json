@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 108,
+      "branch": "phase26d-coreanimation-compositor",
+      "sha": "740add7323b8cfc309dd8d20e52d4343de65fd6e",
+      "title": "phase26d: bounded transactions and deterministic cpu composition",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+      "updated_at": "2026-10-30T12:56:36Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 105,
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
       "sha": "a9bcda8e7432e65d3b0f0a9d581163c91526a23e",
@@ -458,5 +467,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T12:55:23Z"
+  "observed_at": "2026-10-30T12:57:02Z"
 }

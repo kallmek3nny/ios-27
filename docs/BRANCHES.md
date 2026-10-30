@@ -4,7 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **27** · audited base: `55b186d90cf6`
+candidate branches with mapped changes: **28** · audited base: `55b186d90cf6`
+
+### [phase26d-coreanimation-compositor](https://github.com/kallmek3nny/ios-27/pull/108)
+
+head: `740add7323b8` · ci: **running** · unmerged, not credited.
+
+- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +16/-0 lines
+- **unclassified**: 2 source files, 1 test/fixture files, +756/-0 lines
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
 
