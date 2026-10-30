@@ -91,6 +91,7 @@ int main(void) {
     for (unsigned i = 0; i < 16U; ++i) CHECK(observed[i] == 0);
     OK(p26_release(d, cmd));
     OK(p26_command_create(d, &cmd));
+    CHECK(p26_command_copy(d, cmd, cmd, dst, 0, 0, 1) == P26_INVALID);
     p26_mapping map;
     OK(p26_resource_lock(d, src, &map));
     CHECK(((uintptr_t)map.bytes % 64U) == 0);
@@ -99,6 +100,9 @@ int main(void) {
     OK(p26_command_copy(d, cmd, src, dst, 0, 0, 512));
     CHECK(p26_submit(d, queue, cmd, &fence) == P26_BUSY);
     OK(p26_release(d, src)); /* map + command keep it alive */
+    CHECK(p26_release(d, src) == P26_STALE); /* cannot steal internal pins */
+    CHECK(p26_retain(d, src) == P26_STALE);
+    CHECK(p26_read(d, src, 0, observed, 1) == P26_STALE);
     CHECK(p26_device_shutdown(d) == P26_BUSY);
     OK(p26_resource_unlock(d, &map));
     CHECK(p26_resource_unlock(d, &map) == P26_STALE);

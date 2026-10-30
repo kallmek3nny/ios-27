@@ -16,7 +16,7 @@ typedef struct {
 } p26_op;
 typedef struct {
     p26_kind kind;
-    uint32_t generation, refs;
+    uint32_t generation, refs, public_refs;
     uint64_t map_token, sequence;
     int locked;
     void *allocation;
@@ -96,6 +96,7 @@ static p26_status alloc_slot(p26_device *d, p26_kind kind, size_t bytes,
         }
         s->kind = kind;
         s->refs = 1U;
+        s->public_refs = 1U;
         s->bytes = bytes;
         d->used += bytes;
         *out = handle_of(d, i);
@@ -197,7 +198,7 @@ p26_status p26_image_info(p26_device *d, p26_handle image, p26_image_desc *desc)
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, image);
     p26_status st = P26_STALE;
-    if (s) {
+    if (s && s->public_refs) {
         st = is_image(s->kind) ? P26_OK : P26_INVALID;
         if (st == P26_OK) *desc = s->image;
     }
@@ -217,7 +218,8 @@ p26_status p26_retain(p26_device *d, p26_handle h) {
     if (!d) return P26_INVALID;
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, h);
-    p26_status status = s ? ref_slot(s) : P26_STALE;
+    p26_status status = (s && s->public_refs) ? ref_slot(s) : P26_STALE;
+    if (status == P26_OK) ++s->public_refs;
     pthread_mutex_unlock(&d->mu);
     return status;
 }
@@ -225,16 +227,17 @@ p26_status p26_release(p26_device *d, p26_handle h) {
     if (!d) return P26_INVALID;
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, h);
-    if (s) release_slot(d, s);
+    p26_status result = (s && s->public_refs) ? P26_OK : P26_STALE;
+    if (result == P26_OK) { --s->public_refs; release_slot(d, s); }
     pthread_mutex_unlock(&d->mu);
-    return s ? P26_OK : P26_STALE;
+    return result;
 }
 p26_status p26_resource_lock(p26_device *d, p26_handle h, p26_mapping *out) {
     if (!d || !out) return P26_INVALID;
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, h);
     p26_status st = P26_STALE;
-    if (s) {
+    if (s && s->public_refs) {
         st = d->lost ? P26_DEVICE_LOST :
              ((s->kind == P26_FRAME) ? P26_INVALID :
              ((!s->data || s->locked) ? P26_BUSY : ref_slot(s)));
@@ -270,7 +273,7 @@ static p26_status transfer(p26_device *d, p26_handle h, size_t off,
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, h);
     p26_status st = P26_STALE;
-    if (s) {
+    if (s && s->public_refs) {
         if (d->lost && s->kind != P26_FRAME) st = P26_DEVICE_LOST;
         else if (!s->data || (writing && s->kind == P26_FRAME)) st = P26_INVALID;
         else if (s->locked) st = P26_BUSY;
@@ -301,16 +304,19 @@ static p26_status record(p26_device *d, p26_handle command, p26_op op) {
     p26_slot *src = lookup(d, op.src);
     p26_slot *dst = lookup(d, op.dst);
     p26_status st = P26_STALE;
-    if (cmd && src && dst) {
+    if (cmd && src && dst && cmd->public_refs && src->public_refs && dst->public_refs) {
         st = d->lost ? P26_DEVICE_LOST : P26_INVALID;
-        if (!d->lost && cmd->kind == P26_COMMAND && cmd->op_count < P26_MAX_CMDS) {
+        int valid_types = (op.type == 1U && src->kind == P26_BUFFER && dst->kind == P26_BUFFER) ||
+            (op.type == 2U && is_image(src->kind) && is_image(dst->kind)) ||
+            (op.type == 3U && src->kind == P26_BUFFER && is_image(dst->kind));
+        if (!d->lost && valid_types && cmd->kind == P26_COMMAND && cmd->op_count < P26_MAX_CMDS) {
             st = ref_slot(src);
             if (st == P26_OK) {
                 st = ref_slot(dst);
                 if (st != P26_OK) release_slot(d, src);
                 else cmd->ops[cmd->op_count++] = op;
             }
-        } else if (!d->lost && cmd->kind == P26_COMMAND) st = P26_EXHAUSTED;
+        } else if (!d->lost && valid_types && cmd->kind == P26_COMMAND) st = P26_EXHAUSTED;
     }
     pthread_mutex_unlock(&d->mu);
     return st;
@@ -383,7 +389,7 @@ p26_status p26_submit(p26_device *d, p26_handle queue, p26_handle command, p26_f
     pthread_mutex_lock(&d->mu);
     p26_slot *q = lookup(d, queue), *cmd = lookup(d, command);
     p26_status st = P26_STALE;
-    if (q && cmd) {
+    if (q && cmd && q->public_refs && cmd->public_refs) {
         st = d->lost ? P26_DEVICE_LOST : P26_INVALID;
         if (!d->lost && q->kind == P26_QUEUE && cmd->kind == P26_COMMAND && q->sequence != UINT64_MAX) {
             st = P26_OK;
@@ -417,7 +423,7 @@ p26_status p26_fence_poll(p26_device *d, p26_fence fence) {
     pthread_mutex_lock(&d->mu);
     p26_slot *q = lookup(d, fence.queue);
     p26_status st = P26_STALE;
-    if (q) st = d->lost ? P26_DEVICE_LOST :
+    if (q && q->public_refs) st = d->lost ? P26_DEVICE_LOST :
         (q->kind != P26_QUEUE || !fence.sequence ? P26_INVALID :
         (fence.sequence <= q->sequence ? P26_OK : P26_PENDING));
     pthread_mutex_unlock(&d->mu);
@@ -444,7 +450,7 @@ p26_status p26_present(p26_device *d, p26_handle image, p26_handle *frame) {
     pthread_mutex_lock(&d->mu);
     p26_slot *src = lookup(d, image);
     p26_status st = P26_STALE;
-    if (src) {
+    if (src && src->public_refs) {
         st = P26_INVALID;
         if (d->lost) st = P26_DEVICE_LOST;
         else if (is_image(src->kind) && !src->locked) {
@@ -466,7 +472,7 @@ p26_status p26_frame_info(p26_device *d, p26_handle frame,
     pthread_mutex_lock(&d->mu);
     p26_slot *s = lookup(d, frame);
     p26_status st = P26_STALE;
-    if (s) {
+    if (s && s->public_refs) {
         st = s->kind == P26_FRAME ? P26_OK : P26_INVALID;
         if (st == P26_OK) { *desc = s->image; *hash = s->sequence; }
     }

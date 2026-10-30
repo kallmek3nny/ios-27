@@ -16,7 +16,8 @@ guest/device (16-bit namespace), slot (16-bit), and generation (32-bit).
   padding, alignment, per-device allocation quota, checked offsets, and
   rejections for unsupported combinations. currently RGBA8/BGRA8/R8 only.
 - **milestone 2:** retain/release with resource pins in pending commands;
-  exclusive CPU maps with tokens; stale generation and cross-device guards;
+  exclusive CPU maps with tokens; separate public-reference and internal-pin
+  accounting to reject excess external releases; stale generation and cross-device guards;
   no implicit destruction while mapped; device loss can be simulated and
   outstanding handles can be released cleanly. for shutdown, release all
   resources and maps before `p26_device_shutdown`, then destroy. destroy is
