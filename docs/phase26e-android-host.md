@@ -23,7 +23,8 @@ All Java/Canvas rendering is explicitly diagnostic and not an Apple UI shim.
    compositor must own actual image generation and call the generation-checked
    present contract; the current Android Canvas paints diagnostic text only.
 4. **Android shell and verification:** userspace-only SurfaceView activity,
-   Choreographer frame pacing, native host mutex protection, no special
+   on-demand Choreographer frame pacing (no idle redraw loop), read-only
+   CPU-time/native-heap/battery-capacity telemetry, native host mutex protection, no special
    permissions, explicit `P26_DENIED` for audio/permission services, separate
    Werror native stress test and Android build CI.
 
@@ -84,3 +85,11 @@ Future phase26c/26d code should use an explicit adapter around
 `phase26e_present`. No phase26c/26d symbol or header is imported here. Real
 `UIApplication`/`UIWindow`/`UIView`/`UIViewController` ABI compatibility remains
 outside phase26e's demonstrated capabilities.
+
+## Additional boundary checks
+
+- Exactly 64 nested local view coordinates are accepted without dropping the final ancestor.
+- Termination stress starts worker threads behind a mutex gate rather than busy-spinning.
+- The Android diagnostic performs on-demand Choreographer draws, never a continuous idle frame loop, and records CPU time, native heap use, battery capacity and peak frame draw time.
+- Failed surface canvas posting is contained and does not report a successful frame presentation.
+- Rejected pointer-down events do not enter the Android-side captured-touch map.
