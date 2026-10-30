@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 111,
+      "branch": "phase26c-headless-graphics-interop-20261030",
+      "sha": "8d27bffa9c4e534bd37526adea04154f15659343",
+      "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+      "updated_at": "2026-10-30T13:02:26Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 108,
       "branch": "phase26d-coreanimation-compositor",
       "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
@@ -33,15 +42,6 @@
       "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "updated_at": "2026-10-30T13:01:35Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 111,
-      "branch": "phase26c-headless-graphics-interop-20261030",
-      "sha": "8540863d5394cce73d3b06e3a46d2414f311fb63",
-      "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
-      "updated_at": "2026-10-30T12:59:49Z",
       "status": "unmerged: not counted"
     },
     {
@@ -484,5 +484,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:02:28Z"
+  "observed_at": "2026-10-30T13:02:48Z"
 }

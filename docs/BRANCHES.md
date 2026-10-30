@@ -6,6 +6,12 @@
 
 candidate branches with mapped changes: **30** · audited base: `55b186d90cf6`
 
+### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
+
+head: `8d27bffa9c4e` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 1 test/fixture files, +736/-0 lines
+
 ### [phase26d-coreanimation-compositor](https://github.com/kallmek3nny/ios-27/pull/108)
 
 head: `6bdcffce6c7b` · ci: **running** · unmerged, not credited.
@@ -26,12 +32,6 @@ head: `72f0f4900fce` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +730/-0 lines
   - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
-
-### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
-
-head: `8540863d5394` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 1 test/fixture files, +736/-0 lines
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
 
