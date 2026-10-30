@@ -1,5 +1,7 @@
 #include "ios27/phase26a_libc.h"
 #include <stddef.h>
+#include <stdarg.h>
+#include <limits.h>
 #include <stdint.h>
 
 /* Original-source freestanding libc subset. Each Mach-O mapping owns its
@@ -272,5 +274,144 @@ int P26(unsetenv)(const char *name) {
     last_error = 0;
     return 0;
 }
+
+/* Stable narrow Darwin LP64 integer conversion. Input and optional endptr
+ * must reside in a live allocation. The valid radix subset is [2,36] or 0. */
+long P26(strtol)(const char *input, char **endptr, int base) {
+    size_t len = cstr(input), i = 0u, digits = 0u;
+    uint64_t acc = 0u, limit;
+    unsigned negative = 0u, overflow = 0u;
+    if (len == SIZE_MAX) return 0L;
+    if (endptr && !require(endptr, sizeof(*endptr), 1)) return 0L;
+    if (base && (base < 2 || base > 36)) {
+        last_error = IOS27_26A_EINVAL;
+        return 0L;
+    }
+    while (i < len && (input[i] == ' ' || input[i] == '\t' ||
+           input[i] == '\n' || input[i] == '\r' ||
+           input[i] == '\f' || input[i] == '\v')) ++i;
+    if (i < len && (input[i] == '-' || input[i] == '+'))
+        negative = (unsigned)(input[i++] == '-');
+    if ((base == 0 || base == 16) && i + 2u < len &&
+        input[i] == '0' && (input[i + 1u] == 'x' || input[i + 1u] == 'X')) {
+        unsigned char next = (unsigned char)input[i + 2u];
+        if ((next >= '0' && next <= '9') ||
+            (next >= 'a' && next <= 'f') || (next >= 'A' && next <= 'F')) {
+            base = 16;
+            i += 2u;
+        }
+    }
+    if (base == 0) base = i < len && input[i] == '0' ? 8 : 10;
+    limit = negative ? (uint64_t)LONG_MAX + 1u : (uint64_t)LONG_MAX;
+    for (; i < len; ++i) {
+        unsigned char ch = (unsigned char)input[i];
+        unsigned value;
+        if (ch >= '0' && ch <= '9') value = (unsigned)(ch - '0');
+        else if (ch >= 'a' && ch <= 'z') value = (unsigned)(ch - 'a') + 10u;
+        else if (ch >= 'A' && ch <= 'Z') value = (unsigned)(ch - 'A') + 10u;
+        else break;
+        if (value >= (unsigned)base) break;
+        ++digits;
+        if (acc > (limit - value) / (unsigned)base) overflow = 1u;
+        if (!overflow) acc = acc * (unsigned)base + value;
+    }
+    if (endptr) *endptr = (char *)(input + (digits ? i : 0u));
+    if (overflow) {
+        last_error = IOS27_26A_ERANGE;
+        return negative ? LONG_MIN : LONG_MAX;
+    }
+    last_error = 0;
+    if (!digits) return 0L;
+    if (negative && acc == (uint64_t)LONG_MAX + 1u) return LONG_MIN;
+    return negative ? -(long)acc : (long)acc;
+}
+
+char *P26(strerror)(int error) {
+    static char ok[] = "No error";
+    static char invalid[] = "Invalid argument";
+    static char fault[] = "Bad address";
+    static char memory[] = "Cannot allocate memory";
+    static char range[] = "Result too large";
+    static char unknown[] = "Unknown error";
+    switch (error) {
+        case 0: return ok;
+        case IOS27_26A_EINVAL: return invalid;
+        case IOS27_26A_EFAULT: return fault;
+        case IOS27_26A_ENOMEM: return memory;
+        case IOS27_26A_ERANGE: return range;
+        default: return unknown;
+    }
+}
+
+/* Transactional bounded snprintf: only %%s, %%d, %%u, %%x, and %%%% are
+ * recognized. No width, precision, floats, pointer formatting, positional
+ * args, or non-owned strings. The complete output must fit 4096 bytes. */
+#define FORMAT_CAP 4096u
+typedef struct {
+    char text[FORMAT_CAP];
+    size_t used;
+    int failed;
+} format_buffer;
+static void put_char(format_buffer *b, char ch) {
+    if (b->used >= FORMAT_CAP - 1u) {
+        b->failed = 1;
+        return;
+    }
+    b->text[b->used++] = ch;
+}
+static void put_unsigned(format_buffer *b, unsigned value, unsigned radix) {
+    char reverse[32];
+    size_t n = 0u;
+    do {
+        unsigned digit = value % radix;
+        reverse[n++] = (char)(digit < 10u ? '0' + digit : 'a' + digit - 10u);
+        value /= radix;
+    } while (value && n < sizeof(reverse));
+    for (; n > 0u; --n) put_char(b, reverse[n - 1u]);
+}
+int P26(snprintf)(char *destination, size_t capacity, const char *format, ...) {
+    format_buffer buffer = {{0}, 0u, 0};
+    size_t length = cstr(format);
+    va_list args;
+    if (length == SIZE_MAX || (capacity && !require(destination, capacity, 1)))
+        return -1;
+    va_start(args, format);
+    for (size_t i = 0u; i < length; ++i) {
+        char spec;
+        if (format[i] != '%') { put_char(&buffer, format[i]); continue; }
+        if (++i == length) { buffer.failed = 1; break; }
+        spec = format[i];
+        if (spec == '%') put_char(&buffer, '%');
+        else if (spec == 's') {
+            const char *str = va_arg(args, const char *);
+            size_t n = cstr(str);
+            if (n == SIZE_MAX) { buffer.failed = 1; break; }
+            for (size_t j = 0u; j < n && !buffer.failed; ++j)
+                put_char(&buffer, str[j]);
+        } else if (spec == 'd') {
+            int n = va_arg(args, int);
+            if (n < 0) put_char(&buffer, '-');
+            put_unsigned(&buffer, n < 0 ? (unsigned)(-(int64_t)n) : (unsigned)n,
+                         10u);
+        } else if (spec == 'u' || spec == 'x') {
+            unsigned n = va_arg(args, unsigned);
+            put_unsigned(&buffer, n, spec == 'u' ? 10u : 16u);
+        } else { buffer.failed = 1; break; }
+    }
+    va_end(args);
+    if (buffer.failed) {
+        last_error = IOS27_26A_EINVAL;
+        return -1;
+    }
+    if (capacity) {
+        size_t copy = buffer.used < capacity - 1u ?
+                      buffer.used : capacity - 1u;
+        copy_bytes(destination, buffer.text, copy);
+        destination[copy] = 0;
+    }
+    last_error = 0;
+    return (int)buffer.used;
+}
+
 int ios27_26a_last_error(void) { return last_error; }
 size_t ios27_26a_live_bytes(void) { return live_bytes; }
