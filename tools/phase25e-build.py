@@ -33,7 +33,7 @@ EXPORTS = {
     "derived": ("_OBJC_CLASS_$_Phase25eDerived", "_OBJC_METACLASS_$_Phase25eDerived",
                 "_phase25e_load_derived"),
     "worker": ("_OBJC_CLASS_$_Phase25eWorker", "_OBJC_METACLASS_$_Phase25eWorker"),
-    "category": ("_phase25e_category_anchor",),
+    "category": (),
     "ledger": ("_OBJC_CLASS_$_Phase25eLedger", "_OBJC_METACLASS_$_Phase25eLedger",
                "_phase25e_ledger_total"),
     "pipeline": ("_OBJC_CLASS_$_Phase25ePipeline", "_OBJC_METACLASS_$_Phase25ePipeline"),
