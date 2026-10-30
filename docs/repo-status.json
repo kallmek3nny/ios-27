@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 112,
+      "branch": "phase26e-android-host-scenes-input",
+      "sha": "5450807ee1c52eb66cf626a49f94cdf641fe40df",
+      "title": "phase26e: standalone android host, scene and input routing fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
+      "updated_at": "2026-10-30T13:04:57Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 109,
       "branch": "phase26a-native-libc-abi",
       "sha": "872a5317c1d34ce4b55511915efb584cb222cab9",
@@ -33,15 +42,6 @@
       "title": "phase26d: bounded transactions and deterministic cpu composition",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
       "updated_at": "2026-10-30T13:03:34Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 112,
-      "branch": "phase26e-android-host-scenes-input",
-      "sha": "6fa5c1aaf74fd8214ffda5cf9d56bf84ce94f917",
-      "title": "phase26e: standalone android host, scene and input routing fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
-      "updated_at": "2026-10-30T13:03:31Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:04:41Z"
+  "observed_at": "2026-10-30T13:05:05Z"
 }

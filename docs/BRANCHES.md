@@ -6,16 +6,22 @@
 
 candidate branches with mapped changes: **31** · audited base: `55b186d90cf6`
 
+### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
+
+head: `5450807ee1c5` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 1 test/fixture files, +741/-0 lines
+
 ### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
 
-head: `872a5317c1d3` · ci: **running** · unmerged, not credited.
+head: `872a5317c1d3` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +731/-0 lines
   - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
 
 ### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
 
-head: `90a78d0307fa` · ci: **running** · unmerged, not credited.
+head: `90a78d0307fa` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 1 test/fixture files, +736/-0 lines
 
@@ -25,12 +31,6 @@ head: `6bdcffce6c7b` · ci: **passing_checks** · unmerged, not credited.
 
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +16/-0 lines
 - **unclassified**: 2 source files, 1 test/fixture files, +911/-0 lines
-
-### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
-
-head: `6fa5c1aaf74f` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 1 test/fixture files, +741/-0 lines
 
 ### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/pull/110)
 
