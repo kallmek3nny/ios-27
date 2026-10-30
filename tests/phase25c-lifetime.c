@@ -248,6 +248,6 @@ int main(void) {
         assert(ios27_phase25c_release(rt, a) == 0);
         assert(ios27_phase25c_destroy(&rt) == 0 && rt == NULL);
     }
-    puts("phase25c: x86_64 ownership, ARC entrypoints, concurrent weak, TLS pools, teardown ok");
+    puts("phase25c: host-native ownership, ARC entrypoints, concurrent weak, TLS pools, teardown ok");
     return 0;
 }
