@@ -72,6 +72,7 @@ void *objc_retain(void *object);
 void objc_release(void *object);
 void objc_storeStrong(void **slot, void *object);
 void *objc_storeWeak(void **slot, void *object);
+void *objc_initWeak(void **slot, void *object);
 void *objc_loadWeakRetained(void **slot);
 void objc_destroyWeak(void **slot);
 void *objc_autorelease(void *object);
