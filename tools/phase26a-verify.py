@@ -83,7 +83,7 @@ def check(path, kind, dependency=False):
 
 def main():
     clang = shutil.which("clang")
-    ld = shutil.which("ld64.lld")
+    ld = shutil.which("ld64.lld") or shutil.which("ld64.lld-18")
     cc = os.environ.get("CC", "cc")
     if not clang or not ld or not shutil.which(cc):
         raise RuntimeError("clang, ld64.lld, and native C compiler required")
