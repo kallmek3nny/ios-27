@@ -53,6 +53,7 @@ struct ios27_phase26b_process {
     int stopped;
     uint8_t arena[IOS27_26B_PAGE * IOS27_26B_PAGES];
     uint8_t permissions[IOS27_26B_PAGES];
+    uint8_t mapped[IOS27_26B_PAGES];
     vfile files[NFILE];
     open_description opens[NOPEN];
     descriptor fds[NFD];
@@ -120,7 +121,8 @@ ios27_phase26b_process *ios27_phase26b_create(uint32_t pid, uint64_t epoch) {
     p->pid = pid;
     p->epoch = epoch;
     for (size_t i = 0; i < 16u; ++i)
-        p->permissions[i] = IOS27_26B_PROT_READ | IOS27_26B_PROT_WRITE;
+        { p->permissions[i] = IOS27_26B_PROT_READ | IOS27_26B_PROT_WRITE;
+          p->mapped[i] = 1u; }
     for (size_t i = 0; i < NFD; ++i) p->fds[i].description = -1;
     strcpy(p->files[0].path, "/app/readme.txt");
     p->files[0].present = 1u;
@@ -245,7 +247,6 @@ static void transfer(ios27_phase26b_process *p, ios27_phase26b_regs *r,
     if (positioned && r->x[3] > INT64_MAX) { err(r, EINVAL_D); return; }
     f = &p->files[d->file_index];
     offset = positioned ? (size_t)r->x[3] : d->offset;
-    if (positioned && r->x[3] > SIZE_MAX) { err(r, EOVERFLOW_D); return; }
     if (offset > FILE_CAP) { err(r, EINVAL_D); return; }
     n = (size_t)count;
     if (!write && n > f->length - (offset < f->length ? offset : f->length))
@@ -259,6 +260,8 @@ static void transfer(ios27_phase26b_process *p, ios27_phase26b_regs *r,
                           write ? IOS27_26B_PROT_READ : IOS27_26B_PROT_WRITE,
                           &guest_offset)) { err(r, EFAULT_D); return; }
         if (write) {
+            if (offset > f->length)
+                memset(f->data + f->length, 0, offset - f->length);
             memcpy(f->data + offset, p->arena + guest_offset, n);
             if (f->length < offset + n) f->length = offset + n;
         } else memcpy(p->arena + guest_offset, f->data + offset, n);
@@ -303,12 +306,13 @@ static void vm(ios27_phase26b_process *p, ios27_phase26b_regs *r,
         for (first = 16u; first + pages <= IOS27_26B_PAGES; ++first) {
             size_t k;
             for (k = 0; k < pages; ++k)
-                if (p->permissions[first + k]) break;
+                if (p->mapped[first + k]) break;
             if (k == pages) {
                 memset(p->arena + first * IOS27_26B_PAGE, 0,
                        pages * IOS27_26B_PAGE);
                 for (k = 0; k < pages; ++k)
-                    p->permissions[first + k] = (uint8_t)prot;
+                    { p->permissions[first + k] = (uint8_t)prot;
+                      p->mapped[first + k] = 1u; }
                 ret(r, IOS27_26B_BASE + first * IOS27_26B_PAGE, 0u);
                 return;
             }
@@ -323,9 +327,11 @@ static void vm(ios27_phase26b_process *p, ios27_phase26b_regs *r,
     }
     if (op == 74u && r->x[2] > 3u) { err(r, ENOTSUP_D); return; }
     for (size_t i = first; i < first + pages; ++i)
-        if (!p->permissions[i]) { err(r, EINVAL_D); return; }
+        if (!p->mapped[i]) { err(r, EINVAL_D); return; }
     for (size_t i = first; i < first + pages; ++i) {
         p->permissions[i] = op == 73u ? 0u : (uint8_t)prot;
+        if (op == 73u) { p->mapped[i] = 0u;
+            memset(p->arena + i * IOS27_26B_PAGE, 0, IOS27_26B_PAGE); }
     }
     ret(r, 0u, 0u);
 }
