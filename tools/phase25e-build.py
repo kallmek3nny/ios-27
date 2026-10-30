@@ -266,8 +266,8 @@ def run(args):
         "fail_closed_cases": failures,
         "native_execution": gate,
         "expected_only_if_verified": {
-            "per_application_native_objc_sends": 200000,
-            "per_application_native_ownership_transitions": 150000,
+            "minimum_per_application_native_objc_sends": 200000,
+            "minimum_per_application_native_ownership_transitions": 150000,
             "actual_verified_application_starts": 0,
         },
         "execution_trace": [
