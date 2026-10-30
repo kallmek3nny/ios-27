@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import importlib.util
 import json
 from pathlib import Path
+import os
 import sys
 import unittest
 
@@ -21,7 +22,7 @@ spec.loader.exec_module(inspect)
 class Phase25eIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.out = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "build/phase25e"
+        cls.out = Path(os.environ.get("PHASE25E_RESULTS", str(ROOT / "build/phase25e"))).resolve()
         cls.expected = {"lib" + n + ".dylib" for n in
                         ("root", "derived", "worker", "category", "ledger", "pipeline")}
         cls.expected.update(("app_basic", "app_protocol", "app_lifecycle"))
@@ -110,15 +111,4 @@ class Phase25eIntegrationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # unittest must not interpret the fixture build directory as a test name.
-    target = sys.argv[1] if len(sys.argv) > 1 else None
-    sys.argv[:] = sys.argv[:1]
-    if target:
-        sys.argv.append(target)
-        Phase25eIntegrationTests.out_override = target
-    # setUpClass already supports an explicit argument when invoked as a module;
-    # keep a simpler environment variable for the standalone test process.
-    import os
-    if target:
-        os.environ["PHASE25E_RESULTS"] = target
     unittest.main()
