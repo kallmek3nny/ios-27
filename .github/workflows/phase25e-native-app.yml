@@ -50,16 +50,16 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.mode }}" = asan-ubsan ]; then
-            timeout 120s cmake -S . -B build/phase25e-core -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
+            timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
           else
-            timeout 120s cmake -S . -B build/phase25e-core -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror"
+            timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror"
           fi
       - name: compile baseline tests
         shell: bash
-        run: timeout 300s cmake --build build/phase25e-core --parallel 2
+        run: timeout 300s cmake --build build --parallel 2
       - name: run unchanged baseline under selected instrumentation
         shell: bash
-        run: timeout 180s ctest --test-dir build/phase25e-core --output-on-failure --timeout 60
+        run: timeout 180s ctest --test-dir build --output-on-failure --timeout 60
       - name: link nine genuine ObjC2 Mach-O fixtures and capture fail-closed evidence
         shell: bash
         run: timeout 300s python3 tools/phase25e-build.py --output build/phase25e --rounds 100
