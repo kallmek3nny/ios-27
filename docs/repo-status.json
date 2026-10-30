@@ -14,7 +14,7 @@
       "sha": "a9bcda8e7432e65d3b0f0a9d581163c91526a23e",
       "title": "phase25a: native arm64 objc2 metadata relocation and cross-dylib class binding",
       "url": "https://github.com/kallmek3nny/ios-27/pull/105",
-      "updated_at": "2026-10-30T11:04:12Z",
+      "updated_at": "2026-10-30T11:05:49Z",
       "status": "unmerged: not counted"
     },
     {
@@ -23,7 +23,7 @@
       "sha": "99e3678e6241c9298dc6b8271d0828d848931ac6",
       "title": "phase25b: restricted native arm64 objc_msgSend dispatch and compiler-linked fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/106",
-      "updated_at": "2026-10-30T11:03:16Z",
+      "updated_at": "2026-10-30T11:05:01Z",
       "status": "unmerged: not counted"
     },
     {
@@ -448,5 +448,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T11:04:49Z"
+  "observed_at": "2026-10-30T11:14:14Z"
 }
