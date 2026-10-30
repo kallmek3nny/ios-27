@@ -46,6 +46,8 @@ static void base_tests(void) {
     assert(phase26e_text(h, "\xF4\x90\x80\x80", 4) == P26_INVALID);
     assert(phase26e_text(h, "\xE2\x82", 2) == P26_INVALID);
     OK(phase26e_text(h, "hello \xF0\x9F\x91\x8B", 10));
+    OK(phase26e_compose(h, "\xC3\xA9", 2));
+    assert(phase26e_text(h, "a\0b", 3) == P26_INVALID);
     OK(phase26e_keyboard(h, 1, 66));
     assert(phase26e_keyboard(h, 1, -1) == P26_INVALID);
     assert(phase26e_pointer(h, P26_DOWN, 1, NAN, 10) == P26_INVALID);
@@ -60,6 +62,11 @@ static void base_tests(void) {
     OK(phase26e_present(h, phase26e_get_metrics(h).surface_generation));
     assert(phase26e_surface(h, 1, 0, 400, 0) == P26_INVALID);
     assert(phase26e_surface(h, 1, 400, 400, 45) == P26_INVALID);
+    for (int i = 0; i < 16; ++i) OK(phase26e_pointer(h, P26_DOWN, i, 20, 30));
+    assert(phase26e_pointer(h, P26_DOWN, 16, 20, 30) == P26_FULL);
+    OK(phase26e_surface(h, 0, 0, 0, 0));
+    assert(phase26e_get_metrics(h).active_touches == 0);
+    assert(phase26e_get_metrics(h).cancellations == 17);
     phase26e_destroy(h);
 }
 
