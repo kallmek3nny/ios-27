@@ -8,7 +8,7 @@ candidate branches with mapped changes: **26** · audited base: `1dd112410e43`
 
 ### [phase25b-native-objc-dispatch](https://github.com/kallmek3nny/ios-27/pull/106)
 
-head: `6461289f2ee6` · ci: **passing_checks** · unmerged, not credited.
+head: `99e3678e6241` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 3 source files, 13 test/fixture files, +1275/-0 lines
 

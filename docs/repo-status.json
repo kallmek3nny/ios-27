@@ -11,10 +11,10 @@
     {
       "number": 106,
       "branch": "phase25b-native-objc-dispatch",
-      "sha": "6461289f2ee68eb3c0181a8e259ae04c0b879c43",
+      "sha": "99e3678e6241c9298dc6b8271d0828d848931ac6",
       "title": "phase25b: restricted native arm64 objc_msgSend dispatch and compiler-linked fixtures",
       "url": "https://github.com/kallmek3nny/ios-27/pull/106",
-      "updated_at": "2026-10-30T11:01:06Z",
+      "updated_at": "2026-10-30T11:03:16Z",
       "status": "unmerged: not counted"
     },
     {
@@ -448,5 +448,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T11:01:38Z"
+  "observed_at": "2026-10-30T11:03:49Z"
 }

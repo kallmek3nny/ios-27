@@ -8,10 +8,10 @@
   "candidates": [
     {
       "branch": "phase25b-native-objc-dispatch",
-      "sha": "6461289f2ee68eb3c0181a8e259ae04c0b879c43",
+      "sha": "99e3678e6241c9298dc6b8271d0828d848931ac6",
       "url": "https://github.com/kallmek3nny/ios-27/pull/106",
       "pr_number": 106,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 19,
       "possibly_truncated": false,
@@ -972,7 +972,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/106",
         "source_files": 3,
         "fixture_files": 13,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
@@ -1930,5 +1930,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T11:02:03Z"
+  "observed_at": "2026-10-30T11:03:53Z"
 }
