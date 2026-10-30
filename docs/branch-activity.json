@@ -3,9 +3,48 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 21,
-  "candidate_count": 21,
+  "candidates_checked": 24,
+  "candidate_count": 24,
   "candidates": [
+    {
+      "branch": "phase25c-arc-ownership-20261030",
+      "sha": "1ed7b611281b450f95a0cb7ec329a37b7b0d0106",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+      "pr_number": 102,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 947,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase25c_alloc",
+            "ios27_phase25c_autorelease",
+            "ios27_phase25c_can_unload",
+            "ios27_phase25c_create",
+            "ios27_phase25c_destroy",
+            "ios27_phase25c_destroy_weak",
+            "ios27_phase25c_fail_alloc_after",
+            "ios27_phase25c_get_stats",
+            "ios27_phase25c_identity",
+            "ios27_phase25c_load_weak_retained",
+            "ios27_phase25c_pin",
+            "ios27_phase25c_pool_pop"
+          ],
+          "example_paths": [
+            "include/ios27/phase25c_lifetime.h",
+            "src/phase25c_lifetime.c",
+            "tests/phase25c-arc-darwin.m",
+            "tests/phase25c-lifetime.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase24c-objc2-typed-metadata-dispatch",
       "sha": "4b7fe765e9b80dc88f2f20b1790c504c17a3cf4a",
@@ -729,6 +768,58 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "agent/phase25e-objc-app-integration-20261030",
+      "sha": "adee169ff940bb1d760eb94a1b93de7be2621e51",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 0,
+          "fixture_files": 4,
+          "additions": 826,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase25e-fixtures.m",
+            "tests/phase25e-integration.py",
+            "tools/phase25e-build.py",
+            "tools/phase25e-inspect.py"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase25d-objc-lifecycle-20261030",
+      "sha": "bdc181054b63b5d428f26ca7d8900c5b85dd90d3",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 19,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 10,
+          "additions": 185,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase25d_lifecycle.hpp",
+            "tests/phase25d-app0.m",
+            "tests/phase25d-app1.m",
+            "tests/phase25d-app2.m"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -823,6 +914,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase25c-arc-ownership-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "passing_checks"
+      },
+      {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
         "url": "https://github.com/kallmek3nny/ios-27/pull/100",
         "source_files": 2,
@@ -898,6 +996,20 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase25e-objc-app-integration-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
+        "source_files": 0,
+        "fixture_files": 4,
+        "ci": "not_checked"
+      },
+      {
+        "branch": "agent/phase25d-objc-lifecycle-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
+        "source_files": 1,
+        "fixture_files": 10,
+        "ci": "not_checked"
       }
     ]
   },
@@ -1750,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-29T22:16:18Z"
+  "observed_at": "2026-10-30T10:50:55Z"
 }
