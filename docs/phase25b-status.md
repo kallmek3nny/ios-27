@@ -21,10 +21,12 @@
 5. x86_64 host metadata and concurrency verification: 240,005 pinned lookup
    operations across eight reader threads with 1,000 method replacements.
    Normal and ASAN/UBSAN local runs pass. **These are NOT native ObjC calls.**
-6. arm64 CI test is designed to invoke 720,000+ genuine native message sends to
-   compiler-linked Darwin IMP bodies through phase25b_objc_msgSend and
-   phase25b_objc_msgSendSuper2, including x2..x7, FP and concurrent replacement.
-   **This does not become a verified result until that exact runner passes.**
+6. **Verified on frozen PR head `6461289f2ee68eb3c0181a8e259ae04c0b879c43`:**
+   arm64 normal and ASAN/UBSAN jobs each exercised **770,009 genuine native
+   message sends** through phase25b_objc_msgSend and objc_msgSendSuper2, including
+   x2..x7, FP and concurrent replacement. All four phase25b matrix lanes
+   completed successfully on this commit. These are compiler-produced **leaf
+   IMP instruction bodies**, not execution of relocated entire dylibs or apps.
 
 ## real native execution versus host simulation
 
@@ -77,10 +79,24 @@ Do not count host metadata lookups or compiler links as native dispatches.
   the x86_64 development host. Benchmark compares different method paths and
   is indicative only.
 
+## ci evidence (initial implementation commit)
+
+- PR #106: https://github.com/kallmek3nny/ios-27/pull/106
+- Verified commit: `6461289f2ee68eb3c0181a8e259ae04c0b879c43`.
+- Ubuntu ARM64 normal: https://github.com/kallmek3nny/ios-27/actions/runs/41044987803/job/124026762021
+  - 770,009 sends; 769,951 cache hits; 59 misses.
+  - 50,000 direct calls 80,881 ns; 50,000 dispatch calls 1,683,324 ns.
+- Ubuntu ARM64 ASAN/UBSAN: https://github.com/kallmek3nny/ios-27/actions/runs/41044987803/job/124026761881
+  - 770,009 sends; 769,814 cache hits; 196 misses.
+  - 50,000 direct calls 78,584 ns; 50,000 dispatch calls 4,317,635 ns.
+- Both x86_64 normal/sanitizer jobs also passed. Benchmarks compare different method paths and cannot be interpreted as the fully general objc_msgSend overhead.
+- This evidence is specific to the original frozen implementation commit, not an automatic guarantee that subsequent documentation commits have green checks. Re-run checks for the final head.
+
 ## active engineering duration
 
-Work started 2026-10-30 at approximately 10:40 UTC and continues until the
-final recorded action for this session. This is not a three-hour session.
-No artificial sleeping, inflated development durations or false claims of
-completion. Do not merge until frozen-head CI is green, all blockers required
-by phase25b are addressed, and main is unchanged under an expected-SHA lease.
+Work started 2026-10-30 at approximately 10:40 UTC. Implementation, local tests,
+GitHub upload and native CI review continued until approximately 11:03 UTC:
+**roughly 23 minutes**, not three active hours. No artificial sleeping, inflated
+durations or false claims of full completion. Keep PR draft; do not merge until
+all requested runtime and application-level blockers are addressed, final-head
+CI is green, and main is unchanged under an expected-SHA lease.
