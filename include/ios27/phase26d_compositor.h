@@ -27,6 +27,12 @@ typedef struct {
     size_t capacity; /* accessible bytes from pixels, including row gaps */
 } phase26d_frame;
 typedef struct {
+    uint64_t revision;
+    int32_t x, y;
+    uint32_t width, height;
+    uint8_t full; /* 1: repaint whole target, dimensions depend on caller */
+} phase26d_damage;
+typedef struct {
     uint64_t commits, mutations, frames, image_bytes, live_images;
     uint32_t model_layers, presented_layers, transaction_depth;
 } phase26d_stats;
@@ -57,4 +63,7 @@ phase26d_result phase26d_get(phase26d_context *ctx, phase26d_id id, int presenta
                              phase26d_layer_desc *out);
 phase26d_result phase26d_render(phase26d_context *ctx, phase26d_frame frame);
 phase26d_result phase26d_stats_read(phase26d_context *ctx, phase26d_stats *out);
+/* Tracks the latest invalidation. Skipped revisions conservatively request full repaint. */
+phase26d_result phase26d_damage_since(phase26d_context *ctx, uint64_t after,
+                                     phase26d_damage *out);
 #endif

@@ -168,6 +168,45 @@ static void foreign_owner_test(void) {
     CHECK(phase26d_commit(c));
     phase26d_free(c);
 }
+static void damage_test(void) {
+    phase26d_context *c=phase26d_new(); assert(c);
+    phase26d_damage dirty;
+    CHECK(phase26d_damage_since(c,0,&dirty));
+    assert(!dirty.full && dirty.revision==0);
+    CHECK(phase26d_begin(c));
+    phase26d_layer_desc d=phase26d_default_desc();
+    d.x=10; d.y=20; d.width=5; d.height=7;
+    phase26d_id root=create(c,d);
+    CHECK(phase26d_rollback(c));
+    CHECK(phase26d_damage_since(c,0,&dirty));
+    assert(dirty.revision==0);
+    CHECK(phase26d_begin(c));
+    root=create(c,d);
+    CHECK(phase26d_commit(c));
+    CHECK(phase26d_damage_since(c,0,&dirty));
+    assert(dirty.revision==1 && !dirty.full);
+    assert(dirty.x<=10 && dirty.y<=20 &&
+           (int64_t)dirty.x+dirty.width>=15 &&
+           (int64_t)dirty.y+dirty.height>=27);
+    CHECK(phase26d_begin(c));
+    d.x=30; CHECK(phase26d_set(c,root,&d)); CHECK(phase26d_commit(c));
+    CHECK(phase26d_begin(c));
+    d.x=50; CHECK(phase26d_set(c,root,&d)); CHECK(phase26d_commit(c));
+    CHECK(phase26d_damage_since(c,1,&dirty));
+    assert(dirty.revision==3 && dirty.full);
+    CHECK(phase26d_damage_since(c,3,&dirty));
+    assert(!dirty.full && !dirty.width);
+    CHECK(phase26d_step(c,1));
+    CHECK(phase26d_damage_since(c,3,&dirty));
+    assert(dirty.revision==4 && dirty.full);
+    CHECK(phase26d_begin(c));
+    phase26d_id child=create(c,d);
+    CHECK(phase26d_parent(c,child,root));
+    CHECK(phase26d_commit(c));
+    CHECK(phase26d_damage_since(c,4,&dirty));
+    assert(dirty.revision==5 && dirty.full);
+    phase26d_free(c);
+}
 static void stress_test(void) {
     phase26d_context *c=phase26d_new(); assert(c);
     phase26d_layer_desc d=phase26d_default_desc();
@@ -241,6 +280,7 @@ int main(void) {
     animation_test();
     nested_scene();
     foreign_owner_test();
+    damage_test();
     stress_test();
     lifetime_fuzz_and_concurrency();
     puts("phase26d: transactions, exact pixels, animations, 120 layers, 50k commits, 100k mutations, lifetime races PASS");

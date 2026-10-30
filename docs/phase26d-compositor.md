@@ -54,3 +54,11 @@ no docs/progress.json or progress counters are modified by this branch.
 \`phase26d_upload\` requires \`source_bytes\` and rejects a last-row read
 outside the declared source span. \`phase26d_frame.capacity\` similarly
 rejects undersized output buffers before clearing or drawing any pixels.
+
+## bounded invalidation / dirty regions
+\`phase26d_damage_since\` reports a monotonically increasing revision and the
+latest conservative world-space invalidation rectangle for simple, unparented,
+identity-transform layers. hierarchical/transformed changes, frame-step
+animation, and missing intermediate revisions request a full repaint.
+callers must track the last revision themselves. this is an explicit invalidation
+contract, **not** a display synchronization fence or gpu damage optimization.

@@ -34,6 +34,7 @@ struct phase26d_context {
     uint32_t depth, generations[PHASE26D_MAX_LAYERS];
     uint64_t commits, mutations, frames;
     size_t image_bytes, image_count;
+    phase26d_damage damage;
 };
 typedef struct { double a,b,c,d,tx,ty; } matrix;
 typedef struct { matrix m; int width,height,radius; } clip;
@@ -124,12 +125,78 @@ phase26d_result phase26d_begin(phase26d_context *c) {
     pthread_mutex_unlock(&c->mutex);
     return PHASE26D_OK;
 }
+static bool identity_transform(phase26d_affine a) {
+    return a.a==1.0 && a.b==0.0 && a.c==0.0 && a.d==1.0 &&
+           a.tx==0.0 && a.ty==0.0;
+}
+static bool has_children(const tree *t,unsigned index,uint32_t generation) {
+    for (unsigned i=0;i<PHASE26D_MAX_LAYERS;i++)
+        if (t->l[i].used && t->l[i].parent.generation==generation &&
+            t->l[i].parent.slot==index) return true;
+    return false;
+}
+static void damage_include(int64_t *box,const phase26d_layer_desc *d) {
+    int64_t margin=(int64_t)d->shadow_radius +
+                   abs((int)d->shadow_x)+abs((int)d->shadow_y)+1;
+    int64_t x1=(int64_t)d->x-margin,y1=(int64_t)d->y-margin;
+    int64_t x2=(int64_t)d->x+d->width+margin;
+    int64_t y2=(int64_t)d->y+d->height+margin;
+    if (x1<box[0]) box[0]=x1;
+    if (y1<box[1]) box[1]=y1;
+    if (x2>box[2]) box[2]=x2;
+    if (y2>box[3]) box[3]=y2;
+}
+static void record_damage(phase26d_context *c,const tree *old,const tree *next) {
+    bool changed=false,full=false;
+    int64_t box[4]={INT64_MAX,INT64_MAX,INT64_MIN,INT64_MIN};
+    for (unsigned i=0;i<PHASE26D_MAX_LAYERS;i++) {
+        const layer *a=&old->l[i],*b=&next->l[i];
+        if (memcmp(a,b,sizeof(*a))==0) continue;
+        changed=true;
+        if ((a->used && (a->parent.generation || !identity_transform(a->d.transform) ||
+                          has_children(old,i,a->generation))) ||
+            (b->used && (b->parent.generation || !identity_transform(b->d.transform) ||
+                          has_children(next,i,b->generation)))) {
+            full=true;
+        }
+        if (a->used) damage_include(box,&a->d);
+        if (b->used) damage_include(box,&b->d);
+    }
+    if (!changed) return;
+    ++c->damage.revision;
+    c->damage.full=(uint8_t)full;
+    if (box[0]==INT64_MAX || full) {
+        c->damage.x=0; c->damage.y=0; c->damage.width=0; c->damage.height=0;
+    } else {
+        c->damage.x=(int32_t)box[0];
+        c->damage.y=(int32_t)box[1];
+        c->damage.width=(uint32_t)(box[2]-box[0]);
+        c->damage.height=(uint32_t)(box[3]-box[1]);
+    }
+}
+phase26d_result phase26d_damage_since(phase26d_context *c,uint64_t after,phase26d_damage *out) {
+    if (!c || !out) return PHASE26D_INVALID;
+    pthread_mutex_lock(&c->mutex);
+    if (after>c->damage.revision) {
+        pthread_mutex_unlock(&c->mutex);
+        return PHASE26D_INVALID;
+    }
+    *out=c->damage;
+    if (after==c->damage.revision) {
+        out->x=0; out->y=0; out->width=0; out->height=0; out->full=0;
+    } else if (after+1u!=c->damage.revision) {
+        out->x=0; out->y=0; out->width=0; out->height=0; out->full=1;
+    }
+    pthread_mutex_unlock(&c->mutex);
+    return PHASE26D_OK;
+}
 phase26d_result phase26d_commit(phase26d_context *c) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
     if (!can_write(c)) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
     --c->depth;
     if (!c->depth) {
+        record_damage(c,c->presentation,c->working);
         assign_tree(c,c->model,c->working);
         assign_tree(c,c->presentation,c->model);
         ++c->commits;
@@ -302,6 +369,9 @@ phase26d_result phase26d_step(phase26d_context *c,uint64_t now) {
         }
     }
     ++c->frames;
+    ++c->damage.revision;
+    c->damage.full=1; c->damage.x=0; c->damage.y=0;
+    c->damage.width=0; c->damage.height=0;
     pthread_mutex_unlock(&c->mutex);
     return PHASE26D_OK;
 }
