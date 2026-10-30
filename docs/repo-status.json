@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 107,
+      "branch": "fix/live-phase25-progress-map-20261030",
+      "sha": "dbc9702324f40bf4262b5dfed7688287c4c9548a",
+      "title": "fix: count phases 23–25 in live engineering progress without inflating API coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/107",
+      "updated_at": "2026-10-30T11:25:18Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 105,
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
       "sha": "a9bcda8e7432e65d3b0f0a9d581163c91526a23e",
@@ -448,5 +457,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T11:14:14Z"
+  "observed_at": "2026-10-30T11:25:48Z"
 }

@@ -3,7 +3,7 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 26,
+  "candidates_checked": 27,
   "candidate_count": 26,
   "candidates": [
     {
@@ -1930,5 +1930,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T11:14:18Z"
+  "observed_at": "2026-10-30T11:25:52Z"
 }
