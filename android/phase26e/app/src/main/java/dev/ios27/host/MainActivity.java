@@ -8,6 +8,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.os.BatteryManager;
+import android.os.Debug;
+import android.os.Process;
+import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.KeyEvent;
@@ -46,9 +50,14 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
     private DiagnosticSurface display;
     private final SparseArray<PointF> touches = new SparseArray<>();
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private long startWallMs;
+    private long startCpuMs;
+    private long peakDrawMicroseconds;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        startWallMs = SystemClock.elapsedRealtime();
+        startCpuMs = Process.getElapsedCpuTime();
         guest = nativeCreate();
         if (guest == 0) { finish(); return; }
         display = new DiagnosticSurface(this);
@@ -116,6 +125,7 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
         if (guest == 0) return;
         if (!focused) cancelTouches();
         nativeFocus(guest, focused);
+        scheduleFrame();
     }
     private void scheduleFrame() {
         if (!frameScheduled && resumed && surfaceReady && guest != 0) {
@@ -128,7 +138,9 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
         if (!resumed || !surfaceReady || guest == 0) return;
         nativeRequestFrame(guest);
         long generation = nativeGeneration(guest);
+        long drawingStartNs = System.nanoTime();
         Canvas canvas = null;
+        boolean posted = false;
         try {
             canvas = display.getHolder().lockCanvas();
             if (canvas != null) {
@@ -143,14 +155,34 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
                     canvas.drawText("frames: " + m[3] + "  surfaces: " + m[4], 24f, 162f, paint);
                     canvas.drawText("lifecycle: " + m[5] + "  log overflow: " + m[6], 24f, 194f, paint);
                 }
+                long uptimeMs = SystemClock.elapsedRealtime() - startWallMs;
+                long cpuMs = Process.getElapsedCpuTime() - startCpuMs;
+                long heapKiB = Debug.getNativeHeapAllocatedSize() / 1024L;
+                canvas.drawText("cpu: " + cpuMs + "ms / " + uptimeMs + "ms", 24f, 226f, paint);
+                canvas.drawText("native heap: " + heapKiB + " kib", 24f, 258f, paint);
+                BatteryManager battery = (BatteryManager)getSystemService(BATTERY_SERVICE);
+                int capacity = battery == null ? -1 : battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                canvas.drawText("battery: " + (capacity < 0 ? "n/a" : capacity + "%"), 24f, 290f, paint);
+                canvas.drawText("peak draw: " + peakDrawMicroseconds + " us", 24f, 322f, paint);
             }
         } catch (IllegalArgumentException | IllegalStateException ignored) {
             // A surface can disappear during rotation; never retain that canvas.
         } finally {
-            if (canvas != null) display.getHolder().unlockCanvasAndPost(canvas);
+            if (canvas != null) {
+                try {
+                    display.getHolder().unlockCanvasAndPost(canvas);
+                    posted = true;
+                } catch (IllegalArgumentException | IllegalStateException ignored) {
+                    // The surface may retire between lock and post during rotation.
+                }
+            }
         }
-        if (canvas != null && guest != 0) nativePresent(guest, generation);
-        scheduleFrame();
+        if (posted && guest != 0) {
+            nativePresent(guest, generation);
+            long drawUs = (System.nanoTime() - drawingStartNs) / 1000L;
+            peakDrawMicroseconds = Math.max(peakDrawMicroseconds, drawUs);
+        }
+        // On-demand only: do not wake a 120 Hz panel continuously when idle.
     }
     private void cancelTouches() {
         if (guest != 0) for (int i = 0; i < touches.size(); ++i) {
@@ -168,8 +200,8 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
             for (int i = 0; i < event.getPointerCount(); ++i) {
                 int id = event.getPointerId(i);
                 float x = event.getX(i), y = event.getY(i);
-                nativePointer(guest, 2, id, x, y);
-                touches.put(id, new PointF(x, y));
+                if (nativePointer(guest, 2, id, x, y) == 0)
+                    touches.put(id, new PointF(x, y));
             }
             return true;
         }
@@ -179,18 +211,19 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
             int id = event.getPointerId(i);
             float x = event.getX(i), y = event.getY(i);
             int kind = (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) ? 1 : 3;
-            nativePointer(guest, kind, id, x, y);
+            int status = nativePointer(guest, kind, id, x, y);
+            if (status != 0) return false;
             if (kind == 1) touches.put(id, new PointF(x, y)); else touches.remove(id);
             return true;
         }
         return false;
     }
     @Override public boolean onKeyDown(int code, KeyEvent event) {
-        if (guest != 0) nativeKey(guest, true, code);
+        if (guest != 0) { nativeKey(guest, true, code); scheduleFrame(); }
         return super.onKeyDown(code, event);
     }
     @Override public boolean onKeyUp(int code, KeyEvent event) {
-        if (guest != 0) nativeKey(guest, false, code);
+        if (guest != 0) { nativeKey(guest, false, code); scheduleFrame(); }
         return super.onKeyUp(code, event);
     }
     private final class DiagnosticSurface extends SurfaceView {
@@ -203,7 +236,9 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
                 if (nativeAccessibility(guest) == 0)
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
             }
-            return route(event);
+            boolean routed = route(event);
+            scheduleFrame();
+            return routed;
         }
         @Override public boolean onCheckIsTextEditor() { return true; }
         @Override public InputConnection onCreateInputConnection(EditorInfo attrs) {
@@ -212,15 +247,21 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
             return new BaseInputConnection(this, false) {
                 @Override public boolean commitText(CharSequence text, int cursor) {
                     if (guest == 0 || text == null) return false;
-                    return nativeText(guest, text.toString(), false) == 0;
+                    boolean accepted = nativeText(guest, text.toString(), false) == 0;
+                    if (accepted) scheduleFrame();
+                    return accepted;
                 }
                 @Override public boolean setComposingText(CharSequence text, int cursor) {
                     if (guest == 0 || text == null) return false;
-                    return nativeText(guest, text.toString(), true) == 0;
+                    boolean accepted = nativeText(guest, text.toString(), true) == 0;
+                    if (accepted) scheduleFrame();
+                    return accepted;
                 }
                 @Override public boolean finishComposingText() {
                     if (guest == 0) return false;
-                    return nativeText(guest, "", true) == 0;
+                    boolean accepted = nativeText(guest, "", true) == 0;
+                    if (accepted) scheduleFrame();
+                    return accepted;
                 }
             };
         }
