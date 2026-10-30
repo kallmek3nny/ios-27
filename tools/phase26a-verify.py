@@ -108,7 +108,8 @@ def strip_platform(path):
 
 def link(linker, options, obj, *extra):
     common = [linker, "-arch", "arm64", "-platform_version",
-              "macos", "13.0", "13.0", "-fatal_warnings"] + options
+              "macos", "13.0", "13.0", "-fatal_warnings",
+              "-fixup_chains"] + options
     try:
         run(common + [obj, *extra], 30)
     except RuntimeError as error:
