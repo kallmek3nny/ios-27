@@ -8,19 +8,19 @@
   "candidates": [
     {
       "branch": "phase25c-arc-ownership-20261030",
-      "sha": "c84f0bff70f4838de3ef83a70be46b150039082e",
+      "sha": "12632f1f01c730f46a163053c6287a62341555f7",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "pr_number": 102,
       "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 8,
+      "files_checked": 9,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "unclassified",
           "source_files": 2,
-          "fixture_files": 4,
-          "additions": 996,
+          "fixture_files": 5,
+          "additions": 1057,
           "deletions": 0,
           "symbols_preview": [
             "ios27_phase25c_alloc",
@@ -40,7 +40,7 @@
             "include/ios27/phase25c_lifetime.h",
             "src/phase25c_lifetime.c",
             "tests/phase25c-arc-darwin.m",
-            "tests/phase25c-arc-native.m"
+            "tests/phase25c-arc-native-host.c"
           ]
         }
       ]
@@ -50,7 +50,7 @@
       "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
       "url": "https://github.com/kallmek3nny/ios-27/pull/104",
       "pr_number": 104,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 16,
       "possibly_truncated": false,
@@ -917,7 +917,7 @@
         "branch": "phase25c-arc-ownership-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/102",
         "source_files": 2,
-        "fixture_files": 4,
+        "fixture_files": 5,
         "ci": "running"
       },
       {
@@ -925,7 +925,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/104",
         "source_files": 2,
         "fixture_files": 12,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase25e-objc-app-integration-20261030",
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:54:21Z"
+  "observed_at": "2026-10-30T10:54:39Z"
 }

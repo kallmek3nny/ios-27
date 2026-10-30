@@ -8,14 +8,14 @@ candidate branches with mapped changes: **24** · audited base: `1dd112410e43`
 
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
-head: `c84f0bff70f4` · ci: **running** · unmerged, not credited.
+head: `12632f1f01c7` · ci: **running** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 4 test/fixture files, +996/-0 lines
+- **unclassified**: 2 source files, 5 test/fixture files, +1057/-0 lines
   - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
 
 ### [agent/phase25d-objc-lifecycle-20261030](https://github.com/kallmek3nny/ios-27/pull/104)
 
-head: `7c434d616cf2` · ci: **running** · unmerged, not credited.
+head: `7c434d616cf2` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 12 test/fixture files, +922/-0 lines
 
