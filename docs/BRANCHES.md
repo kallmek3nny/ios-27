@@ -8,7 +8,7 @@ candidate branches with mapped changes: **31** · audited base: `55b186d90cf6`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
-head: `63310d737d10` · ci: **running** · unmerged, not credited.
+head: `63310d737d10` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 1 test/fixture files, +771/-0 lines
 
