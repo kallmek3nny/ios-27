@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 106,
+      "branch": "phase25b-native-objc-dispatch",
+      "sha": "6461289f2ee68eb3c0181a8e259ae04c0b879c43",
+      "title": "phase25b: restricted native arm64 objc_msgSend dispatch and compiler-linked fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/106",
+      "updated_at": "2026-10-30T11:01:06Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 105,
+      "branch": "agent/phase25a-objc-linked-metadata-20261030",
+      "sha": "8944a8035faadfe96056d6b0186a05b9560e70db",
+      "title": "phase25a: native arm64 objc2 metadata relocation and cross-dylib class binding",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/105",
+      "updated_at": "2026-10-30T11:01:03Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 102,
       "branch": "phase25c-arc-ownership-20261030",
       "sha": "70d7d9826a034b3076a8c066d81aa085dbced285",
       "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "updated_at": "2026-10-30T10:59:01Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 105,
-      "branch": "agent/phase25a-objc-linked-metadata-20261030",
-      "sha": "66cbb937c62e65e41ccc10ece371fb26b332547c",
-      "title": "phase25a: native arm64 objc2 metadata relocation and cross-dylib class binding",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/105",
-      "updated_at": "2026-10-30T10:58:55Z",
       "status": "unmerged: not counted"
     },
     {
@@ -439,5 +448,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:59:29Z"
+  "observed_at": "2026-10-30T11:01:38Z"
 }

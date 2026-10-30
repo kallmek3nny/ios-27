@@ -2,7 +2,7 @@
 <style>@media(prefers-color-scheme:light){.gh-text{fill:#1f2328}.gh-muted{fill:#59636e}.gh-rule{stroke:#d1d9e0}.gh-surface{fill:#f6f8fa}.gh-missing{fill:#d1d9e0}}</style>
 <text x="18" y="33" font-family="sans-serif" font-size="25" font-weight="600" fill="#e6edf3" class="gh-text">ios-27 / compatibility</text>
 <text x="18" y="55" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">component area = tracked targets · color = test evidence</text>
-<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">25 WIP · 19 merged source PRs (review pending)</text>
+<text x="742" y="81" text-anchor="end" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">26 WIP · 19 merged source PRs (review pending)</text>
 <text x="18" y="119" font-family="sans-serif" font-size="17" font-weight="600" fill="#e6edf3" class="gh-text">system libraries / api targets</text>
 <text x="742" y="120" text-anchor="end" font-family="sans-serif" font-size="22" font-weight="700" fill="#e6edf3" class="gh-text">9.2%</text>
 <text x="18" y="138" font-family="sans-serif" font-size="12" fill="#8b949e" class="gh-muted">13 components · 249 tracked</text>
