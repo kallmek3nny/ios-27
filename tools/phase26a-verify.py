@@ -75,8 +75,8 @@ def check(path, kind, dependency=False):
         raise ValueError("expected real LC_LOAD_DYLIB")
     if kind == 2 and 0x80000028 not in commands:
         raise ValueError("expected compiler-linked LC_MAIN")
-    if kind == 6 and 0x80000033 not in commands:
-        raise ValueError("expected exports trie")
+    if kind == 6 and not ({0x80000033, 0x80000022, 0x22} & set(commands)):
+        raise ValueError("expected modern exports trie or classic dyld-info export command")
     return data
 
 
