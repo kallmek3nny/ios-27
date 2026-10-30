@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 112,
-      "branch": "phase26e-android-host-scenes-input",
-      "sha": "c3baf8d487c689dfe4f094cf69099648b4845c0f",
-      "title": "phase26e: standalone android host, scene and input routing fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
-      "updated_at": "2026-10-30T13:07:24Z",
+      "number": 109,
+      "branch": "phase26a-native-libc-abi",
+      "sha": "4f7ebaf2fd3d3bf87158c67a2964375cdd8e7e4c",
+      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "updated_at": "2026-10-30T13:09:26Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 109,
-      "branch": "phase26a-native-libc-abi",
-      "sha": "09de3646a5c698043c8697d3a811efe77b30b080",
-      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "updated_at": "2026-10-30T13:05:13Z",
+      "number": 112,
+      "branch": "phase26e-android-host-scenes-input",
+      "sha": "333409686230ad7dbb6a00d8a1257447b822c81c",
+      "title": "phase26e: standalone android host, scene and input routing fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
+      "updated_at": "2026-10-30T13:08:58Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:07:58Z"
+  "observed_at": "2026-10-30T13:09:36Z"
 }

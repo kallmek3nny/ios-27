@@ -8,36 +8,11 @@
   "candidate_count": 31,
   "candidates": [
     {
-      "branch": "phase26e-android-host-scenes-input",
-      "sha": "c3baf8d487c689dfe4f094cf69099648b4845c0f",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
-      "pr_number": 112,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 14,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 1,
-          "additions": 749,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase26e_host.h",
-            "src/phase26e_host.c",
-            "tests/phase26e-host-test.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "phase26a-native-libc-abi",
-      "sha": "09de3646a5c698043c8697d3a811efe77b30b080",
+      "sha": "4f7ebaf2fd3d3bf87158c67a2964375cdd8e7e4c",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "pr_number": 109,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -46,7 +21,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 5,
-          "additions": 734,
+          "additions": 879,
           "deletions": 0,
           "symbols_preview": [
             "ios27_26a_calloc",
@@ -67,6 +42,31 @@
             "src/phase26a_libc.c",
             "tests/phase26a-client.c",
             "tests/phase26a-executable.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase26e-android-host-scenes-input",
+      "sha": "333409686230ad7dbb6a00d8a1257447b822c81c",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
+      "pr_number": 112,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 14,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 749,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase26e_host.h",
+            "src/phase26e_host.c",
+            "tests/phase26e-host-test.c"
           ]
         }
       ]
@@ -1241,17 +1241,17 @@
     ],
     "unclassified": [
       {
-        "branch": "phase26e-android-host-scenes-input",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/112",
-        "source_files": 2,
-        "fixture_files": 1,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "phase26a-native-libc-abi",
         "url": "https://github.com/kallmek3nny/ios-27/pull/109",
         "source_files": 2,
         "fixture_files": 5,
+        "ci": "running"
+      },
+      {
+        "branch": "phase26e-android-host-scenes-input",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/112",
+        "source_files": 2,
+        "fixture_files": 1,
         "ci": "passing_checks"
       },
       {
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:08:05Z"
+  "observed_at": "2026-10-30T13:09:40Z"
 }
