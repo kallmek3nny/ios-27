@@ -301,7 +301,7 @@ def audit(repo, provenance, get, groups):
                      "source_files": g["source_files"],
                      "fixture_files": g["fixture_files"],
                      "status": "merged source, not necessarily compatible"})
-    return {"schema": 1, "classification_version": 2,
+    return {"schema": 1, "classification_version": 3,
             "repository": repo, "main_source_sha": sha,
             "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
             "candidates_checked": len(candidates), "candidate_count": len(mapped),
