@@ -28,7 +28,7 @@ def native(cc, sanitizer=False):
          "-o", target], 300)
     env = dict(os.environ)
     if sanitizer:
-        env.update(ASAN_OPTIONS="detect_leaks=1:halt_on_error=1",
+        env.update(ASAN_OPTIONS=("detect_leaks=0:halt_on_error=1" if platform.system() == "Darwin" else "detect_leaks=1:halt_on_error=1"),
                    UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1")
     run([target], 180, env=env)
 
