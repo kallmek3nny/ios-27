@@ -18,7 +18,8 @@ MAGIC = 0xFEEDFACF
 ARM64 = 0x0100000C
 ABI = ("malloc", "calloc", "realloc", "free", "memcpy", "memmove",
        "memset", "memcmp", "strlen", "strnlen", "strcmp", "strncmp",
-       "strcpy", "strncpy", "strdup", "getenv", "setenv", "unsetenv")
+       "strcpy", "strncpy", "strdup", "getenv", "setenv", "unsetenv",
+       "snprintf", "strtol", "strerror")
 
 
 def run(args, limit=120):
@@ -153,7 +154,7 @@ def main():
         provider_stub = out / "phase26a-c.tbd"
         stub(provider_stub, provider.name, ["_" + symbol for symbol in ABI])
         clients = []
-        for case in range(5):
+        for case in range(6):
             obj = out / f"client{case}.o"
             lib = out / f"client{case}.dylib"
             run([clang, *darwin, "-O2", f"-DPHASE26A_CASE={case}",
@@ -177,7 +178,7 @@ def main():
                  obj, client_stub)
             check(exe, 2, True)
             executables.append(exe)
-        print("phase26a: 6 Clang/LLD-linked ARM64 Darwin dylibs and 2 executables", flush=True)
+        print("phase26a: 7 Clang/LLD-linked ARM64 Darwin dylibs and 2 executables", flush=True)
         build = out / "core"
         run(["cmake", "-S", str(ROOT), "-B", str(build),
              "-DIOS27_BUILD_TESTS=OFF", "-DCMAKE_BUILD_TYPE=Debug"], 120)
