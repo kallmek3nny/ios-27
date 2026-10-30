@@ -37,7 +37,7 @@
       "sha": "8910deb40b9e7a912545d832892e0e2ed8bb8e75",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "pr_number": 102,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -925,7 +925,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/102",
         "source_files": 2,
         "fixture_files": 5,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase25d-objc-lifecycle-20261030",
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:54:56Z"
+  "observed_at": "2026-10-30T10:55:16Z"
 }

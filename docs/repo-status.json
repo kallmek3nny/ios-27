@@ -32,7 +32,7 @@
       "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
       "title": "phase25d: isolated objective-c lifecycle scheduler with concurrency and retirement pins",
       "url": "https://github.com/kallmek3nny/ios-27/pull/104",
-      "updated_at": "2026-10-30T10:53:43Z",
+      "updated_at": "2026-10-30T10:55:03Z",
       "status": "unmerged: not counted"
     },
     {
@@ -440,5 +440,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:54:51Z"
+  "observed_at": "2026-10-30T10:55:09Z"
 }

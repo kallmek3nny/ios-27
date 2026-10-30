@@ -14,7 +14,7 @@ head: `ae4bdd578843` · ci: **running** · unmerged, not credited.
 
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
-head: `8910deb40b9e` · ci: **running** · unmerged, not credited.
+head: `8910deb40b9e` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +1057/-0 lines
   - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
