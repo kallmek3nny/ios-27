@@ -11,7 +11,7 @@
       "sha": "6461289f2ee68eb3c0181a8e259ae04c0b879c43",
       "url": "https://github.com/kallmek3nny/ios-27/pull/106",
       "pr_number": 106,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 19,
       "possibly_truncated": false,
@@ -37,7 +37,7 @@
       "sha": "8944a8035faadfe96056d6b0186a05b9560e70db",
       "url": "https://github.com/kallmek3nny/ios-27/pull/105",
       "pr_number": 105,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 13,
       "possibly_truncated": false,
@@ -972,14 +972,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/106",
         "source_files": 3,
         "fixture_files": 13,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/105",
         "source_files": 2,
         "fixture_files": 8,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase25c-arc-ownership-20261030",
@@ -1930,5 +1930,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T11:01:47Z"
+  "observed_at": "2026-10-30T11:02:03Z"
 }
