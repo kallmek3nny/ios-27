@@ -73,7 +73,46 @@ def link_fixtures(temp: Path, clang: str, linker: str, optimize: int) -> dict[st
     return data
 
 
+def verify_concurrent_registration(data: dict[str, bytes]) -> None:
+    """Race identical registration against conflicting global class identities."""
+    registry = Registry()
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        bases = list(executor.map(lambda _: registry.register('root', data['root']),
+                                  range(96)))
+    assert len(set(bases)) == 1
+    assert set(registry.classes) == {'Phase25Root'}
+    assert set(registry.images) == {'root'}
+    generation = registry.generation
+
+    def duplicate(index: int) -> bool:
+        try:
+            registry.register(f'duplicate-{index}', data['root'])
+        except BindError as exc:
+            assert 'duplicate class' in str(exc)
+            return True
+        raise AssertionError('accepted duplicate class from a second image')
+
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        assert all(executor.map(duplicate, range(48)))
+    assert registry.generation == generation and set(registry.images) == {'root'}
+
+    corrupt = bytearray(data['root'])
+    corrupt[0] = 0
+    try:
+        registry.register('invalid-macho', bytes(corrupt))
+    except BindError:
+        pass
+    else:
+        raise AssertionError('invalid image committed despite failed preflight')
+    assert registry.generation == generation
+    registry.unload('root')
+    assert registry.classes == {} and registry.images == {}
+    print('concurrent registration=96; duplicate classes rejected=48; '
+          'atomic invalid-image rollback=passed', flush=True)
+
+
 def exercise(data: dict[str, bytes], rounds: int) -> None:
+    verify_concurrent_registration(data)
     registry = Registry()
     for name in FIXTURES:
         registry.register(name, data[name], GRAPH[name])
@@ -88,6 +127,12 @@ def exercise(data: dict[str, bytes], rounds: int) -> None:
     assert registry.lookup('Phase25Branch', 'categoryValue') is not None
     assert registry.lookup('Phase25Root', 'overrideValue') is not None
     assert registry.lookup('Phase25Root', 'identity', class_method=True) is not None
+    # Compiler-linked categories must replace existing method selectors, not
+    # merely append new methods. Subclasses with no override inherit them.
+    assert registry.lookup('Phase25Root', 'score').owner == 'Phase25Overrides'
+    assert registry.lookup('Phase25Sibling', 'score').owner == 'Phase25Overrides'
+    assert registry.lookup('Phase25Branch', 'score').owner == 'Phase25Extras'
+    assert registry.lookup('Phase25Leaf', 'score').owner == 'Phase25Extras'
     assert registry.classes['Phase25Root'].protocols == ('Phase25Protocol',)
     assert '_value' in registry.classes['Phase25Root'].ivars
     assert len(registry.selectors) >= 6
@@ -144,6 +189,12 @@ def exercise(data: dict[str, bytes], rounds: int) -> None:
     # Teardown is reverse dependency/registration order, retaining no stale IMP.
     for name in reversed(FIXTURES):
         registry.unload(name)
+        # Retiring a category must invalidate its method overlay immediately.
+        if name == 'category2':
+            assert registry.lookup('Phase25Root', 'score').owner == 'Phase25Root'
+            assert registry.lookup('Phase25Sibling', 'score').owner == 'Phase25Root'
+        if name == 'category':
+            assert registry.lookup('Phase25Branch', 'score').owner == 'Phase25Branch'
     assert not registry.classes and not registry.images
     registry.register('root', data['root'])
     assert registry.images['root'].base != base, 'reused retired guest address'
