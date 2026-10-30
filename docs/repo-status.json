@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 104,
+      "branch": "agent/phase25d-objc-lifecycle-20261030",
+      "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
+      "title": "phase25d: isolated objective-c lifecycle scheduler with concurrency and retirement pins",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/104",
+      "updated_at": "2026-10-30T10:55:03Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 103,
       "branch": "agent/phase25e-objc-app-integration-20261030",
       "sha": "ae4bdd5788437d4eb31e90c29cc7840a127b85c7",
@@ -24,15 +33,6 @@
       "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "updated_at": "2026-10-30T10:54:33Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 104,
-      "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
-      "title": "phase25d: isolated objective-c lifecycle scheduler with concurrency and retirement pins",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/104",
-      "updated_at": "2026-10-30T10:55:03Z",
       "status": "unmerged: not counted"
     },
     {
@@ -440,5 +440,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:55:09Z"
+  "observed_at": "2026-10-30T10:55:28Z"
 }
