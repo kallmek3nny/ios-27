@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "phase26e-android-host-scenes-input",
-      "sha": "008a2386778cfaf86db39e9fc455cbb5bf84a282",
+      "sha": "c3baf8d487c689dfe4f094cf69099648b4845c0f",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
       "pr_number": 112,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -21,7 +21,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 1,
-          "additions": 741,
+          "additions": 749,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -1245,7 +1245,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/112",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase26a-native-libc-abi",
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:06:18Z"
+  "observed_at": "2026-10-30T13:08:05Z"
 }
