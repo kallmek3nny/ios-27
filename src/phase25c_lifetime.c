@@ -509,6 +509,11 @@ void *objc_storeWeak(void **slot, void *p) {
     require(ios27_phase25c_store_weak(bound(), slot, p));
     return p;
 }
+void *objc_initWeak(void **slot, void *p) {
+    if (!slot) abort();
+    *slot = NULL;
+    return objc_storeWeak(slot, p);
+}
 void *objc_loadWeakRetained(void **slot) {
     void *p = NULL;
     require(ios27_phase25c_load_weak_retained(bound(), slot, &p));
