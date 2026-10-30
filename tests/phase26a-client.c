@@ -21,6 +21,9 @@ extern char *strdup(const char *);
 extern char *getenv(const char *);
 extern int setenv(const char *, const char *, int);
 extern int unsetenv(const char *);
+extern int snprintf(char *, size_t, const char *, ...);
+extern long strtol(const char *, char **, int);
+extern char *strerror(int);
 #define JOIN0(a,b) a##b
 #define JOIN(a,b) JOIN0(a,b)
 #define CASE JOIN(phase26a_case_,PHASE26A_CASE)
@@ -55,6 +58,31 @@ int CASE(void) {
     if (memset(a, 0x7f, 96u) != a ||
         memmove(a + 4, a, 32u) != a + 4 || a[35] != 0x7f ||
         memcpy(a + 2, a, 8u) != NULL) okay = 0;
+#elif PHASE26A_CASE == 5
+    char *format = malloc(64u);
+    char *expect = malloc(64u);
+    char **end = malloc(sizeof(*end));
+    static const char fmt_source[] = "v=%d x=%x s=%s %%";
+    static const char expected_source[] = "v=-42 x=2a s=ok %";
+    if (!format || !expect || !end) okay = 0;
+    else {
+        for (size_t i = 0u; i < sizeof(fmt_source); ++i)
+            format[i] = fmt_source[i];
+        for (size_t i = 0u; i < sizeof(expected_source); ++i)
+            expect[i] = expected_source[i];
+        a[0] = 'o'; a[1] = 'k'; a[2] = 0;
+        if (snprintf(b, 96u, format, -42, 42u, a) != 17 ||
+            strcmp(b, expect) != 0 ||
+            strerror(12)[0] != 'C') okay = 0;
+        a[0] = '-'; a[1] = '4'; a[2] = '2'; a[3] = 'X'; a[4] = 0;
+        if (strtol(a, end, 10) != -42 || **end != 'X') okay = 0;
+        format[3] = 'f';
+        if (snprintf(b, 96u, format, 3.14) != -1 ||
+            strcmp(b, expect) != 0) okay = 0;
+    }
+    free(format);
+    free(expect);
+    free(end);
 #else
 #error "invalid test case"
 #endif
