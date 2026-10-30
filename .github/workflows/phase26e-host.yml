@@ -38,7 +38,11 @@ jobs:
         with:
           gradle-version: '8.10.2'
       - name: install NDK and platform under hard timeout
-        run: timeout 120s sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+        run: |
+          set -euo pipefail
+          sdk="${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/16.0/bin/sdkmanager"
+          timeout 10s test -x "$sdk"
+          timeout 120s "$sdk" 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: build standalone debug APK
         working-directory: android/phase26e
         run: timeout 300s gradle :app:assembleDebug --no-daemon --console plain -Pandroid.injected.testOnly=false
