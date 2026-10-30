@@ -25,11 +25,14 @@ dashboard files were not edited. No changes to central CMake are required.
    allocation validation. memcpy rejects overlapping spans; memmove supports
    overlap. Unterminated strings and invalid spans fail closed with explicit
    error state. A zero-byte operation may accept a null pointer.
-3. **Process-local environment:** setenv, getenv and unsetenv, restricted to
-   16 keys of at most 31 characters and values of at most 127 characters.
-   Returned values are confined to the mapped image's owned environment.
-4. **Compiler-linked ARM64 graph and regression:** 6 genuine Clang/LLD
-   MH_DYLIB outputs (libc provider plus 5 independent caller dylibs), 2
+3. **Process-local environment and formatting:** setenv, getenv and unsetenv,
+   restricted to 16 keys of at most 31 characters and values of at most 127.
+   A transactional bounded snprintf accepts only %s, %d, %u, %x and %%,
+   with a 4096-character output ceiling, owned source buffers, and explicit
+   failure for other specifiers. A bounded Darwin LP64 strtol and a small
+   deterministic strerror mapping are also provided.
+4. **Compiler-linked ARM64 graph and regression:** 7 genuine Clang/LLD
+   MH_DYLIB outputs (libc provider plus 6 independent caller dylibs), 2
    genuine MH_EXECUTE callers, plus an original-source image-loader test.
    The standalone harness checks Mach-O filetype, LC_MAIN, LC_LOAD_DYLIB
    and exports, then requests native calls through verified cross-image
@@ -45,7 +48,8 @@ dashboard files were not edited. No changes to central CMake are required.
 | memcpy, memmove, memset, memcmp | only ranges of live heap allocations | await ARM64 CI |
 | strlen, strnlen, strcmp, strncmp, strcpy, strncpy, strdup | bounded live buffers, not string literals from foreign images | await ARM64 CI |
 | getenv, setenv, unsetenv | limited process/image scope | await ARM64 CI |
-| snprintf, printf formatting, strtol/strtoul, strerror | not implemented in this slice | unimplemented |
+| snprintf, strtol, strerror | only selected format specifiers, validated LP64 integer range, subset error strings | await ARM64 CI |
+| printf, fprintf, sscanf, strtod, strtoul | not implemented in this slice | unimplemented |
 | qsort, bsearch, atexit | unchecked callback pointers are explicitly unsupported | unimplemented |
 | pthreads, Mach services, files, dylib initializers | out of scope | no target promotion |
 
@@ -75,12 +79,27 @@ ASan+UBSan with `-Werror`.
 PR-triggered frozen-head workflow passes and proves actual separate
 Mach-O `_malloc`, `_calloc`, `_realloc`, `_free`, and string/memory
 symbol calls, propose promoting only individually observed subset
-contracts to **fixture ABI verified**, not globally compatible. Keep
-`snprintf`, numeric conversions, `strerror`, `qsort`, `bsearch`,
-`atexit` and remaining targets as models/unimplemented pending
-independent integration. Promotion must be reconciled with the canonical
+contracts to **fixture ABI verified**, not globally compatible. Keep `printf`, `fprintf`, `sscanf`, `strtod`, `qsort`, `bsearch`, `atexit`
+and the other untested targets as models/unimplemented. The strict
+`snprintf`, `strtol`, and `strerror` subset contracts still require
+independent native evidence, and no system-wide compatibility is implied. Promotion must be reconciled with the canonical
 35-target dashboard list, with explicit evidence links and semantics.
 
 The verifier must not borrow unmerged work. CI failures prevent merge.
 An unchanged-main-SHA integration lease and frozen PR-head green checks are
 mandatory before any merge.
+
+## canonical 35-target reconciliation
+
+The canonical libsystem-c catalog has 35 missing targets. This branch now
+implements exactly these 21 limited subsets: malloc, calloc, realloc, free,
+memcpy, memmove, memset, memcmp, strlen, strnlen, strcmp, strncmp, strcpy,
+strncpy, strdup, snprintf, strtol, setenv, getenv, unsetenv, strerror.
+The remaining 14 catalog targets are printf, fprintf, sscanf, strtod, fopen,
+fclose, fread, fwrite, fseek, fflush, qsort, bsearch, atexit, abort.
+None of the 35 entries in the shared catalog is modified by this PR.
+
+A completed, successful compiler-built ARM64 test means only *fixture ABI
+verified for this explicitly restricted subset*. It does not validate all
+POSIX semantics, unrestricted iOS guest memory, safe concurrent use, or
+process-wide errno. Target promotion must be a separate evidence review.
