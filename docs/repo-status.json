@@ -14,16 +14,16 @@
       "sha": "70d7d9826a034b3076a8c066d81aa085dbced285",
       "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "updated_at": "2026-10-30T10:57:50Z",
+      "updated_at": "2026-10-30T10:59:01Z",
       "status": "unmerged: not counted"
     },
     {
       "number": 105,
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
-      "sha": "9e22f4091f0e565310b0e1ce3ff12635ccd496ad",
+      "sha": "66cbb937c62e65e41ccc10ece371fb26b332547c",
       "title": "phase25a: native arm64 objc2 metadata relocation and cross-dylib class binding",
       "url": "https://github.com/kallmek3nny/ios-27/pull/105",
-      "updated_at": "2026-10-30T10:57:20Z",
+      "updated_at": "2026-10-30T10:58:55Z",
       "status": "unmerged: not counted"
     },
     {
@@ -439,5 +439,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:57:53Z"
+  "observed_at": "2026-10-30T10:59:29Z"
 }

@@ -47,10 +47,10 @@
     },
     {
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
-      "sha": "9e22f4091f0e565310b0e1ce3ff12635ccd496ad",
+      "sha": "66cbb937c62e65e41ccc10ece371fb26b332547c",
       "url": "https://github.com/kallmek3nny/ios-27/pull/105",
       "pr_number": 105,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 13,
       "possibly_truncated": false,
@@ -953,7 +953,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/105",
         "source_files": 2,
         "fixture_files": 8,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase25e-objc-app-integration-20261030",
@@ -1897,5 +1897,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:58:26Z"
+  "observed_at": "2026-10-30T10:59:33Z"
 }

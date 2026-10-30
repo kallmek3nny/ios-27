@@ -15,7 +15,7 @@ head: `70d7d9826a03` · ci: **passing_checks** · unmerged, not credited.
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
 
-head: `9e22f4091f0e` · ci: **passing_checks** · unmerged, not credited.
+head: `66cbb937c62e` · ci: **running** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 8 test/fixture files, +419/-0 lines
   - candidate declarations: `ios27_phase25a_preflight`
