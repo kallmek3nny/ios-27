@@ -12,7 +12,7 @@
       "sha": "8540863d5394cce73d3b06e3a46d2414f311fb63",
       "url": "https://github.com/kallmek3nny/ios-27/pull/111",
       "pr_number": 111,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 8,
       "possibly_truncated": false,
@@ -37,7 +37,7 @@
       "sha": "88ccde8e8f25ecd6f573918c75e95bd1629c0c64",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "pr_number": 109,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -1220,14 +1220,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/111",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase26a-native-libc-abi",
         "url": "https://github.com/kallmek3nny/ios-27/pull/109",
         "source_files": 2,
         "fixture_files": 5,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase26b-bsd-capabilities-20261030",
@@ -2052,5 +2052,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:00:11Z"
+  "observed_at": "2026-10-30T13:00:27Z"
 }
