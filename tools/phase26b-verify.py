@@ -38,7 +38,7 @@ def verify_macho(path):
 def main():
     start = time.monotonic()
     clang = shutil.which("clang")
-    ld64 = shutil.which("ld64.lld")
+    ld64 = shutil.which("ld64.lld") or shutil.which("ld64.lld-18")
     cc = os.environ.get("CC", "cc")
     if not clang or not shutil.which(cc) or not ld64:
         raise RuntimeError("cc, clang and genuine ld64.lld are required")
