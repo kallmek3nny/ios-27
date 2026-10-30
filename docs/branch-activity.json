@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "phase26a-native-libc-abi",
-      "sha": "590efb373d09a22935c1e3a63372a920c405d9f0",
+      "sha": "de713b7d79e02c211c8845adfe1ac3f08e1c2d9e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "pr_number": 109,
-      "ci": "not_checked",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -51,7 +51,7 @@
       "sha": "ec0fa234a194a294990ce7a1fd40a95e82fd0b73",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
       "pr_number": 112,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 14,
       "possibly_truncated": false,
@@ -1245,14 +1245,14 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/109",
         "source_files": 2,
         "fixture_files": 5,
-        "ci": "not_checked"
+        "ci": "running"
       },
       {
         "branch": "phase26e-android-host-scenes-input",
         "url": "https://github.com/kallmek3nny/ios-27/pull/112",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase26c-headless-graphics-interop-20261030",
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:11:16Z"
+  "observed_at": "2026-10-30T13:11:42Z"
 }
