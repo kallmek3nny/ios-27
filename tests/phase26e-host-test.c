@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <math.h>
 #include <pthread.h>
-#include <stdatomic.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -70,6 +69,22 @@ static void base_tests(void) {
     phase26e_destroy(h);
 }
 
+static void full_depth_geometry_test(void) {
+    phase26e_host *h = phase26e_create(); assert(h);
+    phase26e_id scene, window, parent = 0, leaf = 0;
+    OK(phase26e_scene_add(h, &scene));
+    OK(phase26e_window_add(h, scene, (phase26e_rect){0,0,400,800}, &window));
+    for (unsigned i = 0; i < PHASE26E_MAX_VIEWS; ++i) {
+        OK(phase26e_view_add(h, window, parent, (phase26e_rect){1,1,300,300},
+                             (int32_t)i, &leaf));
+        parent = leaf;
+    }
+    float x, y;
+    OK(phase26e_convert_to_window(h, leaf, 0, 0, &x, &y));
+    assert(x == 64 && y == 64);
+    phase26e_destroy(h);
+}
+
 static void stress_tests(void) {
     phase26e_id w, v;
     phase26e_host *h = make_host(&w, &v);
@@ -102,10 +117,11 @@ static void stress_tests(void) {
     phase26e_destroy(h);
 }
 
-struct work { phase26e_host *host; atomic_int *go; };
+struct work { phase26e_host *host; pthread_mutex_t *start_gate; };
 static void *worker(void *user) {
     struct work *w = (struct work *)user;
-    while (!atomic_load(w->go)) { /* no sleeping or open-ended polling: test controller always sets */ }
+    assert(pthread_mutex_lock(w->start_gate) == 0);
+    assert(pthread_mutex_unlock(w->start_gate) == 0);
     for (int i = 0; i < 20000; ++i)
         (void)phase26e_keyboard(w->host, (i & 1), 66);
     return NULL;
@@ -113,18 +129,22 @@ static void *worker(void *user) {
 static void concurrent_tests(void) {
     phase26e_id window, view;
     phase26e_host *h = make_host(&window, &view);
-    pthread_t threads[4]; atomic_int go = 0;
-    struct work w = {h, &go};
+    pthread_t threads[4];
+    pthread_mutex_t start_gate = PTHREAD_MUTEX_INITIALIZER;
+    assert(pthread_mutex_lock(&start_gate) == 0);
+    struct work w = {h, &start_gate};
     for (unsigned i = 0; i < 4; ++i) assert(pthread_create(&threads[i], NULL, worker, &w) == 0);
-    atomic_store(&go, 1);
+    assert(pthread_mutex_unlock(&start_gate) == 0);
     OK(phase26e_terminate(h));
     for (unsigned i = 0; i < 4; ++i) assert(pthread_join(threads[i], NULL) == 0);
+    assert(pthread_mutex_destroy(&start_gate) == 0);
     assert(phase26e_get_metrics(h).lifecycle == P26_TERMINATED);
     assert(phase26e_get_metrics(h).active_touches == 0);
     phase26e_destroy(h);
 }
 int main(void) {
     base_tests();
+    full_depth_geometry_test();
     stress_tests();
     concurrent_tests();
     puts("phase26e: scene, hit test, input (100k), lifecycle (10k), termination concurrency passed");
