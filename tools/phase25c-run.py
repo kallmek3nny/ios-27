@@ -44,6 +44,32 @@ def native_compiler_arc(clang):
          "tests/phase25c-arc-native-host.c", obj, "-o", exe], 300)
     run([exe], 180)
 
+def cross_image(clang):
+    """Test two actually linked native shared images against one runtime."""
+    mac = platform.system() == "Darwin"
+    ext = ".dylib" if mac else ".so"
+    dylib_flag = "-dynamiclib" if mac else "-shared"
+    rpath = "-Wl,-rpath,@loader_path" if mac else "-Wl,-rpath,$ORIGIN"
+    exe_rpath = "-Wl,-rpath,@executable_path" if mac else "-Wl,-rpath,$ORIGIN"
+    runtime = BUILD / ("libphase25c-runtime" + ext)
+    flags = ["-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+             "-Wpedantic", "-pthread", "-fPIC", "-Iinclude"]
+    name = ["-Wl,-install_name,@rpath/libphase25c-runtime.dylib"] if mac else [
+        "-Wl,-soname,libphase25c-runtime.so"]
+    run([clang, *flags, dylib_flag, "src/phase25c_lifetime.c",
+         *name, "-o", runtime], 300)
+    images = []
+    for tag in ("a", "b"):
+        path = BUILD / ("libphase25c-image-" + tag + ext)
+        run([clang, *flags, dylib_flag, "tests/phase25c-image-" + tag + ".c",
+             "-L", BUILD, "-lphase25c-runtime", rpath, "-o", path], 300)
+        images.append(path)
+    test = BUILD / "test-cross-image"
+    run([clang, *flags, "tests/phase25c-cross-image.c",
+         "-L", BUILD, "-lphase25c-runtime", exe_rpath,
+         *([] if mac else ["-ldl"]), "-o", test], 300)
+    run([test, *images], 180)
+
 def darwin(clang):
     objc = ROOT / "tests/phase25c-arc-darwin.m"
     flags = ["--target=arm64-apple-darwin", "-fobjc-runtime=macosx-11.0",
@@ -82,6 +108,7 @@ def main():
     if not args.skip_sanitizers:
         native(args.clang, sanitizer=True)
     native_compiler_arc(args.clang)
+    cross_image(args.clang)
     darwin(args.clang)
     print("phase25c checks passed (native Darwin runtime execution unverified)")
 
