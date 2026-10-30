@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 111,
+      "branch": "phase26c-headless-graphics-interop-20261030",
+      "sha": "8540863d5394cce73d3b06e3a46d2414f311fb63",
+      "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+      "updated_at": "2026-10-30T12:59:49Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 109,
       "branch": "phase26a-native-libc-abi",
       "sha": "88ccde8e8f25ecd6f573918c75e95bd1629c0c64",
@@ -475,5 +484,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T12:59:50Z"
+  "observed_at": "2026-10-30T13:00:06Z"
 }

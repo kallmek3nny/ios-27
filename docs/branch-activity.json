@@ -4,9 +4,34 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "55b186d90cf6facc7d1dcdb61ad011a2e12b67d3",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 29,
-  "candidate_count": 29,
+  "candidates_checked": 30,
+  "candidate_count": 30,
   "candidates": [
+    {
+      "branch": "phase26c-headless-graphics-interop-20261030",
+      "sha": "8540863d5394cce73d3b06e3a46d2414f311fb63",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+      "pr_number": 111,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 8,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 726,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase26c_graphics.h",
+            "src/phase26c_graphics.c",
+            "tests/phase26c-headless.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26a-native-libc-abi",
       "sha": "88ccde8e8f25ecd6f573918c75e95bd1629c0c64",
@@ -1191,6 +1216,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase26c-headless-graphics-interop-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/111",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "running"
+      },
+      {
         "branch": "phase26a-native-libc-abi",
         "url": "https://github.com/kallmek3nny/ios-27/pull/109",
         "source_files": 2,
@@ -2020,5 +2052,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T12:59:54Z"
+  "observed_at": "2026-10-30T13:00:11Z"
 }

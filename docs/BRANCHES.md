@@ -4,7 +4,13 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **29** · audited base: `55b186d90cf6`
+candidate branches with mapped changes: **30** · audited base: `55b186d90cf6`
+
+### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
+
+head: `8540863d5394` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 1 test/fixture files, +726/-0 lines
 
 ### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
 
