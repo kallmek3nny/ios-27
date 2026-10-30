@@ -6,18 +6,18 @@
 
 candidate branches with mapped changes: **24** · audited base: `1dd112410e43`
 
+### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
+
+head: `6645925e1c46` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 8 test/fixture files, +1169/-0 lines
+  - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
+
 ### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/pull/103)
 
 head: `ae4bdd578843` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
-
-### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
-
-head: `223c3c21befa` · ci: **running** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 8 test/fixture files, +1169/-0 lines
-  - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
 
 ### [agent/phase25d-objc-lifecycle-20261030](https://github.com/kallmek3nny/ios-27/pull/104)
 
