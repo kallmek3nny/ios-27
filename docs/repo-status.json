@@ -9,30 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 109,
+      "branch": "phase26a-native-libc-abi",
+      "sha": "88ccde8e8f25ecd6f573918c75e95bd1629c0c64",
+      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "updated_at": "2026-10-30T12:59:45Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 110,
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "67a42b100c6b120fe6591b84fb85421343eca8a3",
+      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+      "updated_at": "2026-10-30T12:59:35Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 108,
       "branch": "phase26d-coreanimation-compositor",
       "sha": "40033d5f387e3889b38aaf13b6bd462a5072b35e",
       "title": "phase26d: bounded transactions and deterministic cpu composition",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
       "updated_at": "2026-10-30T12:59:21Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 110,
-      "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "5030fc38217f0333c206e6c4078bef8ccea23551",
-      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
-      "updated_at": "2026-10-30T12:58:43Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 109,
-      "branch": "phase26a-native-libc-abi",
-      "sha": "a34ed73ad972c677420367207a98d13ee36a288b",
-      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "updated_at": "2026-10-30T12:58:37Z",
       "status": "unmerged: not counted"
     },
     {
@@ -475,5 +475,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T12:59:22Z"
+  "observed_at": "2026-10-30T12:59:50Z"
 }
