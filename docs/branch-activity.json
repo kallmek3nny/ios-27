@@ -11,7 +11,7 @@
       "sha": "50a4f45342118d7d4713c3169d528bd2647dcf3d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "pr_number": 102,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -918,7 +918,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/102",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:52:22Z"
+  "observed_at": "2026-10-30T10:52:39Z"
 }
