@@ -56,7 +56,7 @@ def darwin(clang):
     # The dylib is NOT executed; guest binder and msgSend are owned by 25a/b.
     if platform.system() == "Darwin":
         output = BUILD / "phase25c-arc-arm64-darwin.dylib"
-        run([clang, "--target=arm64-apple-darwin", "-dynamiclib", "-nostdlib",
+        run([clang, "--target=arm64-apple-darwin", "-dynamiclib",
              "-Wl,-undefined,dynamic_lookup", obj, "-o", output], 120)
         print("darwin: real arm64 compiler-linked dylib", output, flush=True)
 
