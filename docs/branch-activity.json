@@ -13,14 +13,14 @@
       "pr_number": 102,
       "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
+      "files_checked": 8,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "unclassified",
           "source_files": 2,
-          "fixture_files": 3,
-          "additions": 982,
+          "fixture_files": 4,
+          "additions": 996,
           "deletions": 0,
           "symbols_preview": [
             "ios27_phase25c_alloc",
@@ -40,7 +40,7 @@
             "include/ios27/phase25c_lifetime.h",
             "src/phase25c_lifetime.c",
             "tests/phase25c-arc-darwin.m",
-            "tests/phase25c-lifetime.c"
+            "tests/phase25c-arc-native.m"
           ]
         }
       ]
@@ -76,7 +76,7 @@
       "sha": "c52b2defd3e4a99443623149264547af5102bb20",
       "url": "https://github.com/kallmek3nny/ios-27/pull/103",
       "pr_number": 103,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -917,7 +917,7 @@
         "branch": "phase25c-arc-ownership-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/102",
         "source_files": 2,
-        "fixture_files": 3,
+        "fixture_files": 4,
         "ci": "running"
       },
       {
@@ -932,7 +932,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/103",
         "source_files": 0,
         "fixture_files": 4,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:54:05Z"
+  "observed_at": "2026-10-30T10:54:21Z"
 }
