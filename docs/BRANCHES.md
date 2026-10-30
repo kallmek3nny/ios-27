@@ -6,18 +6,18 @@
 
 candidate branches with mapped changes: **31** · audited base: `55b186d90cf6`
 
+### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
+
+head: `63310d737d10` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 1 test/fixture files, +771/-0 lines
+
 ### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
 
 head: `c710a3bdcb12` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 5 test/fixture files, +943/-0 lines
   - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
-
-### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
-
-head: `ec0fa234a194` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 1 test/fixture files, +749/-0 lines
 
 ### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
 
