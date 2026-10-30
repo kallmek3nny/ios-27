@@ -8,8 +8,10 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
     const targets=groups.flatMap(g=>g.targets);
     return {panel,groups,targets,h:Math.round(Math.max(230,Math.min(485,166+0.92*targets.length)))};
   });
-  // Classifier v2 enables a separate engineering metric. Prior snapshots stay unchanged.
-  const showTouchCoverage=activity && activity.classification_version===2;
+  // Classifier v2+ enables a separately labeled engineering metric; version 3
+  // adds a prominent activity percentage. Old snapshots remain deterministic.
+  const showTouchCoverage=activity && activity.classification_version>=2;
+  const showPhase26Activity=activity && activity.classification_version>=3;
   const top=100,header=showTouchCoverage?78:58,gap=24,bottom=70;
   const height=top+panels.reduce((a,p)=>a+header+p.h+gap,0)+bottom;
   const svg=[
@@ -89,7 +91,14 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
       const touched=p.groups.filter(g=>(Array.isArray(pending[g.id])&&pending[g.id].length>0)||
         (Array.isArray(merged[g.id])&&merged[g.id].length>0)).length;
       const pct=(100*touched/p.groups.length).toFixed(1);
-      svg.push('<text x="'+margin+'" y="'+(y+65)+'" font-family="sans-serif" font-size="12" fill="#79b8ff">recent engineering changes: '+touched+'/'+p.groups.length+' components ('+pct+'%) · NOT verified compatibility</text>');
+      if(showPhase26Activity){
+        svg.push('<text x="'+margin+'" y="'+(y+65)+'" font-family="sans-serif" font-size="12" fill="#79b8ff">recent engineering: '+touched+'/'+p.groups.length+' areas with source work (NOT verified)</text>');
+        svg.push('<text x="'+(width-margin)+'" y="'+(y+68)+'" text-anchor="end" font-family="sans-serif" font-size="21" font-weight="700" fill="#79b8ff">'+pct+'% activity</text>');
+        svg.push(rect(margin,y+73,mapW,3,"#30363d",2));
+        if(touched)svg.push(rect(margin,y+73,mapW*touched/p.groups.length,3,"#58a6ff",2));
+      }else{
+        svg.push('<text x="'+margin+'" y="'+(y+65)+'" font-family="sans-serif" font-size="12" fill="#79b8ff">recent engineering changes: '+touched+'/'+p.groups.length+' components ('+pct+'%) · NOT verified compatibility</text>');
+      }
     }
     const mapY=y+header;
     const ordered=p.groups.slice().sort((a,b)=>b.targets.length-a.targets.length||a.id.localeCompare(b.id));
@@ -211,7 +220,7 @@ const render = function render(data,live,activity){
     md.push("| **"+item.panel.title+"** | **"+item.c["native-fixture"]+"** | **"+item.c.synthetic+"** | **"+item.c.missing+"** | **"+item.c.excluded+"** | **"+item.total+"** |");
     for(const g of item.groups){const c=count(g.targets);md.push("| ↳ "+g.label+" | "+c["native-fixture"]+" | "+c.synthetic+" | "+c.missing+" | "+c.excluded+" | "+g.targets.length+" |");}
   }
-  if(activity && activity.classification_version===2){
+  if(activity && activity.classification_version>=2){
     md.push("","## recent engineering activity (not verified compatibility)","",
       "these percentages count tracked components touched by an active source PR or a recently merged source PR. they do not mean APIs work, and can decrease as older PRs leave the recent scan.","",
       "| layer | components with source changes | tracked components | recently touched |",
