@@ -8,9 +8,9 @@ candidate branches with mapped changes: **24** · audited base: `1dd112410e43`
 
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
-head: `1ed7b611281b` · ci: **passing_checks** · unmerged, not credited.
+head: `83a78c77a31d` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +947/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +976/-0 lines
   - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
@@ -156,17 +156,17 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
 
-### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030)
-
-head: `adee169ff940` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
-
 ### [agent/phase25d-objc-lifecycle-20261030](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030)
 
-head: `bdc181054b63` · ci: **not_checked** · unmerged, not credited.
+head: `8d67007d44da` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 1 source files, 10 test/fixture files, +185/-0 lines
+- **unclassified**: 2 source files, 10 test/fixture files, +600/-0 lines
+
+### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030)
+
+head: `7e658a544da8` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

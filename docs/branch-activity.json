@@ -8,7 +8,7 @@
   "candidates": [
     {
       "branch": "phase25c-arc-ownership-20261030",
-      "sha": "1ed7b611281b450f95a0cb7ec329a37b7b0d0106",
+      "sha": "83a78c77a31d1a5d885eeee5da68e85b769accf9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "pr_number": 102,
       "ci": "passing_checks",
@@ -20,7 +20,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 3,
-          "additions": 947,
+          "additions": 976,
           "deletions": 0,
           "symbols_preview": [
             "ios27_phase25c_alloc",
@@ -770,13 +770,39 @@
       ]
     },
     {
+      "branch": "agent/phase25d-objc-lifecycle-20261030",
+      "sha": "8d67007d44da8712ffa9490846213e8eefc1bbdf",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 20,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 10,
+          "additions": 600,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase25d_lifecycle.hpp",
+            "src/phase25d_lifecycle.cpp",
+            "tests/phase25d-app0.m",
+            "tests/phase25d-app1.m"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "adee169ff940bb1d760eb94a1b93de7be2621e51",
+      "sha": "7e658a544da8840810f4f9da1007b3cedfe867d1",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
+      "files_checked": 13,
       "possibly_truncated": false,
       "groups": [
         {
@@ -791,32 +817,6 @@
             "tests/phase25e-integration.py",
             "tools/phase25e-build.py",
             "tools/phase25e-inspect.py"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "bdc181054b63b5d428f26ca7d8900c5b85dd90d3",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 1,
-          "fixture_files": 10,
-          "additions": 185,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase25d_lifecycle.hpp",
-            "tests/phase25d-app0.m",
-            "tests/phase25d-app1.m",
-            "tests/phase25d-app2.m"
           ]
         }
       ]
@@ -998,17 +998,17 @@
         "ci": "passing_checks"
       },
       {
+        "branch": "agent/phase25d-objc-lifecycle-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
+        "source_files": 2,
+        "fixture_files": 10,
+        "ci": "not_checked"
+      },
+      {
         "branch": "agent/phase25e-objc-app-integration-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
         "source_files": 0,
         "fixture_files": 4,
-        "ci": "not_checked"
-      },
-      {
-        "branch": "agent/phase25d-objc-lifecycle-20261030",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
-        "source_files": 1,
-        "fixture_files": 10,
         "ci": "not_checked"
       }
     ]
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:50:55Z"
+  "observed_at": "2026-10-30T10:51:44Z"
 }
