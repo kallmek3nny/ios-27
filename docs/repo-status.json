@@ -9,6 +9,33 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 112,
+      "branch": "phase26e-android-host-scenes-input",
+      "sha": "6fa5c1aaf74fd8214ffda5cf9d56bf84ce94f917",
+      "title": "phase26e: standalone android host, scene and input routing fixtures",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/112",
+      "updated_at": "2026-10-30T13:03:31Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 110,
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "ab6320cdc916cd1aae610bd87a4c1b8f8b5dc988",
+      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+      "updated_at": "2026-10-30T13:03:28Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 109,
+      "branch": "phase26a-native-libc-abi",
+      "sha": "4b4de36eb4534c0706476f88a3a9d7b2afe1e3b0",
+      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "updated_at": "2026-10-30T13:03:09Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 111,
       "branch": "phase26c-headless-graphics-interop-20261030",
       "sha": "8d27bffa9c4e534bd37526adea04154f15659343",
@@ -23,25 +50,7 @@
       "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
       "title": "phase26d: bounded transactions and deterministic cpu composition",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
-      "updated_at": "2026-10-30T13:02:18Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 110,
-      "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "ab6320cdc916cd1aae610bd87a4c1b8f8b5dc988",
-      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
-      "updated_at": "2026-10-30T13:01:35Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 109,
-      "branch": "phase26a-native-libc-abi",
-      "sha": "72f0f4900fcefe9f88c2831f956ace357b4ef756",
-      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "updated_at": "2026-10-30T13:01:35Z",
+      "updated_at": "2026-10-30T13:03:34Z",
       "status": "unmerged: not counted"
     },
     {
@@ -484,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:03:09Z"
+  "observed_at": "2026-10-30T13:03:38Z"
 }
