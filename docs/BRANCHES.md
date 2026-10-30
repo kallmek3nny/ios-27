@@ -4,106 +4,106 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **26** · audited base: `1dd112410e43`
+candidate branches with mapped changes: **26** · audited base: `55b186d90cf6`
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
 
 head: `a9bcda8e7432` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 8 test/fixture files, +472/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 3 source files, 8 test/fixture files, +1098/-0 lines
   - candidate declarations: `ios27_phase25a_preflight`
 
 ### [phase25b-native-objc-dispatch](https://github.com/kallmek3nny/ios-27/pull/106)
 
 head: `99e3678e6241` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 3 source files, 13 test/fixture files, +1275/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 3 source files, 13 test/fixture files, +1275/-0 lines
 
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
 head: `70d7d9826a03` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 8 test/fixture files, +1179/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 2 source files, 8 test/fixture files, +1179/-0 lines
   - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
 
 ### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/pull/103)
 
 head: `ae4bdd578843` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 0 source files, 4 test/fixture files, +826/-0 lines
 
 ### [agent/phase25d-objc-lifecycle-20261030](https://github.com/kallmek3nny/ios-27/pull/104)
 
 head: `7c434d616cf2` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 12 test/fixture files, +922/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 2 source files, 12 test/fixture files, +922/-0 lines
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
 
 head: `4b7fe765e9b8` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 12 test/fixture files, +847/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 2 source files, 12 test/fixture files, +847/-0 lines
 
 ### [phase24d-darwin-services-20261029](https://github.com/kallmek3nny/ios-27/pull/101)
 
 head: `26cfbfabc081` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 10 test/fixture files, +954/-0 lines
+- **bsd syscall boundary**: 2 source files, 10 test/fixture files, +954/-0 lines
   - candidate declarations: `ios27_24d_free`, `ios27_24d_get_stats`, `ios27_24d_memory_protect`, `ios27_24d_memory_read`, `ios27_24d_memory_write`, `ios27_24d_new`, `ios27_24d_poll_dead`, `ios27_24d_port_allocate`, `ios27_24d_port_destroy`, `ios27_24d_port_grant`, `ios27_24d_process_create`, `ios27_24d_process_destroy`
 
 ### [agent/phase24b-native-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/99)
 
 head: `f1064a7910d1` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 8 test/fixture files, +1315/-0 lines
+- **dyld / image graph**: 2 source files, 8 test/fixture files, +1315/-0 lines
   - candidate declarations: `ios27_24b_bind`, `ios27_24b_close`, `ios27_24b_ensure`, `ios27_24b_inspect`, `ios27_24b_open`, `ios27_24b_parse`, `ios27_24b_register`, `ios27_24b_runtime_destroy`, `ios27_24b_runtime_init`
 
 ### [phase24a-global-dyld-identity](https://github.com/kallmek3nny/ios-27/pull/97)
 
 head: `982d7575cdc5` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 2 test/fixture files, +970/-0 lines
+- **dyld / image graph**: 2 source files, 2 test/fixture files, +970/-0 lines
   - candidate declarations: `ios27_phase24a_close`, `ios27_phase24a_create`, `ios27_phase24a_destroy`, `ios27_phase24a_flat_symbol`, `ios27_phase24a_open`, `ios27_phase24a_refs`, `ios27_phase24a_release`, `ios27_phase24a_stats_read`, `ios27_phase24a_symbol`
 
 ### [phase24e-native-application-startup](https://github.com/kallmek3nny/ios-27/pull/98)
 
 head: `872607e045f9` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +1056/-0 lines
+- **mach-o parser and native loader**: 2 source files, 3 test/fixture files, +1056/-0 lines
   - candidate declarations: `ios27_24e_enter_main`, `ios27_24e_run`
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
 
 head: `f6c0ee963e39` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 6 test/fixture files, +771/-0 lines
+- **ObjC host prototype (not Apple libobjc)**: 2 source files, 6 test/fixture files, +771/-0 lines
 
 ### [agent/phase23b-lifecycle-20261029](https://github.com/kallmek3nny/ios-27/pull/96)
 
 head: `7988310ebdb2` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 9 test/fixture files, +1005/-0 lines
+- **dyld / image graph**: 2 source files, 9 test/fixture files, +1005/-0 lines
   - candidate declarations: `ios27_23b_add`, `ios27_23b_bind`, `ios27_23b_close`, `ios27_23b_ensure`, `ios27_23b_open`, `ios27_23b_parse`, `ios27_23b_runtime_destroy`, `ios27_23b_runtime_init`, `ios27_23b_snapshot`
 
 ### [phase23d-syscall-mach-bridge-20261029](https://github.com/kallmek3nny/ios-27/pull/95)
 
 head: `72e3f24e5f81` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 7 test/fixture files, +1021/-0 lines
+- **bsd syscall boundary**: 2 source files, 7 test/fixture files, +1021/-0 lines
   - candidate declarations: `ios27_23d_free`, `ios27_23d_get_stats`, `ios27_23d_memory_protect`, `ios27_23d_memory_read`, `ios27_23d_memory_write`, `ios27_23d_new`, `ios27_23d_process_create`, `ios27_23d_process_destroy`, `ios27_23d_seed`, `ios27_23d_service_destroy`, `ios27_23d_service_grant`, `ios27_23d_service_register`
 
 ### [phase23e/native-app-integration-harness](https://github.com/kallmek3nny/ios-27/pull/93)
 
 head: `77cb73c4836c` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +961/-0 lines
+- **mach-o parser and native loader**: 2 source files, 3 test/fixture files, +961/-0 lines
   - candidate declarations: `ios27_23e_application_probe`, `ios27_23e_library_stress`
 
 ### [phase23a-incremental-dyld-namespaces](https://github.com/kallmek3nny/ios-27/pull/92)
 
 head: `280b1daed6f8` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 2 test/fixture files, +991/-0 lines
+- **dyld / image graph**: 2 source files, 2 test/fixture files, +991/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
 
 ### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
@@ -185,7 +185,7 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **19**
+recent merged PRs with source changes: **18**
 
 ### [merged PR #91](https://github.com/kallmek3nny/ios-27/pull/91)
 
@@ -310,13 +310,6 @@ merged: 2026-10-28T18:03:44Z · source changes awaiting function-level audit.
 
 - **mach-o parser and native loader**: 3 source files, 4 fixtures, +737/-28 lines
   - added declarations: `ios27_arm64_enter_main`, `ios27_run_executable_argv`, `ios27_run_executable_context`
-
-### [merged PR #56](https://github.com/kallmek3nny/ios-27/pull/56)
-
-merged: 2026-10-28T18:01:05Z · source changes awaiting function-level audit.
-
-- **mach ipc model**: 4 source files, 2 fixtures, +852/-22 lines
-  - added declarations: `ios27_mach_v2_allocate`, `ios27_mach_v2_allocate_unlocked`, `ios27_mach_v2_destroy`, `ios27_mach_v2_destroy_unlocked`, `ios27_mach_v2_drop_send`, `ios27_mach_v2_drop_send_once`, `ios27_mach_v2_drop_send_once_unlocked`, `ios27_mach_v2_drop_send_unlocked`, `ios27_mach_v2_exception_get`, `ios27_mach_v2_exception_get_unlocked`, `ios27_mach_v2_exception_raise`, `ios27_mach_v2_exception_raise_unlocked`
 
 ## verification policy
 

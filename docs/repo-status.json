@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/1dd112410e43de08b9de228e43a87f8b5cc93369",
-    "committed_at": "2026-10-29T10:41:02Z"
+    "sha": "55b186d90cf6facc7d1dcdb61ad011a2e12b67d3",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/55b186d90cf6facc7d1dcdb61ad011a2e12b67d3",
+    "committed_at": "2026-10-30T11:26:06Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 107,
-      "branch": "fix/live-phase25-progress-map-20261030",
-      "sha": "dbc9702324f40bf4262b5dfed7688287c4c9548a",
-      "title": "fix: count phases 23–25 in live engineering progress without inflating API coverage",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/107",
-      "updated_at": "2026-10-30T11:25:18Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 105,
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
@@ -255,6 +246,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 107,
+      "title": "fix: count phases 23–25 in live engineering progress without inflating API coverage",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/107",
+      "head_sha": "dbc9702324f40bf4262b5dfed7688287c4c9548a",
+      "merged_at": "2026-10-30T11:26:06Z"
+    },
+    {
       "number": 91,
       "title": "fix: actually advance scoped progress percentages for tested phases 19a, 20 and 21",
       "url": "https://github.com/kallmek3nny/ios-27/pull/91",
@@ -442,20 +440,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/54",
       "head_sha": "61b4062eb85b0605542b3b87f629d3859f60ee02",
       "merged_at": "2026-10-28T18:03:44Z"
-    },
-    {
-      "number": 56,
-      "title": "phase19c: bounded Mach thread identities, exception delivery and guest VM ABI",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/56",
-      "head_sha": "681fef8b390096eb7253c4029e491e59e0446389",
-      "merged_at": "2026-10-28T18:01:05Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 10,
+    "branches_scanned": 11,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T11:25:48Z"
+  "observed_at": "2026-10-30T11:26:44Z"
 }
