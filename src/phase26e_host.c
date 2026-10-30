@@ -335,11 +335,13 @@ phase26e_result phase26e_convert_to_window(phase26e_host *h, phase26e_id view,
     struct p26_view *v = view_by_id(h, view);
     if (!v) { pthread_mutex_unlock(&h->lock); return P26_NOT_FOUND; }
     unsigned depth = 0;
-    while (v && depth++ < PHASE26E_MAX_VIEWS) {
+    while (v && depth < PHASE26E_MAX_VIEWS) {
+        ++depth;
         x += v->rect.x; y += v->rect.y;
         v = view_by_id(h, v->parent);
     }
-    phase26e_result r = (depth >= PHASE26E_MAX_VIEWS || !isfinite(x) || !isfinite(y)) ? P26_INVALID : P26_OK;
+    /* Exactly MAX_VIEWS ancestors are valid. Only a remaining link is invalid. */
+    phase26e_result r = (v != NULL || !isfinite(x) || !isfinite(y)) ? P26_INVALID : P26_OK;
     if (r == P26_OK) { *wx = x; *wy = y; }
     pthread_mutex_unlock(&h->lock);
     return r;
