@@ -22,6 +22,7 @@ static const ios27_phase25c_class klass = {
 };
 static atomic_uint destroyed;
 static atomic_uint failures;
+static atomic_uint weak_live_samples;
 static unsigned order[8], order_count;
 
 static void dealloc(ios27_phase25c_runtime *rt, void *p, void *context) {
@@ -127,8 +128,14 @@ static void *weak_runner(void *arg) {
         void *p = NULL;
         int rc = ios27_phase25c_load_weak_retained(t->rt, t->weak, &p);
         if (rc) { atomic_fetch_add(&failures, 1); continue; }
-        if (p && ios27_phase25c_release(t->rt, p))
-            atomic_fetch_add(&failures, 1);
+        if (p) {
+            atomic_fetch_add(&weak_live_samples, 1);
+            if (ios27_phase25c_release(t->rt, p))
+                atomic_fetch_add(&failures, 1);
+        }
+        /* Each worker must successfully observe 10k live weak references
+         * before the main thread can start terminal release. */
+        if (i == 9999) gate_wait(t->barrier);
     }
     return NULL;
 }
@@ -145,6 +152,8 @@ static void weak_race(ios27_phase25c_runtime *rt) {
         assert(pthread_create(&threads[i], NULL, weak_runner, &tasks[i]) == 0);
     }
     gate_wait(&barrier);
+    gate_wait(&barrier);
+    assert(atomic_load(&weak_live_samples) >= 40000);
     assert(ios27_phase25c_release(rt, a) == 0);
     for (size_t i = 0; i < 4; ++i) assert(pthread_join(threads[i], NULL) == 0);
     assert(weak == NULL && atomic_load(&failures) == 0);
@@ -220,6 +229,7 @@ static void ownership_graph(ios27_phase25c_runtime *rt) {
 int main(void) {
     atomic_init(&destroyed, 0);
     atomic_init(&failures, 0);
+    atomic_init(&weak_live_samples, 0);
     ios27_phase25c_runtime *rt = NULL;
     assert(ios27_phase25c_create(&rt) == 0);
     arc_entrypoints(rt);
