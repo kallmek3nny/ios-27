@@ -6,6 +6,12 @@
 
 candidate branches with mapped changes: **24** · audited base: `1dd112410e43`
 
+### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/pull/103)
+
+head: `ae4bdd578843` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
+
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
 head: `223c3c21befa` · ci: **running** · unmerged, not credited.
@@ -18,12 +24,6 @@ head: `223c3c21befa` · ci: **running** · unmerged, not credited.
 head: `7c434d616cf2` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 12 test/fixture files, +922/-0 lines
-
-### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/pull/103)
-
-head: `ae4bdd578843` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 0 source files, 4 test/fixture files, +826/-0 lines
 
 ### [phase24c-objc2-typed-metadata-dispatch](https://github.com/kallmek3nny/ios-27/pull/100)
 

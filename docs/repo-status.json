@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 103,
+      "branch": "agent/phase25e-objc-app-integration-20261030",
+      "sha": "ae4bdd5788437d4eb31e90c29cc7840a127b85c7",
+      "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/103",
+      "updated_at": "2026-10-30T10:56:03Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 102,
       "branch": "phase25c-arc-ownership-20261030",
       "sha": "223c3c21befaeb20075c9038acaf32a0977252ab",
@@ -24,15 +33,6 @@
       "title": "phase25d: isolated objective-c lifecycle scheduler with concurrency and retirement pins",
       "url": "https://github.com/kallmek3nny/ios-27/pull/104",
       "updated_at": "2026-10-30T10:55:03Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 103,
-      "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "ae4bdd5788437d4eb31e90c29cc7840a127b85c7",
-      "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/103",
-      "updated_at": "2026-10-30T10:54:36Z",
       "status": "unmerged: not counted"
     },
     {
@@ -440,5 +440,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:56:03Z"
+  "observed_at": "2026-10-30T10:56:19Z"
 }
