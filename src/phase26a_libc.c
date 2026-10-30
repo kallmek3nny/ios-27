@@ -370,7 +370,9 @@ static void put_unsigned(format_buffer *b, unsigned value, unsigned radix) {
     for (; n > 0u; --n) put_char(b, reverse[n - 1u]);
 }
 int P26(snprintf)(char *destination, size_t capacity, const char *format, ...) {
-    format_buffer buffer = {{0}, 0u, 0};
+    format_buffer buffer;
+    buffer.used = 0u;
+    buffer.failed = 0;
     size_t length = cstr(format);
     va_list args;
     if (length == SIZE_MAX || (capacity && !require(destination, capacity, 1)))
