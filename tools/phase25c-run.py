@@ -32,6 +32,18 @@ def native(cc, sanitizer=False):
                    UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1")
     run([target], 180, env=env)
 
+def native_compiler_arc(clang):
+    """Execute actual compiler-generated ARC instructions on the host CPU."""
+    obj = BUILD / "phase25c-arc-host.o"
+    exe = BUILD / "test-compiled-arc-host"
+    run([clang, "-fobjc-runtime=macosx-11.0", "-fobjc-arc",
+         "-fno-objc-exceptions", "-O0", "-Wall", "-Wextra", "-Werror",
+         "-c", "tests/phase25c-arc-native.m", "-o", obj], 120)
+    run([clang, "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
+         "-Wpedantic", "-pthread", "-Iinclude", "src/phase25c_lifetime.c",
+         "tests/phase25c-arc-native-host.c", obj, "-o", exe], 300)
+    run([exe], 180)
+
 def darwin(clang):
     objc = ROOT / "tests/phase25c-arc-darwin.m"
     flags = ["--target=arm64-apple-darwin", "-fobjc-runtime=macosx-11.0",
@@ -69,6 +81,7 @@ def main():
     native(args.cc)
     if not args.skip_sanitizers:
         native(args.clang, sanitizer=True)
+    native_compiler_arc(args.clang)
     darwin(args.clang)
     print("phase25c checks passed (native Darwin runtime execution unverified)")
 
