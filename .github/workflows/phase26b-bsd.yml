@@ -27,11 +27,15 @@ jobs:
         sanitize: ['0', '1']
     steps:
       - uses: actions/checkout@v4
+      - name: install darwin llvm linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y -qq lld-18
       - name: toolchain
         run: |
           timeout 30s clang --version
           timeout 30s cc --version
-          timeout 30s ld64.lld --version
+          timeout 30s ld64.lld-18 --version
       - name: phase26b independent tests and linked Darwin fixture
         env:
           PHASE26B_SANITIZE: ${{ matrix.sanitize }}
