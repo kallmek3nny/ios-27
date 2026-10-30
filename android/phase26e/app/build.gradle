@@ -3,6 +3,7 @@ plugins { id 'com.android.application' }
 android {
     namespace 'dev.ios27.host'
     compileSdk 35
+    ndkVersion '27.2.12479018'
     defaultConfig {
         applicationId 'dev.ios27.phase26e'
         minSdk 28
