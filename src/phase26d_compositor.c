@@ -29,6 +29,7 @@ typedef struct {
 typedef struct { layer l[PHASE26D_MAX_LAYERS]; } tree;
 struct phase26d_context {
     pthread_mutex_t mutex;
+    pthread_t owner;
     tree *model, *working, *presentation, *save[PHASE26D_MAX_TX_DEPTH];
     uint32_t depth, generations[PHASE26D_MAX_LAYERS];
     uint64_t commits, mutations, frames;
@@ -38,6 +39,9 @@ typedef struct { double a,b,c,d,tx,ty; } matrix;
 typedef struct { matrix m; int width,height,radius; } clip;
 
 static bool finite_value(double x) { return isfinite(x) != 0; }
+static bool can_write(const phase26d_context *c) {
+    return c->depth && pthread_equal(c->owner,pthread_self());
+}
 static void image_retain(image *im) { if (im) ++im->refs; }
 static void image_release(phase26d_context *c, image *im) {
     if (im && --im->refs == 0) {
@@ -112,8 +116,9 @@ void phase26d_free(phase26d_context *c) {
 phase26d_result phase26d_begin(phase26d_context *c) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
+    if (c->depth && !can_write(c)) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
     if (c->depth==PHASE26D_MAX_TX_DEPTH) { pthread_mutex_unlock(&c->mutex); return PHASE26D_LIMIT; }
-    if (!c->depth) assign_tree(c,c->working,c->model);
+    if (!c->depth) { c->owner=pthread_self(); assign_tree(c,c->working,c->model); }
     assign_tree(c,c->save[c->depth],c->working);
     ++c->depth;
     pthread_mutex_unlock(&c->mutex);
@@ -122,7 +127,7 @@ phase26d_result phase26d_begin(phase26d_context *c) {
 phase26d_result phase26d_commit(phase26d_context *c) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    if (!c->depth) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
+    if (!can_write(c)) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
     --c->depth;
     if (!c->depth) {
         assign_tree(c,c->model,c->working);
@@ -135,7 +140,7 @@ phase26d_result phase26d_commit(phase26d_context *c) {
 phase26d_result phase26d_rollback(phase26d_context *c) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    if (!c->depth) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
+    if (!can_write(c)) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
     --c->depth;
     assign_tree(c,c->working,c->save[c->depth]);
     pthread_mutex_unlock(&c->mutex);
@@ -144,7 +149,7 @@ phase26d_result phase26d_rollback(phase26d_context *c) {
 phase26d_result phase26d_create(phase26d_context *c, const phase26d_layer_desc *d, phase26d_id *out) {
     if (!c || !out || !desc_ok(d)) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    if (!c->depth) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
+    if (!can_write(c)) { pthread_mutex_unlock(&c->mutex); return PHASE26D_STATE; }
     for (unsigned i=0;i<PHASE26D_MAX_LAYERS;i++) if (!c->working->l[i].used) {
         layer *l=&c->working->l[i];
         uint32_t g=++c->generations[i];
@@ -162,16 +167,16 @@ phase26d_result phase26d_create(phase26d_context *c, const phase26d_layer_desc *
 phase26d_result phase26d_set(phase26d_context *c, phase26d_id id, const phase26d_layer_desc *d) {
     if (!c || !desc_ok(d)) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth ? find(c->working,id):NULL;
+    layer *l=can_write(c) ? find(c->working,id):NULL;
     if (l) { l->d=*d; ++c->mutations; }
     pthread_mutex_unlock(&c->mutex);
-    return l ? PHASE26D_OK : (c->depth ? PHASE26D_STALE:PHASE26D_STATE);
+    return l ? PHASE26D_OK : (can_write(c) ? PHASE26D_STALE:PHASE26D_STATE);
 }
 phase26d_result phase26d_parent(phase26d_context *c, phase26d_id id, phase26d_id parent) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth ? find(c->working,id):NULL;
-    if (!l) { phase26d_result r=c->depth?PHASE26D_STALE:PHASE26D_STATE;
+    layer *l=can_write(c) ? find(c->working,id):NULL;
+    if (!l) { phase26d_result r=can_write(c)?PHASE26D_STALE:PHASE26D_STATE;
         pthread_mutex_unlock(&c->mutex); return r; }
     if (parent.generation) {
         layer *p=find(c->working,parent);
@@ -195,8 +200,8 @@ phase26d_result phase26d_parent(phase26d_context *c, phase26d_id id, phase26d_id
 phase26d_result phase26d_destroy(phase26d_context *c, phase26d_id id) {
     if (!c) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth ? find(c->working,id):NULL;
-    if (!l) { phase26d_result r=c->depth?PHASE26D_STALE:PHASE26D_STATE;
+    layer *l=can_write(c) ? find(c->working,id):NULL;
+    if (!l) { phase26d_result r=can_write(c)?PHASE26D_STALE:PHASE26D_STATE;
         pthread_mutex_unlock(&c->mutex); return r; }
     /* Cascade deletion until no descendants remain. All generations stay retired. */
     bool marked[PHASE26D_MAX_LAYERS]={false};
@@ -227,8 +232,8 @@ phase26d_result phase26d_upload(phase26d_context *c, phase26d_id id, const uint8
     size_t bytes=(size_t)w*h*4u;
     if (bytes>PHASE26D_MAX_IMAGE_BYTES) return PHASE26D_LIMIT;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth?find(c->working,id):NULL;
-    if (!l) { phase26d_result r=c->depth?PHASE26D_STALE:PHASE26D_STATE;
+    layer *l=can_write(c)?find(c->working,id):NULL;
+    if (!l) { phase26d_result r=can_write(c)?PHASE26D_STALE:PHASE26D_STATE;
         pthread_mutex_unlock(&c->mutex); return r; }
     if (c->image_bytes > PHASE26D_IMAGE_BUDGET-bytes) {
         pthread_mutex_unlock(&c->mutex); return PHASE26D_LIMIT;
@@ -261,21 +266,21 @@ phase26d_result phase26d_animate(phase26d_context *c,phase26d_id id,phase26d_ani
     if (kind==PHASE26D_ANIM_OPACITY ? (from<0 || to<0 || from>255 || to>255):
         (fabs(from)>100000 || fabs(to)>100000)) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth?find(c->working,id):NULL;
+    layer *l=can_write(c)?find(c->working,id):NULL;
     if (l) {
         animation *a=&l->anim[(unsigned)kind-1u];
         *a=(animation){true,kind,from,to,start,duration}; ++c->mutations;
     }
     pthread_mutex_unlock(&c->mutex);
-    return l ? PHASE26D_OK : (c->depth?PHASE26D_STALE:PHASE26D_STATE);
+    return l ? PHASE26D_OK : (can_write(c)?PHASE26D_STALE:PHASE26D_STATE);
 }
 phase26d_result phase26d_cancel(phase26d_context *c,phase26d_id id,phase26d_anim_kind kind) {
     if (!c || kind<PHASE26D_ANIM_OPACITY || kind>PHASE26D_ANIM_Y) return PHASE26D_INVALID;
     pthread_mutex_lock(&c->mutex);
-    layer *l=c->depth?find(c->working,id):NULL;
+    layer *l=can_write(c)?find(c->working,id):NULL;
     if (l) { l->anim[(unsigned)kind-1u].active=false; ++c->mutations; }
     pthread_mutex_unlock(&c->mutex);
-    return l ? PHASE26D_OK : (c->depth?PHASE26D_STALE:PHASE26D_STATE);
+    return l ? PHASE26D_OK : (can_write(c)?PHASE26D_STALE:PHASE26D_STATE);
 }
 phase26d_result phase26d_step(phase26d_context *c,uint64_t now) {
     if (!c) return PHASE26D_INVALID;

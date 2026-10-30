@@ -26,6 +26,8 @@ the cpu step timestamp is caller-provided. no android dependencies.
 
 ## safety, ownership, limitations
 every api is internally protected by one mutex; render serializes with mutation.
+transaction ownership is pinned to the initiating pthread; a foreign thread
+cannot mutate, nest, commit, or rollback that thread's open transaction.
 the caller keeps frame pixels alive through the synchronous render call.
 free must not race a concurrent api call. image input must be premultiplied
 rgba8, color fill uses straight rgba8. descriptor geometry is integer pixels;
