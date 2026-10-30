@@ -4,9 +4,81 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "55b186d90cf6facc7d1dcdb61ad011a2e12b67d3",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 28,
-  "candidate_count": 28,
+  "candidates_checked": 29,
+  "candidate_count": 29,
   "candidates": [
+    {
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "5030fc38217f0333c206e6c4078bef8ccea23551",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+      "pr_number": 110,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 677,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase26b_copyin",
+            "ios27_phase26b_copyout",
+            "ios27_phase26b_create",
+            "ios27_phase26b_destroy",
+            "ios27_phase26b_stop",
+            "ios27_phase26b_trap"
+          ],
+          "example_paths": [
+            "include/ios27/phase26b_bsd.h",
+            "src/phase26b_bsd.c",
+            "tests/phase26b-arm64.c",
+            "tests/phase26b-bsd.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "phase26a-native-libc-abi",
+      "sha": "a34ed73ad972c677420367207a98d13ee36a288b",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "pr_number": 109,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 9,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 5,
+          "additions": 696,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_26a_calloc",
+            "ios27_26a_free",
+            "ios27_26a_getenv",
+            "ios27_26a_last_error",
+            "ios27_26a_live_bytes",
+            "ios27_26a_malloc",
+            "ios27_26a_memcmp",
+            "ios27_26a_memcpy",
+            "ios27_26a_memmove",
+            "ios27_26a_memset",
+            "ios27_26a_realloc",
+            "ios27_26a_setenv"
+          ],
+          "example_paths": [
+            "include/ios27/phase26a_libc.h",
+            "src/phase26a_libc.c",
+            "tests/phase26a-client.c",
+            "tests/phase26a-executable.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26d-coreanimation-compositor",
       "sha": "93d19f6312fcda21cff90b19877f82e7be676b71",
@@ -911,39 +983,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "f859452cf9ba9f943e134286880d65f228f82015",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 3,
-          "additions": 677,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase26b_copyin",
-            "ios27_phase26b_copyout",
-            "ios27_phase26b_create",
-            "ios27_phase26b_destroy",
-            "ios27_phase26b_stop",
-            "ios27_phase26b_trap"
-          ],
-          "example_paths": [
-            "include/ios27/phase26b_bsd.h",
-            "src/phase26b_bsd.c",
-            "tests/phase26b-arm64.c",
-            "tests/phase26b-bsd.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -1152,6 +1191,20 @@
     ],
     "unclassified": [
       {
+        "branch": "agent/phase26b-bsd-capabilities-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "running"
+      },
+      {
+        "branch": "phase26a-native-libc-abi",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+        "source_files": 2,
+        "fixture_files": 5,
+        "ci": "running"
+      },
+      {
         "branch": "phase26d-coreanimation-compositor",
         "url": "https://github.com/kallmek3nny/ios-27/pull/108",
         "source_files": 2,
@@ -1164,13 +1217,6 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "agent/phase26b-bsd-capabilities-20261030",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "not_checked"
       }
     ]
   },
@@ -1974,5 +2020,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T12:57:56Z"
+  "observed_at": "2026-10-30T12:59:10Z"
 }

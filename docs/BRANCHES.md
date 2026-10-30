@@ -4,7 +4,21 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **28** · audited base: `55b186d90cf6`
+candidate branches with mapped changes: **29** · audited base: `55b186d90cf6`
+
+### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/pull/110)
+
+head: `5030fc38217f` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 3 test/fixture files, +677/-0 lines
+  - candidate declarations: `ios27_phase26b_copyin`, `ios27_phase26b_copyout`, `ios27_phase26b_create`, `ios27_phase26b_destroy`, `ios27_phase26b_stop`, `ios27_phase26b_trap`
+
+### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
+
+head: `a34ed73ad972` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 5 test/fixture files, +696/-0 lines
+  - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
 
 ### [phase26d-coreanimation-compositor](https://github.com/kallmek3nny/ios-27/pull/108)
 
@@ -187,13 +201,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030)
-
-head: `f859452cf9ba` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 3 test/fixture files, +677/-0 lines
-  - candidate declarations: `ios27_phase26b_copyin`, `ios27_phase26b_copyout`, `ios27_phase26b_create`, `ios27_phase26b_destroy`, `ios27_phase26b_stop`, `ios27_phase26b_trap`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

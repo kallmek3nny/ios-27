@@ -9,6 +9,24 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 110,
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "5030fc38217f0333c206e6c4078bef8ccea23551",
+      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+      "updated_at": "2026-10-30T12:58:43Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 109,
+      "branch": "phase26a-native-libc-abi",
+      "sha": "a34ed73ad972c677420367207a98d13ee36a288b",
+      "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/109",
+      "updated_at": "2026-10-30T12:58:37Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 108,
       "branch": "phase26d-coreanimation-compositor",
       "sha": "93d19f6312fcda21cff90b19877f82e7be676b71",
@@ -252,17 +270,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "f859452cf9ba9f943e134286880d65f228f82015",
-      "ahead_by": 5,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-30T12:57:48Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 107,
@@ -463,9 +471,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 11,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T12:57:51Z"
+  "observed_at": "2026-10-30T12:59:06Z"
 }
