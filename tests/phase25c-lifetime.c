@@ -85,15 +85,44 @@ static void retain_stress(ios27_phase25c_runtime *rt) {
     assert(ios27_phase25c_identity(rt, a, klass.isa, 17) == -1);
     assert(ios27_phase25c_can_unload(rt, klass.isa, 17) == 0);
 }
+/* Portable generation barrier for Linux and macOS. */
+typedef struct {
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    unsigned arrived, generation, total;
+} phase25c_barrier;
+static void gate_init(phase25c_barrier *gate, unsigned total) {
+    memset(gate, 0, sizeof(*gate));
+    assert(pthread_mutex_init(&gate->mutex, NULL) == 0);
+    assert(pthread_cond_init(&gate->cond, NULL) == 0);
+    gate->total = total;
+}
+static void gate_wait(phase25c_barrier *gate) {
+    assert(pthread_mutex_lock(&gate->mutex) == 0);
+    unsigned generation = gate->generation;
+    if (++gate->arrived == gate->total) {
+        gate->arrived = 0;
+        ++gate->generation;
+        assert(pthread_cond_broadcast(&gate->cond) == 0);
+    } else {
+        while (generation == gate->generation)
+            assert(pthread_cond_wait(&gate->cond, &gate->mutex) == 0);
+    }
+    assert(pthread_mutex_unlock(&gate->mutex) == 0);
+}
+static void gate_destroy(phase25c_barrier *gate) {
+    assert(pthread_cond_destroy(&gate->cond) == 0);
+    assert(pthread_mutex_destroy(&gate->mutex) == 0);
+}
 typedef struct {
     ios27_phase25c_runtime *rt;
     void **weak;
-    pthread_barrier_t *barrier;
+    phase25c_barrier *barrier;
     unsigned iterations;
 } weak_task;
 static void *weak_runner(void *arg) {
     weak_task *t = arg;
-    (void)pthread_barrier_wait(t->barrier);
+    gate_wait(t->barrier);
     for (unsigned i = 0; i < t->iterations; ++i) {
         void *p = NULL;
         int rc = ios27_phase25c_load_weak_retained(t->rt, t->weak, &p);
@@ -107,19 +136,19 @@ static void weak_race(ios27_phase25c_runtime *rt) {
     node *a = make(rt, NULL);
     void *weak = NULL;
     assert(ios27_phase25c_store_weak(rt, &weak, a) == 0);
-    pthread_barrier_t barrier;
-    assert(pthread_barrier_init(&barrier, NULL, 5) == 0);
+    phase25c_barrier barrier;
+    gate_init(&barrier, 5);
     pthread_t threads[4];
     weak_task tasks[4];
     for (size_t i = 0; i < 4; ++i) {
         tasks[i] = (weak_task){rt, &weak, &barrier, 35000};
         assert(pthread_create(&threads[i], NULL, weak_runner, &tasks[i]) == 0);
     }
-    (void)pthread_barrier_wait(&barrier);
+    gate_wait(&barrier);
     assert(ios27_phase25c_release(rt, a) == 0);
     for (size_t i = 0; i < 4; ++i) assert(pthread_join(threads[i], NULL) == 0);
     assert(weak == NULL && atomic_load(&failures) == 0);
-    assert(pthread_barrier_destroy(&barrier) == 0);
+    gate_destroy(&barrier);
     assert(ios27_phase25c_destroy_weak(rt, &weak) == 0);
 }
 static void dispatch_terminal(ios27_phase25c_runtime *rt) {
@@ -137,7 +166,7 @@ static void dispatch_terminal(ios27_phase25c_runtime *rt) {
     assert(atomic_load(&destroyed) == before + 1);
     assert(ios27_phase25c_destroy_weak(rt, &weak) == 0);
 }
-typedef struct { ios27_phase25c_runtime *rt; pthread_barrier_t *barrier; } pool_task;
+typedef struct { ios27_phase25c_runtime *rt; phase25c_barrier *barrier; } pool_task;
 static void *pool_worker(void *arg) {
     pool_task *t = arg;
     void *pool = NULL;
@@ -146,21 +175,21 @@ static void *pool_worker(void *arg) {
         node *a = make(t->rt, NULL);
         assert(ios27_phase25c_autorelease(t->rt, a) == 0);
     }
-    (void)pthread_barrier_wait(t->barrier);
+    gate_wait(t->barrier);
     assert(ios27_phase25c_pool_pop(t->rt, pool) == 0);
     /* Deliberately omit detach to verify pthread TLS destructor drains. */
     return NULL;
 }
 static void concurrent_pool_drains(ios27_phase25c_runtime *rt) {
-    pthread_barrier_t barrier;
-    assert(pthread_barrier_init(&barrier, NULL, 5) == 0);
+    phase25c_barrier barrier;
+    gate_init(&barrier, 5);
     pthread_t threads[4];
     pool_task t = { rt, &barrier };
     for (size_t i = 0; i < 4; ++i)
         assert(pthread_create(&threads[i], NULL, pool_worker, &t) == 0);
-    (void)pthread_barrier_wait(&barrier);
+    gate_wait(&barrier);
     for (size_t i = 0; i < 4; ++i) assert(pthread_join(threads[i], NULL) == 0);
-    assert(pthread_barrier_destroy(&barrier) == 0);
+    gate_destroy(&barrier);
 }
 static void allocation_rollback(ios27_phase25c_runtime *rt) {
     ios27_phase25c_stats before, after;
