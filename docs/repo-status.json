@@ -9,21 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
-      "number": 103,
-      "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "ad70fbbd18c6dcc6e7092b81f87a98e307736e76",
-      "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/103",
-      "updated_at": "2026-10-30T10:53:33Z",
+      "number": 102,
+      "branch": "phase25c-arc-ownership-20261030",
+      "sha": "c84f0bff70f4838de3ef83a70be46b150039082e",
+      "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+      "updated_at": "2026-10-30T10:53:52Z",
       "status": "unmerged: not counted"
     },
     {
-      "number": 102,
-      "branch": "phase25c-arc-ownership-20261030",
-      "sha": "da9994cc5bd222549218e6f9ce42fa79b3cda398",
-      "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "updated_at": "2026-10-30T10:52:45Z",
+      "number": 104,
+      "branch": "agent/phase25d-objc-lifecycle-20261030",
+      "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
+      "title": "phase25d: isolated objective-c lifecycle scheduler with concurrency and retirement pins",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/104",
+      "updated_at": "2026-10-30T10:53:43Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 103,
+      "branch": "agent/phase25e-objc-app-integration-20261030",
+      "sha": "c52b2defd3e4a99443623149264547af5102bb20",
+      "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/103",
+      "updated_at": "2026-10-30T10:53:35Z",
       "status": "unmerged: not counted"
     },
     {
@@ -217,24 +226,6 @@
     }
   ],
   "ahead_branches": [
-    {
-      "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "c52b2defd3e4a99443623149264547af5102bb20",
-      "ahead_by": 67,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:53:33Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
-      "status": "unmerged: not counted"
-    },
-    {
-      "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
-      "ahead_by": 73,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:53:17Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
-      "status": "unmerged: not counted"
-    },
     {
       "branch": "agent/phase25a-objc-linked-metadata-20261030",
       "sha": "2e19dacdf1fac3baf0cbeaa4c8c4ccac69271014",
@@ -445,9 +436,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 13,
+    "branches_scanned": 11,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:53:37Z"
+  "observed_at": "2026-10-30T10:54:00Z"
 }
