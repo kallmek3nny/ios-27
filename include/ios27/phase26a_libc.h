@@ -10,6 +10,7 @@
 #define IOS27_26A_EFAULT 14
 #define IOS27_26A_ENOMEM 12
 #define IOS27_26A_EINVAL 22
+#define IOS27_26A_ERANGE 34
 
 void *ios27_26a_malloc(size_t count);
 void *ios27_26a_calloc(size_t count, size_t bytes);
@@ -29,6 +30,9 @@ char *ios27_26a_strdup(const char *str);
 char *ios27_26a_getenv(const char *name);
 int ios27_26a_setenv(const char *name, const char *value, int overwrite);
 int ios27_26a_unsetenv(const char *name);
+long ios27_26a_strtol(const char *input, char **endptr, int base);
+char *ios27_26a_strerror(int error);
+int ios27_26a_snprintf(char *destination, size_t capacity, const char *format, ...);
 int ios27_26a_last_error(void);
 size_t ios27_26a_live_bytes(void);
 #endif
