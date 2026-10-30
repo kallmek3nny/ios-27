@@ -9,12 +9,30 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 108,
+      "branch": "phase26d-coreanimation-compositor",
+      "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
+      "title": "phase26d: bounded transactions and deterministic cpu composition",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+      "updated_at": "2026-10-30T13:02:18Z",
+      "status": "unmerged: not counted"
+    },
+    {
+      "number": 110,
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "ab6320cdc916cd1aae610bd87a4c1b8f8b5dc988",
+      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
+      "updated_at": "2026-10-30T13:01:35Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 109,
       "branch": "phase26a-native-libc-abi",
-      "sha": "f04bd73e3f21fdaef72463dc6d01e37a587d43f4",
+      "sha": "72f0f4900fcefe9f88c2831f956ace357b4ef756",
       "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "updated_at": "2026-10-30T13:00:42Z",
+      "updated_at": "2026-10-30T13:01:35Z",
       "status": "unmerged: not counted"
     },
     {
@@ -24,24 +42,6 @@
       "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
       "url": "https://github.com/kallmek3nny/ios-27/pull/111",
       "updated_at": "2026-10-30T12:59:49Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 110,
-      "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "67a42b100c6b120fe6591b84fb85421343eca8a3",
-      "title": "phase26b: isolated BSD syscall guest services, capability fds and standalone verification",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/110",
-      "updated_at": "2026-10-30T12:59:35Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 108,
-      "branch": "phase26d-coreanimation-compositor",
-      "sha": "40033d5f387e3889b38aaf13b6bd462a5072b35e",
-      "title": "phase26d: bounded transactions and deterministic cpu composition",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
-      "updated_at": "2026-10-30T12:59:21Z",
       "status": "unmerged: not counted"
     },
     {
@@ -484,5 +484,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:01:11Z"
+  "observed_at": "2026-10-30T13:02:28Z"
 }
