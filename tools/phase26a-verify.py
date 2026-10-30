@@ -7,7 +7,6 @@ Mach-O and exercises the host model; only ARM64 Linux executes loaded images.
 """
 import os
 from pathlib import Path
-import runpy
 import shutil
 import struct
 import subprocess
@@ -33,7 +32,7 @@ def run(args, limit=120):
     if done.stdout:
         print(done.stdout[-9000:], flush=True)
     if done.returncode:
-        raise RuntimeError(f"exit {done.returncode}: {args}")
+        raise RuntimeError(f"exit {done.returncode}: {args}\\n{done.stdout}")
     return done.stdout
 
 
@@ -81,14 +80,49 @@ def check(path, kind, dependency=False):
     return data
 
 
+
+def strip_platform(path):
+    """Drop only a compiler object's LC_BUILD_VERSION or LC_VERSION_MIN."""
+    data = bytearray(path.read_bytes())
+    if len(data) < 32:
+        raise ValueError("short Clang Mach-O object")
+    magic, cpu, _sub, kind, count, nbytes, _flags, _reserved = (
+        struct.unpack_from("<8I", data))
+    if (magic, cpu, kind) != (MAGIC, ARM64, 1) or nbytes > len(data) - 32:
+        raise ValueError("not an ARM64 Darwin compiler object")
+    end, pos = 32 + nbytes, 32
+    for _ in range(count):
+        op, length = struct.unpack_from("<II", data, pos)
+        if length < 8 or length % 8 or pos + length > end:
+            raise ValueError("invalid object load command")
+        if op in (0x32, 0x24):
+            data[pos:end - length] = data[pos + length:end]
+            data[end - length:end] = bytes(length)
+            struct.pack_into("<II", data, 16, count - 1, nbytes - length)
+            altered = path.with_suffix(".link.o")
+            altered.write_bytes(data)
+            return altered
+        pos += length
+    raise ValueError("no compiler platform command to remove")
+
+
+def link(linker, options, obj, *extra):
+    common = [linker, "-arch", "arm64", "-platform_version",
+              "macos", "13.0", "13.0", "-fatal_warnings"] + options
+    try:
+        run(common + [obj, *extra], 30)
+    except RuntimeError as error:
+        if "does not support linking for platform" not in str(error):
+            raise
+        run(common + [strip_platform(obj), *extra], 30)
+
+
 def main():
     clang = shutil.which("clang")
     ld = shutil.which("ld64.lld") or shutil.which("ld64.lld-18")
     cc = os.environ.get("CC", "cc")
     if not clang or not ld or not shutil.which(cc):
         raise RuntimeError("clang, ld64.lld, and native C compiler required")
-    helper = runpy.run_path(str(ROOT / "tools/phase17b-build.py"))
-    link = helper["link"]  # Verified main-only helper, each link has 30s timeout.
     with tempfile.TemporaryDirectory(prefix="phase26a-") as td:
         out = Path(td)
         host_flags = ["-std=c11", "-O2", "-Wall", "-Wextra", "-Wpedantic",
