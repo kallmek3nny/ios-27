@@ -11,10 +11,10 @@
     {
       "number": 108,
       "branch": "phase26d-coreanimation-compositor",
-      "sha": "740add7323b8cfc309dd8d20e52d4343de65fd6e",
+      "sha": "93d19f6312fcda21cff90b19877f82e7be676b71",
       "title": "phase26d: bounded transactions and deterministic cpu composition",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
-      "updated_at": "2026-10-30T12:56:36Z",
+      "updated_at": "2026-10-30T12:57:20Z",
       "status": "unmerged: not counted"
     },
     {
@@ -255,10 +255,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "c8db89473d320dfd39ff104a6ab3d9be9c39339f",
-      "ahead_by": 3,
+      "sha": "f859452cf9ba9f943e134286880d65f228f82015",
+      "ahead_by": 5,
       "behind_by": 0,
-      "last_commit_at": "2026-10-30T12:54:41Z",
+      "last_commit_at": "2026-10-30T12:57:48Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
       "status": "unmerged: not counted"
     }
@@ -467,5 +467,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T12:57:02Z"
+  "observed_at": "2026-10-30T12:57:51Z"
 }

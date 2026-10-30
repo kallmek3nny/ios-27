@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "phase26d-coreanimation-compositor",
-      "sha": "740add7323b8cfc309dd8d20e52d4343de65fd6e",
+      "sha": "93d19f6312fcda21cff90b19877f82e7be676b71",
       "url": "https://github.com/kallmek3nny/ios-27/pull/108",
       "pr_number": 108,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 6,
       "possibly_truncated": false,
@@ -32,7 +32,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 1,
-          "additions": 756,
+          "additions": 761,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -914,19 +914,19 @@
     },
     {
       "branch": "agent/phase26b-bsd-capabilities-20261030",
-      "sha": "c8db89473d320dfd39ff104a6ab3d9be9c39339f",
+      "sha": "f859452cf9ba9f943e134286880d65f228f82015",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
+      "files_checked": 13,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "unclassified",
           "source_files": 2,
-          "fixture_files": 0,
-          "additions": 458,
+          "fixture_files": 3,
+          "additions": 677,
           "deletions": 0,
           "symbols_preview": [
             "ios27_phase26b_copyin",
@@ -938,7 +938,9 @@
           ],
           "example_paths": [
             "include/ios27/phase26b_bsd.h",
-            "src/phase26b_bsd.c"
+            "src/phase26b_bsd.c",
+            "tests/phase26b-arm64.c",
+            "tests/phase26b-bsd.c"
           ]
         }
       ]
@@ -1087,7 +1089,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/108",
         "source_files": 0,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
@@ -1154,7 +1156,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/108",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "fix/external-build-fixtures",
@@ -1167,7 +1169,7 @@
         "branch": "agent/phase26b-bsd-capabilities-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
         "source_files": 2,
-        "fixture_files": 0,
+        "fixture_files": 3,
         "ci": "not_checked"
       }
     ]
@@ -1972,5 +1974,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T12:57:06Z"
+  "observed_at": "2026-10-30T12:57:56Z"
 }

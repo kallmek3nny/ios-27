@@ -8,10 +8,10 @@ candidate branches with mapped changes: **28** · audited base: `55b186d90cf6`
 
 ### [phase26d-coreanimation-compositor](https://github.com/kallmek3nny/ios-27/pull/108)
 
-head: `740add7323b8` · ci: **running** · unmerged, not credited.
+head: `93d19f6312fc` · ci: **passing_checks** · unmerged, not credited.
 
 - **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +16/-0 lines
-- **unclassified**: 2 source files, 1 test/fixture files, +756/-0 lines
+- **unclassified**: 2 source files, 1 test/fixture files, +761/-0 lines
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
 
@@ -190,9 +190,9 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 ### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030)
 
-head: `c8db89473d32` · ci: **not_checked** · unmerged, not credited.
+head: `f859452cf9ba` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 0 test/fixture files, +458/-0 lines
+- **unclassified**: 2 source files, 3 test/fixture files, +677/-0 lines
   - candidate declarations: `ios27_phase26b_copyin`, `ios27_phase26b_copyout`, `ios27_phase26b_create`, `ios27_phase26b_destroy`, `ios27_phase26b_stop`, `ios27_phase26b_trap`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
