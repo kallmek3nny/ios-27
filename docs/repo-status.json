@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 108,
+      "branch": "phase26d-coreanimation-compositor",
+      "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
+      "title": "phase26d: bounded transactions and deterministic cpu composition",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+      "updated_at": "2026-10-30T13:03:34Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "6fa5c1aaf74fd8214ffda5cf9d56bf84ce94f917",
@@ -42,15 +51,6 @@
       "title": "phase26c: bounded headless graphics, frame snapshots, and Android CPU staging",
       "url": "https://github.com/kallmek3nny/ios-27/pull/111",
       "updated_at": "2026-10-30T13:02:55Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 108,
-      "branch": "phase26d-coreanimation-compositor",
-      "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
-      "title": "phase26d: bounded transactions and deterministic cpu composition",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
-      "updated_at": "2026-10-30T13:03:34Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:03:38Z"
+  "observed_at": "2026-10-30T13:04:03Z"
 }

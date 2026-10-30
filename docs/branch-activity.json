@@ -8,6 +8,42 @@
   "candidate_count": 31,
   "candidates": [
     {
+      "branch": "phase26d-coreanimation-compositor",
+      "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+      "pr_number": 108,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 6,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "objc-host-model",
+          "source_files": 0,
+          "fixture_files": 1,
+          "additions": 16,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "tests/phase26d-objc-fixture.m"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 911,
+          "deletions": 0,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/phase26d_compositor.h",
+            "src/phase26d_compositor.c",
+            "tests/phase26d-core.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "6fa5c1aaf74fd8214ffda5cf9d56bf84ce94f917",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
@@ -70,7 +106,7 @@
       "sha": "4b4de36eb4534c0706476f88a3a9d7b2afe1e3b0",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "pr_number": 109,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 9,
       "possibly_truncated": false,
@@ -125,42 +161,6 @@
             "include/ios27/phase26c_graphics.h",
             "src/phase26c_graphics.c",
             "tests/phase26c-headless.c"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase26d-coreanimation-compositor",
-      "sha": "6bdcffce6c7b7b41bc5db5d289455d20dc403d2d",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/108",
-      "pr_number": 108,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 6,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "objc-host-model",
-          "source_files": 0,
-          "fixture_files": 1,
-          "additions": 16,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/phase26d-objc-fixture.m"
-          ]
-        },
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 1,
-          "additions": 911,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "include/ios27/phase26d_compositor.h",
-            "src/phase26d_compositor.c",
-            "tests/phase26d-core.c"
           ]
         }
       ]
@@ -1241,6 +1241,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase26d-coreanimation-compositor",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/108",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "passing_checks"
+      },
+      {
         "branch": "phase26e-android-host-scenes-input",
         "url": "https://github.com/kallmek3nny/ios-27/pull/112",
         "source_files": 2,
@@ -1259,18 +1266,11 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/109",
         "source_files": 2,
         "fixture_files": 5,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase26c-headless-graphics-interop-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/111",
-        "source_files": 2,
-        "fixture_files": 1,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase26d-coreanimation-compositor",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/108",
         "source_files": 2,
         "fixture_files": 1,
         "ci": "passing_checks"
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:03:43Z"
+  "observed_at": "2026-10-30T13:04:07Z"
 }
