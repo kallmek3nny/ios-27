@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "phase26e-android-host-scenes-input",
-      "sha": "85cb72a01d0d0a54525583d784db058be2da1a49",
+      "sha": "008a2386778cfaf86db39e9fc455cbb5bf84a282",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
       "pr_number": 112,
       "ci": "running",
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:05:57Z"
+  "observed_at": "2026-10-30T13:06:18Z"
 }
