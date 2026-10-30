@@ -1,6 +1,8 @@
 #include "ios27/phase26a_libc.h"
 #include <assert.h>
 #include <stdint.h>
+#include <limits.h>
+#include <string.h>
 #include <stdio.h>
 
 int main(void) {
@@ -57,6 +59,37 @@ int main(void) {
     assert(c && c[0] == 'a' && c[1] == 'b' && c[2] == 0);
     assert(ios27_26a_realloc(a, SIZE_MAX) == NULL);
     assert(a[0] == 'a'); /* old allocation retained on failure */
+
+    {
+        char *fmt = ios27_26a_malloc(64u);
+        char *numbers = ios27_26a_malloc(64u);
+        char **last = ios27_26a_malloc(sizeof(*last));
+        const char pattern[] = "v=%d x=%x s=%s %%";
+        const char minus[] = "-42END";
+        const char overflowing[] = "9999999999999999999999999999";
+        assert(fmt && numbers && last);
+        for (size_t i = 0u; i < sizeof(pattern); ++i) fmt[i] = pattern[i];
+        for (size_t i = 0u; i < sizeof(minus); ++i) numbers[i] = minus[i];
+        a[0] = 'o'; a[1] = 'k'; a[2] = 0;
+        assert(ios27_26a_snprintf(b, 128u, fmt, -42, 42u, a) == 18);
+        assert(strcmp(b, "v=-42 x=2a s=ok %") == 0);
+        assert(ios27_26a_snprintf(b, 4u, fmt, -42, 42u, a) == 18);
+        assert(strcmp(b, "v=-") == 0);
+        assert(ios27_26a_strtol(numbers, last, 10) == -42);
+        assert(**last == 'E');
+        for (size_t i = 0u; i < sizeof(overflowing); ++i)
+            numbers[i] = overflowing[i];
+        assert(ios27_26a_strtol(numbers, last, 10) == LONG_MAX);
+        assert(ios27_26a_last_error() == IOS27_26A_ERANGE);
+        assert(ios27_26a_strerror(IOS27_26A_ENOMEM)[0] == 'C');
+        assert(ios27_26a_strerror(9999)[0] == 'U');
+        fmt[3] = 'f'; /* unsupported specifier must not modify output */
+        assert(ios27_26a_snprintf(b, 128u, fmt, 3.14) == -1);
+        assert(strcmp(b, "v=-") == 0);
+        ios27_26a_free(fmt);
+        ios27_26a_free(numbers);
+        ios27_26a_free(last);
+    }
     for (unsigned i = 0u; i < 210000u; ++i) {
         assert(ios27_26a_memset(b, (int)(i & 255u), 64u) == b);
         assert(ios27_26a_memmove(b + 1, b, 60u) == b + 1);
