@@ -448,7 +448,10 @@ def parse_class(im: Image, cls_addr: int, generation: int) -> Class:
     name = im.get_name(ro_vm + 24)
     require(name == im.get_name(meta_ro_vm + 24), 'metaclass name mismatch')
     size = im.val(ro_vm + 8, 4)
-    require(0 < size <= 65536, f'invalid class instance size {name}: {size}, class={vm:x}, ro={ro_vm:x}, raw={im.read(ro_vm, 16).hex()}')
+    # Clang emits class_ro_t.instanceSize == 0 for subclasses that add no ivars.
+    # Their effective runtime allocation size is inherited from the superclass.
+    # This compiler-valid sentinel must not reject the linked metadata record.
+    require(size <= 65536, f'invalid class instance size {name}: {size}, class={vm:x}, ro={ro_vm:x}, raw={im.read(ro_vm, 16).hex()}')
     parent = None
     if isinstance(parent_ptr, Import):
         require(parent_ptr.name.startswith('_OBJC_CLASS_$_') and
