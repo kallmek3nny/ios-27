@@ -1,0 +1,50 @@
+name: phase26e independent host validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase26e_*'
+      - 'include/ios27/phase26e_*'
+      - 'tests/phase26e-*'
+      - 'tools/phase26e-*'
+      - 'docs/phase26e-*'
+      - 'android/phase26e/**'
+      - '.github/workflows/phase26e-*.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: bounded Werror native stress and sanitizer
+        run: PHASE26E_SANITIZE=1 timeout 180s bash tools/phase26e-verify.sh
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: install NDK and platform under hard timeout
+        run: timeout 120s sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: build standalone debug APK
+        working-directory: android/phase26e
+        run: timeout 300s gradle :app:assembleDebug --no-daemon --console plain -Pandroid.injected.testOnly=false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase26e-diagnostic-apk
+          path: android/phase26e/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
