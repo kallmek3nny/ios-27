@@ -7,11 +7,39 @@
   "candidate_count": 26,
   "candidates": [
     {
+      "branch": "agent/phase25a-objc-linked-metadata-20261030",
+      "sha": "a9bcda8e7432e65d3b0f0a9d581163c91526a23e",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/105",
+      "pr_number": 105,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 13,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 8,
+          "additions": 472,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase25a_preflight"
+          ],
+          "example_paths": [
+            "include/ios27/phase25a_inspect.h",
+            "src/phase25a_inspect.c",
+            "tests/phase25a-branch.m",
+            "tests/phase25a-category.m"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase25b-native-objc-dispatch",
       "sha": "99e3678e6241c9298dc6b8271d0828d848931ac6",
       "url": "https://github.com/kallmek3nny/ios-27/pull/106",
       "pr_number": 106,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 19,
       "possibly_truncated": false,
@@ -28,34 +56,6 @@
             "src/phase25b_dispatch.c",
             "src/phase25b_entry.S",
             "tests/phase25b-appone.m"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "agent/phase25a-objc-linked-metadata-20261030",
-      "sha": "8944a8035faadfe96056d6b0186a05b9560e70db",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/105",
-      "pr_number": 105,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 8,
-          "additions": 419,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase25a_preflight"
-          ],
-          "example_paths": [
-            "include/ios27/phase25a_inspect.h",
-            "src/phase25a_inspect.c",
-            "tests/phase25a-branch.m",
-            "tests/phase25a-category.m"
           ]
         }
       ]
@@ -968,17 +968,17 @@
     ],
     "unclassified": [
       {
-        "branch": "phase25b-native-objc-dispatch",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/106",
-        "source_files": 3,
-        "fixture_files": 13,
-        "ci": "running"
-      },
-      {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/105",
         "source_files": 2,
         "fixture_files": 8,
+        "ci": "running"
+      },
+      {
+        "branch": "phase25b-native-objc-dispatch",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/106",
+        "source_files": 3,
+        "fixture_files": 13,
         "ci": "passing_checks"
       },
       {
@@ -1930,5 +1930,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T11:03:53Z"
+  "observed_at": "2026-10-30T11:04:54Z"
 }
