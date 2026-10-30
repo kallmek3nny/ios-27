@@ -52,7 +52,10 @@ int main(int argc, char **argv) {
         if (call() != 42) return 6;
         if (argc == 5) {
             uintptr_t start = 0u;
-            /* LC_MAIN public entrypoint intentionally refuses images requiring dyld.\n             * Invoke only the compiler-linked, exported _main of this trusted\n             * fixture through the explicitly resolved validated symbol. */\n            if (ios27_images_symbol(images, "phase26a-exec", "_main", &start))
+            /* LC_MAIN public entrypoint intentionally refuses images requiring dyld.
+             * Invoke only the compiler-linked, exported _main of this trusted
+             * fixture through the explicitly resolved validated symbol. */
+            if (ios27_images_symbol(images, "phase26a-exec", "_main", &start))
                 return 7;
             int (*main_entry)(void) = (int (*)(void))start;
             if (main_entry() != 42) return 8;
