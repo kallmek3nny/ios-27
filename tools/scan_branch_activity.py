@@ -52,8 +52,14 @@ ALLOWED_CI = ("native tests", "capability progress", "phase19b real linked darwi
 PHASE_GROUP = {
     "22a": "sandbox", "22b": "bsd-calls", "22c": "dyld-engine",
     "22d": "objc-host-model", "22e": "mach-ipc",
+    "23a": "dyld-engine", "23b": "dyld-engine", "23c": "objc-host-model",
+    "23d": "bsd-calls", "23e": "mach-o",
+    "24a": "dyld-engine", "24b": "dyld-engine", "24c": "objc-host-model",
+    "24d": "bsd-calls", "24e": "mach-o",
+    "25a": "objc-host-model", "25b": "objc-host-model",
+    "25c": "objc-host-model", "25d": "objc-host-model", "25e": "objc-host-model",
 }
-PHASE_NAME = re.compile(r"^phase(21[a-j]|22[a-e])[-_]")
+PHASE_NAME = re.compile(r"^phase(21[a-j]|22[a-e]|23[a-e]|24[a-e]|25[a-e])[-_.]")
 
 def get_group(filename):
     matched = next((name for name, regex in GROUPS if regex.search(filename)), None)
@@ -95,7 +101,8 @@ def get_group(filename):
 
 
 def is_source(filename):
-    return filename.startswith(("src/", "include/")) and filename.endswith((".c", ".h", ".m", ".mm", ".cc", ".cpp", ".hpp", ".S", ".s"))
+    return (filename.startswith(("src/", "include/")) and
+            filename.endswith((".c", ".h", ".m", ".mm", ".cc", ".cpp", ".hpp", ".S", ".s"))) or (filename.startswith("src/") and filename.endswith(".py"))
 
 
 def is_fixture(filename):
@@ -283,7 +290,8 @@ def audit(repo, provenance, get, groups):
                      "source_files": g["source_files"],
                      "fixture_files": g["fixture_files"],
                      "status": "merged source, not necessarily compatible"})
-    return {"schema": 1, "repository": repo, "main_source_sha": sha,
+    return {"schema": 1, "classification_version": 2,
+            "repository": repo, "main_source_sha": sha,
             "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
             "candidates_checked": len(candidates), "candidate_count": len(mapped),
             "candidates": mapped, "groups": dict(sorted(by_group.items())),
@@ -319,6 +327,26 @@ def self_test():
     assert get_group("src/phase22d_runtime.c") == "objc-host-model"
     assert get_group("src/phase22e_mig.c") == "mach-ipc"
     assert get_group("tests/phase21j-sync.c") == "libsystem-pthread"
+    for filename, group in [
+        ("src/phase23a_graph.c", "dyld-engine"),
+        ("tests/phase23b-lifecycle.c", "dyld-engine"),
+        ("src/phase23c_metadata.c", "objc-host-model"),
+        ("src/phase23d_services.c", "bsd-calls"),
+        ("tests/phase23e-app.c", "mach-o"),
+        ("src/phase24a_registry.c", "dyld-engine"),
+        ("src/phase24b_lifecycle.c", "dyld-engine"),
+        ("src/phase24c_registry.c", "objc-host-model"),
+        ("src/phase24d_services.c", "bsd-calls"),
+        ("tests/phase24e-app.m", "mach-o"),
+        ("src/phase25a_bind.py", "objc-host-model"),
+        ("src/phase25b_entry.S", "objc-host-model"),
+        ("src/phase25c_lifetime.c", "objc-host-model"),
+        ("src/phase25d_lifecycle.cpp", "objc-host-model"),
+        ("tests/phase25e-fixtures.m", "objc-host-model"),
+    ]:
+        assert get_group(filename) == group, filename
+    assert is_source("src/phase25a_bind.py")
+    assert get_group("src/phase26_unknown.c") is None
     phase20d = summarize(
         {"branch": "phase20d-darwin-threading", "sha": "b" * 40,
          "url": "https://github.com/example/repo/tree/phase20d"},
