@@ -71,7 +71,7 @@ int main(void) {
         for (size_t i = 0u; i < sizeof(pattern); ++i) fmt[i] = pattern[i];
         for (size_t i = 0u; i < sizeof(minus); ++i) numbers[i] = minus[i];
         a[0] = 'o'; a[1] = 'k'; a[2] = 0;
-        assert(ios27_26a_snprintf(b, 128u, fmt, -42, 42u, a) == 18);
+        assert(ios27_26a_snprintf(b, 128u, fmt, -42, 42u, a) == 17);
         assert(strcmp(b, "v=-42 x=2a s=ok %") == 0);
         assert(ios27_26a_snprintf(b, 4u, fmt, -42, 42u, a) == 18);
         assert(strcmp(b, "v=-") == 0);
