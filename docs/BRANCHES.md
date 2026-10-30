@@ -6,22 +6,22 @@
 
 candidate branches with mapped changes: **30** · audited base: `55b186d90cf6`
 
+### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
+
+head: `f04bd73e3f21` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 5 test/fixture files, +730/-0 lines
+  - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
+
 ### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
 
 head: `8540863d5394` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 1 test/fixture files, +726/-0 lines
 
-### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
-
-head: `88ccde8e8f25` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 5 test/fixture files, +696/-0 lines
-  - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
-
 ### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/pull/110)
 
-head: `67a42b100c6b` · ci: **running** · unmerged, not credited.
+head: `67a42b100c6b` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +677/-0 lines
   - candidate declarations: `ios27_phase26b_copyin`, `ios27_phase26b_copyout`, `ios27_phase26b_create`, `ios27_phase26b_destroy`, `ios27_phase26b_stop`, `ios27_phase26b_trap`
