@@ -1,0 +1,78 @@
+name: phase25e compiler-linked objc integration evidence
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase25e_*'
+      - 'include/ios27/phase25e_*'
+      - 'tests/phase25e-*'
+      - 'tools/phase25e-*'
+      - 'docs/phase25e-*'
+      - '.github/workflows/phase25e-native-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linked-fixtures:
+    name: phase25e / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, asan-ubsan]
+    env:
+      PHASE25E_RESULTS: build/phase25e
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - name: checkout frozen PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: prove head identity
+        shell: bash
+        run: |
+          timeout 30s git rev-parse HEAD
+          timeout 30s uname -m
+          timeout 30s clang --version
+      - name: install open-source darwin linker
+        shell: bash
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
+      - name: configure merged-core baseline without relaxing Werror
+        shell: bash
+        run: |
+          if [ "${{ matrix.mode }}" = asan-ubsan ]; then
+            timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
+          else
+            timeout 120s cmake -S . -B build -DIOS27_BUILD_TESTS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror"
+          fi
+      - name: compile baseline tests
+        shell: bash
+        run: timeout 300s cmake --build build --parallel 2
+      - name: run unchanged baseline under selected instrumentation
+        shell: bash
+        run: timeout 180s ctest --test-dir build --output-on-failure --timeout 60
+      - name: link nine genuine ObjC2 Mach-O fixtures and capture fail-closed evidence
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: timeout 300s python3 tools/phase25e-build.py --output build/phase25e --rounds 100
+      - name: phase25e deterministic graph, metadata, negative, concurrency tests
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: timeout 180s python3 tests/phase25e-integration.py -v
+      - name: preserve exact phase25e evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase25e-${{ matrix.runner }}-${{ matrix.mode }}
+          path: |
+            build/phase25e/phase25e-evidence.json
+          if-no-files-found: ignore
