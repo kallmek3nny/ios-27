@@ -243,7 +243,17 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [],
+  "ahead_branches": [
+    {
+      "branch": "agent/phase26b-bsd-capabilities-20261030",
+      "sha": "c8db89473d320dfd39ff104a6ab3d9be9c39339f",
+      "ahead_by": 3,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-30T12:54:41Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase26b-bsd-capabilities-20261030",
+      "status": "unmerged: not counted"
+    }
+  ],
   "recent_merged_pull_requests": [
     {
       "number": 107,
@@ -444,9 +454,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 11,
+    "branches_scanned": 12,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T11:26:44Z"
+  "observed_at": "2026-10-30T12:55:23Z"
 }
