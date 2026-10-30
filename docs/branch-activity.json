@@ -7,6 +7,45 @@
   "candidate_count": 24,
   "candidates": [
     {
+      "branch": "phase25c-arc-ownership-20261030",
+      "sha": "223c3c21befaeb20075c9038acaf32a0977252ab",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+      "pr_number": 102,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 12,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 8,
+          "additions": 1169,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase25c_alloc",
+            "ios27_phase25c_autorelease",
+            "ios27_phase25c_can_unload",
+            "ios27_phase25c_create",
+            "ios27_phase25c_destroy",
+            "ios27_phase25c_destroy_weak",
+            "ios27_phase25c_fail_alloc_after",
+            "ios27_phase25c_get_stats",
+            "ios27_phase25c_identity",
+            "ios27_phase25c_load_weak_retained",
+            "ios27_phase25c_pin",
+            "ios27_phase25c_pool_pop"
+          ],
+          "example_paths": [
+            "include/ios27/phase25c_lifetime.h",
+            "src/phase25c_lifetime.c",
+            "tests/phase25c-arc-darwin.m",
+            "tests/phase25c-arc-native-host.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "agent/phase25d-objc-lifecycle-20261030",
       "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
       "url": "https://github.com/kallmek3nny/ios-27/pull/104",
@@ -54,45 +93,6 @@
             "tests/phase25e-integration.py",
             "tools/phase25e-build.py",
             "tools/phase25e-inspect.py"
-          ]
-        }
-      ]
-    },
-    {
-      "branch": "phase25c-arc-ownership-20261030",
-      "sha": "8910deb40b9e7a912545d832892e0e2ed8bb8e75",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "pr_number": 102,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 9,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 5,
-          "additions": 1057,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase25c_alloc",
-            "ios27_phase25c_autorelease",
-            "ios27_phase25c_can_unload",
-            "ios27_phase25c_create",
-            "ios27_phase25c_destroy",
-            "ios27_phase25c_destroy_weak",
-            "ios27_phase25c_fail_alloc_after",
-            "ios27_phase25c_get_stats",
-            "ios27_phase25c_identity",
-            "ios27_phase25c_load_weak_retained",
-            "ios27_phase25c_pin",
-            "ios27_phase25c_pool_pop"
-          ],
-          "example_paths": [
-            "include/ios27/phase25c_lifetime.h",
-            "src/phase25c_lifetime.c",
-            "tests/phase25c-arc-darwin.m",
-            "tests/phase25c-arc-native-host.c"
           ]
         }
       ]
@@ -914,6 +914,13 @@
     ],
     "unclassified": [
       {
+        "branch": "phase25c-arc-ownership-20261030",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+        "source_files": 2,
+        "fixture_files": 8,
+        "ci": "running"
+      },
+      {
         "branch": "agent/phase25d-objc-lifecycle-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/104",
         "source_files": 2,
@@ -925,13 +932,6 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/103",
         "source_files": 0,
         "fixture_files": 4,
-        "ci": "passing_checks"
-      },
-      {
-        "branch": "phase25c-arc-ownership-20261030",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-        "source_files": 2,
-        "fixture_files": 5,
         "ci": "passing_checks"
       },
       {
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:55:33Z"
+  "observed_at": "2026-10-30T10:56:07Z"
 }

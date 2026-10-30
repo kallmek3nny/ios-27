@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 102,
+      "branch": "phase25c-arc-ownership-20261030",
+      "sha": "223c3c21befaeb20075c9038acaf32a0977252ab",
+      "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
+      "updated_at": "2026-10-30T10:55:58Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 104,
       "branch": "agent/phase25d-objc-lifecycle-20261030",
       "sha": "7c434d616cf2935e4dbf9f2a0ccd44840e4a1744",
@@ -24,15 +33,6 @@
       "title": "phase25e: compiler-linked ObjC application fixtures, strict integration gate and evidence",
       "url": "https://github.com/kallmek3nny/ios-27/pull/103",
       "updated_at": "2026-10-30T10:54:36Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 102,
-      "branch": "phase25c-arc-ownership-20261030",
-      "sha": "8910deb40b9e7a912545d832892e0e2ed8bb8e75",
-      "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "updated_at": "2026-10-30T10:54:33Z",
       "status": "unmerged: not counted"
     },
     {
@@ -440,5 +440,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:55:28Z"
+  "observed_at": "2026-10-30T10:56:03Z"
 }
