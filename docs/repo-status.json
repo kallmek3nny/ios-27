@@ -11,10 +11,10 @@
     {
       "number": 102,
       "branch": "phase25c-arc-ownership-20261030",
-      "sha": "83a78c77a31d1a5d885eeee5da68e85b769accf9",
+      "sha": "50a4f45342118d7d4713c3169d528bd2647dcf3d",
       "title": "phase25c: synchronized objc ARC ownership, weak zeroing and TLS pools",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
-      "updated_at": "2026-10-30T10:51:10Z",
+      "updated_at": "2026-10-30T10:51:51Z",
       "status": "unmerged: not counted"
     },
     {
@@ -210,20 +210,29 @@
   "ahead_branches": [
     {
       "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "8d67007d44da8712ffa9490846213e8eefc1bbdf",
-      "ahead_by": 69,
+      "sha": "6a8e094a4779392d385ff0d0c36c7a807755e8c6",
+      "ahead_by": 70,
       "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:51:25Z",
+      "last_commit_at": "2026-10-30T10:52:05Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
       "status": "unmerged: not counted"
     },
     {
       "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "7e658a544da8840810f4f9da1007b3cedfe867d1",
-      "ahead_by": 64,
+      "sha": "8e619cdd2dc56407abad9de74703f65fb0ee6119",
+      "ahead_by": 65,
       "behind_by": 0,
-      "last_commit_at": "2026-10-30T10:51:01Z",
+      "last_commit_at": "2026-10-30T10:51:55Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
+      "status": "unmerged: not counted"
+    },
+    {
+      "branch": "agent/phase25a-objc-linked-metadata-20261030",
+      "sha": "2e19dacdf1fac3baf0cbeaa4c8c4ccac69271014",
+      "ahead_by": 58,
+      "behind_by": 0,
+      "last_commit_at": "2026-10-30T10:50:56Z",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25a-objc-linked-metadata-20261030",
       "status": "unmerged: not counted"
     }
   ],
@@ -427,9 +436,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 13,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T10:51:40Z"
+  "observed_at": "2026-10-30T10:52:17Z"
 }

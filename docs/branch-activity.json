@@ -3,15 +3,15 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "1dd112410e43de08b9de228e43a87f8b5cc93369",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 24,
+  "candidates_checked": 25,
   "candidate_count": 24,
   "candidates": [
     {
       "branch": "phase25c-arc-ownership-20261030",
-      "sha": "83a78c77a31d1a5d885eeee5da68e85b769accf9",
+      "sha": "50a4f45342118d7d4713c3169d528bd2647dcf3d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/102",
       "pr_number": 102,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 7,
       "possibly_truncated": false,
@@ -771,19 +771,19 @@
     },
     {
       "branch": "agent/phase25d-objc-lifecycle-20261030",
-      "sha": "8d67007d44da8712ffa9490846213e8eefc1bbdf",
+      "sha": "6a8e094a4779392d385ff0d0c36c7a807755e8c6",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 20,
+      "files_checked": 21,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "unclassified",
           "source_files": 2,
-          "fixture_files": 10,
-          "additions": 600,
+          "fixture_files": 11,
+          "additions": 821,
           "deletions": 0,
           "symbols_preview": [],
           "example_paths": [
@@ -797,12 +797,12 @@
     },
     {
       "branch": "agent/phase25e-objc-app-integration-20261030",
-      "sha": "7e658a544da8840810f4f9da1007b3cedfe867d1",
+      "sha": "8e619cdd2dc56407abad9de74703f65fb0ee6119",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25e-objc-app-integration-20261030",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 13,
+      "files_checked": 14,
       "possibly_truncated": false,
       "groups": [
         {
@@ -918,7 +918,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/102",
         "source_files": 2,
         "fixture_files": 3,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24c-objc2-typed-metadata-dispatch",
@@ -1001,7 +1001,7 @@
         "branch": "agent/phase25d-objc-lifecycle-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase25d-objc-lifecycle-20261030",
         "source_files": 2,
-        "fixture_files": 10,
+        "fixture_files": 11,
         "ci": "not_checked"
       },
       {
@@ -1862,5 +1862,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T10:51:44Z"
+  "observed_at": "2026-10-30T10:52:22Z"
 }
