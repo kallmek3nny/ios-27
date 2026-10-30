@@ -122,9 +122,50 @@ static void stress(void) {
     ios27_phase26b_destroy(p);
     printf("phase26b: 320000 concurrent BSD trap dispatches verified\n");
 }
+
+typedef struct { ios27_phase26b_process *p; uint64_t fd; } fd_job;
+static void *fd_worker(void *raw) {
+    fd_job *j = raw;
+    for (unsigned i = 0u; i < 5000u; ++i) {
+        uint64_t dup = success(C(j->p,92u,j->fd,0,0,0,0,0));
+        assert(success(C(j->p,4u,dup,IOS27_26B_BASE+3500u,1u,0,0,0))==1u);
+        assert(success(C(j->p,6u,dup,0,0,0,0,0))==0u);
+    }
+    return NULL;
+}
+static void descriptor_stress(void) {
+    ios27_phase26b_process *p = ios27_phase26b_create(888u,0);
+    uint64_t dup[31], fd;
+    pthread_t threads[4];
+    fd_job j;
+    assert(p);
+    put(p,32u,"/tmp/data");
+    assert(!ios27_phase26b_copyout(p,IOS27_26B_BASE+3500u,"q",1u));
+    fd = success(C(p,5u,IOS27_26B_BASE+32u,2u,0,0,0,0));
+    j.p=p; j.fd=fd;
+    for (size_t i=0u; i<4u; ++i)
+        assert(!pthread_create(&threads[i],NULL,fd_worker,&j));
+    for (size_t i=0u; i<4u; ++i)
+        assert(!pthread_join(threads[i],NULL));
+    assert(success(C(p,199u,fd,0,1u,0,0,0))==20000u);
+    for (size_t i=0u; i<31u; ++i)
+        dup[i]=success(C(p,92u,fd,0,0,0,0,0));
+    failure(C(p,92u,fd,0,0,0,0,0),24u);
+    for (size_t i=0u; i<31u; ++i)
+        assert(success(C(p,6u,dup[i],0,0,0,0,0))==0u);
+    failure(C(p,6u,dup[0],0,0,0,0,0),9u);
+    assert(success(C(p,6u,fd,0,0,0,0,0))==0u);
+    failure(C(p,4u,fd,IOS27_26B_BASE+3500u,1u,0,0,0),9u);
+    assert(ios27_phase26b_copyout(p,IOS27_26B_BASE+16u*IOS27_26B_PAGE-1u,
+                                    "aa",2u));
+    ios27_phase26b_destroy(p);
+    puts("phase26b: 60000 concurrent fd dup/write/close operations verified");
+}
+
 int main(void) {
     basic();
     stress();
+    descriptor_stress();
     puts("phase26b: memory, fd, syscall, VM and concurrency checks passed");
     return 0;
 }
