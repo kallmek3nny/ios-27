@@ -419,7 +419,8 @@ static int utf8_ok(const unsigned char *s, size_t n) {
     return 1;
 }
 static phase26e_result text_event(phase26e_host *h, const char *utf8, size_t n, phase26e_event_kind kind) {
-    if (!h || !utf8 || n > PHASE26E_MAX_TEXT || !utf8_ok((const unsigned char *)utf8, n)) return P26_INVALID;
+    if (!h || !utf8 || n > PHASE26E_MAX_TEXT || memchr(utf8, 0, n) ||
+        !utf8_ok((const unsigned char *)utf8, n)) return P26_INVALID;
     pthread_mutex_lock(&h->lock);
     if (!active(h)) { phase26e_result r = rejected(h, P26_STATE); pthread_mutex_unlock(&h->lock); return r; }
     phase26e_event e = {0}; e.kind = kind;
