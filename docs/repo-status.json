@@ -11,10 +11,10 @@
     {
       "number": 109,
       "branch": "phase26a-native-libc-abi",
-      "sha": "99986e6a0e8cc94b5cc1e17f2be8290354539a75",
+      "sha": "590efb373d09a22935c1e3a63372a920c405d9f0",
       "title": "phase26a: isolated native ARM64 Darwin libc ABI + standalone verification",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
-      "updated_at": "2026-10-30T13:10:43Z",
+      "updated_at": "2026-10-30T13:11:06Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-30T13:10:55Z"
+  "observed_at": "2026-10-30T13:11:12Z"
 }
