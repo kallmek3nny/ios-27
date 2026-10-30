@@ -4,14 +4,21 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **24** · audited base: `1dd112410e43`
+candidate branches with mapped changes: **25** · audited base: `1dd112410e43`
 
 ### [phase25c-arc-ownership-20261030](https://github.com/kallmek3nny/ios-27/pull/102)
 
-head: `6645925e1c46` · ci: **running** · unmerged, not credited.
+head: `70d7d9826a03` · ci: **not_checked** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 8 test/fixture files, +1169/-0 lines
+- **unclassified**: 2 source files, 8 test/fixture files, +1179/-0 lines
   - candidate declarations: `ios27_phase25c_alloc`, `ios27_phase25c_autorelease`, `ios27_phase25c_can_unload`, `ios27_phase25c_create`, `ios27_phase25c_destroy`, `ios27_phase25c_destroy_weak`, `ios27_phase25c_fail_alloc_after`, `ios27_phase25c_get_stats`, `ios27_phase25c_identity`, `ios27_phase25c_load_weak_retained`, `ios27_phase25c_pin`, `ios27_phase25c_pool_pop`
+
+### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
+
+head: `9e22f4091f0e` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 2 source files, 8 test/fixture files, +419/-0 lines
+  - candidate declarations: `ios27_phase25a_preflight`
 
 ### [agent/phase25e-objc-app-integration-20261030](https://github.com/kallmek3nny/ios-27/pull/103)
 
