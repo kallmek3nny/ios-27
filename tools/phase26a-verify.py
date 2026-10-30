@@ -173,7 +173,7 @@ def main():
             exe = out / f"exe{case}"
             run([clang, *darwin, "-O2", f"-DPHASE26A_CASE={case}",
                  "-c", "tests/phase26a-executable.c", "-o", obj], 120)
-            link(ld, ["-e", "_main", "-o", str(exe)],
+            link(ld, ["-e", "_main", "-exported_symbol", "_main", "-o", str(exe)],
                  obj, client_stub)
             check(exe, 2, True)
             executables.append(exe)
