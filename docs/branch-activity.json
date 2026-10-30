@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "phase26a-native-libc-abi",
-      "sha": "2df308fa16ca70b130fb677d1b2fa5fc3d194242",
+      "sha": "b99d4bfd8d6a73a60b09a1b45a7cbb5997a2acac",
       "url": "https://github.com/kallmek3nny/ios-27/pull/109",
       "pr_number": 109,
       "ci": "not_checked",
@@ -21,7 +21,7 @@
           "group_id": "unclassified",
           "source_files": 2,
           "fixture_files": 5,
-          "additions": 912,
+          "additions": 940,
           "deletions": 0,
           "symbols_preview": [
             "ios27_26a_calloc",
@@ -2084,5 +2084,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T13:10:15Z"
+  "observed_at": "2026-10-30T13:10:42Z"
 }
