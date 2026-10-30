@@ -55,7 +55,8 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>fork</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>wait4</span></div>
 </div></details>
-<details class="group"><summary><strong>libsystem_c / libc</strong> <span class="tag">plausible ceiling</span> <span class="stats">0 native, 0 synthetic, 35 targets</span></summary>
+<details class="group"><summary><strong>libsystem_c / libc</strong> <span class="tag">plausible ceiling</span> <span class="stats">0 native, 0 synthetic, 35 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/109">phase26a-native-libc-abi</a> · 2 source, 5 fixture files · CI: passing_checks · not yet merged</p>
 <p>portable c functions could be implemented or safely forwarded after abi and guest address-space isolation; these are representative targets, not extracted iphone exports.</p>
 <div class="chips">
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>malloc</span></div>
@@ -300,13 +301,12 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>TLS trust bridge</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>Network sandbox policy</span></div>
 </div></details>
-<details class="group"><summary><strong>ObjC host prototype (not Apple libobjc)</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 7 synthetic, 8 targets</span> <span style="color:#a371f7">8 incoming</span> <span style="color:#58a6ff">5 merged, review needed</span></summary>
+<details class="group"><summary><strong>ObjC host prototype (not Apple libobjc)</strong> <span class="tag">conditional ceiling</span> <span class="stats">1 native, 7 synthetic, 8 targets</span> <span style="color:#a371f7">7 incoming</span> <span style="color:#58a6ff">5 merged, review needed</span></summary>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/84">merged PR #84</a> · 4 source files · compatibility review pending</p>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/67">merged PR #67</a> · 2 source files · compatibility review pending</p>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/63">merged PR #63</a> · 3 source files · compatibility review pending</p>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/65">merged PR #65</a> · 3 source files · compatibility review pending</p>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/57">merged PR #57</a> · 6 source files · compatibility review pending</p>
-<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/108">phase26d-coreanimation-compositor</a> · 0 source, 1 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/105">agent/phase25a-objc-linked-metadata-20261030</a> · 3 source, 8 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/106">phase25b-native-objc-dispatch</a> · 3 source, 13 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/102">phase25c-arc-ownership-20261030</a> · 2 source, 8 fixture files · CI: passing_checks · not yet merged</p>
@@ -345,9 +345,8 @@
 </section>
 <section class="panel"><h2>darwin runtime / native compatibility</h2><p class="lead">narrow tests, parser contracts and mach models; NOT general ios execution</p>
 <p class="stats">91 targets · 5 native · 41 synthetic · 43 missing · 2 excluded</p>
-<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">4 native, 5 synthetic, 13 targets</span> <span style="color:#a371f7">3 incoming</span> <span style="color:#58a6ff">2 merged, review needed</span></summary>
+<details class="group"><summary><strong>mach-o parser and native loader</strong> <span class="tag">plausible ceiling</span> <span class="stats">4 native, 5 synthetic, 13 targets</span> <span style="color:#a371f7">3 incoming</span> <span style="color:#58a6ff">1 merged, review needed</span></summary>
 <p><a href="https://github.com/kallmek3nny/ios-27/pull/55">merged PR #55</a> · 2 source files · compatibility review pending</p>
-<p><a href="https://github.com/kallmek3nny/ios-27/pull/54">merged PR #54</a> · 3 source files · compatibility review pending</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/98">phase24e-native-application-startup</a> · 2 source, 3 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/93">phase23e/native-app-integration-harness</a> · 2 source, 3 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/89">fix/external-build-fixtures</a> · 0 source, 2 fixture files · CI: passing_checks · not yet merged</p>
@@ -422,7 +421,8 @@
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>fixture exception registration and delivery</span></div>
 <div class="chip" title="synthetic parser/model/probe"><span class="sq" style="background:#d29922"></span><span>bounded guest VM copy/zero model</span></div>
 </div></details>
-<details class="group"><summary><strong>bsd syscall boundary</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 17 targets</span> <span style="color:#a371f7">3 incoming</span></summary>
+<details class="group"><summary><strong>bsd syscall boundary</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 7 synthetic, 17 targets</span> <span style="color:#a371f7">4 incoming</span></summary>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/110">agent/phase26b-bsd-capabilities-20261030</a> · 2 source, 3 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/101">phase24d-darwin-services-20261029</a> · 2 source, 10 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/95">phase23d-syscall-mach-bridge-20261029</a> · 2 source, 7 fixture files · CI: passing_checks · not yet merged</p>
 <p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/86">phase22b-darwin-bsd-capability-20261028</a> · 2 source, 3 fixture files · CI: passing_checks · not yet merged</p>
@@ -519,7 +519,8 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>app scene lifecycle</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>async view updates</span></div>
 </div></details>
-<details class="group"><summary><strong>CoreAnimation / compositor</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span></summary>
+<details class="group"><summary><strong>CoreAnimation / compositor</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/108">phase26d-coreanimation-compositor</a> · 2 source, 2 fixture files · CI: passing_checks · not yet merged</p>
 <p>renderer compatibility requires apple semantics converted into isolated android-compatible surfaces.</p>
 <div class="chips">
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>CALayer tree</span></div>
@@ -536,7 +537,8 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>vsync integration</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>glass material rendering</span></div>
 </div></details>
-<details class="group"><summary><strong>Metal / IOSurface / gpu</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 15 targets</span></summary>
+<details class="group"><summary><strong>Metal / IOSurface / gpu</strong> <span class="tag">unknown ceiling</span> <span class="stats">0 native, 0 synthetic, 15 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/111">phase26c-headless-graphics-interop-20261030</a> · 4 source, 1 fixture files · CI: passing_checks · not yet merged</p>
 <p>apple metal command and resource semantics are not a one-to-one vulkan translation; apple iosurface ownership is not present.</p>
 <div class="chips">
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>MTLDevice discovery</span></div>
@@ -590,7 +592,8 @@
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>app network services</span></div>
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>legitimate app runtime smoke test</span></div>
 </div></details>
-<details class="group"><summary><strong>Android host integration</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span></summary>
+<details class="group"><summary><strong>Android host integration</strong> <span class="tag">conditional ceiling</span> <span class="stats">0 native, 0 synthetic, 13 targets</span> <span style="color:#a371f7">1 incoming</span></summary>
+<p class="description"><a href="https://github.com/kallmek3nny/ios-27/pull/112">phase26e-android-host-scenes-input</a> · 4 source, 1 fixture files · CI: passing_checks · not yet merged</p>
 <p>any bridge should remain voluntary, non-root and not alter android recovery or verified boot.</p>
 <div class="chips">
 <div class="chip" title="unimplemented"><span class="sq" style="background:#30363d"></span><span>galaxy s25+ native test</span></div>

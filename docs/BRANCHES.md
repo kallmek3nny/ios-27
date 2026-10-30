@@ -4,39 +4,38 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `55b186d90cf6`
+candidate branches with mapped changes: **31** · audited base: `669a9d95d4c6`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
 head: `63310d737d10` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 1 test/fixture files, +771/-0 lines
+- **Android host integration**: 4 source files, 1 test/fixture files, +1173/-0 lines
 
 ### [phase26a-native-libc-abi](https://github.com/kallmek3nny/ios-27/pull/109)
 
 head: `c710a3bdcb12` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 5 test/fixture files, +943/-0 lines
+- **libsystem_c / libc**: 2 source files, 5 test/fixture files, +943/-0 lines
   - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
 
 ### [phase26c-headless-graphics-interop-20261030](https://github.com/kallmek3nny/ios-27/pull/111)
 
 head: `90a78d0307fa` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 1 test/fixture files, +736/-0 lines
+- **Metal / IOSurface / gpu**: 4 source files, 1 test/fixture files, +870/-0 lines
 
 ### [phase26d-coreanimation-compositor](https://github.com/kallmek3nny/ios-27/pull/108)
 
 head: `6bdcffce6c7b` · ci: **passing_checks** · unmerged, not credited.
 
-- **ObjC host prototype (not Apple libobjc)**: 0 source files, 1 test/fixture files, +16/-0 lines
-- **unclassified**: 2 source files, 1 test/fixture files, +911/-0 lines
+- **CoreAnimation / compositor**: 2 source files, 2 test/fixture files, +927/-0 lines
 
 ### [agent/phase26b-bsd-capabilities-20261030](https://github.com/kallmek3nny/ios-27/pull/110)
 
 head: `ab6320cdc916` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 2 source files, 3 test/fixture files, +718/-0 lines
+- **bsd syscall boundary**: 2 source files, 3 test/fixture files, +718/-0 lines
   - candidate declarations: `ios27_phase26b_copyin`, `ios27_phase26b_copyout`, `ios27_phase26b_create`, `ios27_phase26b_destroy`, `ios27_phase26b_stop`, `ios27_phase26b_trap`
 
 ### [agent/phase25a-objc-linked-metadata-20261030](https://github.com/kallmek3nny/ios-27/pull/105)
@@ -218,7 +217,7 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **18**
+recent merged PRs with source changes: **17**
 
 ### [merged PR #91](https://github.com/kallmek3nny/ios-27/pull/91)
 
@@ -336,13 +335,6 @@ merged: 2026-10-28T18:06:20Z · source changes awaiting function-level audit.
 
 - **mach-o parser and native loader**: 2 source files, 2 fixtures, +1111/-9 lines
   - added declarations: `ios27_darwin_arm64_apply_batch`, `ios27_darwin_link_objects`
-
-### [merged PR #54](https://github.com/kallmek3nny/ios-27/pull/54)
-
-merged: 2026-10-28T18:03:44Z · source changes awaiting function-level audit.
-
-- **mach-o parser and native loader**: 3 source files, 4 fixtures, +737/-28 lines
-  - added declarations: `ios27_arm64_enter_main`, `ios27_run_executable_argv`, `ios27_run_executable_context`
 
 ## verification policy
 

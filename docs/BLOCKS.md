@@ -49,15 +49,15 @@ these percentages count tracked components touched by an active source PR or a r
 
 | layer | components with source changes | tracked components | recently touched |
 | --- | ---: | ---: | ---: |
-| system libraries / api targets | 3 | 13 | 23.1% |
+| system libraries / api targets | 4 | 13 | 30.8% |
 | darwin runtime / native compatibility | 5 | 6 | 83.3% |
-| apple ui / android integration | 0 | 8 | 0.0% |
+| apple ui / android integration | 3 | 8 | 37.5% |
 
 ## merged main and incoming work
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `55b186d90cf6`
+main source: `669a9d95d4c6`
 
 - [PR #112](https://github.com/kallmek3nny/ios-27/pull/112) · incoming, not counted
 - [PR #109](https://github.com/kallmek3nny/ios-27/pull/109) · incoming, not counted
@@ -74,22 +74,26 @@ the purple dashed outlines identify components with new source or test changes o
 
 [Live branch diff inventory and CI evidence](BRANCHES.md) · 31 active candidate(s) with recognized code changes.
 
+- **libsystem_c / libc**: 1 unmerged candidate branch(es), not counted
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
 - **mach-o parser and native loader**: 3 unmerged candidate branch(es), not counted
 - **dyld / image graph**: 5 unmerged candidate branch(es), not counted
 - **mach ipc model**: 1 unmerged candidate branch(es), not counted
-- **bsd syscall boundary**: 3 unmerged candidate branch(es), not counted
+- **bsd syscall boundary**: 4 unmerged candidate branch(es), not counted
 - **guest security / isolation**: 1 unmerged candidate branch(es), not counted
-- **ObjC host prototype (not Apple libobjc)**: 8 unmerged candidate branch(es), not counted
+- **CoreAnimation / compositor**: 1 unmerged candidate branch(es), not counted
+- **Metal / IOSurface / gpu**: 1 unmerged candidate branch(es), not counted
+- **Android host integration**: 1 unmerged candidate branch(es), not counted
+- **ObjC host prototype (not Apple libobjc)**: 7 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
 blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
 
-latest scanned merged PRs: **18** · [source diffs](BRANCHES.md).
+latest scanned merged PRs: **17** · [source diffs](BRANCHES.md).
 
 - **libsystem_pthread**: 8 recently merged code PR(s), compatibility review pending
-- **mach-o parser and native loader**: 2 recently merged code PR(s), compatibility review pending
+- **mach-o parser and native loader**: 1 recently merged code PR(s), compatibility review pending
 - **dyld / image graph**: 1 recently merged code PR(s), compatibility review pending
 - **ObjC host prototype (not Apple libobjc)**: 5 recently merged code PR(s), compatibility review pending
 - **libSystem guest model (not dylib)**: 3 recently merged code PR(s), compatibility review pending
