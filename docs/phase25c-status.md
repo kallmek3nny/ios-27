@@ -84,7 +84,7 @@ compile/link (120s), and test execution (180s). No configure or Git/GH
 subprocesses are spawned. The dedicated PR workflow has a 15-minute job
 timeout and separate Linux and macOS builds.
 
-The deterministic test suite performs at least 240k reference transitions
+Darwin ASan runs without leak detection because Apple ASan does not support that feature; Linux ASan leak detection remains enabled.\n\nThe deterministic test suite performs at least 240k reference transitions
 and 140k synchronized weak loads, confirms weak-zeroing before dealloc,
 deferred destruction while dispatch-pinned, pool LIFO, cross-thread pool
 drains, class-unload rejection, failed-allocation rollback, 24 repeated
