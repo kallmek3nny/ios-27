@@ -136,6 +136,8 @@ supervised child with a one-second deadline:
 ```
 
 See [contained native process execution](docs/contained-native-process.md)
-for the API, syscall restrictions, outcomes, and host requirements.
+for the API, syscall restrictions, outcomes, and host requirements. The
+[exec guest loader](docs/exec-guest-loader.md) variant runs the same
+fixtures in a fresh address space instead of a fork.
 
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.
