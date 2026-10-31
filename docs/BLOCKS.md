@@ -72,11 +72,11 @@ main source: `b6b9b7674ba3`
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 31 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 32 active candidate(s) with recognized code changes.
 
 - **libsystem_c / libc**: 1 unmerged candidate branch(es), not counted
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
-- **mach-o parser and native loader**: 3 unmerged candidate branch(es), not counted
+- **mach-o parser and native loader**: 4 unmerged candidate branch(es), not counted
 - **dyld / image graph**: 5 unmerged candidate branch(es), not counted
 - **mach ipc model**: 1 unmerged candidate branch(es), not counted
 - **bsd syscall boundary**: 4 unmerged candidate branch(es), not counted
