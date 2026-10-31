@@ -37,7 +37,8 @@ unknown sections, unresolved relocations and unexpected source structure.
 the existing compiled executable ctest **requires** this new workload, runs
 32 fresh native invocations on arm64, verifies private mutations and exit
 codes, and checks rejected malformed `LC_MAIN` and page permission metadata.
-neither `CMakeLists.txt` nor another agent's files are modified.
+CMake builds the fixture before CTest, tracks its source and builder
+dependencies, and passes its absolute path to the test.
 
 to run from repo root:
 

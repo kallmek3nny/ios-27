@@ -2,8 +2,8 @@
 """Reproducible, SDK-free, Clang+LLD ARM64 MH_EXECUTE integration fixture.
 
 No Apple binaries, SDK, host system libraries, downloads, or emulation.
-Called by the existing compiled-darwin-real-mh-execute CTest, so this does
-not need CMake ownership. Exit 77 only when the host lacks a linker/compiler.
+Built by CMake before the compiled-darwin-real-mh-execute CTest runs.
+Exit 77 when the compiler is unavailable; CMake treats this as a build failure.
 """
 import pathlib
 import shutil

@@ -25,6 +25,12 @@ jobs:
         run: timeout 120s cmake --build build --parallel 2
       - name: unit tests
         run: timeout 120s ctest --test-dir build --timeout 30 --output-on-failure
+      - name: external build directory with spaces
+        run: |
+          build_dir="${RUNNER_TEMP}/ios27 external build"
+          timeout 120s cmake -S . -B "$build_dir" -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
+          timeout 120s cmake --build "$build_dir" --parallel 2
+          timeout 120s ctest --test-dir "$build_dir" --timeout 30 --output-on-failure
       - name: cli usage check
         run: |
           set +e
