@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "669a9d95d4c6f6a12882617663787cc9aeb65756",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/669a9d95d4c6f6a12882617663787cc9aeb65756",
-    "committed_at": "2026-10-30T16:44:14Z"
+    "sha": "b6b9b7674ba3fd41ed9dbd32aedf611285024caf",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/b6b9b7674ba3fd41ed9dbd32aedf611285024caf",
+    "committed_at": "2026-10-31T19:28:16Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 114,
-      "branch": "codex/contained-native-process",
-      "sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
-      "title": "feat: contain trusted native Mach-O execution in a supervised child",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/114",
-      "updated_at": "2026-10-31T19:25:50Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -300,6 +291,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 114,
+      "title": "feat: contain trusted native Mach-O execution in a supervised child",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+      "head_sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
+      "merged_at": "2026-10-31T19:28:16Z"
+    },
+    {
       "number": 113,
       "title": "fix: update progress dashboard with phase26 source activity percentages",
       "url": "https://github.com/kallmek3nny/ios-27/pull/113",
@@ -487,20 +485,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/53",
       "head_sha": "6c22f521c3bb450c370e83b0da88e11d21348343",
       "merged_at": "2026-10-28T18:08:09Z"
-    },
-    {
-      "number": 55,
-      "title": "phase19d: transactional ARM64 Darwin relocations and native cross-object execution",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "head_sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
-      "merged_at": "2026-10-28T18:06:20Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 12,
+    "branches_scanned": 13,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T19:26:19Z"
+  "observed_at": "2026-10-31T19:28:48Z"
 }

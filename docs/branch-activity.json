@@ -2,54 +2,11 @@
   "schema": 1,
   "classification_version": 3,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "669a9d95d4c6f6a12882617663787cc9aeb65756",
+  "main_source_sha": "b6b9b7674ba3fd41ed9dbd32aedf611285024caf",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 32,
-  "candidate_count": 32,
+  "candidates_checked": 31,
+  "candidate_count": 31,
   "candidates": [
-    {
-      "branch": "codex/contained-native-process",
-      "sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/114",
-      "pr_number": 114,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 11,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "mach-o",
-          "source_files": 1,
-          "fixture_files": 0,
-          "additions": 56,
-          "deletions": 9,
-          "symbols_preview": [
-            "ios27_run_executable_contained",
-            "ios27_run_executable_context"
-          ],
-          "example_paths": [
-            "src/runner.c"
-          ]
-        },
-        {
-          "group_id": "unclassified",
-          "source_files": 4,
-          "fixture_files": 2,
-          "additions": 911,
-          "deletions": 3,
-          "symbols_preview": [
-            "ios27_process_supervise",
-            "ios27_run_executable_contained"
-          ],
-          "example_paths": [
-            "include/ios27/process.h",
-            "src/main.c",
-            "src/process.c",
-            "src/process_internal.h"
-          ]
-        }
-      ]
-    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1220,13 +1177,6 @@
     ],
     "mach-o": [
       {
-        "branch": "codex/contained-native-process",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
-        "source_files": 1,
-        "fixture_files": 0,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "phase24e-native-application-startup",
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
@@ -1319,13 +1269,6 @@
     ],
     "unclassified": [
       {
-        "branch": "codex/contained-native-process",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
-        "source_files": 4,
-        "fixture_files": 2,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
         "source_files": 0,
@@ -1336,6 +1279,50 @@
   },
   "recent_merged_count": 17,
   "recent_merged": [
+    {
+      "branch": "merged-pr-114",
+      "sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+      "pr_number": 114,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-o",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 56,
+          "deletions": 9,
+          "symbols_preview": [
+            "ios27_run_executable_contained",
+            "ios27_run_executable_context"
+          ],
+          "example_paths": [
+            "src/runner.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 2,
+          "additions": 911,
+          "deletions": 3,
+          "symbols_preview": [
+            "ios27_process_supervise",
+            "ios27_run_executable_contained"
+          ],
+          "example_paths": [
+            "include/ios27/process.h",
+            "src/main.c",
+            "src/process.c",
+            "src/process_internal.h"
+          ]
+        }
+      ],
+      "merged_at": "2026-10-31T19:28:16Z"
+    },
     {
       "branch": "merged-pr-91",
       "sha": "fc6267fc4c1017f5184251f81e8f62aabb1b164d",
@@ -1926,36 +1913,6 @@
         }
       ],
       "merged_at": "2026-10-28T18:08:09Z"
-    },
-    {
-      "branch": "merged-pr-55",
-      "sha": "5c30e2ac31cd3dc12440cd3ee6ae207ab68af985",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-      "pr_number": 55,
-      "ci": "merged_not_compat_verified",
-      "status": "merged source; compatibility review pending",
-      "files_checked": 5,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "mach-o",
-          "source_files": 2,
-          "fixture_files": 2,
-          "additions": 1111,
-          "deletions": 9,
-          "symbols_preview": [
-            "ios27_darwin_arm64_apply_batch",
-            "ios27_darwin_link_objects"
-          ],
-          "example_paths": [
-            "include/ios27/darwin_branch26.h",
-            "src/darwin_branch26.c",
-            "tests/test_compiled_darwin_got.c",
-            "tests/test_compiled_darwin_reloc.c"
-          ]
-        }
-      ],
-      "merged_at": "2026-10-28T18:06:20Z"
     }
   ],
   "merged_groups": {
@@ -2051,10 +2008,10 @@
     ],
     "mach-o": [
       {
-        "pr_number": 55,
-        "url": "https://github.com/kallmek3nny/ios-27/pull/55",
-        "source_files": 2,
-        "fixture_files": 2,
+        "pr_number": 114,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+        "source_files": 1,
+        "fixture_files": 0,
         "status": "merged source, not necessarily compatible"
       }
     ],
@@ -2094,7 +2051,16 @@
         "fixture_files": 3,
         "status": "merged source, not necessarily compatible"
       }
+    ],
+    "unclassified": [
+      {
+        "pr_number": 114,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+        "source_files": 4,
+        "fixture_files": 2,
+        "status": "merged source, not necessarily compatible"
+      }
     ]
   },
-  "observed_at": "2026-10-31T19:26:24Z"
+  "observed_at": "2026-10-31T19:28:53Z"
 }

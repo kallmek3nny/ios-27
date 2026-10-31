@@ -4,16 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **32** · audited base: `669a9d95d4c6`
-
-### [codex/contained-native-process](https://github.com/kallmek3nny/ios-27/pull/114)
-
-head: `92aa94e7a48d` · ci: **passing_checks** · unmerged, not credited.
-
-- **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +56/-9 lines
-  - candidate declarations: `ios27_run_executable_contained`, `ios27_run_executable_context`
-- **unclassified**: 4 source files, 2 test/fixture files, +911/-3 lines
-  - candidate declarations: `ios27_process_supervise`, `ios27_run_executable_contained`
+candidate branches with mapped changes: **31** · audited base: `b6b9b7674ba3`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -228,6 +219,15 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **17**
 
+### [merged PR #114](https://github.com/kallmek3nny/ios-27/pull/114)
+
+merged: 2026-10-31T19:28:16Z · source changes awaiting function-level audit.
+
+- **mach-o parser and native loader**: 1 source files, 0 fixtures, +56/-9 lines
+  - added declarations: `ios27_run_executable_contained`, `ios27_run_executable_context`
+- **unclassified**: 4 source files, 2 fixtures, +911/-3 lines
+  - added declarations: `ios27_process_supervise`, `ios27_run_executable_contained`
+
 ### [merged PR #91](https://github.com/kallmek3nny/ios-27/pull/91)
 
 merged: 2026-10-29T10:41:02Z · source changes awaiting function-level audit.
@@ -337,13 +337,6 @@ merged: 2026-10-28T18:08:09Z · source changes awaiting function-level audit.
 
 - **dyld / image graph**: 3 source files, 7 fixtures, +697/-72 lines
   - added declarations: `ios27_images_finalization_image`
-
-### [merged PR #55](https://github.com/kallmek3nny/ios-27/pull/55)
-
-merged: 2026-10-28T18:06:20Z · source changes awaiting function-level audit.
-
-- **mach-o parser and native loader**: 2 source files, 2 fixtures, +1111/-9 lines
-  - added declarations: `ios27_darwin_arm64_apply_batch`, `ios27_darwin_link_objects`
 
 ## verification policy
 
