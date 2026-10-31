@@ -128,4 +128,14 @@ ctest --test-dir build --output-on-failure
 ./build/ios27 audit-ios path/to/arm64-or-fat-macho
 ```
 
-See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.
+For trusted freestanding fixtures on ARM64 Linux, `run-contained` adds a
+supervised child with a one-second deadline:
+
+```sh
+./build/ios27 run-contained ./build/phase15a-executable --unsafe
+```
+
+See [contained native process execution](docs/contained-native-process.md)
+for the API, syscall restrictions, outcomes, and host requirements.
+
+See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.

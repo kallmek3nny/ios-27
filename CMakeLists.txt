@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -184,4 +184,36 @@ if(IOS27_BUILD_TESTS)
     add_dependencies(test_compiled_darwin_executable ios27_phase15a_executable)
     add_test(NAME compiled-darwin-real-mh-execute
         COMMAND test_compiled_darwin_executable "${IOS27_PHASE15A_EXECUTABLE}")
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+        add_executable(test_process tests/test_process.c)
+        target_link_libraries(test_process PRIVATE ios27_core)
+        target_include_directories(test_process PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_compile_options(test_process PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_test(NAME contained-process-supervisor COMMAND test_process)
+        set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15)
+
+        add_executable(test_contained_macho tests/test_contained_macho.c)
+        target_link_libraries(test_contained_macho PRIVATE ios27_core)
+        target_compile_options(test_contained_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        # Keep the original phase19a workload as a build-owned dependency;
+        # CTest must not invoke a compiler relative to its working directory.
+        set(IOS27_CONTAINED_STARTUP "${CMAKE_CURRENT_BINARY_DIR}/contained-phase19a-process")
+        add_custom_command(
+            OUTPUT "${IOS27_CONTAINED_STARTUP}"
+            COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                "${IOS27_CONTAINED_STARTUP}"
+            DEPENDS
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-link-fallback.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase19a-process.c"
+            VERBATIM
+            COMMENT "Link SDK-free ARM64 contained startup fixture")
+        add_custom_target(ios27_contained_startup DEPENDS "${IOS27_CONTAINED_STARTUP}")
+        add_dependencies(test_contained_macho ios27_phase15a_executable ios27_contained_startup)
+        add_test(NAME contained-native-macho COMMAND test_contained_macho
+            "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}")
+        set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
+    endif()
 endif()
