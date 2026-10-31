@@ -4,6 +4,7 @@
 #include "ios27/dyld_paths.h"
 #include "ios27/exports.h"
 #include "ios27/binds.h"
+#include "ios27/process.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -69,6 +70,7 @@ int main(int argc, char **argv) {
     }
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
                      strcmp(argv[1], "run-freestanding") != 0 &&
+                     strcmp(argv[1], "run-contained") != 0 &&
                      strcmp(argv[1], "probe-darwin") != 0 &&
                      strcmp(argv[1], "audit-ios") != 0 &&
                      strcmp(argv[1], "symbols") != 0 &&
@@ -79,14 +81,17 @@ int main(int argc, char **argv) {
                         "       ios27 symbols <thin-or-fat-arm64-macho>\n"
                         "       ios27 binds <thin-or-fat-arm64-macho>\n"
                         "       ios27 resolve-dyld <name> <loader> <main> [rpath ...]\n"
-                        "       ios27 run-freestanding <trusted-macho> --unsafe\n");
+                        "       ios27 run-freestanding <trusted-macho> --unsafe\n"
+                        "       ios27 run-contained <trusted-macho> --unsafe\n");
         return 2;
     }
-    if (strcmp(argv[1], "run-freestanding") != 0 && argc != 3) {
+    if (strcmp(argv[1], "run-freestanding") != 0 &&
+        strcmp(argv[1], "run-contained") != 0 && argc != 3) {
         fprintf(stderr, "expected exactly one image path\n");
         return 2;
     }
-    if (strcmp(argv[1], "run-freestanding") == 0 &&
+    if ((strcmp(argv[1], "run-freestanding") == 0 ||
+         strcmp(argv[1], "run-contained") == 0) &&
         (argc != 4 || strcmp(argv[3], "--unsafe") != 0)) {
         fprintf(stderr, "refusing to run code without explicit --unsafe flag\n");
         return 2;
@@ -230,6 +235,29 @@ int main(int argc, char **argv) {
                (unsigned long long)probe.x16, probe.carry, probe.exited,
                probe.instructions, probe.syscalls);
         free(data);
+        return 0;
+    }
+    if (strcmp(argv[1], "run-contained") == 0) {
+        ios27_process_options options = {1000u};
+        ios27_startup_context context = {0, NULL, NULL, NULL};
+        ios27_process_result completed;
+        if (ios27_run_executable_contained(data, size, &image, &context,
+                                            &options, &completed, error,
+                                            sizeof(error))) {
+            fprintf(stderr, "cannot execute contained fixture: %s\n", error);
+            free(data);
+            return 1;
+        }
+        free(data);
+        if (completed.outcome == IOS27_PROCESS_TIMED_OUT) {
+            fprintf(stderr, "contained ARM64 entry exceeded %u ms\n", options.timeout_ms);
+            return 124;
+        }
+        if (completed.outcome == IOS27_PROCESS_SIGNALED) {
+            fprintf(stderr, "contained ARM64 entry terminated by signal %d\n", completed.signal);
+            return 128 + completed.signal;
+        }
+        printf("contained ARM64 entry returned %d\n", completed.exit_code);
         return 0;
     }
     if (ios27_run_freestanding(data, size, &image, &result,

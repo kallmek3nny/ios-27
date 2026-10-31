@@ -1,4 +1,5 @@
 #include "ios27/macho.h"
+#include "process_internal.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -107,6 +108,19 @@ static void release_guest_stack(ios27_guest_stack *stack) {
     if (stack->reservation)
         (void)munmap(stack->reservation, stack->size);
     memset(stack, 0, sizeof(*stack));
+}
+
+typedef struct {
+    uintptr_t entry;
+    ios27_guest_stack *stack;
+    int argc;
+} prepared_entry;
+
+static int enter_prepared(void *opaque) {
+    const prepared_entry *call = opaque;
+    return ios27_arm64_enter_main(call->entry, call->stack->sp, call->argc,
+                                  call->stack->argv, call->stack->envp,
+                                  call->stack->apple);
 }
 
 /* All argument checks precede stack allocation and executable mappings. No
@@ -227,21 +241,55 @@ failed:
 }
 #endif
 
-int ios27_run_executable_context(const uint8_t *data, size_t size,
+typedef void (*guest_handoff)(int (*entry)(void *), void *call);
+
+static int run_image(const uint8_t *data, size_t size,
+                     const ios27_macho_info *info,
+                     const ios27_startup_context *context, int *exit_code,
+                     const ios27_process_options *options,
+                     ios27_process_result *process_result,
+                     guest_handoff handoff, char *error, size_t error_size);
+
+static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_macho_info *info,
                                  const ios27_startup_context *context,
-                                 int *exit_code, char *error,
+                                 int *exit_code,
+                                 const ios27_process_options *options,
+                                 ios27_process_result *process_result, char *error,
                                  size_t error_size) {
+    return run_image(data, size, info, context, exit_code, options,
+                     process_result, NULL, error, error_size);
+}
+
+/* Loader mode: identical preflight, guarded guest stack and final W^X
+ * mappings, but the exec'd ios27-loader enters LC_MAIN through handoff. */
+int ios27_native_handoff(const uint8_t *data, size_t size,
+                         const ios27_macho_info *info,
+                         const ios27_startup_context *context,
+                         void (*handoff)(int (*entry)(void *), void *call),
+                         char *error, size_t error_size) {
+    if (!handoff) return fail(error, error_size, "null guest loader handoff");
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff,
+                     error, error_size);
+}
+
+static int run_image(const uint8_t *data, size_t size,
+                     const ios27_macho_info *info,
+                     const ios27_startup_context *context, int *exit_code,
+                     const ios27_process_options *options,
+                     ios27_process_result *process_result,
+                     guest_handoff handoff, char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)context;
+    (void)context; (void)options; (void)process_result; (void)handoff;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
-    if (!data || !info || !context || !exit_code || os_page <= 0)
+    if (!data || !info || !context ||
+        (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
     /* Fail closed on unsupported host pages, stale metadata or W^X ambiguity.
      * All checks complete before any executable memory becomes accessible. */
@@ -305,16 +353,29 @@ int ios27_run_executable_context(const uint8_t *data, size_t size,
     {
         uintptr_t entry = (uintptr_t)(mapping +
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        /* Only ordinary returns are supported, not Darwin process exit,
-         * dyld, ObjC, syscalls or exception unwinding. */
-        int result = ios27_arm64_enter_main(entry, guest.sp, context->argc, guest.argv,
-                                             guest.envp, guest.apple);
+        prepared_entry call = {entry, &guest, context->argc};
+        ios27_process_result completed = {0};
+        int result = 0, status = 0;
+        if (handoff) {
+            /* handoff installs containment, enters the guest and terminates
+             * the loader process; returning here is always a failure. */
+            handoff(enter_prepared, &call);
+            status = fail(error, error_size, "guest loader handoff returned");
+        } else if (options) {
+            status = ios27_process_supervise(enter_prepared, &call, options,
+                                             &completed, error, error_size);
+        } else {
+            /* The original API still requires an ordinary in-process return. */
+            result = enter_prepared(&call);
+        }
         /* Publish the result only after both guest reservations are gone. */
         int image_unmapped = munmap(mapping, layout.span);
         int stack_unmapped = munmap(guest.reservation, guest.size);
         if (image_unmapped || stack_unmapped)
             return fail(error, error_size, "native process cleanup failed");
-        *exit_code = result;
+        if (status) return -1;
+        if (process_result) *process_result = completed;
+        else *exit_code = result;
     }
     if (error && error_size) error[0] = '\0';
     return 0;
@@ -324,6 +385,29 @@ mapping_failed:
     release_guest_stack(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");
 #endif
+}
+
+int ios27_run_executable_context(const uint8_t *data, size_t size,
+                                 const ios27_macho_info *info,
+                                 const ios27_startup_context *context,
+                                 int *exit_code, char *error, size_t error_size) {
+    return run_executable_context(data, size, info, context, exit_code,
+                                   NULL, NULL, error, error_size);
+}
+
+int ios27_run_executable_contained(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const ios27_process_options *options,
+                                    ios27_process_result *result,
+                                    char *error, size_t error_size) {
+    if (!result) return fail(error, error_size, "null child result");
+    memset(result, 0, sizeof(*result));
+    if (!options || !options->timeout_ms ||
+        options->timeout_ms > IOS27_PROCESS_MAX_TIMEOUT_MS)
+        return fail(error, error_size, "invalid child deadline");
+    return run_executable_context(data, size, info, context, NULL,
+                                   options, result, error, error_size);
 }
 
 /* Older callers use an empty apple vector; no host information is leaked. */

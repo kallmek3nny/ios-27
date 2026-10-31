@@ -8,7 +8,11 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
     const targets=groups.flatMap(g=>g.targets);
     return {panel,groups,targets,h:Math.round(Math.max(230,Math.min(485,166+0.92*targets.length)))};
   });
-  const top=100,header=58,gap=24,bottom=70;
+  // Classifier v2+ enables a separately labeled engineering metric; version 3
+  // adds a prominent activity percentage. Old snapshots remain deterministic.
+  const showTouchCoverage=activity && activity.classification_version>=2;
+  const showPhase26Activity=activity && activity.classification_version>=3;
+  const top=100,header=showTouchCoverage?78:58,gap=24,bottom=70;
   const height=top+panels.reduce((a,p)=>a+header+p.h+gap,0)+bottom;
   const svg=[
     '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="ios-27 tracked API sample with proportional component size and evidence status">',
@@ -83,6 +87,19 @@ const makeMap = function makeMap(data,colors,names,esc,count,gather,live,activit
     svg.push(rect(margin,y+46,mapW,4,"#30363d",2));
     if(c["native-fixture"])svg.push(rect(margin,y+46,mapW*c["native-fixture"]/p.targets.length,4,colors["native-fixture"],2));
     if(c.synthetic)svg.push(rect(margin+mapW*c["native-fixture"]/p.targets.length,y+46,mapW*c.synthetic/p.targets.length,4,colors.synthetic,2));
+    if(showTouchCoverage){
+      const touched=p.groups.filter(g=>(Array.isArray(pending[g.id])&&pending[g.id].length>0)||
+        (Array.isArray(merged[g.id])&&merged[g.id].length>0)).length;
+      const pct=(100*touched/p.groups.length).toFixed(1);
+      if(showPhase26Activity){
+        svg.push('<text x="'+margin+'" y="'+(y+65)+'" font-family="sans-serif" font-size="12" fill="#79b8ff">recent engineering: '+touched+'/'+p.groups.length+' areas with source work (NOT verified)</text>');
+        svg.push('<text x="'+(width-margin)+'" y="'+(y+68)+'" text-anchor="end" font-family="sans-serif" font-size="21" font-weight="700" fill="#79b8ff">'+pct+'% activity</text>');
+        svg.push(rect(margin,y+73,mapW,3,"#30363d",2));
+        if(touched)svg.push(rect(margin,y+73,mapW*touched/p.groups.length,3,"#58a6ff",2));
+      }else{
+        svg.push('<text x="'+margin+'" y="'+(y+65)+'" font-family="sans-serif" font-size="12" fill="#79b8ff">recent engineering changes: '+touched+'/'+p.groups.length+' components ('+pct+'%) · NOT verified compatibility</text>');
+      }
+    }
     const mapY=y+header;
     const ordered=p.groups.slice().sort((a,b)=>b.targets.length-a.targets.length||a.id.localeCompare(b.id));
     const placements=partition(ordered,margin,mapY,mapW,p.h);
@@ -202,6 +219,18 @@ const render = function render(data,live,activity){
   for(const item of totals){
     md.push("| **"+item.panel.title+"** | **"+item.c["native-fixture"]+"** | **"+item.c.synthetic+"** | **"+item.c.missing+"** | **"+item.c.excluded+"** | **"+item.total+"** |");
     for(const g of item.groups){const c=count(g.targets);md.push("| ↳ "+g.label+" | "+c["native-fixture"]+" | "+c.synthetic+" | "+c.missing+" | "+c.excluded+" | "+g.targets.length+" |");}
+  }
+  if(activity && activity.classification_version>=2){
+    md.push("","## recent engineering activity (not verified compatibility)","",
+      "these percentages count tracked components touched by an active source PR or a recently merged source PR. they do not mean APIs work, and can decrease as older PRs leave the recent scan.","",
+      "| layer | components with source changes | tracked components | recently touched |",
+      "| --- | ---: | ---: | ---: |");
+    for(const item of totals){
+      const touched=item.groups.filter(g=>
+        (Array.isArray(activity.groups[g.id])&&activity.groups[g.id].length>0)||
+        (Array.isArray(activity.merged_groups?.[g.id])&&activity.merged_groups[g.id].length>0)).length;
+      md.push("| "+item.panel.title+" | "+touched+" | "+item.groups.length+" | "+(100*touched/item.groups.length).toFixed(1)+"% |");
+    }
   }
   md.push("","## merged main and incoming work","",
     "confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.","",

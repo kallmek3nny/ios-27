@@ -38,14 +38,17 @@ jobs:
         run: |
           timeout 120s python3 tools/refresh_repo_status.py --repo "$GITHUB_REPOSITORY" --output docs/repo-status.json
           timeout 240s python3 tools/scan_branch_activity.py --repo "$GITHUB_REPOSITORY"
+          timeout 15s python3 tools/phase_delivery.py
           timeout 15s python3 tools/progress.py
           timeout 15s node tools/compat_blocks.cjs
           timeout 15s python3 tools/scan_branch_activity.py --self-test
+          timeout 15s python3 tools/phase_delivery.py --self-test
+          timeout 15s python3 tools/phase_delivery.py --check
           timeout 15s python3 tools/progress.py --check
           timeout 15s node tools/compat_blocks.cjs --check
       - name: publish only if main has not moved
         run: |
-          timeout 15s git add docs/repo-status.json docs/branch-activity.json docs/PROGRESS.md docs/progress.svg docs/blocks.svg docs/engineering.svg docs/BLOCKS.md docs/BRANCHES.md docs/blocks.html
+          timeout 15s git add docs/repo-status.json docs/branch-activity.json docs/phase-delivery.json docs/phase-delivery.svg docs/DELIVERY.md docs/PROGRESS.md docs/progress.svg docs/blocks.svg docs/engineering.svg docs/BLOCKS.md docs/BRANCHES.md docs/blocks.html
           if ! timeout 15s git diff --cached --quiet; then
             timeout 15s git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore(progress): refresh merged main and branch evidence'
             if ! timeout 30s git push origin HEAD:main; then

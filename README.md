@@ -2,6 +2,12 @@
 
 [capability progress and realistic ceiling](docs/PROGRESS.md) · [audited technical ceilings](docs/CEILINGS.md) · [live main/branch status](docs/repo-status.json)
 
+## merged engineering workstreams (automatic)
+
+![phase 20–22 merged PR delivery percentage](docs/phase-delivery.svg)
+
+<sub>This percentage counts source-bearing agent workstreams **merged into main** out of a fixed 20-workstream phase 20–22 plan. Purple means open PRs. It does **not** measure how much of real iOS works. [Evidence and per-phase details](docs/DELIVERY.md).</sub>
+
 ## recent development
 
 ![live engineering progress from merged and active agent code](docs/engineering.svg)
@@ -132,4 +138,16 @@ cmake --build "/tmp/ios27 external build" --parallel 2
 ctest --test-dir "/tmp/ios27 external build" --timeout 30 --output-on-failure
 ```
 
-See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: the freestanding runner has no sandbox and is intended only for deliberately constructed local test fixtures.
+For trusted freestanding fixtures on ARM64 Linux, `run-contained` adds a
+supervised child with a one-second deadline:
+
+```sh
+./build/ios27 run-contained ./build/phase15a-executable --unsafe
+```
+
+See [contained native process execution](docs/contained-native-process.md)
+for the API, syscall restrictions, outcomes, and host requirements. The
+[exec guest loader](docs/exec-guest-loader.md) variant runs the same
+fixtures in a fresh address space instead of a fork.
+
+See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.

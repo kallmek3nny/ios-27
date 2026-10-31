@@ -25,6 +25,18 @@ jobs:
         run: timeout 120s cmake --build build --parallel 2
       - name: unit tests
         run: timeout 120s ctest --test-dir build --timeout 30 --output-on-failure
+      - name: contained fixture CLI
+        run: |
+          set +e
+          timeout 20s ./build/ios27 run-contained ./build/phase15a-executable > /tmp/ios27-contained-refusal.log 2>&1
+          code=$?
+          set -e
+          test "$code" -eq 2
+          grep -q "explicit --unsafe flag" /tmp/ios27-contained-refusal.log
+          if [ "$(uname -m)" = "aarch64" ]; then
+            timeout 20s ./build/ios27 run-contained ./build/phase15a-executable --unsafe > /tmp/ios27-contained.log 2>&1
+            grep -q "contained ARM64 entry returned 43" /tmp/ios27-contained.log
+          fi
       - name: external build directory with spaces
         run: |
           build_dir="${RUNNER_TEMP}/ios27 external build"
