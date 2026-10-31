@@ -190,8 +190,36 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_compiled_darwin_executable PRIVATE
         -Wall -Wextra -Werror -Wpedantic)
     add_dependencies(test_compiled_darwin_executable ios27_phase15a_executable)
+
+    # Linux/Android startup tests consume fixtures built here, rather than
+    # invoking source-relative shell commands from CTest's working directory.
+    set(IOS27_STARTUP_FIXTURES)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+        foreach(fixture IN ITEMS phase17a-multisegment phase18a-startup phase19a-process)
+            string(REGEX REPLACE "-.*$" "" phase "${fixture}")
+            set(fallback "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase17a-link-fallback.py")
+            if(phase STREQUAL "phase19a")
+                set(fallback "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-link-fallback.py")
+            endif()
+            set(output "${CMAKE_CURRENT_BINARY_DIR}/${fixture}")
+            add_custom_command(
+                OUTPUT "${output}"
+                COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/${phase}-build.py" "${output}"
+                DEPENDS
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/${phase}-build.py"
+                    "${fallback}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/${fixture}.c"
+                VERBATIM
+                COMMENT "Link SDK-free ARM64 startup fixture ${fixture}")
+            list(APPEND IOS27_STARTUP_FIXTURES "${output}")
+        endforeach()
+        add_custom_target(ios27_startup_executables DEPENDS ${IOS27_STARTUP_FIXTURES})
+        add_dependencies(test_compiled_darwin_executable ios27_startup_executables)
+    endif()
     add_test(NAME compiled-darwin-real-mh-execute
-        COMMAND test_compiled_darwin_executable "${IOS27_PHASE15A_EXECUTABLE}")
+        COMMAND test_compiled_darwin_executable
+            "${IOS27_PHASE15A_EXECUTABLE}" ${IOS27_STARTUP_FIXTURES})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
         add_executable(test_process tests/test_process.c)
