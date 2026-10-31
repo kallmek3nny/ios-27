@@ -125,9 +125,11 @@ int main(int argc, char **argv) {
     bytes = read_file(argv[1], &size);
     assert(!ios27_macho_parse(bytes, size, &info, error, sizeof(error)));
     assert(!ios27_darwin_executable_inspect(bytes, size, &executable, error, sizeof(error)));
+    /* phase15a is only required to have a 4 KiB-granular layout, as in
+     * compiled-darwin-real-mh-execute. CI shows its linked segments are
+     * rejected at 16 KiB granularity, so no 16 KiB host layout is claimed
+     * here; phase19a's 16 KiB preflight is asserted in process_context_test. */
     assert(!ios27_macho_executable_layout(bytes, size, &info, 4096u,
-                                          &layout, error, sizeof(error)));
-    assert(!ios27_macho_executable_layout(bytes, size, &info, 16384u,
                                           &layout, error, sizeof(error)));
 #if defined(__aarch64__)
     {
