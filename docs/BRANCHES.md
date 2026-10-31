@@ -6,6 +6,15 @@
 
 candidate branches with mapped changes: **32** · audited base: `b6b9b7674ba3`
 
+### [codex/exec-guest-loader](https://github.com/kallmek3nny/ios-27/pull/115)
+
+head: `ec63735adc7b` · ci: **running** · unmerged, not credited.
+
+- **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +40/-3 lines
+  - candidate declarations: `ios27_native_handoff`
+- **unclassified**: 4 source files, 2 test/fixture files, +1213/-146 lines
+  - candidate declarations: `ios27_launch_payload_close`, `ios27_launch_payload_create`, `ios27_launch_payload_open`, `ios27_native_handoff`, `ios27_process_close_outside`, `ios27_process_install_filter`, `ios27_process_report`, `ios27_process_supervise`, `ios27_process_supervise_exec`, `ios27_run_executable_exec`
+
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
 head: `63310d737d10` · ci: **passing_checks** · unmerged, not credited.
@@ -212,15 +221,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [codex/exec-guest-loader](https://github.com/kallmek3nny/ios-27/tree/codex%2Fexec-guest-loader)
-
-head: `ec63735adc7b` · ci: **not_checked** · unmerged, not credited.
-
-- **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +40/-3 lines
-  - candidate declarations: `ios27_native_handoff`
-- **unclassified**: 4 source files, 2 test/fixture files, +1213/-146 lines
-  - candidate declarations: `ios27_launch_payload_close`, `ios27_launch_payload_create`, `ios27_launch_payload_open`, `ios27_native_handoff`, `ios27_process_close_outside`, `ios27_process_install_filter`, `ios27_process_report`, `ios27_process_supervise`, `ios27_process_supervise_exec`, `ios27_run_executable_exec`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

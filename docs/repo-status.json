@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 115,
+      "branch": "codex/exec-guest-loader",
+      "sha": "ec63735adc7b87c5755738b2ed0fb9e18e61eac3",
+      "title": "feat: run trusted Mach-O fixtures through an exec guest loader",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/115",
+      "updated_at": "2026-10-31T21:40:49Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -288,17 +297,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "codex/exec-guest-loader",
-      "sha": "ec63735adc7b87c5755738b2ed0fb9e18e61eac3",
-      "ahead_by": 2,
-      "behind_by": 0,
-      "last_commit_at": "2026-10-31T21:39:23Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Fexec-guest-loader",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 114,
@@ -499,9 +498,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 14,
+    "branches_scanned": 13,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T21:40:15Z"
+  "observed_at": "2026-10-31T21:41:14Z"
 }

@@ -8,6 +8,56 @@
   "candidate_count": 32,
   "candidates": [
     {
+      "branch": "codex/exec-guest-loader",
+      "sha": "ec63735adc7b87c5755738b2ed0fb9e18e61eac3",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/115",
+      "pr_number": 115,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-o",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 40,
+          "deletions": 3,
+          "symbols_preview": [
+            "ios27_native_handoff"
+          ],
+          "example_paths": [
+            "src/runner.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 2,
+          "additions": 1213,
+          "deletions": 146,
+          "symbols_preview": [
+            "ios27_launch_payload_close",
+            "ios27_launch_payload_create",
+            "ios27_launch_payload_open",
+            "ios27_native_handoff",
+            "ios27_process_close_outside",
+            "ios27_process_install_filter",
+            "ios27_process_report",
+            "ios27_process_supervise",
+            "ios27_process_supervise_exec",
+            "ios27_run_executable_exec"
+          ],
+          "example_paths": [
+            "include/ios27/process.h",
+            "src/loader.c",
+            "src/process.c",
+            "src/process_internal.h"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
@@ -1025,56 +1075,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "codex/exec-guest-loader",
-      "sha": "ec63735adc7b87c5755738b2ed0fb9e18e61eac3",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Fexec-guest-loader",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 19,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "mach-o",
-          "source_files": 1,
-          "fixture_files": 0,
-          "additions": 40,
-          "deletions": 3,
-          "symbols_preview": [
-            "ios27_native_handoff"
-          ],
-          "example_paths": [
-            "src/runner.c"
-          ]
-        },
-        {
-          "group_id": "unclassified",
-          "source_files": 4,
-          "fixture_files": 2,
-          "additions": 1213,
-          "deletions": 146,
-          "symbols_preview": [
-            "ios27_launch_payload_close",
-            "ios27_launch_payload_create",
-            "ios27_launch_payload_open",
-            "ios27_native_handoff",
-            "ios27_process_close_outside",
-            "ios27_process_install_filter",
-            "ios27_process_report",
-            "ios27_process_supervise",
-            "ios27_process_supervise_exec",
-            "ios27_run_executable_exec"
-          ],
-          "example_paths": [
-            "include/ios27/process.h",
-            "src/loader.c",
-            "src/process.c",
-            "src/process_internal.h"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -1227,6 +1227,13 @@
     ],
     "mach-o": [
       {
+        "branch": "codex/exec-guest-loader",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/115",
+        "source_files": 1,
+        "fixture_files": 0,
+        "ci": "running"
+      },
+      {
         "branch": "phase24e-native-application-startup",
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
@@ -1246,13 +1253,6 @@
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "codex/exec-guest-loader",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Fexec-guest-loader",
-        "source_files": 1,
-        "fixture_files": 0,
-        "ci": "not_checked"
       }
     ],
     "metal": [
@@ -1326,18 +1326,18 @@
     ],
     "unclassified": [
       {
+        "branch": "codex/exec-guest-loader",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/115",
+        "source_files": 4,
+        "fixture_files": 2,
+        "ci": "running"
+      },
+      {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
         "source_files": 0,
         "fixture_files": 2,
         "ci": "passing_checks"
-      },
-      {
-        "branch": "codex/exec-guest-loader",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Fexec-guest-loader",
-        "source_files": 4,
-        "fixture_files": 2,
-        "ci": "not_checked"
       }
     ]
   },
@@ -2126,5 +2126,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-31T21:40:20Z"
+  "observed_at": "2026-10-31T21:41:18Z"
 }
