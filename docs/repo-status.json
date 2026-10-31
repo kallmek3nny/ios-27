@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "428989bf9feba734a1c0ac44a604b8a0896d39be",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/428989bf9feba734a1c0ac44a604b8a0896d39be",
-    "committed_at": "2026-10-31T21:43:45Z"
+    "sha": "73b3cff5a5bb00f67161a8dcddf5aa5890167864",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/73b3cff5a5bb00f67161a8dcddf5aa5890167864",
+    "committed_at": "2026-10-31T21:59:21Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 89,
-      "branch": "fix/external-build-fixtures",
-      "sha": "d1bcbccd3c32aaf980b6296a727d4f3cefcff88e",
-      "title": "fix: support external build directories for Darwin startup tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/89",
-      "updated_at": "2026-10-31T21:54:48Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 89,
+      "title": "fix: support external build directories for Darwin startup tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/89",
+      "head_sha": "d1bcbccd3c32aaf980b6296a727d4f3cefcff88e",
+      "merged_at": "2026-10-31T21:59:21Z"
+    },
+    {
       "number": 115,
       "title": "feat: run trusted Mach-O fixtures through an exec guest loader",
       "url": "https://github.com/kallmek3nny/ios-27/pull/115",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/58",
       "head_sha": "6167c8a3fa848b39e2aa36cb84a5f3bc60446594",
       "merged_at": "2026-10-28T18:49:37Z"
-    },
-    {
-      "number": 57,
-      "title": "phase 19e: bounded Objective-C metadata runtime and libSystem userspace foundations",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/57",
-      "head_sha": "a4441f26a78e264271fb8ad3b0ba62b69c11584d",
-      "merged_at": "2026-10-28T18:10:37Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 14,
+    "branches_scanned": 15,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T21:54:57Z"
+  "observed_at": "2026-10-31T22:00:01Z"
 }

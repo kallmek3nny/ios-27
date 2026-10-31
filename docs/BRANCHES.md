@@ -4,14 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `428989bf9feb`
-
-### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
-
-head: `d1bcbccd3c32` · ci: **running** · unmerged, not credited.
-
-- **mach-o parser and native loader**: 0 source files, 2 test/fixture files, +21/-41 lines
-- **unclassified**: 0 source files, 2 test/fixture files, +4/-4 lines
+candidate branches with mapped changes: **30** · audited base: `73b3cff5a5bb`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -217,7 +210,7 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **17**
+recent merged PRs with source changes: **16**
 
 ### [merged PR #115](https://github.com/kallmek3nny/ios-27/pull/115)
 
@@ -330,15 +323,6 @@ merged: 2026-10-28T19:20:17Z · source changes awaiting function-level audit.
 
 - **ObjC host prototype (not Apple libobjc)**: 3 source files, 5 fixtures, +1002/-0 lines
   - added declarations: `ios27_objc20a_counts`, `ios27_objc20a_find_class`, `ios27_objc20a_inspect`, `ios27_objc20a_register`, `ios27_objc20a_register_image`, `ios27_objc20a_registry_create`, `ios27_objc20a_registry_destroy`
-
-### [merged PR #57](https://github.com/kallmek3nny/ios-27/pull/57)
-
-merged: 2026-10-28T18:10:37Z · source changes awaiting function-level audit.
-
-- **libSystem guest model (not dylib)**: 2 source files, 0 fixtures, +192/-0 lines
-  - added declarations: `ios27_libsystem_create`, `ios27_libsystem_destroy`, `ios27_libsystem_free`, `ios27_libsystem_guest`, `ios27_libsystem_heap_state`, `ios27_libsystem_malloc`, `ios27_libsystem_output`, `ios27_libsystem_stdin`, `ios27_libsystem_syscall`
-- **ObjC host prototype (not Apple libobjc)**: 6 source files, 3 fixtures, +1080/-0 lines
-  - added declarations: `ios27_objc_alloc`, `ios27_objc_class_index`, `ios27_objc_counts`, `ios27_objc_lookup`, `ios27_objc_metadata_inspect`, `ios27_objc_register_classes`, `ios27_objc_register_metadata`, `ios27_objc_release`, `ios27_objc_runtime_create`, `ios27_objc_runtime_destroy`, `ios27_objc_selector`, `ios27_objc_send`
 
 ## verification policy
 
