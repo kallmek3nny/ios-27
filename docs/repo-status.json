@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 89,
+      "branch": "fix/external-build-fixtures",
+      "sha": "d1bcbccd3c32aaf980b6296a727d4f3cefcff88e",
+      "title": "fix: support external build directories for Darwin startup tests",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/89",
+      "updated_at": "2026-10-31T21:54:48Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -186,15 +195,6 @@
       "title": "phase23a: transactional incremental macho loading and symbol namespaces",
       "url": "https://github.com/kallmek3nny/ios-27/pull/92",
       "updated_at": "2026-10-29T21:23:07Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 89,
-      "branch": "fix/external-build-fixtures",
-      "sha": "6ca4a3188311207a6196b5adeabcb24110fef7cd",
-      "title": "fix: support external build directories for Darwin startup tests",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/89",
-      "updated_at": "2026-10-29T10:18:02Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T21:44:15Z"
+  "observed_at": "2026-10-31T21:54:57Z"
 }

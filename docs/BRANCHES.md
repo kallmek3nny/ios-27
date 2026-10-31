@@ -6,6 +6,13 @@
 
 candidate branches with mapped changes: **31** · audited base: `428989bf9feb`
 
+### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
+
+head: `d1bcbccd3c32` · ci: **running** · unmerged, not credited.
+
+- **mach-o parser and native loader**: 0 source files, 2 test/fixture files, +21/-41 lines
+- **unclassified**: 0 source files, 2 test/fixture files, +4/-4 lines
+
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
 head: `63310d737d10` · ci: **passing_checks** · unmerged, not credited.
@@ -137,13 +144,6 @@ head: `280b1daed6f8` · ci: **passing_checks** · unmerged, not credited.
 
 - **dyld / image graph**: 2 source files, 2 test/fixture files, +991/-0 lines
   - candidate declarations: `ios27_phase23a_close`, `ios27_phase23a_create`, `ios27_phase23a_destroy`, `ios27_phase23a_diagnostics_read`, `ios27_phase23a_flat_symbol`, `ios27_phase23a_open`, `ios27_phase23a_reference_count`, `ios27_phase23a_symbol`
-
-### [fix/external-build-fixtures](https://github.com/kallmek3nny/ios-27/pull/89)
-
-head: `6ca4a3188311` · ci: **passing_checks** · unmerged, not credited.
-
-- **mach-o parser and native loader**: 0 source files, 2 test/fixture files, +21/-41 lines
-- **unclassified**: 0 source files, 2 test/fixture files, +4/-4 lines
 
 ### [phase22e-mach-ipc-mig](https://github.com/kallmek3nny/ios-27/pull/87)
 
