@@ -8,11 +8,11 @@ candidate branches with mapped changes: **32** · audited base: `669a9d95d4c6`
 
 ### [codex/contained-native-process](https://github.com/kallmek3nny/ios-27/pull/114)
 
-head: `9cce3f3fb3fa` · ci: **failing** · unmerged, not credited.
+head: `92aa94e7a48d` · ci: **passing_checks** · unmerged, not credited.
 
 - **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +56/-9 lines
   - candidate declarations: `ios27_run_executable_contained`, `ios27_run_executable_context`
-- **unclassified**: 4 source files, 2 test/fixture files, +909/-3 lines
+- **unclassified**: 4 source files, 2 test/fixture files, +911/-3 lines
   - candidate declarations: `ios27_process_supervise`, `ios27_run_executable_contained`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)

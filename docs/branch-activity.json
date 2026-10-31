@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/contained-native-process",
-      "sha": "9cce3f3fb3fa572145a8dee96b380b816c233201",
+      "sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/114",
       "pr_number": 114,
-      "ci": "failing",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -35,7 +35,7 @@
           "group_id": "unclassified",
           "source_files": 4,
           "fixture_files": 2,
-          "additions": 909,
+          "additions": 911,
           "deletions": 3,
           "symbols_preview": [
             "ios27_process_supervise",
@@ -1224,7 +1224,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/114",
         "source_files": 1,
         "fixture_files": 0,
-        "ci": "failing"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1323,7 +1323,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/114",
         "source_files": 4,
         "fixture_files": 2,
-        "ci": "failing"
+        "ci": "passing_checks"
       },
       {
         "branch": "fix/external-build-fixtures",
@@ -2096,5 +2096,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-31T00:34:29Z"
+  "observed_at": "2026-10-31T19:26:24Z"
 }

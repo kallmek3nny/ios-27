@@ -11,10 +11,10 @@
     {
       "number": 114,
       "branch": "codex/contained-native-process",
-      "sha": "9cce3f3fb3fa572145a8dee96b380b816c233201",
+      "sha": "92aa94e7a48d28f96ac857402d6da365417882e9",
       "title": "feat: contain trusted native Mach-O execution in a supervised child",
       "url": "https://github.com/kallmek3nny/ios-27/pull/114",
-      "updated_at": "2026-10-31T00:24:15Z",
+      "updated_at": "2026-10-31T19:25:50Z",
       "status": "unmerged: not counted"
     },
     {
@@ -502,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T00:34:23Z"
+  "observed_at": "2026-10-31T19:26:19Z"
 }
