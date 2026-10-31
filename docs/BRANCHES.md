@@ -4,16 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **32** · audited base: `b6b9b7674ba3`
-
-### [codex/exec-guest-loader](https://github.com/kallmek3nny/ios-27/pull/115)
-
-head: `ec63735adc7b` · ci: **running** · unmerged, not credited.
-
-- **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +40/-3 lines
-  - candidate declarations: `ios27_native_handoff`
-- **unclassified**: 4 source files, 2 test/fixture files, +1213/-146 lines
-  - candidate declarations: `ios27_launch_payload_close`, `ios27_launch_payload_create`, `ios27_launch_payload_open`, `ios27_native_handoff`, `ios27_process_close_outside`, `ios27_process_install_filter`, `ios27_process_report`, `ios27_process_supervise`, `ios27_process_supervise_exec`, `ios27_run_executable_exec`
+candidate branches with mapped changes: **31** · audited base: `428989bf9feb`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -228,6 +219,15 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **17**
 
+### [merged PR #115](https://github.com/kallmek3nny/ios-27/pull/115)
+
+merged: 2026-10-31T21:43:46Z · source changes awaiting function-level audit.
+
+- **mach-o parser and native loader**: 1 source files, 0 fixtures, +40/-3 lines
+  - added declarations: `ios27_native_handoff`
+- **unclassified**: 4 source files, 2 fixtures, +1213/-146 lines
+  - added declarations: `ios27_launch_payload_close`, `ios27_launch_payload_create`, `ios27_launch_payload_open`, `ios27_native_handoff`, `ios27_process_close_outside`, `ios27_process_install_filter`, `ios27_process_report`, `ios27_process_supervise`, `ios27_process_supervise_exec`, `ios27_run_executable_exec`
+
 ### [merged PR #114](https://github.com/kallmek3nny/ios-27/pull/114)
 
 merged: 2026-10-31T19:28:16Z · source changes awaiting function-level audit.
@@ -339,13 +339,6 @@ merged: 2026-10-28T18:10:37Z · source changes awaiting function-level audit.
   - added declarations: `ios27_libsystem_create`, `ios27_libsystem_destroy`, `ios27_libsystem_free`, `ios27_libsystem_guest`, `ios27_libsystem_heap_state`, `ios27_libsystem_malloc`, `ios27_libsystem_output`, `ios27_libsystem_stdin`, `ios27_libsystem_syscall`
 - **ObjC host prototype (not Apple libobjc)**: 6 source files, 3 fixtures, +1080/-0 lines
   - added declarations: `ios27_objc_alloc`, `ios27_objc_class_index`, `ios27_objc_counts`, `ios27_objc_lookup`, `ios27_objc_metadata_inspect`, `ios27_objc_register_classes`, `ios27_objc_register_metadata`, `ios27_objc_release`, `ios27_objc_runtime_create`, `ios27_objc_runtime_destroy`, `ios27_objc_selector`, `ios27_objc_send`
-
-### [merged PR #53](https://github.com/kallmek3nny/ios-27/pull/53)
-
-merged: 2026-10-28T18:08:09Z · source changes awaiting function-level audit.
-
-- **dyld / image graph**: 3 source files, 7 fixtures, +697/-72 lines
-  - added declarations: `ios27_images_finalization_image`
 
 ## verification policy
 
