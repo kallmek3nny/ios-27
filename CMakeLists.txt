@@ -13,6 +13,14 @@ add_executable(ios27 src/main.c)
 target_link_libraries(ios27 PRIVATE ios27_core)
 target_compile_options(ios27 PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
+# Trusted helper that ios27_run_executable_exec execveat()s into a fresh
+# address space. Linux/Android only; it is never meant to be run directly.
+if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    add_executable(ios27-loader src/loader.c)
+    target_link_libraries(ios27-loader PRIVATE ios27_core)
+    target_compile_options(ios27-loader PRIVATE -Wall -Wextra -Werror -Wpedantic)
+endif()
+
 option(IOS27_BUILD_TESTS "Build parser and runtime tests" ON)
 if(IOS27_BUILD_TESTS)
     enable_testing()
@@ -211,9 +219,12 @@ if(IOS27_BUILD_TESTS)
             VERBATIM
             COMMENT "Link SDK-free ARM64 contained startup fixture")
         add_custom_target(ios27_contained_startup DEPENDS "${IOS27_CONTAINED_STARTUP}")
-        add_dependencies(test_contained_macho ios27_phase15a_executable ios27_contained_startup)
+        add_dependencies(test_contained_macho ios27_phase15a_executable
+            ios27_contained_startup ios27-loader)
+        # The exec-mode cases run the project's own trusted loader build output.
         add_test(NAME contained-native-macho COMMAND test_contained_macho
-            "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}")
+            "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"
+            "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
     endif()
 endif()

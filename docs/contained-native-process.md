@@ -89,6 +89,11 @@ host address-space ABI. The report channel is also visible in that address
 space; its packets are not authenticated evidence about an untrusted guest.
 Only execute original, deliberately constructed, reviewed fixtures.
 
+`ios27_run_executable_exec` avoids inheriting launcher memory by executing
+the trusted `ios27-loader` helper in a fresh address space. It keeps the same
+outcomes and the same trusted-fixture limit; see
+[exec guest loader](exec-guest-loader.md).
+
 ## Verification scope
 
 CTest registers `contained-process-supervisor` and `contained-native-macho`.

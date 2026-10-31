@@ -241,6 +241,15 @@ failed:
 }
 #endif
 
+typedef void (*guest_handoff)(int (*entry)(void *), void *call);
+
+static int run_image(const uint8_t *data, size_t size,
+                     const ios27_macho_info *info,
+                     const ios27_startup_context *context, int *exit_code,
+                     const ios27_process_options *options,
+                     ios27_process_result *process_result,
+                     guest_handoff handoff, char *error, size_t error_size);
+
 static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_macho_info *info,
                                  const ios27_startup_context *context,
@@ -248,16 +257,39 @@ static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_process_options *options,
                                  ios27_process_result *process_result, char *error,
                                  size_t error_size) {
+    return run_image(data, size, info, context, exit_code, options,
+                     process_result, NULL, error, error_size);
+}
+
+/* Loader mode: identical preflight, guarded guest stack and final W^X
+ * mappings, but the exec'd ios27-loader enters LC_MAIN through handoff. */
+int ios27_native_handoff(const uint8_t *data, size_t size,
+                         const ios27_macho_info *info,
+                         const ios27_startup_context *context,
+                         void (*handoff)(int (*entry)(void *), void *call),
+                         char *error, size_t error_size) {
+    if (!handoff) return fail(error, error_size, "null guest loader handoff");
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff,
+                     error, error_size);
+}
+
+static int run_image(const uint8_t *data, size_t size,
+                     const ios27_macho_info *info,
+                     const ios27_startup_context *context, int *exit_code,
+                     const ios27_process_options *options,
+                     ios27_process_result *process_result,
+                     guest_handoff handoff, char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)context; (void)options; (void)process_result;
+    (void)context; (void)options; (void)process_result; (void)handoff;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
-    if (!data || !info || !context || (!exit_code && !process_result) || os_page <= 0)
+    if (!data || !info || !context ||
+        (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
     /* Fail closed on unsupported host pages, stale metadata or W^X ambiguity.
      * All checks complete before any executable memory becomes accessible. */
@@ -324,7 +356,12 @@ static int run_executable_context(const uint8_t *data, size_t size,
         prepared_entry call = {entry, &guest, context->argc};
         ios27_process_result completed = {0};
         int result = 0, status = 0;
-        if (options) {
+        if (handoff) {
+            /* handoff installs containment, enters the guest and terminates
+             * the loader process; returning here is always a failure. */
+            handoff(enter_prepared, &call);
+            status = fail(error, error_size, "guest loader handoff returned");
+        } else if (options) {
             status = ios27_process_supervise(enter_prepared, &call, options,
                                              &completed, error, error_size);
         } else {
