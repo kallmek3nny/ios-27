@@ -4,7 +4,16 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `669a9d95d4c6`
+candidate branches with mapped changes: **32** · audited base: `669a9d95d4c6`
+
+### [codex/contained-native-process](https://github.com/kallmek3nny/ios-27/pull/114)
+
+head: `9cce3f3fb3fa` · ci: **failing** · unmerged, not credited.
+
+- **mach-o parser and native loader**: 1 source files, 0 test/fixture files, +56/-9 lines
+  - candidate declarations: `ios27_run_executable_contained`, `ios27_run_executable_context`
+- **unclassified**: 4 source files, 2 test/fixture files, +909/-3 lines
+  - candidate declarations: `ios27_process_supervise`, `ios27_run_executable_contained`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 

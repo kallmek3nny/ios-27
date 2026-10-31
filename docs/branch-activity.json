@@ -4,9 +4,52 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "669a9d95d4c6f6a12882617663787cc9aeb65756",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 31,
-  "candidate_count": 31,
+  "candidates_checked": 32,
+  "candidate_count": 32,
   "candidates": [
+    {
+      "branch": "codex/contained-native-process",
+      "sha": "9cce3f3fb3fa572145a8dee96b380b816c233201",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+      "pr_number": 114,
+      "ci": "failing",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 11,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "mach-o",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 56,
+          "deletions": 9,
+          "symbols_preview": [
+            "ios27_run_executable_contained",
+            "ios27_run_executable_context"
+          ],
+          "example_paths": [
+            "src/runner.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 4,
+          "fixture_files": 2,
+          "additions": 909,
+          "deletions": 3,
+          "symbols_preview": [
+            "ios27_process_supervise",
+            "ios27_run_executable_contained"
+          ],
+          "example_paths": [
+            "include/ios27/process.h",
+            "src/main.c",
+            "src/process.c",
+            "src/process_internal.h"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1177,6 +1220,13 @@
     ],
     "mach-o": [
       {
+        "branch": "codex/contained-native-process",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+        "source_files": 1,
+        "fixture_files": 0,
+        "ci": "failing"
+      },
+      {
         "branch": "phase24e-native-application-startup",
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
@@ -1268,6 +1318,13 @@
       }
     ],
     "unclassified": [
+      {
+        "branch": "codex/contained-native-process",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/114",
+        "source_files": 4,
+        "fixture_files": 2,
+        "ci": "failing"
+      },
       {
         "branch": "fix/external-build-fixtures",
         "url": "https://github.com/kallmek3nny/ios-27/pull/89",
@@ -2039,5 +2096,5 @@
       }
     ]
   },
-  "observed_at": "2026-10-30T16:44:50Z"
+  "observed_at": "2026-10-31T00:34:29Z"
 }
