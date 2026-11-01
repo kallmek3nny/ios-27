@@ -79,12 +79,27 @@ the seal set is final.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
-3. It sets `RLIMIT_CORE` to zero and enters a deny-all Landlock domain, then
-   opens the payload. All four launch seals must be present (`F_GET_SEALS`)
-   and the size must match. The file is mapped `PROT_READ` and `MAP_PRIVATE`,
-   and the NULL-terminated vectors are rebuilt with bounds checks on every
-   count, size and string. Descriptor 4 is then closed; the private mapping
-   outlives it.
+3. It sets `RLIMIT_CORE` to zero, clears its dumpable attribute and enters a
+   deny-all Landlock domain, then opens the payload. All four launch seals
+   must be present (`F_GET_SEALS`) and the size must match. The file is
+   mapped `PROT_READ` and `MAP_PRIVATE`, and the NULL-terminated vectors are
+   rebuilt with bounds checks on every count, size and string. Descriptor 4
+   is then closed; the private mapping outlives it.
+
+   An `execveat` of a readable program by a caller whose real and effective
+   IDs match resets the dumpable attribute to 1 (`begin_new_exec` in the
+   kernel's `fs/exec.c`). While it is 1, same-UID processes can pass the
+   ptrace access checks that govern `PTRACE_ATTACH` and `/proc/<pid>/mem`,
+   subject to Yama
+   ([`ptrace(2)`](https://man7.org/linux/man-pages/man2/ptrace.2.html)).
+   The loader sets it to 0 with `PR_SET_DUMPABLE` and reads it back with
+   `PR_GET_DUMPABLE`; a failed call or any value other than 0 is a setup
+   error. At 0, the `/proc/<pid>` files become root-owned
+   ([`proc_pid(5)`](https://man7.org/linux/man-pages/man5/proc_pid.5.html))
+   and callers without `CAP_SYS_PTRACE` are refused, for the loader and for
+   the guest that later runs in the same process. Root and `CAP_SYS_PTRACE`
+   holders are not excluded. This step runs before the stage-one filter,
+   which does not permit that `prctl` option.
 
    The Landlock ruleset has no rules. Depending on the ABI version the kernel
    reports, it handles every filesystem right through
@@ -185,6 +200,15 @@ memfd missing any launch seal, an invalid descriptor, corrupted headers or
 string tables and oversized files, while accepting a resealed faithful copy,
 strings exactly at the length limit, a full 64 KiB string table and an empty
 startup context. Creation must enforce the vector, string, string-table and
-image limits without leaking a descriptor. Passing these tests does not
-satisfy the general Darwin process-startup or untrusted-guest-isolation
-capability gates.
+image limits without leaking a descriptor.
+
+The same suite also runs the real `ios27-loader` under injected seccomp
+answers. A refused `PR_SET_DUMPABLE` must end in an `EPERM` setup report.
+When the launcher's real and effective IDs match, a faked successful one
+must fail the same way, because the read-back catches it. `ENOSYS` or
+`EOPNOTSUPP` from the Landlock version query must be skipped, and `EPERM`
+from it must fail setup. On hosts with Landlock, a refused or faked
+successful `restrict_self` must also fail setup. These steps run before the
+loader's architecture check, so they also run on x86_64. Passing these tests
+does not satisfy the general Darwin process-startup or
+untrusted-guest-isolation capability gates.
