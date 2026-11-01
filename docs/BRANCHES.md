@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `aa0e2fb8e101`
-
-### [codex/loader-cpu-limit](https://github.com/kallmek3nny/ios-27/pull/124)
-
-head: `30e571995864` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 1 test/fixture files, +166/-17 lines
+candidate branches with mapped changes: **30** · audited base: `72d926a86443`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -218,6 +212,12 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **21**
 
+### [merged PR #124](https://github.com/kallmek3nny/ios-27/pull/124)
+
+merged: 2026-11-01T20:43:20Z · source changes awaiting function-level audit.
+
+- **unclassified**: 3 source files, 1 fixtures, +166/-17 lines
+
 ### [merged PR #123](https://github.com/kallmek3nny/ios-27/pull/123)
 
 merged: 2026-11-01T20:08:28Z · source changes awaiting function-level audit.
@@ -351,13 +351,6 @@ merged: 2026-10-28T19:24:38Z · source changes awaiting function-level audit.
 
 - **ObjC host prototype (not Apple libobjc)**: 2 source files, 4 fixtures, +938/-0 lines
   - added declarations: `ios27_objc20c_alloc`, `ios27_objc20c_autorelease`, `ios27_objc20c_create`, `ios27_objc20c_destroy`, `ios27_objc20c_get_stats`, `ios27_objc20c_pool_pop`, `ios27_objc20c_pool_push`, `ios27_objc20c_release`, `ios27_objc20c_retain`, `ios27_objc20c_retain_count`, `ios27_objc20c_strong_store`, `ios27_objc20c_validate`
-
-### [merged PR #62](https://github.com/kallmek3nny/ios-27/pull/62)
-
-merged: 2026-10-28T19:22:22Z · source changes awaiting function-level audit.
-
-- **libSystem guest model (not dylib)**: 2 source files, 3 fixtures, +558/-0 lines
-  - added declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
 
 ## verification policy
 

@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "aa0e2fb8e101880e6fb7c2b1dfb3b7dbf8451db5",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/aa0e2fb8e101880e6fb7c2b1dfb3b7dbf8451db5",
-    "committed_at": "2026-11-01T20:08:28Z"
+    "sha": "72d926a864435bde65c90e8e8f10cfe19acfbf5a",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/72d926a864435bde65c90e8e8f10cfe19acfbf5a",
+    "committed_at": "2026-11-01T20:43:20Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 124,
-      "branch": "codex/loader-cpu-limit",
-      "sha": "30e571995864348ca28617dde9e9dbe329699573",
-      "title": "feat(loader): clamp and verify a bounded RLIMIT_CPU across exec",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/124",
-      "updated_at": "2026-11-01T20:39:05Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 124,
+      "title": "feat(loader): clamp and verify a bounded RLIMIT_CPU across exec",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/124",
+      "head_sha": "30e571995864348ca28617dde9e9dbe329699573",
+      "merged_at": "2026-11-01T20:43:20Z"
+    },
+    {
       "number": 123,
       "title": "fix(loader): reset inherited real-time scheduling before exec",
       "url": "https://github.com/kallmek3nny/ios-27/pull/123",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/67",
       "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
       "merged_at": "2026-10-28T19:24:38Z"
-    },
-    {
-      "number": 62,
-      "title": "phase 20e: bounded Darwin libSystem userspace services and compiled ARM64 fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/62",
-      "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
-      "merged_at": "2026-10-28T19:22:22Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 23,
+    "branches_scanned": 24,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T20:39:42Z"
+  "observed_at": "2026-11-01T20:44:01Z"
 }
