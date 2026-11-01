@@ -72,18 +72,21 @@ the seal set is final.
 ## Child and loader sequence
 
 1. The supervisor forks a child that resets signals and its persona,
-   lowers an `RLIMIT_STACK` soft limit above 8 MiB to 8 MiB, disables core
-   dumps, keeps only the report pipe (descriptor 3) and the payload
-   (descriptor 4), sets `PR_SET_NO_NEW_PRIVS` and executes the loader
-   descriptor with a single `argv` entry and an empty environment. The
-   signal mask stays fully blocked across the exec.
+   lowers an `RLIMIT_STACK` soft limit above 8 MiB to 8 MiB, moves any
+   scheduling policy other than `SCHED_OTHER`, `SCHED_BATCH` and
+   `SCHED_IDLE` to `SCHED_OTHER`, disables core dumps, keeps only the
+   report pipe (descriptor 3) and the payload (descriptor 4), sets
+   `PR_SET_NO_NEW_PRIVS` and executes the loader descriptor with a single
+   `argv` entry and an empty environment. The signal mask stays fully
+   blocked across the exec.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
 3. It sets `RLIMIT_CORE` to zero, drops its capabilities, clears its dumpable
    attribute, confirms that the supervisor's parent-death `SIGKILL` survived
-   the exec, that its persona is plain `PER_LINUX` and that its
-   `RLIMIT_STACK` soft limit is at most 8 MiB, and enters a deny-all
+   the exec, that its persona is plain `PER_LINUX`, that its `RLIMIT_STACK`
+   soft limit is at most 8 MiB and that its scheduling policy is
+   `SCHED_OTHER`, `SCHED_BATCH` or `SCHED_IDLE`, and enters a deny-all
    Landlock domain, then opens the payload.
    All four launch seals must be present (`F_GET_SEALS`) and the size must
    match. The file is mapped `PROT_READ` and `MAP_PRIVATE`, and the
@@ -185,6 +188,30 @@ the seal set is final.
    soft limit above 8 MiB, unlimited included, is an `EPERM` setup error
    and is not lowered. Like the dumpable step, this runs before the
    stage-one filter, which does not permit `prlimit64`.
+
+   A child created by `fork` inherits its parent's scheduling policy and
+   priority, and an ordinary `execveat` keeps them
+   ([`sched(7)`](https://man7.org/linux/man-pages/man7/sched.7.html)).
+   Only a `SCHED_RESET_ON_FORK` flag set by the launcher resets a
+   `SCHED_FIFO` or `SCHED_RR` policy in the child. A guest busy loop under
+   an inherited real-time policy would outrank every `SCHED_OTHER` task on
+   its CPU, including a `SCHED_OTHER` launcher enforcing the deadline,
+   limited only by real-time throttling. The supervisor's child therefore
+   reads its policy with a pid-0 `sched_getscheduler`. `SCHED_OTHER`,
+   `SCHED_BATCH` and `SCHED_IDLE`, none of which outranks `SCHED_OTHER`,
+   are kept; leaving `SCHED_IDLE` would need `CAP_SYS_NICE` or a
+   sufficient `RLIMIT_NICE`. Any other policy, such as `SCHED_FIFO` or
+   `SCHED_RR`, is moved to `SCHED_OTHER` with priority 0 by a pid-0
+   `sched_setscheduler`. That legacy call keeps the nice value, so lowering
+   a real-time policy needs no privilege (`user_check_sched_setscheduler`
+   in the kernel's `kernel/sched/syscalls.c`). The reset-on-fork bit that
+   `sched_getscheduler` can OR into its result is accepted and passed to
+   the reset, because clearing a set flag needs `CAP_SYS_NICE`. A failed
+   query or reset is a setup error. The loader reads the policy back with
+   `sched_getscheduler`, naming its own PID instead of 0, and does not
+   repair it: any policy outside those three is an `EPERM` setup error.
+   Like the dumpable step, this runs before the stage-one filter, which
+   does not permit `sched_getscheduler`.
 
    The Landlock ruleset has no rules. Depending on the ABI version the kernel
    reports, it handles every filesystem right through
@@ -320,7 +347,19 @@ call behind glibc's `getrlimit` and `setrlimit`, leaves the raised limit in
 place, so setup must fail with `EPERM`: the loader's read-back names its
 PID, is not answered and still reports the raised limit. Hosts whose hard
 limit cannot hold a raised soft limit, or whose policy refuses the change,
-skip only that mode. These steps run before the loader's architecture
-check, so they also run on x86_64. Passing these tests does not satisfy
-the general Darwin process-startup or untrusted-guest-isolation capability
-gates.
+skip only that mode. A refused pid-0 `sched_getscheduler` in the
+supervisor's child must end in an `EPERM` setup report, while a refused
+`sched_setscheduler` must not matter under the default `SCHED_OTHER`
+policy, which the child keeps. Where the host permits it, the launcher
+also first switches to `SCHED_BATCH`, which the child must keep the same
+way, and, with `CAP_SYS_NICE` or a nonzero `RLIMIT_RTPRIO` soft limit
+(raised from 0 to 1 when the hard limit allows it), to `SCHED_RR` at
+priority 1. The real reset must then let the loader reach the payload
+stage, and a refused pid-0 reset must end in an `EPERM` setup report. A
+faked successful reset leaves `SCHED_RR` in place, so setup must fail with
+`EPERM`: the loader's read-back names its PID, is not answered and still
+reports the real-time policy. Hosts that refuse `SCHED_BATCH`, or lack
+both `CAP_SYS_NICE` and a usable `RLIMIT_RTPRIO` for `SCHED_RR`, skip only
+that mode. These steps run before the loader's architecture check, so
+they also run on x86_64. Passing these tests does not satisfy the general
+Darwin process-startup or untrusted-guest-isolation capability gates.

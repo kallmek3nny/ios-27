@@ -293,6 +293,29 @@ static int require_bounded_stack_limit(void) {
     return 0;
 }
 
+/* An ordinary execveat keeps the scheduling policy, so the supervisor's
+ * child moves an inherited SCHED_FIFO, SCHED_RR or other policy outside
+ * SCHED_OTHER, SCHED_BATCH and SCHED_IDLE to SCHED_OTHER before the exec:
+ * a guest busy loop under a real-time policy would outrank every
+ * SCHED_OTHER task on its CPU, the launcher enforcing the deadline
+ * included, limited only by real-time throttling. The loader reads the
+ * policy back and does not repair it, so any other policy is a setup error.
+ * The reset-on-fork bit that sched_getscheduler may OR into its result is
+ * accepted; the stage-one filter forbids fork anyway. The query names this
+ * process by PID instead of 0, which keeps it apart from the supervisor
+ * child's pid-0 query and reset when a test answers those with seccomp.
+ * Like the other read-backs, this runs before the stage-one filter, which
+ * does not permit sched_getscheduler. */
+static int require_fair_scheduling_policy(void) {
+    long policy = syscall(SYS_sched_getscheduler, (long)getpid());
+    if (policy < 0) return -1;
+    if (!ios27_process_fair_policy(policy)) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -305,12 +328,12 @@ int main(int argc, char **argv) {
         return 2;
     }
     /* Capabilities, core dumps and same-UID ptrace access end, and the
-     * parent-death signal, plain persona and bounded stack limit are
-     * confirmed, before any payload byte is read. */
+     * parent-death signal, plain persona, bounded stack limit and fair
+     * scheduling policy are confirmed, before any payload byte is read. */
     if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
         clear_dumpable() || require_parent_death_signal() ||
         require_plain_persona() || require_bounded_stack_limit() ||
-        enter_landlock_domain())
+        require_fair_scheduling_policy() || enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);

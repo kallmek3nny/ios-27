@@ -33,6 +33,27 @@ int ios27_process_supervise(int (*entry)(void *), void *context,
  * The supervisor's exec child applies this clamp before execveat. */
 #define IOS27_LOADER_STACK_LIMIT (UINT64_C(8) * 1024u * 1024u)
 
+/* Linux scheduling policies from the linux/sched.h uapi. The supervisor's
+ * child moves an inherited policy outside the fair set below, such as
+ * SCHED_FIFO or SCHED_RR, to IOS27_SCHED_OTHER, and the guest loader reads
+ * the policy back. sched_getscheduler ORs IOS27_SCHED_RESET_ON_FORK into
+ * its result when the thread's reset-on-fork flag is set. */
+#define IOS27_SCHED_OTHER 0L
+#define IOS27_SCHED_BATCH 3L
+#define IOS27_SCHED_IDLE 5L
+#define IOS27_SCHED_RESET_ON_FORK 0x40000000L
+
+/* Nonzero for a sched_getscheduler result the guest may keep: SCHED_OTHER,
+ * SCHED_BATCH or SCHED_IDLE, with or without the reset-on-fork bit. None of
+ * them outranks SCHED_OTHER, and leaving SCHED_IDLE needs CAP_SYS_NICE or a
+ * sufficient RLIMIT_NICE, so these are kept. */
+static inline int ios27_process_fair_policy(long policy) {
+    long base = policy & ~IOS27_SCHED_RESET_ON_FORK;
+    return policy >= 0 &&
+           (base == IOS27_SCHED_OTHER || base == IOS27_SCHED_BATCH ||
+            base == IOS27_SCHED_IDLE);
+}
+
 /* Child-side helpers. Only async-signal-safe system calls are used. */
 int ios27_process_report(int fd, uint32_t kind, int value);
 /* Close every descriptor outside [first, last]; requires close_range. */

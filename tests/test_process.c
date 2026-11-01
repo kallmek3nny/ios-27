@@ -846,22 +846,65 @@ static int stack_limit_available(rlim_t soft) {
     return WEXITSTATUS(status) == 0;
 }
 
+/* Launcher scheduling setups for loader_landlock_case, and SCHED_RR from
+ * the linux/sched.h uapi. */
+#define LAUNCHER_SCHED_BATCH 5
+#define LAUNCHER_SCHED_REALTIME 6
+#define TEST_SCHED_RR 2L
+
+/* Switch the calling single-threaded process to policy and read it back.
+ * SCHED_BATCH needs no privilege. SCHED_RR at priority 1 needs
+ * CAP_SYS_NICE or a nonzero RLIMIT_RTPRIO soft limit (sched(7)), so a zero
+ * soft limit is first raised to 1 when the hard limit allows it. The legacy
+ * call keeps the nice value, and struct sched_param holds only
+ * sched_priority. */
+static int hold_scheduling_policy(long policy) {
+    int priority = policy == TEST_SCHED_RR ? 1 : 0;
+    if (priority) {
+        struct rlimit rtprio;
+        if (getrlimit(RLIMIT_RTPRIO, &rtprio)) return -1;
+        if (rtprio.rlim_cur == 0u && rtprio.rlim_max >= 1u) {
+            rtprio.rlim_cur = 1u;
+            if (setrlimit(RLIMIT_RTPRIO, &rtprio)) return -1;
+        }
+    }
+    if (syscall(SYS_sched_setscheduler, 0L, policy, &priority)) return -1;
+    return syscall(SYS_sched_getscheduler, 0L) == policy ? 0 : -1;
+}
+
+/* Try hold_scheduling_policy in a throwaway child. Hosts whose policy
+ * refuses SCHED_BATCH skip that mode, and hosts without CAP_SYS_NICE or a
+ * usable RLIMIT_RTPRIO skip the real-time mode. */
+static int scheduling_policy_available(long policy) {
+    pid_t child = fork();
+    int status;
+    assert(child >= 0);
+    if (!child) _exit(hold_scheduling_policy(policy) ? 1 : 0);
+    assert(waitpid(child, &status, 0) == child);
+    assert(WIFEXITED(status));
+    return WEXITSTATUS(status) == 0;
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the supervisor
- * child's PR_SET_PDEATHSIG, persona reset and stack-limit clamp and the
- * loader's capability, dumpable, parent-death, persona, stack-limit and
- * Landlock setup. LAUNCHER_CAPABILITY first makes TEST_CAPABILITY ambient
- * in the launcher, so the loader starts with it. LAUNCHER_PERSONA first
- * sets TEST_PERSONA, and LAUNCHER_STACK_UNLIMITED and LAUNCHER_STACK_LARGE
- * first raise the RLIMIT_STACK soft limit to unlimited or TEST_LARGE_STACK,
- * so the supervisor's child starts with them. Reaching LOADER_STAGE means
- * the loader dropped its capabilities and read back empty sets, cleared and
- * read back its dumpable attribute, read back the supervisor's parent-death
- * SIGKILL, a plain PER_LINUX persona and a stack soft limit no larger than
- * IOS27_LOADER_STACK_LIMIT, either enforced its deny-all domain (its own
- * probe of "/" must fail with EACCES) or skipped an absent Landlock as
- * documented, and then opened the payload. */
+ * child's PR_SET_PDEATHSIG, persona reset, stack-limit clamp and
+ * scheduling-policy reset and the loader's capability, dumpable,
+ * parent-death, persona, stack-limit, scheduling-policy and Landlock setup.
+ * LAUNCHER_CAPABILITY first makes TEST_CAPABILITY ambient in the launcher,
+ * so the loader starts with it. LAUNCHER_PERSONA first sets TEST_PERSONA,
+ * LAUNCHER_STACK_UNLIMITED and LAUNCHER_STACK_LARGE first raise the
+ * RLIMIT_STACK soft limit to unlimited or TEST_LARGE_STACK, and
+ * LAUNCHER_SCHED_BATCH and LAUNCHER_SCHED_REALTIME first switch to
+ * SCHED_BATCH or to SCHED_RR at priority 1, so the supervisor's child
+ * starts with them. Reaching LOADER_STAGE means the loader dropped its
+ * capabilities and read back empty sets, cleared and read back its dumpable
+ * attribute, read back the supervisor's parent-death SIGKILL, a plain
+ * PER_LINUX persona, a stack soft limit no larger than
+ * IOS27_LOADER_STACK_LIMIT and a SCHED_OTHER, SCHED_BATCH or SCHED_IDLE
+ * policy, either enforced its deny-all domain (its own probe of "/" must
+ * fail with EACCES) or skipped an absent Landlock as documented, and then
+ * opened the payload. */
 static void loader_landlock_case(const char *loader_path, loader_case test,
                                  int launcher_mode) {
     pid_t launcher = fork();
@@ -883,6 +926,10 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
             assert(!hold_stack_limit(RLIM_INFINITY));
         if (launcher_mode == LAUNCHER_STACK_LARGE)
             assert(!hold_stack_limit(TEST_LARGE_STACK));
+        if (launcher_mode == LAUNCHER_SCHED_BATCH)
+            assert(!hold_scheduling_policy(IOS27_SCHED_BATCH));
+        if (launcher_mode == LAUNCHER_SCHED_REALTIME)
+            assert(!hold_scheduling_policy(TEST_SCHED_RR));
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
@@ -1148,6 +1195,48 @@ int main(int argc, char **argv) {
         }
         printf("guest loader stack limit: %u of %zu raised soft limits clamped and read back\n",
                exercised, sizeof(modes) / sizeof(modes[0]));
+    }
+    {
+        /* On any host, a refused pid-0 sched_getscheduler in the
+         * supervisor's child fails setup, while a refused sched_setscheduler
+         * must not matter under the default SCHED_OTHER policy, which the
+         * child keeps. An inherited SCHED_BATCH policy is kept the same way.
+         * An inherited SCHED_RR policy must be moved to SCHED_OTHER: the
+         * real reset must let the loader reach the payload stage, a refused
+         * pid-0 reset fails setup, and a faked successful one leaves
+         * SCHED_RR in place, so the loader's read-back, which names its PID
+         * and is not answered, must fail setup. Hosts that refuse
+         * SCHED_BATCH, or lack CAP_SYS_NICE and a usable RLIMIT_RTPRIO for
+         * SCHED_RR, skip only that mode. */
+        const loader_case any_policy[] = {
+            {SYS_sched_getscheduler, 0L, EPERM, EPERM},
+            {SYS_sched_setscheduler, ANY_ARGUMENT, EPERM, 0}
+        };
+        const loader_case batch[] = {
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            {SYS_sched_setscheduler, ANY_ARGUMENT, EPERM, 0}
+        };
+        const loader_case realtime[] = {
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            {SYS_sched_setscheduler, 0L, EPERM, EPERM},
+            {SYS_sched_setscheduler, 0L, 0, EPERM}
+        };
+        int batch_available = scheduling_policy_available(IOS27_SCHED_BATCH);
+        int realtime_available = scheduling_policy_available(TEST_SCHED_RR);
+        for (size_t i = 0u; i < sizeof(any_policy) / sizeof(any_policy[0]); ++i)
+            loader_landlock_case(argv[1], any_policy[i], 0);
+        if (batch_available) {
+            for (size_t i = 0u; i < sizeof(batch) / sizeof(batch[0]); ++i)
+                loader_landlock_case(argv[1], batch[i], LAUNCHER_SCHED_BATCH);
+        }
+        if (realtime_available) {
+            for (size_t i = 0u; i < sizeof(realtime) / sizeof(realtime[0]); ++i)
+                loader_landlock_case(argv[1], realtime[i], LAUNCHER_SCHED_REALTIME);
+        }
+        printf("guest loader scheduling policy: SCHED_BATCH %s; SCHED_RR %s\n",
+               batch_available ? "kept" : "refused, skipped",
+               realtime_available ? "reset to SCHED_OTHER and read back" :
+                                    "unavailable without CAP_SYS_NICE or RLIMIT_RTPRIO, skipped");
     }
     {
         /* On any host the capability read-back must succeed and report no

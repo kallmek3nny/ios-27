@@ -461,6 +461,26 @@ static void child_reset(int fd, pid_t parent) {
         prctl(PR_SET_PDEATHSIG, SIGKILL, 0ul, 0ul, 0ul) ||
         syscall(SYS_personality, 0ul) < 0)
         report_and_exit(fd, IOS27_REPORT_SETUP, errno);
+    /* The scheduling policy survives fork unless the launcher set
+     * SCHED_RESET_ON_FORK, and an ordinary execveat keeps it. A guest busy
+     * loop under an inherited SCHED_FIFO or SCHED_RR policy would outrank
+     * every SCHED_OTHER task on its CPU, a SCHED_OTHER launcher enforcing
+     * the deadline included, limited only by real-time throttling. Move any
+     * policy outside SCHED_OTHER, SCHED_BATCH and SCHED_IDLE to SCHED_OTHER
+     * with priority 0. The legacy call keeps the nice value, so lowering a
+     * real-time policy needs no privilege (user_check_sched_setscheduler in
+     * kernel/sched/syscalls.c). fork already cleared the reset-on-fork flag
+     * in this child; the bit is still carried over, because clearing a set
+     * flag needs CAP_SYS_NICE. The pid-0 calls name this thread, and the
+     * loader reads the policy back. */
+    long policy = syscall(SYS_sched_getscheduler, 0L);
+    int priority = 0; /* struct sched_param holds only sched_priority */
+    if (policy < 0 ||
+        (!ios27_process_fair_policy(policy) &&
+         syscall(SYS_sched_setscheduler, 0L,
+                 IOS27_SCHED_OTHER | (policy & IOS27_SCHED_RESET_ON_FORK),
+                 &priority)))
+        report_and_exit(fd, IOS27_REPORT_SETUP, errno);
     if (getppid() != parent) _exit(125);
 }
 
