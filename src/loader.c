@@ -16,9 +16,10 @@
  * sealed launch payload on fd 4, an empty environment and a fully blocked
  * signal mask, so no launcher heap, stack or mapping is visible to the
  * guest. Before reading the payload it enters a deny-all Landlock domain
- * when the kernel provides one. Like the fork runner this is
- * trusted-fixture failure containment, NOT a sandbox for untrusted Mach-O
- * code. */
+ * when the kernel provides one. Once the payload is mapped and its
+ * descriptor closed, it installs a stage-one seccomp allowlist before the
+ * image is re-parsed. Like the fork runner this is trusted-fixture failure
+ * containment, NOT a sandbox for untrusted Mach-O code. */
 
 static ios27_launch_payload payload;
 
@@ -134,8 +135,14 @@ int main(int argc, char **argv) {
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);
-    /* The read-only private mapping outlives its descriptor. */
-    if (close(IOS27_LOADER_PAYLOAD_FD))
+    /* The read-only private mapping outlives its descriptor. With only the
+     * report pipe left, stage one of the syscall filter goes on before any
+     * image byte is re-parsed; see ios27_process_install_loader_filter.
+     * no_new_privs was set by the supervisor and survives exec, but
+     * enter_landlock_domain reasserts it only when Landlock is present. */
+    if (close(IOS27_LOADER_PAYLOAD_FD) ||
+        prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
+        ios27_process_install_loader_filter(IOS27_LOADER_REPORT_FD))
         loader_exit(IOS27_REPORT_SETUP, errno);
 #if !defined(__aarch64__)
     loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_ARCH);

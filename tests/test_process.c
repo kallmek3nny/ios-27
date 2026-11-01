@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -549,6 +550,143 @@ static void launch_payload_checks(void) {
     assert(fd_count() == descriptors);
 }
 
+/* Stage-one guest loader filter cases. Each runs in its own child because
+ * seccomp filters cannot be removed, and main() checks that this process
+ * keeps its original no_new_privs and seccomp state. */
+enum {
+    STAGE_ONE_ALLOWED,
+    STAGE_ONE_GETPID,
+    STAGE_ONE_OPENAT,
+    STAGE_ONE_MMAP_READ,
+    STAGE_ONE_MPROTECT_WX,
+    STAGE_ONE_MPROTECT_HIGH,
+    STAGE_ONE_WRITE_SIZE,
+    STAGE_ONE_WRITE_FD,
+    STAGE_ONE_WRITE_FD_HIGH,
+    STAGE_ONE_PRCTL_OTHER,
+    STAGE_ONE_X32
+};
+
+static _Noreturn void stage_one_child(int operation, int report) {
+    struct rlimit core = {0u, 0u};
+    long page = sysconf(_SC_PAGESIZE), outcome = 0;
+    uint8_t packet[12] = {0};
+    sigset_t empty;
+    uint8_t *region;
+    if (page <= 0 || setrlimit(RLIMIT_CORE, &core) || sigemptyset(&empty) ||
+        prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
+        ios27_process_install_loader_filter(report))
+        _exit(2);
+    /* Inaccessible reservations stay available for image staging. */
+    region = mmap(NULL, 2u * (size_t)page, PROT_NONE,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (region == MAP_FAILED) _exit(3);
+    switch (operation) {
+    case STAGE_ONE_ALLOWED:
+        /* The loader's own sequence: staging, final W^X protections, the
+         * payload unmap, descriptor cleanup, the stacked mandatory filter
+         * and the readiness packet. */
+        if (mprotect(region, (size_t)page, PROT_READ | PROT_WRITE)) _exit(4);
+        region[0] = 0xd6u;
+        if (mprotect(region, (size_t)page, PROT_READ | PROT_EXEC) ||
+            mprotect(region + page, (size_t)page, PROT_READ) ||
+            munmap(region, 2u * (size_t)page))
+            _exit(5);
+        if (ios27_process_close_outside(report, report) ||
+            prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
+            sigprocmask(SIG_SETMASK, &empty, NULL) ||
+            ios27_process_install_filter(report) ||
+            ios27_process_report(report, IOS27_REPORT_READY, 7))
+            _exit(6);
+        _exit(0);
+    case STAGE_ONE_GETPID:
+        outcome = syscall(SYS_getpid);
+        break;
+    case STAGE_ONE_OPENAT:
+        outcome = syscall(SYS_openat, AT_FDCWD, "/", O_RDONLY | O_CLOEXEC);
+        break;
+    case STAGE_ONE_MMAP_READ:
+        outcome = mmap(NULL, (size_t)page, PROT_READ,
+                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0) == MAP_FAILED ? -1 : 0;
+        break;
+    case STAGE_ONE_MPROTECT_WX:
+        outcome = mprotect(region, (size_t)page,
+                           PROT_READ | PROT_WRITE | PROT_EXEC);
+        break;
+    case STAGE_ONE_MPROTECT_HIGH:
+        /* The kernel would reject the high bits; the filter must kill first. */
+        outcome = syscall(SYS_mprotect, region, (size_t)page,
+                          (1ul << 32) | (unsigned long)PROT_READ);
+        break;
+    case STAGE_ONE_WRITE_SIZE:
+        outcome = (long)write(report, packet, sizeof(packet) - 1u);
+        break;
+    case STAGE_ONE_WRITE_FD:
+        outcome = (long)write(STDERR_FILENO, packet, sizeof(packet));
+        break;
+    case STAGE_ONE_WRITE_FD_HIGH:
+        /* The kernel truncates fd to 32 bits; the filter checks all 64. */
+        outcome = syscall(SYS_write, (1ul << 32) | (unsigned long)report,
+                          packet, sizeof(packet));
+        break;
+    case STAGE_ONE_PRCTL_OTHER:
+        outcome = prctl(PR_GET_DUMPABLE, 0ul, 0ul, 0ul, 0ul);
+        break;
+#if defined(__x86_64__)
+    case STAGE_ONE_X32:
+        /* x32 calls share AUDIT_ARCH_X86_64 but carry bit 30 in nr. */
+        outcome = syscall(0x40000000L | SYS_getpid);
+        break;
+#endif
+    default:
+        break;
+    }
+    /* Reaching this point means a forbidden call was not killed. */
+    _exit(outcome < 0 ? 11 : 10);
+}
+
+static void stage_one_case(int operation) {
+    int fds[2], status;
+    uint32_t words[3];
+    pid_t child;
+    assert(!pipe2(fds, O_CLOEXEC));
+    child = fork();
+    assert(child >= 0);
+    if (!child) {
+        if (close(fds[0])) _exit(1);
+        stage_one_child(operation, fds[1]);
+    }
+    assert(!close(fds[1]));
+    assert(waitpid(child, &status, 0) == child);
+    if (operation == STAGE_ONE_ALLOWED) {
+        assert(WIFEXITED(status) && WEXITSTATUS(status) == 0);
+        assert(read(fds[0], words, sizeof(words)) == (ssize_t)sizeof(words));
+        assert(words[1] == (uint32_t)IOS27_REPORT_READY && words[2] == 7u);
+    } else {
+        assert(WIFSIGNALED(status) && WTERMSIG(status) == SIGSYS);
+    }
+    assert(read(fds[0], words, sizeof(words)) == 0);
+    assert(!close(fds[0]));
+    no_children();
+}
+
+static void loader_filter_checks(void) {
+    static const int denied[] = {
+        STAGE_ONE_GETPID, STAGE_ONE_OPENAT, STAGE_ONE_MMAP_READ,
+        STAGE_ONE_MPROTECT_WX, STAGE_ONE_MPROTECT_HIGH, STAGE_ONE_WRITE_SIZE,
+        STAGE_ONE_WRITE_FD, STAGE_ONE_WRITE_FD_HIGH, STAGE_ONE_PRCTL_OTHER,
+#if defined(__x86_64__)
+        STAGE_ONE_X32,
+#endif
+    };
+    /* An invalid report descriptor is refused before any filter exists. */
+    errno = 0;
+    assert(ios27_process_install_loader_filter(-1) == -1 && errno == EBADF);
+    stage_one_case(STAGE_ONE_ALLOWED);
+    for (size_t i = 0u; i < sizeof(denied) / sizeof(denied[0]); ++i)
+        stage_one_case(denied[i]);
+}
+
 #ifndef SYS_landlock_create_ruleset
 #define SYS_landlock_create_ruleset 444
 #endif
@@ -758,6 +896,7 @@ int main(int argc, char **argv) {
         no_children();
     }
     launch_payload_checks();
+    loader_filter_checks();
     {
         /* Host Landlock ABI, queried without side effects. restrict_self
          * answers only matter once the loader's version query succeeds. */

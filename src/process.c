@@ -113,6 +113,104 @@ int ios27_process_install_filter(int report_fd) {
     return prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program);
 }
 
+/* Stage-one guest loader allowlist; see process_internal.h. Instructions
+ * are addressed by name: each macro below fills its own designated slot,
+ * the compiler derives every jump offset, and a backward or out-of-range
+ * jump is a build error (negative array size). */
+#ifdef SYS_close_range
+#define LF_SYS_CLOSE_RANGE SYS_close_range
+#else
+/* ios27_process_close_outside then fails with ENOSYS before guest entry,
+ * so this slot only repeats an existing allowance. */
+#define LF_SYS_CLOSE_RANGE SYS_exit
+#endif
+#define LF_TO(from, to) \
+    ((to) - (from) - 1 + \
+     0u * sizeof(char[(to) > (from) && (to) - (from) <= 256 ? 1 : -1]))
+#define LF_ARG(n) offsetof(struct seccomp_data, args[n])
+#define LF_ARG_HIGH(n) (offsetof(struct seccomp_data, args[n]) + 4u)
+#define LF_LOAD(at, offset) [at] = BPF_STMT(BPF_LD | BPF_W | BPF_ABS, (offset))
+#define LF_RET(at, action) [at] = BPF_STMT(BPF_RET | BPF_K, (action))
+/* Equal: jump to target; otherwise fall through to the next test. */
+#define LF_IS(at, value, target) \
+    [at] = BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, (value), LF_TO(at, target), 0)
+/* Equal: continue with the next instruction; otherwise kill. */
+#define LF_NEED(at, value) \
+    [at] = BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, (value), 0, LF_TO(at, LF_KILL))
+/* Last argument test: equal allows the call; otherwise kill. */
+#define LF_LAST(at, value) \
+    [at] = BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, (value), \
+                    LF_TO(at, LF_ALLOW), LF_TO(at, LF_KILL))
+
+enum {
+    LF_ARCH, LF_ARCH_IS, LF_NR,
+    /* syscall number dispatch */
+    LF_EXIT, LF_EXIT_GROUP, LF_SIGRETURN, LF_MUNMAP, LF_SIGPROCMASK,
+    LF_CLOSE_RANGE, LF_WRITE, LF_MMAP, LF_MPROTECT, LF_PRCTL, LF_OTHER,
+    /* write(fd, buffer, count): one report packet, as in the guest filter */
+    LF_WRITE_FD, LF_WRITE_FD_IS, LF_WRITE_FD_HIGH, LF_WRITE_FD_HIGH_IS,
+    LF_WRITE_SIZE, LF_WRITE_SIZE_IS, LF_WRITE_SIZE_HIGH, LF_WRITE_SIZE_HIGH_IS,
+    /* mmap(addr, length, prot, ...): inaccessible reservations only */
+    LF_MMAP_PROT, LF_MMAP_PROT_IS, LF_MMAP_PROT_HIGH, LF_MMAP_PROT_HIGH_IS,
+    /* mprotect(addr, length, prot): never write and execute together */
+    LF_MPROTECT_HIGH, LF_MPROTECT_HIGH_IS, LF_MPROTECT_PROT,
+    LF_MPROTECT_WX, LF_MPROTECT_WX_IS,
+    /* prctl(option, ...): option is an int, so only its low word counts */
+    LF_PRCTL_OPTION, LF_PRCTL_NO_NEW_PRIVS, LF_PRCTL_SECCOMP,
+    LF_ALLOW, LF_KILL, LF_LENGTH
+};
+
+int ios27_process_install_loader_filter(int report_fd) {
+    struct sock_filter code[LF_LENGTH] = {
+        LF_LOAD(LF_ARCH, offsetof(struct seccomp_data, arch)),
+        LF_NEED(LF_ARCH_IS, IOS27_AUDIT_ARCH),
+        LF_LOAD(LF_NR, offsetof(struct seccomp_data, nr)),
+        LF_IS(LF_EXIT, SYS_exit, LF_ALLOW),
+        LF_IS(LF_EXIT_GROUP, SYS_exit_group, LF_ALLOW),
+        LF_IS(LF_SIGRETURN, SYS_rt_sigreturn, LF_ALLOW),
+        LF_IS(LF_MUNMAP, SYS_munmap, LF_ALLOW),
+        LF_IS(LF_SIGPROCMASK, SYS_rt_sigprocmask, LF_ALLOW),
+        LF_IS(LF_CLOSE_RANGE, LF_SYS_CLOSE_RANGE, LF_ALLOW),
+        LF_IS(LF_WRITE, SYS_write, LF_WRITE_FD),
+        LF_IS(LF_MMAP, SYS_mmap, LF_MMAP_PROT),
+        LF_IS(LF_MPROTECT, SYS_mprotect, LF_MPROTECT_HIGH),
+        LF_IS(LF_PRCTL, SYS_prctl, LF_PRCTL_OPTION),
+        LF_RET(LF_OTHER, SECCOMP_RET_KILL_PROCESS),
+        LF_LOAD(LF_WRITE_FD, LF_ARG(0)),
+        LF_NEED(LF_WRITE_FD_IS, (uint32_t)report_fd),
+        LF_LOAD(LF_WRITE_FD_HIGH, LF_ARG_HIGH(0)),
+        LF_NEED(LF_WRITE_FD_HIGH_IS, 0u),
+        LF_LOAD(LF_WRITE_SIZE, LF_ARG(2)),
+        LF_NEED(LF_WRITE_SIZE_IS, sizeof(child_report)),
+        LF_LOAD(LF_WRITE_SIZE_HIGH, LF_ARG_HIGH(2)),
+        LF_LAST(LF_WRITE_SIZE_HIGH_IS, 0u),
+        LF_LOAD(LF_MMAP_PROT, LF_ARG(2)),
+        LF_NEED(LF_MMAP_PROT_IS, PROT_NONE),
+        LF_LOAD(LF_MMAP_PROT_HIGH, LF_ARG_HIGH(2)),
+        LF_LAST(LF_MMAP_PROT_HIGH_IS, 0u),
+        LF_LOAD(LF_MPROTECT_HIGH, LF_ARG_HIGH(2)),
+        LF_NEED(LF_MPROTECT_HIGH_IS, 0u),
+        LF_LOAD(LF_MPROTECT_PROT, LF_ARG(2)),
+        [LF_MPROTECT_WX] = BPF_STMT(BPF_ALU | BPF_AND | BPF_K,
+                                    PROT_WRITE | PROT_EXEC),
+        [LF_MPROTECT_WX_IS] = BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                                       PROT_WRITE | PROT_EXEC,
+                                       LF_TO(LF_MPROTECT_WX_IS, LF_KILL),
+                                       LF_TO(LF_MPROTECT_WX_IS, LF_ALLOW)),
+        LF_LOAD(LF_PRCTL_OPTION, LF_ARG(0)),
+        LF_IS(LF_PRCTL_NO_NEW_PRIVS, PR_SET_NO_NEW_PRIVS, LF_ALLOW),
+        LF_LAST(LF_PRCTL_SECCOMP, PR_SET_SECCOMP),
+        LF_RET(LF_ALLOW, SECCOMP_RET_ALLOW),
+        LF_RET(LF_KILL, SECCOMP_RET_KILL_PROCESS)
+    };
+    struct sock_fprog program = {(unsigned short)LF_LENGTH, code};
+    if (report_fd < 0) {
+        errno = EBADF;
+        return -1;
+    }
+    return prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program);
+}
+
 int ios27_process_close_outside(int first, int last) {
     if (first < 0 || last < first) {
         errno = EINVAL;
@@ -606,6 +704,12 @@ int ios27_process_close_outside(int first, int last) {
 }
 
 int ios27_process_install_filter(int report_fd) {
+    (void)report_fd;
+    errno = ENOSYS;
+    return -1;
+}
+
+int ios27_process_install_loader_filter(int report_fd) {
     (void)report_fd;
     errno = ENOSYS;
     return -1;
