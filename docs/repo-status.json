@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 119,
+      "branch": "codex/loader-drop-capabilities",
+      "sha": "1311b5d69d060594d6beacc07fb7f70bfa8bcf45",
+      "title": "feat(loader): drop capabilities before reading the payload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/119",
+      "updated_at": "2026-11-01T17:30:27Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -484,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T17:01:36Z"
+  "observed_at": "2026-11-01T17:31:01Z"
 }
