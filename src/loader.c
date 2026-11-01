@@ -262,6 +262,37 @@ static int require_plain_persona(void) {
     return 0;
 }
 
+/* The supervisor's child clamps the RLIMIT_STACK soft limit to
+ * IOS27_LOADER_STACK_LIMIT (_STK_LIM) before the exec, because execveat
+ * picks the loader's mmap layout from the limit saved when the exec began
+ * (bprm_mm_init and setup_new_exec in fs/exec.c). With an unlimited soft
+ * limit, the generic top-down layout that arm64 uses (mmap_is_legacy in
+ * mm/util.c) selects the legacy bottom-up mmap base, and x86_64 sizes the
+ * gap below the stack from the limit. That layout already exists when the
+ * loader runs, so a soft limit above IOS27_LOADER_STACK_LIMIT, unlimited
+ * included, is a setup error, not something to lower here. The query names
+ * this process by PID instead of 0, which keeps it apart from the pid-0
+ * prlimit64 calls behind setrlimit and getrlimit when a test answers those
+ * with seccomp. The buffer starts as unlimited, so a prlimit64 that claims
+ * success without writing it reads as unlimited. */
+typedef struct {
+    uint64_t current;
+    uint64_t maximum;
+} loader_rlimit64;
+_Static_assert(sizeof(loader_rlimit64) == 16u, "rlimit64 layout");
+
+static int require_bounded_stack_limit(void) {
+    loader_rlimit64 stack = {UINT64_MAX, UINT64_MAX};
+    if (syscall(SYS_prlimit64, (long)getpid(), (long)RLIMIT_STACK, NULL,
+                &stack))
+        return -1;
+    if (stack.current > IOS27_LOADER_STACK_LIMIT) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -274,11 +305,12 @@ int main(int argc, char **argv) {
         return 2;
     }
     /* Capabilities, core dumps and same-UID ptrace access end, and the
-     * parent-death signal and plain persona are confirmed, before any
-     * payload byte is read. */
+     * parent-death signal, plain persona and bounded stack limit are
+     * confirmed, before any payload byte is read. */
     if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
         clear_dumpable() || require_parent_death_signal() ||
-        require_plain_persona() || enter_landlock_domain())
+        require_plain_persona() || require_bounded_stack_limit() ||
+        enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);

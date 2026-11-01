@@ -72,16 +72,18 @@ the seal set is final.
 ## Child and loader sequence
 
 1. The supervisor forks a child that resets signals and its persona,
-   disables core dumps, keeps only the report pipe (descriptor 3) and the
-   payload (descriptor 4), sets `PR_SET_NO_NEW_PRIVS` and executes the
-   loader descriptor with a single `argv` entry and an empty environment.
-   The signal mask stays fully blocked across the exec.
+   lowers an `RLIMIT_STACK` soft limit above 8 MiB to 8 MiB, disables core
+   dumps, keeps only the report pipe (descriptor 3) and the payload
+   (descriptor 4), sets `PR_SET_NO_NEW_PRIVS` and executes the loader
+   descriptor with a single `argv` entry and an empty environment. The
+   signal mask stays fully blocked across the exec.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
 3. It sets `RLIMIT_CORE` to zero, drops its capabilities, clears its dumpable
    attribute, confirms that the supervisor's parent-death `SIGKILL` survived
-   the exec and that its persona is plain `PER_LINUX`, and enters a deny-all
+   the exec, that its persona is plain `PER_LINUX` and that its
+   `RLIMIT_STACK` soft limit is at most 8 MiB, and enters a deny-all
    Landlock domain, then opens the payload.
    All four launch seals must be present (`F_GET_SEALS`) and the size must
    match. The file is mapped `PROT_READ` and `MAP_PRIVATE`, and the
@@ -160,6 +162,29 @@ the seal set is final.
    loader adjusted, is a setup error and is not repaired. Like the dumpable
    step, this runs before the stage-one filter, which does not permit
    `personality`.
+
+   `execveat` builds the loader's address space from the `RLIMIT_STACK`
+   value saved when the exec began (`bprm_mm_init` and `setup_new_exec` in
+   the kernel's `fs/exec.c`). An ordinary exec keeps that value; only a
+   secure exec lowers a soft limit above `_STK_LIM` (8 MiB) to `_STK_LIM`
+   (`begin_new_exec`). With an unlimited soft limit, the generic layout code
+   that arm64 uses (`mmap_is_legacy` and `arch_pick_mmap_layout` in
+   `mm/util.c`) clears `MMF_TOPDOWN` and starts the mmap base at the legacy
+   bottom-up `TASK_UNMAPPED_BASE`, and x86_64 sizes the gap below the stack
+   from the limit. The supervisor's child therefore applies the secure-exec
+   clamp itself before the exec. When `getrlimit` reports an unlimited soft
+   limit or one above 8 MiB, the child lowers only the soft limit to 8 MiB
+   and keeps the hard limit, which needs no privilege
+   ([`getrlimit(2)`](https://man7.org/linux/man-pages/man2/getrlimit.2.html)).
+   A soft limit of 8 MiB or less is kept. The read buffer starts as
+   unlimited, so a `getrlimit` that claims success without writing it still
+   leads to the clamp. The fork runner does not clamp, because its child
+   keeps the launcher's existing address space. The loader reads its limit
+   back with `prlimit64`, naming its own PID instead of 0, into a buffer
+   that also starts as unlimited. Its layout already exists by then, so a
+   soft limit above 8 MiB, unlimited included, is an `EPERM` setup error
+   and is not lowered. Like the dumpable step, this runs before the
+   stage-one filter, which does not permit `prlimit64`.
 
    The Landlock ruleset has no rules. Depending on the ABI version the kernel
    reports, it handles every filesystem right through
@@ -287,7 +312,15 @@ host permits it, the launcher first sets `ADDR_NO_RANDOMIZE`, which an
 ordinary `execveat` keeps. The real reset must then let the loader reach
 the payload stage, and a faked successful reset must fail with `EPERM`
 because the read-back still reports the bit. Hosts whose policy refuses the
-persona change skip only these inherited cases. These steps run before the
-loader's architecture check, so they also run on x86_64. Passing these
-tests does not satisfy the general Darwin process-startup or
-untrusted-guest-isolation capability gates.
+persona change skip only these inherited cases. The launcher also raises
+its `RLIMIT_STACK` soft limit, once to unlimited and once to 16 MiB, and the
+supervisor's child inherits it. The real clamp must then let the loader
+reach the payload stage. Faked success for every pid-0 `prlimit64`, the
+call behind glibc's `getrlimit` and `setrlimit`, leaves the raised limit in
+place, so setup must fail with `EPERM`: the loader's read-back names its
+PID, is not answered and still reports the raised limit. Hosts whose hard
+limit cannot hold a raised soft limit, or whose policy refuses the change,
+skip only that mode. These steps run before the loader's architecture
+check, so they also run on x86_64. Passing these tests does not satisfy
+the general Darwin process-startup or untrusted-guest-isolation capability
+gates.
