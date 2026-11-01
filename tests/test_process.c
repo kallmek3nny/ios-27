@@ -549,7 +549,87 @@ static void launch_payload_checks(void) {
     assert(fd_count() == descriptors);
 }
 
-int main(void) {
+#ifndef SYS_landlock_create_ruleset
+#define SYS_landlock_create_ruleset 444
+#endif
+#ifndef SYS_landlock_restrict_self
+#define SYS_landlock_restrict_self 446
+#endif
+#define NO_INJECTION (-1L)
+
+/* After Landlock setup and the sealed payload open, the x86_64 loader stops
+ * at its architecture refusal and the ARM64 loader rejects the non-Mach-O
+ * image, so either stage proves both steps completed. */
+#if defined(__aarch64__)
+#define LOADER_STAGE "guest loader rejected the Mach-O image"
+#else
+#define LOADER_STAGE "guest loader requires ARM64 Linux/Android"
+#endif
+
+typedef struct {
+    long syscall_number; /* NO_INJECTION, or the syscall answered by seccomp */
+    int injected_errno;  /* 0 fakes success without running the syscall */
+    int setup_errno;     /* expected loader SETUP errno; 0 means LOADER_STAGE */
+} loader_case;
+
+/* Drive the project's real ios27-loader through ios27_process_supervise_exec
+ * from a separate launcher, so an injected seccomp answer stays local. The
+ * filter is inherited across fork and execveat and steers the loader's
+ * Landlock setup. Reaching LOADER_STAGE means the loader either enforced its
+ * deny-all domain (its own probe of "/" must fail with EACCES) or skipped an
+ * absent Landlock as documented, and then opened the payload. */
+static void loader_landlock_case(const char *loader_path, loader_case test) {
+    pid_t launcher = fork();
+    int status;
+    assert(launcher >= 0);
+    if (!launcher) {
+        static const uint8_t image[] = {0xcf, 0xfa, 0xed, 0xfe, 0x0c, 0x00, 0x00, 0x01};
+        const char *argv[] = {"fixture", NULL};
+        ios27_startup_context context = {.argc = 1, .argv = argv};
+        ios27_process_options options = {2000u};
+        ios27_process_result result;
+        char error[160], expected[160];
+        int loader = open(loader_path, O_RDONLY | O_CLOEXEC), payload = -1;
+        assert(loader >= 0);
+        assert(!ios27_launch_payload_create(image, sizeof(image), &context,
+                                            &payload, error, sizeof(error)));
+        if (test.syscall_number != NO_INJECTION) {
+            struct sock_filter code[] = {
+                BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
+                         offsetof(struct seccomp_data, nr)),
+                BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                         (uint32_t)test.syscall_number, 0, 1),
+                BPF_STMT(BPF_RET | BPF_K,
+                         SECCOMP_RET_ERRNO | (uint32_t)test.injected_errno),
+                BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
+            };
+            struct sock_fprog program = {
+                (unsigned short)(sizeof(code) / sizeof(code[0])), code
+            };
+            assert(!prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul));
+            assert(!prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program));
+        }
+        memset(&result, 0xff, sizeof(result));
+        assert(ios27_process_supervise_exec(loader, payload, &options, &result,
+                                            error, sizeof(error)) == -1);
+        cleared(&result);
+        if (test.setup_errno)
+            (void)snprintf(expected, sizeof(expected),
+                           "child containment setup failed: errno=%d",
+                           test.setup_errno);
+        else
+            (void)snprintf(expected, sizeof(expected), "%s", LOADER_STAGE);
+        assert(!strcmp(error, expected));
+        assert(!close(payload) && !close(loader));
+        no_children();
+        _exit(0);
+    }
+    assert(waitpid(launcher, &status, 0) == launcher);
+    assert(WIFEXITED(status) && WEXITSTATUS(status) == 0);
+    no_children();
+}
+
+int main(int argc, char **argv) {
     ios27_process_options options = {1000u};
     ios27_process_result result;
     char error[160];
@@ -678,6 +758,32 @@ int main(void) {
         no_children();
     }
     launch_payload_checks();
+    {
+        /* Host Landlock ABI, queried without side effects. restrict_self
+         * answers only matter once the loader's version query succeeds. */
+        long abi = syscall(SYS_landlock_create_ruleset, NULL, 0ul, 1ul);
+        int query_errno = errno;
+        int denied = abi > 0 ? EPERM : 0;
+        const loader_case cases[] = {
+            {NO_INJECTION, 0, 0},
+            /* Absent or disabled Landlock is skipped, as documented. */
+            {SYS_landlock_create_ruleset, ENOSYS, 0},
+            {SYS_landlock_create_ruleset, EOPNOTSUPP, 0},
+            /* Any other Landlock failure is a loader setup error. */
+            {SYS_landlock_create_ruleset, EPERM, EPERM},
+            {SYS_landlock_restrict_self, EPERM, denied},
+            /* A faked successful restrict_self is caught by the probe. */
+            {SYS_landlock_restrict_self, 0, denied}
+        };
+        assert(argc == 2 && argv[1][0]);
+        assert(abi > 0 || query_errno == ENOSYS || query_errno == EOPNOTSUPP);
+        for (size_t i = 0u; i < sizeof(cases) / sizeof(cases[0]); ++i)
+            loader_landlock_case(argv[1], cases[i]);
+        printf("guest loader Landlock: %s (host ABI %ld)\n",
+               abi > 0 ? "deny-all domain enforced and probed" :
+                         "unavailable, best-effort skip",
+               abi > 0 ? abi : 0L);
+    }
     assert(getpid() == parent && fd_count() == descriptors);
     assert(prctl(PR_GET_NO_NEW_PRIVS, 0ul, 0ul, 0ul, 0ul) == no_new_privs);
     assert(prctl(PR_GET_SECCOMP, 0ul, 0ul, 0ul, 0ul) == seccomp);

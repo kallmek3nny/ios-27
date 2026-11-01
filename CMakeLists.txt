@@ -226,7 +226,10 @@ if(IOS27_BUILD_TESTS)
         target_link_libraries(test_process PRIVATE ios27_core)
         target_include_directories(test_process PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
         target_compile_options(test_process PRIVATE -Wall -Wextra -Werror -Wpedantic)
-        add_test(NAME contained-process-supervisor COMMAND test_process)
+        add_dependencies(test_process ios27-loader)
+        # The Landlock cases exec the project's own trusted loader build output.
+        add_test(NAME contained-process-supervisor COMMAND test_process
+            "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15)
 
         add_executable(test_contained_macho tests/test_contained_macho.c)
