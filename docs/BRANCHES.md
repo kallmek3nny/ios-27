@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `72d926a86443`
-
-### [codex/fork-cpu-limit](https://github.com/kallmek3nny/ios-27/pull/125)
-
-head: `da57cfcac118` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 1 source files, 1 test/fixture files, +160/-45 lines
+candidate branches with mapped changes: **30** · audited base: `2674b2b42c0b`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -218,6 +212,12 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **21**
 
+### [merged PR #125](https://github.com/kallmek3nny/ios-27/pull/125)
+
+merged: 2026-11-01T21:07:54Z · source changes awaiting function-level audit.
+
+- **unclassified**: 1 source files, 1 fixtures, +160/-45 lines
+
 ### [merged PR #124](https://github.com/kallmek3nny/ios-27/pull/124)
 
 merged: 2026-11-01T20:43:20Z · source changes awaiting function-level audit.
@@ -350,13 +350,6 @@ merged: 2026-10-28T19:54:07Z · source changes awaiting function-level audit.
 
 - **libsystem_pthread**: 2 source files, 3 fixtures, +774/-0 lines
   - added declarations: `ios27_21b_attr_init`, `ios27_21b_attr_validate`, `ios27_21b_runtime_create`, `ios27_21b_runtime_destroy`, `ios27_21b_runtime_usage`, `ios27_21b_runtime_wait_idle`, `ios27_21b_thread_create`, `ios27_21b_thread_detach`, `ios27_21b_thread_equal`, `ios27_21b_thread_info`, `ios27_21b_thread_join`, `ios27_21b_thread_self`
-
-### [merged PR #67](https://github.com/kallmek3nny/ios-27/pull/67)
-
-merged: 2026-10-28T19:24:38Z · source changes awaiting function-level audit.
-
-- **ObjC host prototype (not Apple libobjc)**: 2 source files, 4 fixtures, +938/-0 lines
-  - added declarations: `ios27_objc20c_alloc`, `ios27_objc20c_autorelease`, `ios27_objc20c_create`, `ios27_objc20c_destroy`, `ios27_objc20c_get_stats`, `ios27_objc20c_pool_pop`, `ios27_objc20c_pool_push`, `ios27_objc20c_release`, `ios27_objc20c_retain`, `ios27_objc20c_retain_count`, `ios27_objc20c_strong_store`, `ios27_objc20c_validate`
 
 ## verification policy
 

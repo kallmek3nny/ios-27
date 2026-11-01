@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "72d926a864435bde65c90e8e8f10cfe19acfbf5a",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/72d926a864435bde65c90e8e8f10cfe19acfbf5a",
-    "committed_at": "2026-11-01T20:43:20Z"
+    "sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
+    "committed_at": "2026-11-01T21:07:54Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 125,
-      "branch": "codex/fork-cpu-limit",
-      "sha": "da57cfcac118d45c61f894ed0a589c36adfcc434",
-      "title": "feat(process): clamp and verify a bounded RLIMIT_CPU in the fork runner",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/125",
-      "updated_at": "2026-11-01T21:04:29Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 125,
+      "title": "feat(process): clamp and verify a bounded RLIMIT_CPU in the fork runner",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/125",
+      "head_sha": "da57cfcac118d45c61f894ed0a589c36adfcc434",
+      "merged_at": "2026-11-01T21:07:54Z"
+    },
+    {
       "number": 124,
       "title": "feat(loader): clamp and verify a bounded RLIMIT_CPU across exec",
       "url": "https://github.com/kallmek3nny/ios-27/pull/124",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/68",
       "head_sha": "e5db3003ede2457825deb04ff5d180e3a5346023",
       "merged_at": "2026-10-28T19:33:53Z"
-    },
-    {
-      "number": 67,
-      "title": "phase20c: bounded native ObjC ownership, weak refs, and nested autorelease pools",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "head_sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
-      "merged_at": "2026-10-28T19:24:38Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 24,
+    "branches_scanned": 25,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T21:05:06Z"
+  "observed_at": "2026-11-01T21:08:31Z"
 }

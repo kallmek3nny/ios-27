@@ -2,35 +2,11 @@
   "schema": 1,
   "classification_version": 3,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "72d926a864435bde65c90e8e8f10cfe19acfbf5a",
+  "main_source_sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 31,
-  "candidate_count": 31,
+  "candidates_checked": 30,
+  "candidate_count": 30,
   "candidates": [
-    {
-      "branch": "codex/fork-cpu-limit",
-      "sha": "da57cfcac118d45c61f894ed0a589c36adfcc434",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/125",
-      "pr_number": 125,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 4,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 1,
-          "fixture_files": 1,
-          "additions": 160,
-          "deletions": 45,
-          "symbols_preview": [],
-          "example_paths": [
-            "src/process.c",
-            "tests/test_process.c"
-          ]
-        }
-      ]
-    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1247,19 +1223,35 @@
         "fixture_files": 9,
         "ci": "passing_checks"
       }
-    ],
-    "unclassified": [
-      {
-        "branch": "codex/fork-cpu-limit",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/125",
-        "source_files": 1,
-        "fixture_files": 1,
-        "ci": "passing_checks"
-      }
     ]
   },
   "recent_merged_count": 21,
   "recent_merged": [
+    {
+      "branch": "merged-pr-125",
+      "sha": "da57cfcac118d45c61f894ed0a589c36adfcc434",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/125",
+      "pr_number": 125,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 4,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 1,
+          "additions": 160,
+          "deletions": 45,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/process.c",
+            "tests/test_process.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-11-01T21:07:54Z"
+    },
     {
       "branch": "merged-pr-124",
       "sha": "30e571995864348ca28617dde9e9dbe329699573",
@@ -1897,46 +1889,6 @@
         }
       ],
       "merged_at": "2026-10-28T19:54:07Z"
-    },
-    {
-      "branch": "merged-pr-67",
-      "sha": "ab794912355e89f02ddd82c6c58658b432fc1f9e",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-      "pr_number": 67,
-      "ci": "merged_not_compat_verified",
-      "status": "merged source; compatibility review pending",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "objc-host-model",
-          "source_files": 2,
-          "fixture_files": 4,
-          "additions": 938,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_objc20c_alloc",
-            "ios27_objc20c_autorelease",
-            "ios27_objc20c_create",
-            "ios27_objc20c_destroy",
-            "ios27_objc20c_get_stats",
-            "ios27_objc20c_pool_pop",
-            "ios27_objc20c_pool_push",
-            "ios27_objc20c_release",
-            "ios27_objc20c_retain",
-            "ios27_objc20c_retain_count",
-            "ios27_objc20c_strong_store",
-            "ios27_objc20c_validate"
-          ],
-          "example_paths": [
-            "include/ios27/objc20c_lifetime.h",
-            "src/objc20c_lifetime.c",
-            "tests/phase20c-compiled-host.c",
-            "tests/phase20c-compiled.m"
-          ]
-        }
-      ],
-      "merged_at": "2026-10-28T19:24:38Z"
     }
   ],
   "merged_groups": {
@@ -2023,16 +1975,16 @@
         "source_files": 4,
         "fixture_files": 4,
         "status": "merged source, not necessarily compatible"
-      },
-      {
-        "pr_number": 67,
-        "url": "https://github.com/kallmek3nny/ios-27/pull/67",
-        "source_files": 2,
-        "fixture_files": 4,
-        "status": "merged source, not necessarily compatible"
       }
     ],
     "unclassified": [
+      {
+        "pr_number": 125,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/125",
+        "source_files": 1,
+        "fixture_files": 1,
+        "status": "merged source, not necessarily compatible"
+      },
       {
         "pr_number": 124,
         "url": "https://github.com/kallmek3nny/ios-27/pull/124",
@@ -2112,5 +2064,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T21:05:11Z"
+  "observed_at": "2026-11-01T21:08:36Z"
 }
