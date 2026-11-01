@@ -11,10 +11,10 @@
     {
       "number": 116,
       "branch": "codex/loader-landlock",
-      "sha": "d5c4efb7f7b6f8563371b443840967beb072ca61",
+      "sha": "76565d6daee1f876b26d57989cf769bc6cdb74b5",
       "title": "feat(loader): enter a deny-all Landlock domain before reading the payload",
       "url": "https://github.com/kallmek3nny/ios-27/pull/116",
-      "updated_at": "2026-11-01T00:40:23Z",
+      "updated_at": "2026-11-01T00:44:38Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T00:40:58Z"
+  "observed_at": "2026-11-01T00:45:20Z"
 }

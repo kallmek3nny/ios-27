@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/loader-landlock",
-      "sha": "d5c4efb7f7b6f8563371b443840967beb072ca61",
+      "sha": "76565d6daee1f876b26d57989cf769bc6cdb74b5",
       "url": "https://github.com/kallmek3nny/ios-27/pull/116",
       "pr_number": 116,
       "ci": "running",
@@ -1994,5 +1994,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T00:41:01Z"
+  "observed_at": "2026-11-01T00:45:24Z"
 }
