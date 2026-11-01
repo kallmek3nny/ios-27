@@ -8,6 +8,30 @@
   "candidate_count": 31,
   "candidates": [
     {
+      "branch": "codex/loader-pdeathsig",
+      "sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/120",
+      "pr_number": 120,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 3,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 1,
+          "additions": 44,
+          "deletions": 12,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/loader.c",
+            "tests/test_process.c"
+          ]
+        }
+      ]
+    },
+    {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
       "url": "https://github.com/kallmek3nny/ios-27/pull/112",
@@ -989,30 +1013,6 @@
           ]
         }
       ]
-    },
-    {
-      "branch": "codex/loader-pdeathsig",
-      "sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Floader-pdeathsig",
-      "pr_number": null,
-      "ci": "not_checked",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 1,
-          "fixture_files": 1,
-          "additions": 44,
-          "deletions": 12,
-          "symbols_preview": [],
-          "example_paths": [
-            "src/loader.c",
-            "tests/test_process.c"
-          ]
-        }
-      ]
     }
   ],
   "groups": {
@@ -1251,10 +1251,10 @@
     "unclassified": [
       {
         "branch": "codex/loader-pdeathsig",
-        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Floader-pdeathsig",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/120",
         "source_files": 1,
         "fixture_files": 1,
-        "ci": "not_checked"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -2126,5 +2126,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T17:54:59Z"
+  "observed_at": "2026-11-01T17:55:47Z"
 }

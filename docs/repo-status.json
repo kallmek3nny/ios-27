@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 120,
+      "branch": "codex/loader-pdeathsig",
+      "sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
+      "title": "feat(loader): require the parent-death SIGKILL before reading the payload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/120",
+      "updated_at": "2026-11-01T17:55:03Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -279,17 +288,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "codex/loader-pdeathsig",
-      "sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
-      "ahead_by": 2,
-      "behind_by": 0,
-      "last_commit_at": "2026-11-01T17:54:01Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Floader-pdeathsig",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 119,
@@ -490,9 +489,9 @@
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 20,
+    "branches_scanned": 19,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T17:54:53Z"
+  "observed_at": "2026-11-01T17:55:42Z"
 }

@@ -6,6 +6,12 @@
 
 candidate branches with mapped changes: **31** · audited base: `d7e4bf56796b`
 
+### [codex/loader-pdeathsig](https://github.com/kallmek3nny/ios-27/pull/120)
+
+head: `0291d9ffb056` · ci: **passing_checks** · unmerged, not credited.
+
+- **unclassified**: 1 source files, 1 test/fixture files, +44/-12 lines
+
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
 head: `63310d737d10` · ci: **passing_checks** · unmerged, not credited.
@@ -205,12 +211,6 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
-
-### [codex/loader-pdeathsig](https://github.com/kallmek3nny/ios-27/tree/codex%2Floader-pdeathsig)
-
-head: `0291d9ffb056` · ci: **not_checked** · unmerged, not credited.
-
-- **unclassified**: 1 source files, 1 test/fixture files, +44/-12 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
