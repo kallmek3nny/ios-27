@@ -15,9 +15,9 @@
  * into a fresh address space. It inherits only the report pipe on fd 3, the
  * sealed launch payload on fd 4, an empty environment and a fully blocked
  * signal mask, so no launcher heap, stack or mapping is visible to the
- * guest. Before reading the payload it clears its dumpable attribute and
- * enters a deny-all Landlock domain when the kernel provides one. Once the
- * payload is mapped and its
+ * guest. Before reading the payload it drops its capabilities, clears its
+ * dumpable attribute and enters a deny-all Landlock domain when the kernel
+ * provides one. Once the payload is mapped and its
  * descriptor closed, it installs a stage-one seccomp allowlist before the
  * image is re-parsed. Like the fork runner this is trusted-fixture failure
  * containment, NOT a sandbox for untrusted Mach-O code. */
@@ -142,6 +142,77 @@ static int clear_dumpable(void) {
     return 0;
 }
 
+/* Capability uapi subset from linux/capability.h and linux/prctl.h,
+ * defined here so older headers still build. Version 3 uses two data
+ * structs, covering capabilities 0 through 63. */
+#define LOADER_CAPABILITY_VERSION_3 UINT32_C(0x20080522)
+#define LOADER_CAPABILITY_U32S 2u
+#ifndef PR_CAP_AMBIENT
+#define PR_CAP_AMBIENT 47
+#endif
+#ifndef PR_CAP_AMBIENT_CLEAR_ALL
+#define PR_CAP_AMBIENT_CLEAR_ALL 4
+#endif
+
+typedef struct {
+    uint32_t version;
+    int pid;
+} loader_cap_header;
+
+typedef struct {
+    uint32_t effective;
+    uint32_t permitted;
+    uint32_t inheritable;
+} loader_cap_data;
+_Static_assert(sizeof(loader_cap_header) == 8u, "capability header layout");
+_Static_assert(sizeof(loader_cap_data) == 12u, "capability data layout");
+
+/* Read back this thread's effective, permitted and inheritable sets. The
+ * buffer starts as all ones, so a capget that claims success without
+ * writing it reads as held capabilities. */
+static int capabilities_held(int *held) {
+    loader_cap_header header = {LOADER_CAPABILITY_VERSION_3, 0};
+    loader_cap_data data[LOADER_CAPABILITY_U32S];
+    uint32_t bits = 0u;
+    for (unsigned i = 0u; i < LOADER_CAPABILITY_U32S; ++i)
+        data[i].effective = data[i].permitted = data[i].inheritable = UINT32_MAX;
+    if (syscall(SYS_capget, &header, data)) return -1;
+    for (unsigned i = 0u; i < LOADER_CAPABILITY_U32S; ++i)
+        bits |= data[i].effective | data[i].permitted | data[i].inheritable;
+    *held = bits != 0u;
+    return 0;
+}
+
+/* execveat of a program without file capabilities copies the caller's
+ * ambient set into the new permitted and effective sets, and no_new_privs
+ * does not clear an ambient set the caller already holds
+ * (cap_bprm_creds_from_file in security/commoncap.c). The inheritable set
+ * carries over unchanged, and a root caller can also start the loader with
+ * permitted capabilities. All of them are dropped before any payload byte
+ * is read. Clearing the ambient set and lowering the other sets to empty
+ * needs no capability. A capability can be ambient only while it is both
+ * permitted and inheritable, so empty sets also mean an empty ambient set.
+ * EINVAL from the ambient clear means a kernel older than Linux 4.3, which
+ * has no ambient sets. A refused capset is accepted only when the
+ * read-back shows nothing left to drop; any capability still reported is a
+ * setup error. The bounding set and the user and group IDs are unchanged. */
+static int drop_capabilities(void) {
+    loader_cap_header header = {LOADER_CAPABILITY_VERSION_3, 0};
+    loader_cap_data none[LOADER_CAPABILITY_U32S] = {{0u, 0u, 0u}, {0u, 0u, 0u}};
+    int refused = 0, held = 1;
+    if (prctl(PR_CAP_AMBIENT, (unsigned long)PR_CAP_AMBIENT_CLEAR_ALL, 0ul,
+              0ul, 0ul) &&
+        errno != EINVAL)
+        return -1;
+    if (syscall(SYS_capset, &header, none)) refused = errno;
+    if (capabilities_held(&held)) return -1;
+    if (held) {
+        errno = refused ? refused : EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -153,10 +224,10 @@ int main(int argc, char **argv) {
               "ios27_run_executable_exec\n", stderr);
         return 2;
     }
-    /* Core dumps and same-UID ptrace access end before any payload byte
-     * is read. */
-    if (setrlimit(RLIMIT_CORE, &core) || clear_dumpable() ||
-        enter_landlock_domain())
+    /* Capabilities, core dumps and same-UID ptrace access end before any
+     * payload byte is read. */
+    if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
+        clear_dumpable() || enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);
