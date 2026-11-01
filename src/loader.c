@@ -2,21 +2,96 @@
 #include "process_internal.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 /* ios27-loader: trusted helper that ios27_run_executable_exec execveat()s
  * into a fresh address space. It inherits only the report pipe on fd 3, the
  * sealed launch payload on fd 4, an empty environment and a fully blocked
  * signal mask, so no launcher heap, stack or mapping is visible to the
- * guest. Like the fork runner this is trusted-fixture failure containment,
- * NOT a sandbox for untrusted Mach-O code. */
+ * guest. Before reading the payload it enters a deny-all Landlock domain
+ * when the kernel provides one. Like the fork runner this is
+ * trusted-fixture failure containment, NOT a sandbox for untrusted Mach-O
+ * code. */
 
 static ios27_launch_payload payload;
+
+/* Landlock uapi subset from linux/landlock.h, defined here so older headers
+ * still build. x86_64 and the generic arm64 syscall table share these
+ * numbers. */
+#ifndef SYS_landlock_create_ruleset
+#define SYS_landlock_create_ruleset 444
+#endif
+#ifndef SYS_landlock_restrict_self
+#define SYS_landlock_restrict_self 446
+#endif
+#define LOADER_LANDLOCK_VERSION 1ul /* LANDLOCK_CREATE_RULESET_VERSION */
+/* EXECUTE through MAKE_SYM (ABI 1), REFER (2), TRUNCATE (3), IOCTL_DEV (5);
+ * TCP bind and connect (4); abstract UNIX socket and signal scopes (6).
+ * Rights added by later ABI versions are not requested. */
+#define LOADER_LANDLOCK_FS_ABI1 ((UINT64_C(1) << 13) - 1u)
+#define LOADER_LANDLOCK_FS_REFER (UINT64_C(1) << 13)
+#define LOADER_LANDLOCK_FS_TRUNCATE (UINT64_C(1) << 14)
+#define LOADER_LANDLOCK_FS_IOCTL_DEV (UINT64_C(1) << 15)
+#define LOADER_LANDLOCK_NET_TCP UINT64_C(0x3)
+#define LOADER_LANDLOCK_SCOPES UINT64_C(0x3)
+
+typedef struct {
+    uint64_t handled_access_fs;
+    uint64_t handled_access_net;
+    uint64_t scoped;
+} loader_landlock_ruleset_attr;
+_Static_assert(sizeof(loader_landlock_ruleset_attr) == 24u,
+               "Landlock ruleset attribute layout");
+
+/* Enter a Landlock domain without rules, so every handled right is denied
+ * to the loader and to the guest that later runs in this process.
+ * Descriptors opened earlier (the report pipe and the sealed payload) stay
+ * usable. Best effort, as the kernel documentation recommends: ENOSYS or
+ * EOPNOTSUPP from the version query means Landlock is absent or disabled,
+ * and the mandatory seccomp filter still applies before guest entry. Any
+ * other failure, or a directory open that still succeeds afterwards, is a
+ * setup error. */
+static int enter_landlock_domain(void) {
+    loader_landlock_ruleset_attr attr = {0};
+    long abi, ruleset;
+    int saved, probe;
+    abi = syscall(SYS_landlock_create_ruleset, NULL, 0ul, LOADER_LANDLOCK_VERSION);
+    if (abi < 0)
+        return errno == ENOSYS || errno == EOPNOTSUPP ? 0 : -1;
+    attr.handled_access_fs = LOADER_LANDLOCK_FS_ABI1;
+    if (abi >= 2) attr.handled_access_fs |= LOADER_LANDLOCK_FS_REFER;
+    if (abi >= 3) attr.handled_access_fs |= LOADER_LANDLOCK_FS_TRUNCATE;
+    if (abi >= 4) attr.handled_access_net = LOADER_LANDLOCK_NET_TCP;
+    if (abi >= 5) attr.handled_access_fs |= LOADER_LANDLOCK_FS_IOCTL_DEV;
+    if (abi >= 6) attr.scoped = LOADER_LANDLOCK_SCOPES;
+    ruleset = syscall(SYS_landlock_create_ruleset, &attr, sizeof(attr), 0ul);
+    if (ruleset < 0) return -1;
+    /* Unprivileged enforcement needs no_new_privs. The supervisor set it
+     * before execveat and it survives exec; this only reasserts it. */
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
+        syscall(SYS_landlock_restrict_self, ruleset, 0ul)) {
+        saved = errno;
+        (void)close((int)ruleset);
+        errno = saved;
+        return -1;
+    }
+    if (close((int)ruleset)) return -1;
+    /* Confirm enforcement: reading any directory is now refused. */
+    probe = open("/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (probe >= 0) {
+        (void)close(probe);
+        errno = EPERM;
+        return -1;
+    }
+    return errno == EACCES ? 0 : -1;
+}
 
 static _Noreturn void loader_exit(uint32_t kind, int value) {
     int sent = ios27_process_report(IOS27_LOADER_REPORT_FD, kind, value);
@@ -55,7 +130,7 @@ int main(int argc, char **argv) {
               "ios27_run_executable_exec\n", stderr);
         return 2;
     }
-    if (setrlimit(RLIMIT_CORE, &core))
+    if (setrlimit(RLIMIT_CORE, &core) || enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);

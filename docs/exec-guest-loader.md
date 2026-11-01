@@ -79,11 +79,28 @@ the seal set is final.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
-3. It sets `RLIMIT_CORE` to zero, then opens the payload. All four launch
-   seals must be present (`F_GET_SEALS`) and the size must match. The file is
-   mapped `PROT_READ` and `MAP_PRIVATE`, and the NULL-terminated vectors are
-   rebuilt with bounds checks on every count, size and string. Descriptor 4
-   is then closed; the private mapping outlives it.
+3. It sets `RLIMIT_CORE` to zero and enters a deny-all Landlock domain, then
+   opens the payload. All four launch seals must be present (`F_GET_SEALS`)
+   and the size must match. The file is mapped `PROT_READ` and `MAP_PRIVATE`,
+   and the NULL-terminated vectors are rebuilt with bounds checks on every
+   count, size and string. Descriptor 4 is then closed; the private mapping
+   outlives it.
+
+   The Landlock ruleset has no rules. Depending on the ABI version the kernel
+   reports, it handles every filesystem right through
+   `LANDLOCK_ACCESS_FS_IOCTL_DEV` (ABI 5), TCP bind and connect (ABI 4), and
+   the abstract UNIX socket and signal scopes (ABI 6). New file and directory
+   opens, executions and filesystem changes are therefore refused for the
+   loader and for the guest that later runs in the same process. Rights added
+   by later ABI versions are not requested. Descriptors opened before
+   enforcement, here the report pipe and the sealed payload, stay usable, as
+   the [kernel documentation](https://docs.kernel.org/userspace-api/landlock.html)
+   describes. After enforcement the loader confirms that opening `/` for
+   reading fails with `EACCES`. Following the documented best-effort pattern,
+   `ENOSYS` or `EOPNOTSUPP` from the version query skips the domain, and the
+   mandatory seccomp filter still applies before guest entry. Any other
+   Landlock failure is a setup error. Android kernel support, and whether
+   Android's app seccomp policy permits these syscalls, are not verified.
 4. Launcher metadata is never trusted across exec. The loader re-runs
    `ios27_macho_parse` and `ios27_macho_executable_layout` on its sealed copy
    with its own page size.
