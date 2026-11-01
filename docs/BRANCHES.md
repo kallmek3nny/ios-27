@@ -4,7 +4,13 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **30** · audited base: `4fce43fe62c6`
+candidate branches with mapped changes: **31** · audited base: `4fce43fe62c6`
+
+### [codex/loader-nondumpable](https://github.com/kallmek3nny/ios-27/pull/118)
+
+head: `610dd7b996d3` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 1 source files, 1 test/fixture files, +64/-11 lines
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 

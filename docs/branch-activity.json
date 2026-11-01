@@ -4,9 +4,33 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "4fce43fe62c6322c94f4e0bea227b7229387b634",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 30,
-  "candidate_count": 30,
+  "candidates_checked": 31,
+  "candidate_count": 31,
   "candidates": [
+    {
+      "branch": "codex/loader-nondumpable",
+      "sha": "610dd7b996d39e32edc30a77309ca0d94d3da0c2",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/118",
+      "pr_number": 118,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 3,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 1,
+          "additions": 64,
+          "deletions": 11,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/loader.c",
+            "tests/test_process.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1223,6 +1247,15 @@
         "fixture_files": 9,
         "ci": "passing_checks"
       }
+    ],
+    "unclassified": [
+      {
+        "branch": "codex/loader-nondumpable",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/118",
+        "source_files": 1,
+        "fixture_files": 1,
+        "ci": "running"
+      }
     ]
   },
   "recent_merged_count": 18,
@@ -2029,5 +2062,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T16:04:03Z"
+  "observed_at": "2026-11-01T16:57:17Z"
 }
