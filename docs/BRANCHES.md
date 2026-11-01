@@ -4,7 +4,14 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **30** · audited base: `50b326d5c36b`
+candidate branches with mapped changes: **31** · audited base: `50b326d5c36b`
+
+### [codex/loader-sched-reset](https://github.com/kallmek3nny/ios-27/pull/123)
+
+head: `2148d9e7aff8` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 3 source files, 1 test/fixture files, +169/-16 lines
+  - candidate declarations: `ios27_process_fair_policy`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
