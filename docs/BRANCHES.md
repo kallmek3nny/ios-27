@@ -8,7 +8,7 @@ candidate branches with mapped changes: **31** · audited base: `73b3cff5a5bb`
 
 ### [codex/loader-landlock](https://github.com/kallmek3nny/ios-27/pull/116)
 
-head: `76565d6daee1` · ci: **running** · unmerged, not credited.
+head: `676d6611af6e` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 1 source files, 1 test/fixture files, +185/-4 lines
 

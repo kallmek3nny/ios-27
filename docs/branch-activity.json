@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/loader-landlock",
-      "sha": "76565d6daee1f876b26d57989cf769bc6cdb74b5",
+      "sha": "676d6611af6e31df449cfa03478c68f589459335",
       "url": "https://github.com/kallmek3nny/ios-27/pull/116",
       "pr_number": 116,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 4,
       "possibly_truncated": false,
@@ -1254,7 +1254,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/116",
         "source_files": 1,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -1994,5 +1994,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T00:45:24Z"
+  "observed_at": "2026-11-01T00:50:16Z"
 }
