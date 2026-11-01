@@ -11,10 +11,10 @@
     {
       "number": 121,
       "branch": "codex/loader-persona",
-      "sha": "371cf59ededfb8cffbe3b015f1d8934a1d6d7d31",
+      "sha": "20d5592b204d1fc0b5952f0f6b8b9abdc82db27c",
       "title": "feat(loader): reset and verify a plain PER_LINUX persona across exec",
       "url": "https://github.com/kallmek3nny/ios-27/pull/121",
-      "updated_at": "2026-11-01T18:26:04Z",
+      "updated_at": "2026-11-01T18:30:23Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T18:26:47Z"
+  "observed_at": "2026-11-01T18:30:55Z"
 }
