@@ -484,20 +484,6 @@ static void child_reset(int fd, pid_t parent) {
     if (getppid() != parent) _exit(125);
 }
 
-/* Fork mode: executable/stack mappings and guest arguments already exist. */
-static void child_run(int fd, pid_t parent, int (*entry)(void *), void *context) {
-    sigset_t empty;
-    child_reset(fd, parent);
-    if (sigemptyset(&empty) || ios27_process_close_outside(fd, fd) ||
-        prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
-        sigprocmask(SIG_SETMASK, &empty, NULL) ||
-        ios27_process_install_filter(fd))
-        report_and_exit(fd, IOS27_REPORT_SETUP, errno);
-    /* A fault before this packet is a setup failure, not guest execution. */
-    if (ios27_process_report(fd, IOS27_REPORT_READY, 0)) _exit(125);
-    report_and_exit(fd, IOS27_REPORT_RETURN, entry(context));
-}
-
 /* execveat applies the RLIMIT_STACK value saved when the exec began
  * (bprm_mm_init in fs/exec.c) to the loader's new address space, and an
  * ordinary exec never lowers it; only a secureexec exec clamps the soft
@@ -524,9 +510,9 @@ _Static_assert(IOS27_LOADER_CPU_LIMIT * 1000u > IOS27_PROCESS_MAX_TIMEOUT_MS,
 /* The launcher's wall-clock deadline normally ends a guest busy loop, and
  * the parent-death signal covers a launcher that exits. A launcher that is
  * stopped but still alive neither enforces its deadline nor triggers that
- * signal, so the exec child also bounds CPU time in the kernel. fork resets
- * the child's CPU time counters (fork(2)), and resource limits survive fork
- * and execveat (getrlimit(2)). check_process_timers in
+ * signal, so the fork and exec children also bound CPU time in the kernel.
+ * fork resets the child's CPU time counters (fork(2)), and resource limits
+ * survive fork and execveat (getrlimit(2)). check_process_timers in
  * kernel/time/posix-cpu-timers.c compares the whole thread group's user
  * plus system time with RLIMIT_CPU and sends SIGXCPU at the soft limit and
  * SIGKILL at the hard limit. Without privilege a process may lower its hard
@@ -534,8 +520,9 @@ _Static_assert(IOS27_LOADER_CPU_LIMIT * 1000u > IOS27_PROCESS_MAX_TIMEOUT_MS,
  * IOS27_LOADER_CPU_LIMIT seconds, unlimited included, is lowered to it and
  * the soft limit is kept at or below it. Lower inherited limits are kept.
  * The read buffer starts as unlimited, so a getrlimit that claims success
- * without writing it still leads to the clamp. The loader reads the hard
- * limit back. */
+ * without writing it still leads to the clamp. The clamp is not trusted on
+ * its own: the loader reads both limits back after the exec, and the fork
+ * child reads them back with require_bounded_cpu_limit. */
 static int clamp_cpu_limit(void) {
     struct rlimit cpu = {RLIM_INFINITY, RLIM_INFINITY};
     if (getrlimit(RLIMIT_CPU, &cpu)) return -1;
@@ -548,14 +535,59 @@ static int clamp_cpu_limit(void) {
     return setrlimit(RLIMIT_CPU, &cpu);
 }
 
+/* prlimit64 fills a struct rlimit64, whose layout does not depend on the
+ * libc struct rlimit. */
+typedef struct {
+    uint64_t current;
+    uint64_t maximum;
+} child_rlimit64;
+_Static_assert(sizeof(child_rlimit64) == 16u, "rlimit64 layout");
+
+/* The fork child's counterpart of the loader's CPU-limit read-back. No
+ * exec separates the clamp from the guest, so the child reads its own
+ * limits back before installing its filter. As in the loader, the query
+ * names this process by PID instead of 0, which keeps it apart from the
+ * pid-0 prlimit64 calls behind getrlimit and setrlimit when a test answers
+ * those with seccomp, and the buffer starts as unlimited, so a prlimit64
+ * that claims success without writing it reads as unlimited. A hard limit
+ * above IOS27_LOADER_CPU_LIMIT seconds, unlimited included, or a soft limit
+ * above the hard limit fails with EPERM. */
+static int require_bounded_cpu_limit(void) {
+    child_rlimit64 cpu = {UINT64_MAX, UINT64_MAX};
+    if (syscall(SYS_prlimit64, (long)getpid(), (long)RLIMIT_CPU, NULL, &cpu))
+        return -1;
+    if (cpu.maximum > IOS27_LOADER_CPU_LIMIT || cpu.current > cpu.maximum) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
+/* Fork mode: executable/stack mappings and guest arguments already exist.
+ * The guest keeps the launcher's address space, so the stack-limit clamp
+ * does not apply here, but the CPU-limit clamp and its read-back do. */
+static void child_run(int fd, pid_t parent, int (*entry)(void *), void *context) {
+    sigset_t empty;
+    child_reset(fd, parent);
+    if (clamp_cpu_limit() || require_bounded_cpu_limit() ||
+        sigemptyset(&empty) || ios27_process_close_outside(fd, fd) ||
+        prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul) ||
+        sigprocmask(SIG_SETMASK, &empty, NULL) ||
+        ios27_process_install_filter(fd))
+        report_and_exit(fd, IOS27_REPORT_SETUP, errno);
+    /* A fault before this packet is a setup failure, not guest execution. */
+    if (ios27_process_report(fd, IOS27_REPORT_READY, 0)) _exit(125);
+    report_and_exit(fd, IOS27_REPORT_RETURN, entry(context));
+}
+
 /* Exec mode: assemble the fixed loader layout (report pipe on 3, sealed
  * payload on 4), drop every other descriptor and replace the address space
  * with the trusted loader, using an empty environment. The launcher's full
  * signal mask stays blocked across exec; the loader clears it immediately
  * before installing its own filter and reporting readiness. The stack-limit
  * clamp applies only here, because the fork child keeps the launcher's
- * existing address space. The CPU-limit clamp also applies only here for
- * now, because only the loader reads it back. */
+ * existing address space. The CPU-limit clamp applies in both modes; after
+ * the exec, the loader reads it back. */
 static void child_exec(int fd, pid_t parent, int payload, int loader) {
     int report, staged_payload = -1, staged_loader = -1;
     child_reset(fd, parent);

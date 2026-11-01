@@ -190,9 +190,9 @@ the seal set is final.
    stage-one filter, which does not permit `prlimit64`.
 
    A launcher that is stopped but still alive neither enforces its
-   deadline nor triggers the parent-death signal, so the supervisor's exec
-   child also bounds CPU time in the kernel. `fork` resets the child's CPU
-   time counters
+   deadline nor triggers the parent-death signal, so the supervisor's fork
+   and exec children also bound CPU time in the kernel. `fork` resets the
+   child's CPU time counters
    ([`fork(2)`](https://man7.org/linux/man-pages/man2/fork.2.html)), and
    resource limits survive `fork` and `execveat` (`getrlimit(2)`).
    `check_process_timers` in the kernel's `kernel/time/posix-cpu-timers.c`
@@ -209,13 +209,14 @@ the seal set is final.
    ending a guest that the deadline still allows. The read buffer starts
    as unlimited, so a `getrlimit` that claims success without writing it
    still leads to the clamp, and a failed query or change is a setup
-   error. For now the fork runner does not clamp, because only the loader
-   reads the limit back. The loader reads both limits back with
-   `prlimit64`, naming its own PID instead of 0, into a buffer that also
-   starts as unlimited, and does not repair them: a hard limit above 61
-   seconds, unlimited included, or a soft limit above the hard limit is an
-   `EPERM` setup error. Like the dumpable step, this runs before the
-   stage-one filter, which does not permit `prlimit64`.
+   error. The fork runner applies the same clamp, and because no exec
+   separates the clamp from its guest, its child reads both limits back
+   the same way before installing its filter. The loader reads both
+   limits back with `prlimit64`, naming its own PID instead of 0, into a
+   buffer that also starts as unlimited, and does not repair them: a hard
+   limit above 61 seconds, unlimited included, or a soft limit above the
+   hard limit is an `EPERM` setup error. Like the dumpable step, this runs
+   before the stage-one filter, which does not permit `prlimit64`.
 
    A child created by `fork` inherits its parent's scheduling policy and
    priority, and an ordinary `execveat` keeps them

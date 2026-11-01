@@ -70,6 +70,27 @@ report protocol after reaping the child. A raw exit without a return report
 is a report failure. A monotonic deadline covers setup and execution; the
 launcher kills and reaps the child when it expires.
 
+The deadline only works while the launcher is running. If the launcher is
+stopped but still alive, it doesn't enforce the deadline, and the child's
+parent-death signal doesn't fire. So the child also bounds its CPU time in
+the kernel. Resource limits survive fork, and fork resets the child's CPU
+time counters
+([`getrlimit(2)`](https://man7.org/linux/man-pages/man2/getrlimit.2.html),
+[`fork(2)`](https://man7.org/linux/man-pages/man2/fork.2.html)). Before it
+installs its filter, the child checks its `RLIMIT_CPU` hard limit. If that
+limit is above `IOS27_LOADER_CPU_LIMIT` seconds, or unlimited, the child
+lowers it to that bound and keeps the soft limit at or below it. Lower
+inherited limits stay as they are. Neither change needs privilege. A
+compile-time check makes sure the bound is longer than the 60000 ms maximum
+deadline. The kernel sends `SIGXCPU` when the child's user plus system time
+reaches the soft limit, and `SIGKILL` at the hard limit. Time the child
+spends blocked instead of running doesn't count toward the limit. No exec
+separates the clamp from the guest, so the child then reads both limits
+back with `prlimit64`, naming its own PID. Setup fails with `EPERM` before
+the guest runs if the hard limit is above the bound or the soft limit is
+above the hard limit. The exec runner applies the same clamp, and its
+loader does the read-back ([exec guest loader](exec-guest-loader.md)).
+
 ## Host requirements and limits
 
 Native Mach-O entry requires ARM64 Linux. Linux x86_64 can run the supervisor
@@ -100,6 +121,11 @@ CTest registers `contained-process-supervisor` and `contained-native-macho`.
 The host supervisor tests cover full integer returns, private child memory,
 forbidden syscalls, faults, deadlines under interrupted waits, signal-state
 reset, setup refusal, descriptor closure, result clearing, and child reaping.
+They also start the fork runner from a launcher that holds unlimited, large
+or small `RLIMIT_CPU` limits. The guest must run in each mode. When a
+seccomp answer fakes the child's clamp, the read-back must fail setup with
+`EPERM` for the unlimited and large limits, and must accept the small
+limit. No test runs a guest until it reaches the CPU limit.
 
 The Mach-O test uses the unmodified compiler-linked phase15a and phase19a
 fixtures. Native ARM64 checks exercise the real return values, recursive stack

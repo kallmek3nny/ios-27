@@ -931,6 +931,84 @@ static int cpu_limit_available(rlim_t limit) {
     return WEXITSTATUS(status) == 0;
 }
 
+/* Answer one syscall in the calling process with seccomp, for tests that
+ * steer the supervisor's child or the loader. The syscall number and,
+ * unless ANY_ARGUMENT, arg0's low 32 bits (a prctl option or a prlimit64
+ * PID) must match; a zero mask matches every arg0. The filter is inherited
+ * across fork and execveat, so callers install it only in a separate
+ * launcher process. NO_INJECTION installs nothing. */
+static void inject_answer(loader_case answer) {
+    const uint32_t mask =
+        answer.first_argument == ANY_ARGUMENT ? 0u : UINT32_MAX;
+    struct sock_filter code[] = {
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                 (uint32_t)answer.syscall_number, 0, 4),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG0_LOW),
+        BPF_STMT(BPF_ALU | BPF_AND | BPF_K, mask),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                 (uint32_t)answer.first_argument & mask, 0, 1),
+        BPF_STMT(BPF_RET | BPF_K,
+                 SECCOMP_RET_ERRNO | (uint32_t)answer.injected_errno),
+        BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
+    };
+    struct sock_fprog program = {
+        (unsigned short)(sizeof(code) / sizeof(code[0])), code
+    };
+    if (answer.syscall_number == NO_INJECTION) return;
+    assert(!prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul));
+    assert(!prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program));
+}
+
+/* Drive ios27_process_supervise, the fork runner, from a separate launcher
+ * that first sets both RLIMIT_CPU limits for launcher_mode
+ * (LAUNCHER_CPU_UNLIMITED, LAUNCHER_CPU_LARGE or LAUNCHER_CPU_SMALL) and
+ * then installs test's seccomp answer, so neither reaches the test process.
+ * No exec separates the fork child's clamp from its guest, so the child
+ * reads its own limits back before installing its filter. With a zero
+ * setup_errno the guest must run and return its value; otherwise setup
+ * must fail with that errno before the guest runs. */
+static void fork_cpu_limit_case(loader_case test, int launcher_mode) {
+    pid_t launcher = fork();
+    int status;
+    assert(launcher >= 0);
+    if (!launcher) {
+        ios27_process_options options = {1000u};
+        ios27_process_result result;
+        char error[160], expected[160];
+        int value = 271828;
+        if (launcher_mode == LAUNCHER_CPU_UNLIMITED)
+            assert(!hold_cpu_limit(RLIM_INFINITY));
+        if (launcher_mode == LAUNCHER_CPU_LARGE)
+            assert(!hold_cpu_limit(TEST_LARGE_CPU));
+        if (launcher_mode == LAUNCHER_CPU_SMALL)
+            assert(!hold_cpu_limit(TEST_SMALL_CPU));
+        inject_answer(test);
+        memset(&result, 0xff, sizeof(result));
+        if (!test.setup_errno) {
+            assert(!ios27_process_supervise(return_value, &value, &options,
+                                             &result, error, sizeof(error)));
+            assert(result.outcome == IOS27_PROCESS_RETURNED);
+            assert(result.exit_code == 271828 && result.signal == 0);
+            assert(error[0] == '\0');
+        } else {
+            assert(ios27_process_supervise(return_value, &value, &options,
+                                            &result, error, sizeof(error)) == -1);
+            cleared(&result);
+            (void)snprintf(expected, sizeof(expected),
+                           "child containment setup failed: errno=%d",
+                           test.setup_errno);
+            assert(!strcmp(error, expected));
+        }
+        assert(value == 271828);
+        no_children();
+        _exit(0);
+    }
+    assert(waitpid(launcher, &status, 0) == launcher);
+    assert(WIFEXITED(status) && WEXITSTATUS(status) == 0);
+    no_children();
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the supervisor
@@ -987,30 +1065,7 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
             assert(!hold_cpu_limit(TEST_SMALL_CPU));
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
-        if (test.syscall_number != NO_INJECTION) {
-            /* Match the syscall number and, unless ANY_ARGUMENT, arg0's low
-             * 32 bits (a prctl option); a zero mask matches every arg0. */
-            const uint32_t mask =
-                test.first_argument == ANY_ARGUMENT ? 0u : UINT32_MAX;
-            struct sock_filter code[] = {
-                BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
-                         offsetof(struct seccomp_data, nr)),
-                BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                         (uint32_t)test.syscall_number, 0, 4),
-                BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG0_LOW),
-                BPF_STMT(BPF_ALU | BPF_AND | BPF_K, mask),
-                BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                         (uint32_t)test.first_argument & mask, 0, 1),
-                BPF_STMT(BPF_RET | BPF_K,
-                         SECCOMP_RET_ERRNO | (uint32_t)test.injected_errno),
-                BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
-            };
-            struct sock_fprog program = {
-                (unsigned short)(sizeof(code) / sizeof(code[0])), code
-            };
-            assert(!prctl(PR_SET_NO_NEW_PRIVS, 1ul, 0ul, 0ul, 0ul));
-            assert(!prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program));
-        }
+        inject_answer(test);
         memset(&result, 0xff, sizeof(result));
         assert(ios27_process_supervise_exec(loader, payload, &options, &result,
                                             error, sizeof(error)) == -1);
@@ -1278,6 +1333,34 @@ int main(int argc, char **argv) {
             loader_landlock_case(argv[1], faked, modes[m]);
         }
         printf("guest loader CPU limit: %u of %zu inherited limits clamped or kept and read back\n",
+               exercised, sizeof(modes) / sizeof(modes[0]));
+    }
+    {
+        /* The fork runner applies the same RLIMIT_CPU clamp, and because no
+         * exec separates it from the guest, its child reads both limits back
+         * itself before installing its filter. The real clamp must let the
+         * guest run and return in every mode. Faking success for the child's
+         * pid-0 prlimit64 calls (glibc getrlimit and setrlimit) leaves an
+         * unlimited or TEST_LARGE_CPU hard limit in place, so the child's
+         * read-back, which names its PID and is not answered, must fail
+         * setup with EPERM before the guest runs. TEST_SMALL_CPU is already
+         * within the bound, so the guest must still run when the clamp is
+         * faked. Hosts whose hard limit is already below a mode's limit skip
+         * only that mode. */
+        const loader_case real = {NO_INJECTION, ANY_ARGUMENT, 0, 0};
+        const int modes[] = {LAUNCHER_CPU_UNLIMITED, LAUNCHER_CPU_LARGE,
+                             LAUNCHER_CPU_SMALL};
+        const rlim_t limits[] = {RLIM_INFINITY, TEST_LARGE_CPU, TEST_SMALL_CPU};
+        const int faked_errno[] = {EPERM, EPERM, 0};
+        unsigned exercised = 0u;
+        for (size_t m = 0u; m < sizeof(modes) / sizeof(modes[0]); ++m) {
+            const loader_case faked = {SYS_prlimit64, 0L, 0, faked_errno[m]};
+            if (!cpu_limit_available(limits[m])) continue;
+            ++exercised;
+            fork_cpu_limit_case(real, modes[m]);
+            fork_cpu_limit_case(faked, modes[m]);
+        }
+        printf("fork runner CPU limit: %u of %zu inherited limits clamped or kept and read back\n",
                exercised, sizeof(modes) / sizeof(modes[0]));
     }
     {
