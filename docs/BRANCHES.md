@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `2a302ac9f4ab`
-
-### [codex/loader-stack-limit](https://github.com/kallmek3nny/ios-27/pull/122)
-
-head: `ab35502dce26` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 3 source files, 1 test/fixture files, +136/-13 lines
+candidate branches with mapped changes: **30** · audited base: `50b326d5c36b`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -218,6 +212,12 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **20**
 
+### [merged PR #122](https://github.com/kallmek3nny/ios-27/pull/122)
+
+merged: 2026-11-01T19:26:52Z · source changes awaiting function-level audit.
+
+- **unclassified**: 3 source files, 1 fixtures, +136/-13 lines
+
 ### [merged PR #121](https://github.com/kallmek3nny/ios-27/pull/121)
 
 merged: 2026-11-01T18:35:26Z · source changes awaiting function-level audit.
@@ -345,13 +345,6 @@ merged: 2026-10-28T19:22:22Z · source changes awaiting function-level audit.
 
 - **libSystem guest model (not dylib)**: 2 source files, 3 fixtures, +558/-0 lines
   - added declarations: `ios27_20e_advance_time`, `ios27_20e_calloc`, `ios27_20e_close`, `ios27_20e_free`, `ios27_20e_getenv`, `ios27_20e_gettimeofday`, `ios27_20e_guest_ptr`, `ios27_20e_init`, `ios27_20e_lseek`, `ios27_20e_malloc`, `ios27_20e_mmap`, `ios27_20e_mprotect`
-
-### [merged PR #63](https://github.com/kallmek3nny/ios-27/pull/63)
-
-merged: 2026-10-28T19:21:00Z · source changes awaiting function-level audit.
-
-- **ObjC host prototype (not Apple libobjc)**: 3 source files, 4 fixtures, +655/-0 lines
-  - added declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
 
 ## verification policy
 
