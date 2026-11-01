@@ -704,8 +704,17 @@ static void loader_filter_checks(void) {
 #define LOADER_STAGE "guest loader requires ARM64 Linux/Android"
 #endif
 
+/* Byte offset of the low 32 bits of arg0 in struct seccomp_data. */
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define ARG0_LOW (offsetof(struct seccomp_data, args) + 4u)
+#else
+#define ARG0_LOW offsetof(struct seccomp_data, args)
+#endif
+#define ANY_ARGUMENT (-1L)
+
 typedef struct {
     long syscall_number; /* NO_INJECTION, or the syscall answered by seccomp */
+    long first_argument; /* ANY_ARGUMENT, or arg0's low 32 bits to match */
     int injected_errno;  /* 0 fakes success without running the syscall */
     int setup_errno;     /* expected loader SETUP errno; 0 means LOADER_STAGE */
 } loader_case;
@@ -713,7 +722,8 @@ typedef struct {
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the loader's
- * Landlock setup. Reaching LOADER_STAGE means the loader either enforced its
+ * dumpable and Landlock setup. Reaching LOADER_STAGE means the loader
+ * cleared and read back its dumpable attribute, either enforced its
  * deny-all domain (its own probe of "/" must fail with EACCES) or skipped an
  * absent Landlock as documented, and then opened the payload. */
 static void loader_landlock_case(const char *loader_path, loader_case test) {
@@ -732,11 +742,19 @@ static void loader_landlock_case(const char *loader_path, loader_case test) {
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
+            /* Match the syscall number and, unless ANY_ARGUMENT, arg0's low
+             * 32 bits (a prctl option); a zero mask matches every arg0. */
+            const uint32_t mask =
+                test.first_argument == ANY_ARGUMENT ? 0u : UINT32_MAX;
             struct sock_filter code[] = {
                 BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
                          offsetof(struct seccomp_data, nr)),
                 BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                         (uint32_t)test.syscall_number, 0, 1),
+                         (uint32_t)test.syscall_number, 0, 4),
+                BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG0_LOW),
+                BPF_STMT(BPF_ALU | BPF_AND | BPF_K, mask),
+                BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                         (uint32_t)test.first_argument & mask, 0, 1),
                 BPF_STMT(BPF_RET | BPF_K,
                          SECCOMP_RET_ERRNO | (uint32_t)test.injected_errno),
                 BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
@@ -904,20 +922,30 @@ int main(int argc, char **argv) {
         int query_errno = errno;
         int denied = abi > 0 ? EPERM : 0;
         const loader_case cases[] = {
-            {NO_INJECTION, 0, 0},
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            /* The loader refuses to continue while it stays dumpable. */
+            {SYS_prctl, PR_SET_DUMPABLE, EPERM, EPERM},
             /* Absent or disabled Landlock is skipped, as documented. */
-            {SYS_landlock_create_ruleset, ENOSYS, 0},
-            {SYS_landlock_create_ruleset, EOPNOTSUPP, 0},
+            {SYS_landlock_create_ruleset, ANY_ARGUMENT, ENOSYS, 0},
+            {SYS_landlock_create_ruleset, ANY_ARGUMENT, EOPNOTSUPP, 0},
             /* Any other Landlock failure is a loader setup error. */
-            {SYS_landlock_create_ruleset, EPERM, EPERM},
-            {SYS_landlock_restrict_self, EPERM, denied},
+            {SYS_landlock_create_ruleset, ANY_ARGUMENT, EPERM, EPERM},
+            {SYS_landlock_restrict_self, ANY_ARGUMENT, EPERM, denied},
             /* A faked successful restrict_self is caught by the probe. */
-            {SYS_landlock_restrict_self, 0, denied}
+            {SYS_landlock_restrict_self, ANY_ARGUMENT, 0, denied}
         };
         assert(argc == 2 && argv[1][0]);
         assert(abi > 0 || query_errno == ENOSYS || query_errno == EOPNOTSUPP);
         for (size_t i = 0u; i < sizeof(cases) / sizeof(cases[0]); ++i)
             loader_landlock_case(argv[1], cases[i]);
+        /* With matching real and effective IDs, execveat of the readable
+         * loader leaves it dumpable (begin_new_exec in fs/exec.c), so a
+         * faked successful PR_SET_DUMPABLE must be caught by the read-back.
+         * Otherwise the starting value follows fs.suid_dumpable. */
+        if (geteuid() == getuid() && getegid() == getgid()) {
+            const loader_case faked = {SYS_prctl, PR_SET_DUMPABLE, 0, EPERM};
+            loader_landlock_case(argv[1], faked);
+        }
         printf("guest loader Landlock: %s (host ABI %ld)\n",
                abi > 0 ? "deny-all domain enforced and probed" :
                          "unavailable, best-effort skip",

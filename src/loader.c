@@ -15,8 +15,9 @@
  * into a fresh address space. It inherits only the report pipe on fd 3, the
  * sealed launch payload on fd 4, an empty environment and a fully blocked
  * signal mask, so no launcher heap, stack or mapping is visible to the
- * guest. Before reading the payload it enters a deny-all Landlock domain
- * when the kernel provides one. Once the payload is mapped and its
+ * guest. Before reading the payload it clears its dumpable attribute and
+ * enters a deny-all Landlock domain when the kernel provides one. Once the
+ * payload is mapped and its
  * descriptor closed, it installs a stage-one seccomp allowlist before the
  * image is re-parsed. Like the fork runner this is trusted-fixture failure
  * containment, NOT a sandbox for untrusted Mach-O code. */
@@ -120,6 +121,27 @@ static _Noreturn void enter_guest(int (*entry)(void *), void *call) {
 }
 #endif
 
+/* execveat of a readable program by a caller whose real and effective IDs
+ * match resets the dumpable attribute to 1 (begin_new_exec in fs/exec.c).
+ * While it is 1, same-UID processes pass the ptrace access checks for this
+ * process, subject to Yama, and those checks govern PTRACE_ATTACH and
+ * /proc/<pid>/mem. Clearing it makes the /proc/<pid> files root-owned and
+ * refuses that access to callers without CAP_SYS_PTRACE, for the loader and
+ * for the guest that later runs in this process. The stage-one filter
+ * forbids this prctl option, so it runs first. The value is read back, and
+ * a set that did not take effect is a setup error. */
+static int clear_dumpable(void) {
+    int dumpable;
+    if (prctl(PR_SET_DUMPABLE, 0ul, 0ul, 0ul, 0ul)) return -1;
+    dumpable = prctl(PR_GET_DUMPABLE, 0ul, 0ul, 0ul, 0ul);
+    if (dumpable < 0) return -1;
+    if (dumpable != 0) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -131,7 +153,10 @@ int main(int argc, char **argv) {
               "ios27_run_executable_exec\n", stderr);
         return 2;
     }
-    if (setrlimit(RLIMIT_CORE, &core) || enter_landlock_domain())
+    /* Core dumps and same-UID ptrace access end before any payload byte
+     * is read. */
+    if (setrlimit(RLIMIT_CORE, &core) || clear_dumpable() ||
+        enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);
