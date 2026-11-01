@@ -1,0 +1,43 @@
+name: phase22a guest address space
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase22a_*'
+      - 'include/ios27/phase22a_*'
+      - 'tests/phase22a-*'
+      - 'tools/phase22a-*'
+      - 'docs/phase22a-*'
+      - '.github/workflows/phase22a-space.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: phase22a / ${{ matrix.runner }} / ${{ matrix.compiler }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: compiler and architecture
+        run: |
+          timeout 30s uname -m
+          timeout 30s ${{ matrix.compiler }} --version
+      - name: self-contained -Werror O0 O2 and deterministic stress
+        env:
+          CC: ${{ matrix.compiler }}
+        run: timeout 300s python3 tools/phase22a-standalone.py
+      - name: ASan UBSan and leak checking
+        if: matrix.compiler == 'clang'
+        env:
+          CC: clang
+          PHASE22A_SANITIZE: '1'
+        run: timeout 300s python3 tools/phase22a-standalone.py
