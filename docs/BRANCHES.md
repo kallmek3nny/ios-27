@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `d7e4bf56796b`
-
-### [codex/loader-pdeathsig](https://github.com/kallmek3nny/ios-27/pull/120)
-
-head: `0291d9ffb056` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 1 source files, 1 test/fixture files, +44/-12 lines
+candidate branches with mapped changes: **30** · audited base: `6341edbb6ecb`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -218,6 +212,12 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **20**
 
+### [merged PR #120](https://github.com/kallmek3nny/ios-27/pull/120)
+
+merged: 2026-11-01T17:58:30Z · source changes awaiting function-level audit.
+
+- **unclassified**: 1 source files, 1 fixtures, +44/-12 lines
+
 ### [merged PR #119](https://github.com/kallmek3nny/ios-27/pull/119)
 
 merged: 2026-11-01T17:33:13Z · source changes awaiting function-level audit.
@@ -347,13 +347,6 @@ merged: 2026-10-28T19:20:45Z · source changes awaiting function-level audit.
 
 - **libsystem_pthread**: 2 source files, 4 fixtures, +983/-0 lines
   - added declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
-
-### [merged PR #65](https://github.com/kallmek3nny/ios-27/pull/65)
-
-merged: 2026-10-28T19:20:17Z · source changes awaiting function-level audit.
-
-- **ObjC host prototype (not Apple libobjc)**: 3 source files, 5 fixtures, +1002/-0 lines
-  - added declarations: `ios27_objc20a_counts`, `ios27_objc20a_find_class`, `ios27_objc20a_inspect`, `ios27_objc20a_register`, `ios27_objc20a_register_image`, `ios27_objc20a_registry_create`, `ios27_objc20a_registry_destroy`
 
 ## verification policy
 

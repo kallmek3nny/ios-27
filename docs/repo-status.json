@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "d7e4bf56796bca59925adcb066108db1867ff4fb",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/d7e4bf56796bca59925adcb066108db1867ff4fb",
-    "committed_at": "2026-11-01T17:33:12Z"
+    "sha": "6341edbb6ecb2c9a7b13ddba1281fb1b8ede2f92",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/6341edbb6ecb2c9a7b13ddba1281fb1b8ede2f92",
+    "committed_at": "2026-11-01T17:58:30Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 120,
-      "branch": "codex/loader-pdeathsig",
-      "sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
-      "title": "feat(loader): require the parent-death SIGKILL before reading the payload",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/120",
-      "updated_at": "2026-11-01T17:55:03Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 120,
+      "title": "feat(loader): require the parent-death SIGKILL before reading the payload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/120",
+      "head_sha": "0291d9ffb05633b07d6f1f58f4b1b946f9b19398",
+      "merged_at": "2026-11-01T17:58:30Z"
+    },
+    {
       "number": 119,
       "title": "feat(loader): drop capabilities before reading the payload",
       "url": "https://github.com/kallmek3nny/ios-27/pull/119",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/64",
       "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
       "merged_at": "2026-10-28T19:20:45Z"
-    },
-    {
-      "number": 65,
-      "title": "phase 20a: clang ARM64 ObjC2 metadata graphs and transactional registration",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/65",
-      "head_sha": "8e767fcb59c65597d6fe7cc9bc6d29420e9bdf3c",
-      "merged_at": "2026-10-28T19:20:17Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 19,
+    "branches_scanned": 20,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T17:55:42Z"
+  "observed_at": "2026-11-01T17:59:08Z"
 }
