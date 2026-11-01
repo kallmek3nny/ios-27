@@ -1,0 +1,47 @@
+name: phase24a global dyld identity
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase24a_*'
+      - 'include/ios27/phase24a_*'
+      - 'tests/phase24a-*'
+      - 'tools/phase24a-*'
+      - 'docs/phase24a-*'
+      - '.github/workflows/phase24a-dyld.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-dyld:
+    name: ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+      - name: install llvm Mach-O linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y -qq lld-18
+      - name: report compiler and host
+        run: |
+          timeout 30s uname -m
+          timeout 30s clang --version
+          timeout 30s ld64.lld-18 --version
+      - name: build genuine arm64 darwin images and stress global identity
+        env:
+          PHASE24A_SANITIZE: ${{ matrix.mode == 'sanitizers' && '1' || '0' }}
+        run: |
+          if [ "$PHASE24A_SANITIZE" = 1 ]; then
+            timeout 900s python3 tools/phase24a-verify.py --ld ld64.lld-18 --sanitize --output-dir build/phase24a-san
+          else
+            timeout 900s python3 tools/phase24a-verify.py --ld ld64.lld-18 --output-dir build/phase24a
+          fi
