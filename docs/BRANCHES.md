@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `d2507d366e90`
-
-### [codex/loader-drop-capabilities](https://github.com/kallmek3nny/ios-27/pull/119)
-
-head: `1311b5d69d06` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 1 source files, 1 test/fixture files, +189/-14 lines
+candidate branches with mapped changes: **30** · audited base: `d7e4bf56796b`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -216,7 +210,13 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 recent merges appear here even after their purple WIP marker disappears. blue means merged code, **not** a newly verified iOS function.
 
-recent merged PRs with source changes: **19**
+recent merged PRs with source changes: **20**
+
+### [merged PR #119](https://github.com/kallmek3nny/ios-27/pull/119)
+
+merged: 2026-11-01T17:33:13Z · source changes awaiting function-level audit.
+
+- **unclassified**: 1 source files, 1 fixtures, +189/-14 lines
 
 ### [merged PR #118](https://github.com/kallmek3nny/ios-27/pull/118)
 
