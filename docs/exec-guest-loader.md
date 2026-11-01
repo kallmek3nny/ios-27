@@ -101,6 +101,22 @@ the seal set is final.
    mandatory seccomp filter still applies before guest entry. Any other
    Landlock failure is a setup error. Android kernel support, and whether
    Android's app seccomp policy permits these syscalls, are not verified.
+
+   With descriptor 4 closed, the loader reasserts `PR_SET_NO_NEW_PRIVS` and
+   installs a stage-one seccomp allowlist before it re-parses the image. It
+   covers only what image preparation and guest entry use: `exit`,
+   `exit_group`, `rt_sigreturn`, a 12-byte `write` to the report pipe,
+   `munmap`, `mmap` with `PROT_NONE`, `mprotect` that does not request write
+   and execute together, `rt_sigprocmask`, `close_range`, and the
+   `PR_SET_NO_NEW_PRIVS` and `PR_SET_SECCOMP` options of `prctl`. Any other
+   syscall number or audit architecture kills the loader. When filters are
+   stacked the kernel applies the most restrictive result
+   ([seccomp filter documentation](https://docs.kernel.org/userspace-api/seccomp_filter.html)),
+   so the mandatory filter added in step 6 can only narrow this set. The
+   x86_64 loader installs the filter too before it reports `-3`; other
+   non-ARM64 builds, which the API never launches, lack the filter and fail
+   setup with `ENOSYS`. A kernel without seccomp filters fails this step as
+   a setup error.
 4. Launcher metadata is never trusted across exec. The loader re-runs
    `ios27_macho_parse` and `ios27_macho_executable_layout` on its sealed copy
    with its own page size.

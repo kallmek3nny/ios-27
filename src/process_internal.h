@@ -35,6 +35,16 @@ int ios27_process_close_outside(int first, int last);
 /* Mandatory guest filter: native exit, exit_group, rt_sigreturn and a
  * report-sized write to report_fd only. Requires no_new_privs. */
 int ios27_process_install_filter(int report_fd);
+/* Stage-one guest loader filter, installed once the sealed payload is
+ * mapped and its descriptor closed, before the Mach-O re-parse. It permits
+ * everything the mandatory filter permits, plus what image preparation and
+ * guest entry need: munmap, PROT_NONE-only mmap, mprotect that never asks
+ * for write and execute together, rt_sigprocmask, close_range and only the
+ * PR_SET_NO_NEW_PRIVS and PR_SET_SECCOMP prctl options. Any other syscall,
+ * or a foreign syscall architecture, kills the process. Filters stack, so
+ * the mandatory filter installed later can only narrow this set. Requires
+ * no_new_privs. */
+int ios27_process_install_loader_filter(int report_fd);
 
 /* Sealed memfd launch payload: header, image bytes, then argc + envc +
  * applec NUL-terminated startup strings in argv, envp, apple order. */
