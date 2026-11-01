@@ -33,6 +33,15 @@ int ios27_process_supervise(int (*entry)(void *), void *context,
  * The supervisor's exec child applies this clamp before execveat. */
 #define IOS27_LOADER_STACK_LIMIT (UINT64_C(8) * 1024u * 1024u)
 
+/* Largest RLIMIT_CPU hard limit, in seconds, the guest loader accepts: one
+ * second more than the longest deadline, IOS27_PROCESS_MAX_TIMEOUT_MS. The
+ * loader creates no threads and its syscall filters permit no clone, so the
+ * CPU time of the loader and its guest does not exceed the elapsed
+ * wall-clock time, and the extra second keeps the kernel bound from ending
+ * a guest that the deadline still allows. The supervisor's exec child
+ * lowers a larger hard limit, unlimited included, to this before execveat. */
+#define IOS27_LOADER_CPU_LIMIT UINT64_C(61)
+
 /* Linux scheduling policies from the linux/sched.h uapi. The supervisor's
  * child moves an inherited policy outside the fair set below, such as
  * SCHED_FIFO or SCHED_RR, to IOS27_SCHED_OTHER, and the guest loader reads

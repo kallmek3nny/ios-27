@@ -885,23 +885,72 @@ static int scheduling_policy_available(long policy) {
     return WEXITSTATUS(status) == 0;
 }
 
+/* Launcher RLIMIT_CPU setups for loader_landlock_case. Each sets the soft
+ * and hard limits to the same value: unlimited, TEST_LARGE_CPU, a finite
+ * limit above IOS27_LOADER_CPU_LIMIT that the supervisor's child must lower,
+ * or TEST_SMALL_CPU, a limit below it that the child must keep. */
+#define LAUNCHER_CPU_UNLIMITED 7
+#define LAUNCHER_CPU_LARGE 8
+#define LAUNCHER_CPU_SMALL 9
+#define TEST_LARGE_CPU ((rlim_t)(2u * IOS27_LOADER_CPU_LIMIT))
+#define TEST_SMALL_CPU ((rlim_t)(IOS27_LOADER_CPU_LIMIT / 2u))
+
+/* Set both RLIMIT_CPU limits of the calling process to limit and read them
+ * back. Without privilege a hard limit can only be lowered (getrlimit(2)),
+ * so a current hard limit below limit fails. The RLIMIT_STACK soft limit is
+ * first lowered to IOS27_LOADER_STACK_LIMIT when it is above it, which also
+ * needs no privilege, so the loader's earlier stack read-back cannot be the
+ * check that fails a CPU-limit case. */
+static int hold_cpu_limit(rlim_t limit) {
+    struct rlimit stack, cpu;
+    if (getrlimit(RLIMIT_STACK, &stack)) return -1;
+    if (stack.rlim_cur == RLIM_INFINITY ||
+        stack.rlim_cur > (rlim_t)IOS27_LOADER_STACK_LIMIT) {
+        stack.rlim_cur = (rlim_t)IOS27_LOADER_STACK_LIMIT;
+        if (setrlimit(RLIMIT_STACK, &stack)) return -1;
+    }
+    if (getrlimit(RLIMIT_CPU, &cpu) ||
+        (cpu.rlim_max != RLIM_INFINITY && cpu.rlim_max < limit))
+        return -1;
+    cpu.rlim_cur = limit;
+    cpu.rlim_max = limit;
+    if (setrlimit(RLIMIT_CPU, &cpu) || getrlimit(RLIMIT_CPU, &cpu)) return -1;
+    return cpu.rlim_cur == limit && cpu.rlim_max == limit ? 0 : -1;
+}
+
+/* Try hold_cpu_limit in a throwaway child. Hosts whose RLIMIT_CPU hard
+ * limit is already below limit, or whose policy refuses the change, skip
+ * that launcher mode. */
+static int cpu_limit_available(rlim_t limit) {
+    pid_t child = fork();
+    int status;
+    assert(child >= 0);
+    if (!child) _exit(hold_cpu_limit(limit) ? 1 : 0);
+    assert(waitpid(child, &status, 0) == child);
+    assert(WIFEXITED(status));
+    return WEXITSTATUS(status) == 0;
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the supervisor
- * child's PR_SET_PDEATHSIG, persona reset, stack-limit clamp and
+ * child's PR_SET_PDEATHSIG, persona reset, stack- and CPU-limit clamps and
  * scheduling-policy reset and the loader's capability, dumpable,
- * parent-death, persona, stack-limit, scheduling-policy and Landlock setup.
- * LAUNCHER_CAPABILITY first makes TEST_CAPABILITY ambient in the launcher,
- * so the loader starts with it. LAUNCHER_PERSONA first sets TEST_PERSONA,
- * LAUNCHER_STACK_UNLIMITED and LAUNCHER_STACK_LARGE first raise the
- * RLIMIT_STACK soft limit to unlimited or TEST_LARGE_STACK, and
+ * parent-death, persona, stack-limit, CPU-limit, scheduling-policy and
+ * Landlock setup. LAUNCHER_CAPABILITY first makes TEST_CAPABILITY ambient in
+ * the launcher, so the loader starts with it. LAUNCHER_PERSONA first sets
+ * TEST_PERSONA, LAUNCHER_STACK_UNLIMITED and LAUNCHER_STACK_LARGE first
+ * raise the RLIMIT_STACK soft limit to unlimited or TEST_LARGE_STACK,
  * LAUNCHER_SCHED_BATCH and LAUNCHER_SCHED_REALTIME first switch to
- * SCHED_BATCH or to SCHED_RR at priority 1, so the supervisor's child
- * starts with them. Reaching LOADER_STAGE means the loader dropped its
- * capabilities and read back empty sets, cleared and read back its dumpable
- * attribute, read back the supervisor's parent-death SIGKILL, a plain
- * PER_LINUX persona, a stack soft limit no larger than
- * IOS27_LOADER_STACK_LIMIT and a SCHED_OTHER, SCHED_BATCH or SCHED_IDLE
+ * SCHED_BATCH or to SCHED_RR at priority 1, and LAUNCHER_CPU_UNLIMITED,
+ * LAUNCHER_CPU_LARGE and LAUNCHER_CPU_SMALL first set both RLIMIT_CPU
+ * limits to unlimited, TEST_LARGE_CPU or TEST_SMALL_CPU, so the
+ * supervisor's child starts with them. Reaching LOADER_STAGE means the
+ * loader dropped its capabilities and read back empty sets, cleared and
+ * read back its dumpable attribute, read back the supervisor's parent-death
+ * SIGKILL, a plain PER_LINUX persona, a stack soft limit no larger than
+ * IOS27_LOADER_STACK_LIMIT, CPU soft and hard limits no larger than
+ * IOS27_LOADER_CPU_LIMIT and a SCHED_OTHER, SCHED_BATCH or SCHED_IDLE
  * policy, either enforced its deny-all domain (its own probe of "/" must
  * fail with EACCES) or skipped an absent Landlock as documented, and then
  * opened the payload. */
@@ -930,6 +979,12 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
             assert(!hold_scheduling_policy(IOS27_SCHED_BATCH));
         if (launcher_mode == LAUNCHER_SCHED_REALTIME)
             assert(!hold_scheduling_policy(TEST_SCHED_RR));
+        if (launcher_mode == LAUNCHER_CPU_UNLIMITED)
+            assert(!hold_cpu_limit(RLIM_INFINITY));
+        if (launcher_mode == LAUNCHER_CPU_LARGE)
+            assert(!hold_cpu_limit(TEST_LARGE_CPU));
+        if (launcher_mode == LAUNCHER_CPU_SMALL)
+            assert(!hold_cpu_limit(TEST_SMALL_CPU));
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
@@ -1194,6 +1249,35 @@ int main(int argc, char **argv) {
                 loader_landlock_case(argv[1], raised[i], modes[m]);
         }
         printf("guest loader stack limit: %u of %zu raised soft limits clamped and read back\n",
+               exercised, sizeof(modes) / sizeof(modes[0]));
+    }
+    {
+        /* The launcher sets both RLIMIT_CPU limits to unlimited, to
+         * TEST_LARGE_CPU or to TEST_SMALL_CPU, and the supervisor's child
+         * inherits them. The real clamp must let the loader reach the
+         * payload stage in every mode. Faking success for the child's pid-0
+         * prlimit64 calls (glibc getrlimit and setrlimit) leaves an
+         * unlimited or TEST_LARGE_CPU hard limit in place, so the loader's
+         * read-back, which names its PID and is not answered, must fail
+         * setup. TEST_SMALL_CPU is already within the bound, so the loader
+         * must accept it even when the clamp is faked. hold_cpu_limit keeps
+         * the stack soft limit bounded, so each EPERM comes from the CPU
+         * read-back. Hosts whose hard limit is already below a mode's limit
+         * skip only that mode. */
+        const loader_case real = {NO_INJECTION, ANY_ARGUMENT, 0, 0};
+        const int modes[] = {LAUNCHER_CPU_UNLIMITED, LAUNCHER_CPU_LARGE,
+                             LAUNCHER_CPU_SMALL};
+        const rlim_t limits[] = {RLIM_INFINITY, TEST_LARGE_CPU, TEST_SMALL_CPU};
+        const int faked_errno[] = {EPERM, EPERM, 0};
+        unsigned exercised = 0u;
+        for (size_t m = 0u; m < sizeof(modes) / sizeof(modes[0]); ++m) {
+            const loader_case faked = {SYS_prlimit64, 0L, 0, faked_errno[m]};
+            if (!cpu_limit_available(limits[m])) continue;
+            ++exercised;
+            loader_landlock_case(argv[1], real, modes[m]);
+            loader_landlock_case(argv[1], faked, modes[m]);
+        }
+        printf("guest loader CPU limit: %u of %zu inherited limits clamped or kept and read back\n",
                exercised, sizeof(modes) / sizeof(modes[0]));
     }
     {

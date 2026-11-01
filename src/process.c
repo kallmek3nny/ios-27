@@ -518,17 +518,49 @@ static int clamp_stack_limit(void) {
     return setrlimit(RLIMIT_STACK, &stack);
 }
 
+_Static_assert(IOS27_LOADER_CPU_LIMIT * 1000u > IOS27_PROCESS_MAX_TIMEOUT_MS,
+               "the RLIMIT_CPU bound must outlast the longest deadline");
+
+/* The launcher's wall-clock deadline normally ends a guest busy loop, and
+ * the parent-death signal covers a launcher that exits. A launcher that is
+ * stopped but still alive neither enforces its deadline nor triggers that
+ * signal, so the exec child also bounds CPU time in the kernel. fork resets
+ * the child's CPU time counters (fork(2)), and resource limits survive fork
+ * and execveat (getrlimit(2)). check_process_timers in
+ * kernel/time/posix-cpu-timers.c compares the whole thread group's user
+ * plus system time with RLIMIT_CPU and sends SIGXCPU at the soft limit and
+ * SIGKILL at the hard limit. Without privilege a process may lower its hard
+ * limit and set its soft limit anywhere up to it, so a hard limit above
+ * IOS27_LOADER_CPU_LIMIT seconds, unlimited included, is lowered to it and
+ * the soft limit is kept at or below it. Lower inherited limits are kept.
+ * The read buffer starts as unlimited, so a getrlimit that claims success
+ * without writing it still leads to the clamp. The loader reads the hard
+ * limit back. */
+static int clamp_cpu_limit(void) {
+    struct rlimit cpu = {RLIM_INFINITY, RLIM_INFINITY};
+    if (getrlimit(RLIMIT_CPU, &cpu)) return -1;
+    if (cpu.rlim_max != RLIM_INFINITY &&
+        cpu.rlim_max <= (rlim_t)IOS27_LOADER_CPU_LIMIT)
+        return 0;
+    cpu.rlim_max = (rlim_t)IOS27_LOADER_CPU_LIMIT;
+    if (cpu.rlim_cur == RLIM_INFINITY || cpu.rlim_cur > cpu.rlim_max)
+        cpu.rlim_cur = cpu.rlim_max;
+    return setrlimit(RLIMIT_CPU, &cpu);
+}
+
 /* Exec mode: assemble the fixed loader layout (report pipe on 3, sealed
  * payload on 4), drop every other descriptor and replace the address space
  * with the trusted loader, using an empty environment. The launcher's full
  * signal mask stays blocked across exec; the loader clears it immediately
  * before installing its own filter and reporting readiness. The stack-limit
  * clamp applies only here, because the fork child keeps the launcher's
- * existing address space. */
+ * existing address space. The CPU-limit clamp also applies only here for
+ * now, because only the loader reads it back. */
 static void child_exec(int fd, pid_t parent, int payload, int loader) {
     int report, staged_payload = -1, staged_loader = -1;
     child_reset(fd, parent);
-    if (clamp_stack_limit()) report_and_exit(fd, IOS27_REPORT_SETUP, errno);
+    if (clamp_stack_limit() || clamp_cpu_limit())
+        report_and_exit(fd, IOS27_REPORT_SETUP, errno);
     /* Lift every source above the layout first, so a descriptor already
      * occupying 3..5 cannot be replaced before it has been copied. */
     report = fcntl(fd, F_DUPFD_CLOEXEC, LOADER_SCRATCH_FD);
