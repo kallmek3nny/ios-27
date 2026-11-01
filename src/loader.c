@@ -316,6 +316,28 @@ static int require_fair_scheduling_policy(void) {
     return 0;
 }
 
+/* The supervisor's exec child lowers an RLIMIT_CPU hard limit above
+ * IOS27_LOADER_CPU_LIMIT seconds before the exec, and resource limits are
+ * preserved across execveat (getrlimit(2)). The kernel then sends SIGKILL
+ * once the loader and its guest have used that much CPU time, even while a
+ * stopped launcher cannot enforce its deadline. The limit is read back and
+ * not repaired, so a clamp that failed in the supervisor's child is a setup
+ * error: a hard limit above IOS27_LOADER_CPU_LIMIT, unlimited included, or
+ * a soft limit above the hard limit fails with EPERM. As with the stack
+ * limit, the query names this process by PID instead of 0 and its buffer
+ * starts as unlimited. Like the other read-backs, this runs before the
+ * stage-one filter, which does not permit prlimit64. */
+static int require_bounded_cpu_limit(void) {
+    loader_rlimit64 cpu = {UINT64_MAX, UINT64_MAX};
+    if (syscall(SYS_prlimit64, (long)getpid(), (long)RLIMIT_CPU, NULL, &cpu))
+        return -1;
+    if (cpu.maximum > IOS27_LOADER_CPU_LIMIT || cpu.current > cpu.maximum) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -328,12 +350,14 @@ int main(int argc, char **argv) {
         return 2;
     }
     /* Capabilities, core dumps and same-UID ptrace access end, and the
-     * parent-death signal, plain persona, bounded stack limit and fair
-     * scheduling policy are confirmed, before any payload byte is read. */
+     * parent-death signal, plain persona, bounded stack and CPU limits and
+     * fair scheduling policy are confirmed, before any payload byte is
+     * read. */
     if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
         clear_dumpable() || require_parent_death_signal() ||
         require_plain_persona() || require_bounded_stack_limit() ||
-        require_fair_scheduling_policy() || enter_landlock_domain())
+        require_bounded_cpu_limit() || require_fair_scheduling_policy() ||
+        enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);

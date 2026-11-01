@@ -189,6 +189,34 @@ the seal set is final.
    and is not lowered. Like the dumpable step, this runs before the
    stage-one filter, which does not permit `prlimit64`.
 
+   A launcher that is stopped but still alive neither enforces its
+   deadline nor triggers the parent-death signal, so the supervisor's exec
+   child also bounds CPU time in the kernel. `fork` resets the child's CPU
+   time counters
+   ([`fork(2)`](https://man7.org/linux/man-pages/man2/fork.2.html)), and
+   resource limits survive `fork` and `execveat` (`getrlimit(2)`).
+   `check_process_timers` in the kernel's `kernel/time/posix-cpu-timers.c`
+   compares the whole thread group's user plus system time with
+   `RLIMIT_CPU` and sends `SIGXCPU` at the soft limit, then once a second,
+   and `SIGKILL` at the hard limit. When `getrlimit` reports an unlimited
+   hard limit or one above 61 seconds, the child lowers the hard limit to
+   61 seconds and a larger soft limit, unlimited included, to the same
+   value. Lowering needs no privilege, and lower inherited limits are kept.
+   The bound is one second more than the longest 60000 ms deadline: the
+   loader creates no threads and its syscall filters permit no `clone`, so
+   the CPU time of the loader and its guest cannot exceed the elapsed
+   wall-clock time, and the extra second keeps the kernel bound from
+   ending a guest that the deadline still allows. The read buffer starts
+   as unlimited, so a `getrlimit` that claims success without writing it
+   still leads to the clamp, and a failed query or change is a setup
+   error. For now the fork runner does not clamp, because only the loader
+   reads the limit back. The loader reads both limits back with
+   `prlimit64`, naming its own PID instead of 0, into a buffer that also
+   starts as unlimited, and does not repair them: a hard limit above 61
+   seconds, unlimited included, or a soft limit above the hard limit is an
+   `EPERM` setup error. Like the dumpable step, this runs before the
+   stage-one filter, which does not permit `prlimit64`.
+
    A child created by `fork` inherits its parent's scheduling policy and
    priority, and an ordinary `execveat` keeps them
    ([`sched(7)`](https://man7.org/linux/man-pages/man7/sched.7.html)).
@@ -360,6 +388,15 @@ faked successful reset leaves `SCHED_RR` in place, so setup must fail with
 `EPERM`: the loader's read-back names its PID, is not answered and still
 reports the real-time policy. Hosts that refuse `SCHED_BATCH`, or lack
 both `CAP_SYS_NICE` and a usable `RLIMIT_RTPRIO` for `SCHED_RR`, skip only
-that mode. These steps run before the loader's architecture check, so
-they also run on x86_64. Passing these tests does not satisfy the general
-Darwin process-startup or untrusted-guest-isolation capability gates.
+that mode. The launcher also sets both `RLIMIT_CPU` limits, once to
+unlimited, once to 122 seconds and once to 30 seconds, after lowering a
+stack soft limit above 8 MiB so that only the CPU read-back can fail. The
+real clamp must then let the loader reach the payload stage in each mode.
+Faked success for every pid-0 `prlimit64` leaves an unlimited or
+122-second hard limit in place, so setup must fail with `EPERM`. The
+30-second limit is already within the bound, so the loader must accept it
+even when the clamp is faked. Hosts whose hard limit is already below a
+mode's limit, or whose policy refuses the change, skip only that mode.
+These steps run before the loader's architecture check, so they also run
+on x86_64. Passing these tests does not satisfy the general Darwin
+process-startup or untrusted-guest-isolation capability gates.
