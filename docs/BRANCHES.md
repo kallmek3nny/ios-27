@@ -8,7 +8,7 @@ candidate branches with mapped changes: **31** · audited base: `6341edbb6ecb`
 
 ### [codex/loader-persona](https://github.com/kallmek3nny/ios-27/pull/121)
 
-head: `20d5592b204d` · ci: **running** · unmerged, not credited.
+head: `035e4529981b` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 1 test/fixture files, +101/-13 lines
 

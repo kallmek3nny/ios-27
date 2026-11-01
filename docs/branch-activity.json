@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/loader-persona",
-      "sha": "20d5592b204d1fc0b5952f0f6b8b9abdc82db27c",
+      "sha": "035e4529981bf8bf662c28904db293f09982d283",
       "url": "https://github.com/kallmek3nny/ios-27/pull/121",
       "pr_number": 121,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 4,
       "possibly_truncated": false,
@@ -1255,7 +1255,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/121",
         "source_files": 2,
         "fixture_files": 1,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -2117,5 +2117,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T18:31:00Z"
+  "observed_at": "2026-11-01T18:33:19Z"
 }
