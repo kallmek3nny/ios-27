@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/loader-stack-limit",
-      "sha": "e2dc664daefc180c6c10178e6c4ebaef4b59b187",
+      "sha": "ab35502dce263217d2643e4f226e8d19d46806a1",
       "url": "https://github.com/kallmek3nny/ios-27/pull/122",
       "pr_number": 122,
       "ci": "passing_checks",
@@ -2104,5 +2104,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T19:17:12Z"
+  "observed_at": "2026-11-01T19:21:23Z"
 }

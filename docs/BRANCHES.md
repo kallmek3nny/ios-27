@@ -8,7 +8,7 @@ candidate branches with mapped changes: **31** · audited base: `2a302ac9f4ab`
 
 ### [codex/loader-stack-limit](https://github.com/kallmek3nny/ios-27/pull/122)
 
-head: `e2dc664daefc` · ci: **passing_checks** · unmerged, not credited.
+head: `ab35502dce26` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 3 source files, 1 test/fixture files, +136/-13 lines
 
