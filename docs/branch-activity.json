@@ -2,35 +2,11 @@
   "schema": 1,
   "classification_version": 3,
   "repository": "kallmek3nny/ios-27",
-  "main_source_sha": "73b3cff5a5bb00f67161a8dcddf5aa5890167864",
+  "main_source_sha": "7678c4019905e48b1ae4c84dee755f56b3b30e24",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 31,
-  "candidate_count": 31,
+  "candidates_checked": 30,
+  "candidate_count": 30,
   "candidates": [
-    {
-      "branch": "codex/loader-landlock",
-      "sha": "676d6611af6e31df449cfa03478c68f589459335",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/116",
-      "pr_number": 116,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 4,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 1,
-          "fixture_files": 1,
-          "additions": 185,
-          "deletions": 4,
-          "symbols_preview": [],
-          "example_paths": [
-            "src/loader.c",
-            "tests/test_process.c"
-          ]
-        }
-      ]
-    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1247,19 +1223,35 @@
         "fixture_files": 9,
         "ci": "passing_checks"
       }
-    ],
-    "unclassified": [
-      {
-        "branch": "codex/loader-landlock",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/116",
-        "source_files": 1,
-        "fixture_files": 1,
-        "ci": "passing_checks"
-      }
     ]
   },
-  "recent_merged_count": 16,
+  "recent_merged_count": 17,
   "recent_merged": [
+    {
+      "branch": "merged-pr-116",
+      "sha": "676d6611af6e31df449cfa03478c68f589459335",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/116",
+      "pr_number": 116,
+      "ci": "merged_not_compat_verified",
+      "status": "merged source; compatibility review pending",
+      "files_checked": 4,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 1,
+          "additions": 185,
+          "deletions": 4,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/loader.c",
+            "tests/test_process.c"
+          ]
+        }
+      ],
+      "merged_at": "2026-11-01T14:31:29Z"
+    },
     {
       "branch": "merged-pr-115",
       "sha": "ec63735adc7b87c5755738b2ed0fb9e18e61eac3",
@@ -1979,6 +1971,13 @@
     ],
     "unclassified": [
       {
+        "pr_number": 116,
+        "url": "https://github.com/kallmek3nny/ios-27/pull/116",
+        "source_files": 1,
+        "fixture_files": 1,
+        "status": "merged source, not necessarily compatible"
+      },
+      {
         "pr_number": 115,
         "url": "https://github.com/kallmek3nny/ios-27/pull/115",
         "source_files": 4,
@@ -1994,5 +1993,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T00:50:16Z"
+  "observed_at": "2026-11-01T14:32:04Z"
 }
