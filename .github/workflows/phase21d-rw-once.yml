@@ -1,0 +1,44 @@
+name: phase21d standalone reader-writer and once
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/libsystem21d_*'
+      - 'include/ios27/libsystem21d_*'
+      - 'tests/phase21d-*'
+      - 'tools/phase21d-*'
+      - 'docs/phase21d-*'
+      - '.github/workflows/phase21d-rw-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-bridge:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: verify independent native tests and Darwin ARM64 fixture
+        run: timeout 300s python3 tools/phase21d-standalone.py
+      - name: sanitize on x86_64
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE21D_SANITIZE: '1'
+          PHASE21D_SKIP_BASE: '1'
+        run: timeout 300s python3 tools/phase21d-standalone.py
+      - name: thread sanitizer on x86_64
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE21D_TSAN: '1'
+          PHASE21D_SKIP_BASE: '1'
+        run: timeout 300s python3 tools/phase21d-standalone.py
+      - name: cumulative compiler-produced branch coverage on x86_64
+        if: matrix.runner == 'ubuntu-24.04'
+        run: timeout 180s python3 tools/phase21d-coverage.py
