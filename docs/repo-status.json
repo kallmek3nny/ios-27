@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "6341edbb6ecb2c9a7b13ddba1281fb1b8ede2f92",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/6341edbb6ecb2c9a7b13ddba1281fb1b8ede2f92",
-    "committed_at": "2026-11-01T17:58:30Z"
+    "sha": "2a302ac9f4abd34decdad8d38024907c331dea43",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/2a302ac9f4abd34decdad8d38024907c331dea43",
+    "committed_at": "2026-11-01T18:35:25Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 121,
-      "branch": "codex/loader-persona",
-      "sha": "035e4529981bf8bf662c28904db293f09982d283",
-      "title": "feat(loader): reset and verify a plain PER_LINUX persona across exec",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/121",
-      "updated_at": "2026-11-01T18:32:31Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 121,
+      "title": "feat(loader): reset and verify a plain PER_LINUX persona across exec",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/121",
+      "head_sha": "035e4529981bf8bf662c28904db293f09982d283",
+      "merged_at": "2026-11-01T18:35:26Z"
+    },
+    {
       "number": 120,
       "title": "feat(loader): require the parent-death SIGKILL before reading the payload",
       "url": "https://github.com/kallmek3nny/ios-27/pull/120",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/63",
       "head_sha": "809381d1f0e36e786f4b2482b919075e0a5dbd7f",
       "merged_at": "2026-10-28T19:21:00Z"
-    },
-    {
-      "number": 64,
-      "title": "phase 20d: bounded native threading bridge with synchronization, TLS and ARM64 compiler fixtures",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/64",
-      "head_sha": "3252d111e12d96f0fea5b484c61e379abd4e279a",
-      "merged_at": "2026-10-28T19:20:45Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 20,
+    "branches_scanned": 21,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T18:33:11Z"
+  "observed_at": "2026-11-01T18:36:01Z"
 }

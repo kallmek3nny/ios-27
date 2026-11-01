@@ -4,13 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `6341edbb6ecb`
-
-### [codex/loader-persona](https://github.com/kallmek3nny/ios-27/pull/121)
-
-head: `035e4529981b` · ci: **passing_checks** · unmerged, not credited.
-
-- **unclassified**: 2 source files, 1 test/fixture files, +101/-13 lines
+candidate branches with mapped changes: **30** · audited base: `2a302ac9f4ab`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -218,6 +212,12 @@ recent merges appear here even after their purple WIP marker disappears. blue me
 
 recent merged PRs with source changes: **20**
 
+### [merged PR #121](https://github.com/kallmek3nny/ios-27/pull/121)
+
+merged: 2026-11-01T18:35:26Z · source changes awaiting function-level audit.
+
+- **unclassified**: 2 source files, 1 fixtures, +101/-13 lines
+
 ### [merged PR #120](https://github.com/kallmek3nny/ios-27/pull/120)
 
 merged: 2026-11-01T17:58:30Z · source changes awaiting function-level audit.
@@ -346,13 +346,6 @@ merged: 2026-10-28T19:21:00Z · source changes awaiting function-level audit.
 
 - **ObjC host prototype (not Apple libobjc)**: 3 source files, 4 fixtures, +655/-0 lines
   - added declarations: `ios27_objc20b_alloc`, `ios27_objc20b_bind`, `ios27_objc20b_create`, `ios27_objc20b_destroy`, `ios27_objc20b_register`, `ios27_objc20b_release`, `ios27_objc20b_replace`, `ios27_objc20b_resolve`, `ios27_objc20b_resolve_global`, `ios27_objc20b_resolve_super_global`, `ios27_objc20b_selector`, `ios27_objc20b_send_words`
-
-### [merged PR #64](https://github.com/kallmek3nny/ios-27/pull/64)
-
-merged: 2026-10-28T19:20:45Z · source changes awaiting function-level audit.
-
-- **libsystem_pthread**: 2 source files, 4 fixtures, +983/-0 lines
-  - added declarations: `ios27_20d_cancel_point`, `ios27_20d_cancel_request`, `ios27_20d_cond_signal`, `ios27_20d_cond_wait`, `ios27_20d_create`, `ios27_20d_destroy`, `ios27_20d_getspecific`, `ios27_20d_key_create`, `ios27_20d_key_delete`, `ios27_20d_mutex_lock`, `ios27_20d_mutex_trylock`, `ios27_20d_mutex_unlock`
 
 ## verification policy
 
