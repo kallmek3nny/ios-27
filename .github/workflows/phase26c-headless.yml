@@ -1,0 +1,27 @@
+name: phase26c isolated headless graphics
+on:
+  pull_request:
+    paths:
+      - 'src/phase26c_*'
+      - 'include/ios27/phase26c_*'
+      - 'tests/phase26c-*'
+      - 'tools/phase26c-*'
+      - 'docs/phase26c-*'
+      - 'android/phase26c/**'
+      - '.github/workflows/phase26c-*.yml'
+  workflow_dispatch:
+jobs:
+  headless:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitizer: ['0', '1']
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile and test strict C11 graphics backend
+        env:
+          P26_SANITIZE: ${{ matrix.sanitizer }}
+        run: timeout 180s bash tools/phase26c-verify.sh "$RUNNER_TEMP/phase26c-test"
