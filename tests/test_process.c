@@ -789,14 +789,15 @@ static int ambient_capability_available(void) {
 
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
- * filter is inherited across fork and execveat and steers the loader's
- * capability, dumpable and Landlock setup. With hold_capability the
- * launcher first makes TEST_CAPABILITY ambient, so the loader starts with
- * it. Reaching LOADER_STAGE means the loader dropped its capabilities and
- * read back empty sets, cleared and read back its dumpable attribute,
- * either enforced its deny-all domain (its own probe of "/" must fail with
- * EACCES) or skipped an absent Landlock as documented, and then opened the
- * payload. */
+ * filter is inherited across fork and execveat and steers the supervisor
+ * child's PR_SET_PDEATHSIG and the loader's capability, dumpable,
+ * parent-death and Landlock setup. With hold_capability the launcher first
+ * makes TEST_CAPABILITY ambient, so the loader starts with it. Reaching
+ * LOADER_STAGE means the loader dropped its capabilities and read back
+ * empty sets, cleared and read back its dumpable attribute, read back the
+ * supervisor's parent-death SIGKILL, either enforced its deny-all domain
+ * (its own probe of "/" must fail with EACCES) or skipped an absent
+ * Landlock as documented, and then opened the payload. */
 static void loader_landlock_case(const char *loader_path, loader_case test,
                                  int hold_capability) {
     pid_t launcher = fork();
@@ -998,6 +999,12 @@ int main(int argc, char **argv) {
             {NO_INJECTION, ANY_ARGUMENT, 0, 0},
             /* The loader refuses to continue while it stays dumpable. */
             {SYS_prctl, PR_SET_DUMPABLE, EPERM, EPERM},
+            /* A refused or faked parent-death read-back fails setup, and so
+             * does a supervisor PR_SET_PDEATHSIG that claimed success but
+             * left the signal unset: the loader reads back 0, not SIGKILL. */
+            {SYS_prctl, PR_GET_PDEATHSIG, EPERM, EPERM},
+            {SYS_prctl, PR_GET_PDEATHSIG, 0, EPERM},
+            {SYS_prctl, PR_SET_PDEATHSIG, 0, EPERM},
             /* Absent or disabled Landlock is skipped, as documented. */
             {SYS_landlock_create_ruleset, ANY_ARGUMENT, ENOSYS, 0},
             {SYS_landlock_create_ruleset, ANY_ARGUMENT, EOPNOTSUPP, 0},

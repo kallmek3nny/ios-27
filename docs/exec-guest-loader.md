@@ -80,7 +80,8 @@ the seal set is final.
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
 3. It sets `RLIMIT_CORE` to zero, drops its capabilities, clears its dumpable
-   attribute and enters a deny-all Landlock domain, then opens the payload.
+   attribute, confirms that the supervisor's parent-death `SIGKILL` survived
+   the exec and enters a deny-all Landlock domain, then opens the payload.
    All four launch seals must be present (`F_GET_SEALS`) and the size must
    match. The file is mapped `PROT_READ` and `MAP_PRIVATE`, and the
    NULL-terminated vectors are rebuilt with bounds checks on every count,
@@ -120,6 +121,24 @@ the seal set is final.
    the guest that later runs in the same process. Root and `CAP_SYS_PTRACE`
    holders are not excluded. This step runs before the stage-one filter,
    which does not permit that `prctl` option.
+
+   The supervisor's child sets `PR_SET_PDEATHSIG` to `SIGKILL` and only then
+   checks `getppid()`, so a launcher that dies after that check takes the
+   child with it
+   ([`PR_SET_PDEATHSIG(2const)`](https://man7.org/linux/man-pages/man2/PR_SET_PDEATHSIG.2const.html)).
+   The signal follows the thread that forked the child, here the
+   single-threaded launcher. An ordinary `execveat` keeps the setting.
+   `begin_new_exec` in the kernel's `fs/exec.c` clears it for a secure exec
+   (a set-user-ID, set-group-ID or file-capability binary, or a security
+   module's decision), and `commit_creds` in `kernel/cred.c` clears it when
+   an effective or filesystem user or group ID changes or the permitted set
+   grows. The loader does not know the launcher's PID, so it cannot repeat
+   the `getppid()` check and does not try to restore a lost signal.
+   Instead it reads the value back with `PR_GET_PDEATHSIG` after the
+   capability drop, which only lowers sets and so keeps the signal. A
+   failed call or any value other than `SIGKILL` is a setup error. Like the
+   dumpable step, this runs before the stage-one filter, which does not
+   permit `PR_GET_PDEATHSIG`.
 
    The Landlock ruleset has no rules. Depending on the ABI version the kernel
    reports, it handles every filesystem right through
@@ -238,6 +257,10 @@ starts holding it. The real drop must then succeed, `capset` alone must
 succeed when the ambient clear returns `EINVAL`, and a refused or faked
 successful `capset` must fail with `EPERM` because the read-back still
 reports the capability. Hosts without such namespaces skip only these
-holding cases. These steps run before the loader's architecture check, so
-they also run on x86_64. Passing these tests does not satisfy the general
-Darwin process-startup or untrusted-guest-isolation capability gates.
+holding cases. A refused `PR_GET_PDEATHSIG`, a faked successful one that
+leaves its result unwritten, and a faked successful `PR_SET_PDEATHSIG` in
+the supervisor's child, which leaves the signal unset across the exec, must
+each end in an `EPERM` setup report. These steps run before the loader's
+architecture check, so they also run on x86_64. Passing these tests does
+not satisfy the general Darwin process-startup or untrusted-guest-isolation
+capability gates.

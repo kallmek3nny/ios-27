@@ -16,7 +16,8 @@
  * sealed launch payload on fd 4, an empty environment and a fully blocked
  * signal mask, so no launcher heap, stack or mapping is visible to the
  * guest. Before reading the payload it drops its capabilities, clears its
- * dumpable attribute and enters a deny-all Landlock domain when the kernel
+ * dumpable attribute, confirms that the supervisor's parent-death SIGKILL
+ * survived the exec and enters a deny-all Landlock domain when the kernel
  * provides one. Once the payload is mapped and its
  * descriptor closed, it installs a stage-one seccomp allowlist before the
  * image is re-parsed. Like the fork runner this is trusted-fixture failure
@@ -213,6 +214,29 @@ static int drop_capabilities(void) {
     return 0;
 }
 
+/* The supervisor's child sets PR_SET_PDEATHSIG to SIGKILL and only then
+ * checks getppid(), so a launcher that dies after that check kills the
+ * child. An ordinary execveat keeps the setting. begin_new_exec in
+ * fs/exec.c clears it for a secureexec exec (a set-user-ID, set-group-ID or
+ * file-capability binary, or a security module's decision), and
+ * commit_creds clears it when an effective or filesystem ID changes or the
+ * permitted set grows. The loader does not know the launcher's PID and
+ * cannot repeat the getppid() check, so a lost signal is a setup error,
+ * not something to restore. The capability drop only lowers sets and keeps
+ * the signal, so this check runs after it. The value starts as 0, so a
+ * PR_GET_PDEATHSIG that claims success without writing it reads as lost. */
+static int require_parent_death_signal(void) {
+    int sig = 0;
+    if (prctl(PR_GET_PDEATHSIG, (unsigned long)(uintptr_t)&sig, 0ul, 0ul,
+              0ul))
+        return -1;
+    if (sig != SIGKILL) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -224,10 +248,11 @@ int main(int argc, char **argv) {
               "ios27_run_executable_exec\n", stderr);
         return 2;
     }
-    /* Capabilities, core dumps and same-UID ptrace access end before any
-     * payload byte is read. */
+    /* Capabilities, core dumps and same-UID ptrace access end, and the
+     * parent-death signal is confirmed, before any payload byte is read. */
     if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
-        clear_dumpable() || enter_landlock_domain())
+        clear_dumpable() || require_parent_death_signal() ||
+        enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);
