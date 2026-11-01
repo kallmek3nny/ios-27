@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **30** · audited base: `d7e4bf56796b`
+candidate branches with mapped changes: **31** · audited base: `d7e4bf56796b`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
@@ -205,6 +205,12 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [codex/loader-pdeathsig](https://github.com/kallmek3nny/ios-27/tree/codex%2Floader-pdeathsig)
+
+head: `0291d9ffb056` · ci: **not_checked** · unmerged, not credited.
+
+- **unclassified**: 1 source files, 1 test/fixture files, +44/-12 lines
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

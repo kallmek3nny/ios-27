@@ -72,7 +72,7 @@ main source: `d7e4bf56796b`
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 30 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 31 active candidate(s) with recognized code changes.
 
 - **libsystem_c / libc**: 1 unmerged candidate branch(es), not counted
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
