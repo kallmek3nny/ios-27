@@ -4,7 +4,13 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **30** · audited base: `73b3cff5a5bb`
+candidate branches with mapped changes: **31** · audited base: `73b3cff5a5bb`
+
+### [codex/loader-landlock](https://github.com/kallmek3nny/ios-27/pull/116)
+
+head: `d5c4efb7f7b6` · ci: **running** · unmerged, not credited.
+
+- **unclassified**: 1 source files, 1 test/fixture files, +185/-4 lines
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 

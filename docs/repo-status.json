@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 116,
+      "branch": "codex/loader-landlock",
+      "sha": "d5c4efb7f7b6f8563371b443840967beb072ca61",
+      "title": "feat(loader): enter a deny-all Landlock domain before reading the payload",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/116",
+      "updated_at": "2026-11-01T00:40:23Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -484,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-10-31T22:00:01Z"
+  "observed_at": "2026-11-01T00:40:58Z"
 }
