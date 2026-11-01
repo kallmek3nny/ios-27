@@ -451,8 +451,15 @@ static void child_reset(int fd, pid_t parent) {
         if (sigaction(signal, &action, NULL) && errno != EINVAL)
             report_and_exit(fd, IOS27_REPORT_SETUP, errno);
     }
+    /* Reset the persona to plain PER_LINUX (0). An inherited
+     * READ_IMPLIES_EXEC lets PROT_READ in mmap and mprotect imply PROT_EXEC
+     * after the syscall filter has checked the requested protection, and an
+     * ordinary execveat keeps ADDR_NO_RANDOMIZE, ADDR_COMPAT_LAYOUT and
+     * MMAP_PAGE_ZERO and applies them to the loader's new address space.
+     * The loader reads the persona back. */
     if (setrlimit(RLIMIT_CORE, &core) ||
-        prctl(PR_SET_PDEATHSIG, SIGKILL, 0ul, 0ul, 0ul))
+        prctl(PR_SET_PDEATHSIG, SIGKILL, 0ul, 0ul, 0ul) ||
+        syscall(SYS_personality, 0ul) < 0)
         report_and_exit(fd, IOS27_REPORT_SETUP, errno);
     if (getppid() != parent) _exit(125);
 }
