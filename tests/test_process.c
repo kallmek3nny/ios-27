@@ -790,6 +790,10 @@ static int ambient_capability_available(void) {
 /* Launcher setups for loader_landlock_case. */
 #define LAUNCHER_CAPABILITY 1
 #define LAUNCHER_PERSONA 2
+#define LAUNCHER_STACK_UNLIMITED 3
+#define LAUNCHER_STACK_LARGE 4
+/* A finite RLIMIT_STACK soft limit above IOS27_LOADER_STACK_LIMIT. */
+#define TEST_LARGE_STACK ((rlim_t)(2u * IOS27_LOADER_STACK_LIMIT))
 /* A persona bit the supervisor's child must clear. Native 64-bit exec on
  * arm64 and x86_64 already clears READ_IMPLIES_EXEC, but an ordinary
  * execveat keeps ADDR_NO_RANDOMIZE. */
@@ -815,18 +819,48 @@ static int persona_available(void) {
     return WEXITSTATUS(status) == 0;
 }
 
+/* Set the RLIMIT_STACK soft limit of the calling process to soft, keep the
+ * hard limit and read the soft limit back. Without privilege, the soft
+ * limit can only be raised up to the hard limit. */
+static int hold_stack_limit(rlim_t soft) {
+    struct rlimit stack;
+    if (getrlimit(RLIMIT_STACK, &stack) ||
+        (stack.rlim_max != RLIM_INFINITY && stack.rlim_max < soft))
+        return -1;
+    stack.rlim_cur = soft;
+    if (setrlimit(RLIMIT_STACK, &stack) || getrlimit(RLIMIT_STACK, &stack))
+        return -1;
+    return stack.rlim_cur == soft ? 0 : -1;
+}
+
+/* Try hold_stack_limit in a throwaway child. Hosts whose hard limit is too
+ * low for soft, or whose policy refuses the change, skip that raised-limit
+ * loader mode. */
+static int stack_limit_available(rlim_t soft) {
+    pid_t child = fork();
+    int status;
+    assert(child >= 0);
+    if (!child) _exit(hold_stack_limit(soft) ? 1 : 0);
+    assert(waitpid(child, &status, 0) == child);
+    assert(WIFEXITED(status));
+    return WEXITSTATUS(status) == 0;
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the supervisor
- * child's PR_SET_PDEATHSIG and persona reset and the loader's capability,
- * dumpable, parent-death, persona and Landlock setup. LAUNCHER_CAPABILITY
- * first makes TEST_CAPABILITY ambient in the launcher, so the loader starts
- * with it, and LAUNCHER_PERSONA first sets TEST_PERSONA, so the
- * supervisor's child starts with it. Reaching LOADER_STAGE means the loader
- * dropped its capabilities and read back empty sets, cleared and read back
- * its dumpable attribute, read back the supervisor's parent-death SIGKILL
- * and a plain PER_LINUX persona, either enforced its deny-all domain (its
- * own probe of "/" must fail with EACCES) or skipped an absent Landlock as
+ * child's PR_SET_PDEATHSIG, persona reset and stack-limit clamp and the
+ * loader's capability, dumpable, parent-death, persona, stack-limit and
+ * Landlock setup. LAUNCHER_CAPABILITY first makes TEST_CAPABILITY ambient
+ * in the launcher, so the loader starts with it. LAUNCHER_PERSONA first
+ * sets TEST_PERSONA, and LAUNCHER_STACK_UNLIMITED and LAUNCHER_STACK_LARGE
+ * first raise the RLIMIT_STACK soft limit to unlimited or TEST_LARGE_STACK,
+ * so the supervisor's child starts with them. Reaching LOADER_STAGE means
+ * the loader dropped its capabilities and read back empty sets, cleared and
+ * read back its dumpable attribute, read back the supervisor's parent-death
+ * SIGKILL, a plain PER_LINUX persona and a stack soft limit no larger than
+ * IOS27_LOADER_STACK_LIMIT, either enforced its deny-all domain (its own
+ * probe of "/" must fail with EACCES) or skipped an absent Landlock as
  * documented, and then opened the payload. */
 static void loader_landlock_case(const char *loader_path, loader_case test,
                                  int launcher_mode) {
@@ -845,6 +879,10 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
         if (launcher_mode == LAUNCHER_CAPABILITY)
             assert(!hold_ambient_capability());
         if (launcher_mode == LAUNCHER_PERSONA) assert(!hold_persona());
+        if (launcher_mode == LAUNCHER_STACK_UNLIMITED)
+            assert(!hold_stack_limit(RLIM_INFINITY));
+        if (launcher_mode == LAUNCHER_STACK_LARGE)
+            assert(!hold_stack_limit(TEST_LARGE_STACK));
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
@@ -1085,6 +1123,31 @@ int main(int argc, char **argv) {
         printf("guest loader persona: %s\n",
                available ? "inherited ADDR_NO_RANDOMIZE reset and read back" :
                            "persona change refused; inherited-persona cases skipped");
+    }
+    {
+        /* The launcher raises its RLIMIT_STACK soft limit to unlimited or to
+         * TEST_LARGE_STACK, and the supervisor's child inherits it. The real
+         * clamp must leave the loader reading back IOS27_LOADER_STACK_LIMIT.
+         * Faking success for the child's pid-0 prlimit64 calls (glibc
+         * getrlimit and setrlimit) leaves the raised limit in place. The
+         * loader's own read-back names its PID, so the injection does not
+         * answer it, and it must fail setup. Hosts whose hard limit cannot
+         * hold a raised soft limit skip that mode. */
+        const loader_case raised[] = {
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            {SYS_prlimit64, 0L, 0, EPERM}
+        };
+        const int modes[] = {LAUNCHER_STACK_UNLIMITED, LAUNCHER_STACK_LARGE};
+        const rlim_t limits[] = {RLIM_INFINITY, TEST_LARGE_STACK};
+        unsigned exercised = 0u;
+        for (size_t m = 0u; m < sizeof(modes) / sizeof(modes[0]); ++m) {
+            if (!stack_limit_available(limits[m])) continue;
+            ++exercised;
+            for (size_t i = 0u; i < sizeof(raised) / sizeof(raised[0]); ++i)
+                loader_landlock_case(argv[1], raised[i], modes[m]);
+        }
+        printf("guest loader stack limit: %u of %zu raised soft limits clamped and read back\n",
+               exercised, sizeof(modes) / sizeof(modes[0]));
     }
     {
         /* On any host the capability read-back must succeed and report no

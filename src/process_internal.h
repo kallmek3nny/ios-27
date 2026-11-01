@@ -28,6 +28,11 @@ int ios27_process_supervise(int (*entry)(void *), void *context,
 #define IOS27_LOADER_REPORT_FD 3
 #define IOS27_LOADER_PAYLOAD_FD 4
 
+/* Largest RLIMIT_STACK soft limit the guest loader accepts: the kernel's
+ * _STK_LIM (8 MiB), which a secureexec exec also clamps the soft limit to.
+ * The supervisor's exec child applies this clamp before execveat. */
+#define IOS27_LOADER_STACK_LIMIT (UINT64_C(8) * 1024u * 1024u)
+
 /* Child-side helpers. Only async-signal-safe system calls are used. */
 int ios27_process_report(int fd, uint32_t kind, int value);
 /* Close every descriptor outside [first, last]; requires close_range. */

@@ -478,14 +478,37 @@ static void child_run(int fd, pid_t parent, int (*entry)(void *), void *context)
     report_and_exit(fd, IOS27_REPORT_RETURN, entry(context));
 }
 
+/* execveat applies the RLIMIT_STACK value saved when the exec began
+ * (bprm_mm_init in fs/exec.c) to the loader's new address space, and an
+ * ordinary exec never lowers it; only a secureexec exec clamps the soft
+ * limit to _STK_LIM. With an unlimited soft limit, the generic top-down
+ * layout that arm64 uses (mmap_is_legacy in mm/util.c) falls back to the
+ * legacy bottom-up mmap base, and x86_64 sizes the gap below the stack from
+ * the limit. Apply the secureexec clamp here instead. Only the soft limit
+ * is lowered and the hard limit is kept, so this needs no privilege. The
+ * buffer starts as unlimited, so a getrlimit that claims success without
+ * writing it still leads to the clamp. The loader reads the limit back. */
+static int clamp_stack_limit(void) {
+    struct rlimit stack = {RLIM_INFINITY, RLIM_INFINITY};
+    if (getrlimit(RLIMIT_STACK, &stack)) return -1;
+    if (stack.rlim_cur != RLIM_INFINITY &&
+        stack.rlim_cur <= IOS27_LOADER_STACK_LIMIT)
+        return 0;
+    stack.rlim_cur = (rlim_t)IOS27_LOADER_STACK_LIMIT;
+    return setrlimit(RLIMIT_STACK, &stack);
+}
+
 /* Exec mode: assemble the fixed loader layout (report pipe on 3, sealed
  * payload on 4), drop every other descriptor and replace the address space
  * with the trusted loader, using an empty environment. The launcher's full
  * signal mask stays blocked across exec; the loader clears it immediately
- * before installing its own filter and reporting readiness. */
+ * before installing its own filter and reporting readiness. The stack-limit
+ * clamp applies only here, because the fork child keeps the launcher's
+ * existing address space. */
 static void child_exec(int fd, pid_t parent, int payload, int loader) {
     int report, staged_payload = -1, staged_loader = -1;
     child_reset(fd, parent);
+    if (clamp_stack_limit()) report_and_exit(fd, IOS27_REPORT_SETUP, errno);
     /* Lift every source above the layout first, so a descriptor already
      * occupying 3..5 cannot be replaced before it has been copied. */
     report = fcntl(fd, F_DUPFD_CLOEXEC, LOADER_SCRATCH_FD);
