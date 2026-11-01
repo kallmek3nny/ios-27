@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "7678c4019905e48b1ae4c84dee755f56b3b30e24",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/7678c4019905e48b1ae4c84dee755f56b3b30e24",
-    "committed_at": "2026-11-01T14:31:29Z"
+    "sha": "4fce43fe62c6322c94f4e0bea227b7229387b634",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/4fce43fe62c6322c94f4e0bea227b7229387b634",
+    "committed_at": "2026-11-01T16:03:20Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 117,
-      "branch": "codex/loader-stage1-seccomp",
-      "sha": "4c49f603354ae27421701b63d43599dff86a8726",
-      "title": "feat(loader): install a stage-one seccomp allowlist before re-parsing",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/117",
-      "updated_at": "2026-11-01T15:54:56Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 117,
+      "title": "feat(loader): install a stage-one seccomp allowlist before re-parsing",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/117",
+      "head_sha": "4c49f603354ae27421701b63d43599dff86a8726",
+      "merged_at": "2026-11-01T16:03:20Z"
+    },
+    {
       "number": 116,
       "title": "feat(loader): enter a deny-all Landlock domain before reading the payload",
       "url": "https://github.com/kallmek3nny/ios-27/pull/116",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/60",
       "head_sha": "0845d3ed2d56c1eb5146b7a5ebfffc5f18acde5d",
       "merged_at": "2026-10-28T19:14:10Z"
-    },
-    {
-      "number": 59,
-      "title": "fix: handle progress refresh/main races and remove stale phase references",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/59",
-      "head_sha": "788e8882e16c628a33eb735117680d9fbc286336",
-      "merged_at": "2026-10-28T18:51:52Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 16,
+    "branches_scanned": 17,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T15:55:33Z"
+  "observed_at": "2026-11-01T16:03:57Z"
 }
