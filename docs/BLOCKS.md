@@ -57,9 +57,8 @@ these percentages count tracked components touched by an active source PR or a r
 
 confirmed evidence is drawn only from merged main. the [live provenance snapshot](repo-status.json) records recent branches, which never count until merged and reviewed.
 
-main source: `50b326d5c36b`
+main source: `aa0e2fb8e101`
 
-- [PR #123](https://github.com/kallmek3nny/ios-27/pull/123) · incoming, not counted
 - [PR #112](https://github.com/kallmek3nny/ios-27/pull/112) · incoming, not counted
 - [PR #109](https://github.com/kallmek3nny/ios-27/pull/109) · incoming, not counted
 - [PR #111](https://github.com/kallmek3nny/ios-27/pull/111) · incoming, not counted
@@ -67,12 +66,13 @@ main source: `50b326d5c36b`
 - [PR #110](https://github.com/kallmek3nny/ios-27/pull/110) · incoming, not counted
 - [PR #105](https://github.com/kallmek3nny/ios-27/pull/105) · incoming, not counted
 - [PR #106](https://github.com/kallmek3nny/ios-27/pull/106) · incoming, not counted
+- [PR #102](https://github.com/kallmek3nny/ios-27/pull/102) · incoming, not counted
 
 ## parsed branch diffs (provisional, not merged)
 
 the purple dashed outlines identify components with new source or test changes on tracked agent branches. they do not increase verified compatibility percentages.
 
-[Live branch diff inventory and CI evidence](BRANCHES.md) · 31 active candidate(s) with recognized code changes.
+[Live branch diff inventory and CI evidence](BRANCHES.md) · 30 active candidate(s) with recognized code changes.
 
 - **libsystem_c / libc**: 1 unmerged candidate branch(es), not counted
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
@@ -90,7 +90,7 @@ the purple dashed outlines identify components with new source or test changes o
 
 blue outlines mark merged source code that is not yet credited by a specific evidence-reviewed compatibility target. this can include passing CI; CI is not an Apple ABI conformance test.
 
-latest scanned merged PRs: **20** · [source diffs](BRANCHES.md).
+latest scanned merged PRs: **21** · [source diffs](BRANCHES.md).
 
 - **libsystem_pthread**: 7 recently merged code PR(s), compatibility review pending
 - **mach-o parser and native loader**: 2 recently merged code PR(s), compatibility review pending

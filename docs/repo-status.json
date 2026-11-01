@@ -2,21 +2,12 @@
   "schema": 1,
   "repository": "kallmek3nny/ios-27",
   "main_source": {
-    "sha": "50b326d5c36b464fc435245e5f7cd67e325d7b6b",
-    "url": "https://github.com/kallmek3nny/ios-27/commit/50b326d5c36b464fc435245e5f7cd67e325d7b6b",
-    "committed_at": "2026-11-01T19:26:52Z"
+    "sha": "aa0e2fb8e101880e6fb7c2b1dfb3b7dbf8451db5",
+    "url": "https://github.com/kallmek3nny/ios-27/commit/aa0e2fb8e101880e6fb7c2b1dfb3b7dbf8451db5",
+    "committed_at": "2026-11-01T20:08:28Z"
   },
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
-    {
-      "number": 123,
-      "branch": "codex/loader-sched-reset",
-      "sha": "2148d9e7aff8dbc20196ea3c52b2a0c1b6991388",
-      "title": "fix(loader): reset inherited real-time scheduling before exec",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/123",
-      "updated_at": "2026-11-01T20:05:32Z",
-      "status": "unmerged: not counted"
-    },
     {
       "number": 112,
       "branch": "phase26e-android-host-scenes-input",
@@ -291,6 +282,13 @@
   "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
+      "number": 123,
+      "title": "fix(loader): reset inherited real-time scheduling before exec",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/123",
+      "head_sha": "2148d9e7aff8dbc20196ea3c52b2a0c1b6991388",
+      "merged_at": "2026-11-01T20:08:28Z"
+    },
+    {
       "number": 122,
       "title": "feat(loader): clamp and verify a bounded RLIMIT_STACK across exec",
       "url": "https://github.com/kallmek3nny/ios-27/pull/122",
@@ -478,20 +476,13 @@
       "url": "https://github.com/kallmek3nny/ios-27/pull/62",
       "head_sha": "5b41efa301ccb07a605403fd1c4e95dfbae71a9e",
       "merged_at": "2026-10-28T19:22:22Z"
-    },
-    {
-      "number": 66,
-      "title": "fix: attribute phase-named fixture changes to the agent's source subsystem",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/66",
-      "head_sha": "63818f8893f292b70487ba83742be14de305319b",
-      "merged_at": "2026-10-28T19:22:03Z"
     }
   ],
   "scan_limits": {
     "branch_page": 100,
-    "branches_scanned": 22,
+    "branches_scanned": 23,
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-01T20:06:01Z"
+  "observed_at": "2026-11-01T20:09:01Z"
 }
