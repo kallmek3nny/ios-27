@@ -4,9 +4,34 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "6341edbb6ecb2c9a7b13ddba1281fb1b8ede2f92",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 30,
-  "candidate_count": 30,
+  "candidates_checked": 31,
+  "candidate_count": 31,
   "candidates": [
+    {
+      "branch": "codex/loader-persona",
+      "sha": "371cf59ededfb8cffbe3b015f1d8934a1d6d7d31",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/121",
+      "pr_number": 121,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 4,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 101,
+          "deletions": 13,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/loader.c",
+            "src/process.c",
+            "tests/test_process.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1223,6 +1248,15 @@
         "fixture_files": 9,
         "ci": "passing_checks"
       }
+    ],
+    "unclassified": [
+      {
+        "branch": "codex/loader-persona",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/121",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "passing_checks"
+      }
     ]
   },
   "recent_merged_count": 20,
@@ -2083,5 +2117,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T17:59:14Z"
+  "observed_at": "2026-11-01T18:26:50Z"
 }
