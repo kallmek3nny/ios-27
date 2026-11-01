@@ -79,12 +79,32 @@ the seal set is final.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
-3. It sets `RLIMIT_CORE` to zero, clears its dumpable attribute and enters a
-   deny-all Landlock domain, then opens the payload. All four launch seals
-   must be present (`F_GET_SEALS`) and the size must match. The file is
-   mapped `PROT_READ` and `MAP_PRIVATE`, and the NULL-terminated vectors are
-   rebuilt with bounds checks on every count, size and string. Descriptor 4
-   is then closed; the private mapping outlives it.
+3. It sets `RLIMIT_CORE` to zero, drops its capabilities, clears its dumpable
+   attribute and enters a deny-all Landlock domain, then opens the payload.
+   All four launch seals must be present (`F_GET_SEALS`) and the size must
+   match. The file is mapped `PROT_READ` and `MAP_PRIVATE`, and the
+   NULL-terminated vectors are rebuilt with bounds checks on every count,
+   size and string. Descriptor 4 is then closed; the private mapping
+   outlives it.
+
+   An `execveat` of a program without file capabilities copies the caller's
+   ambient set into the new permitted and effective sets, and
+   `PR_SET_NO_NEW_PRIVS` does not clear an ambient set the caller already
+   holds (`cap_bprm_creds_from_file` in the kernel's
+   `security/commoncap.c`). The inheritable set carries over unchanged, and
+   a root caller can also start the loader with permitted capabilities
+   ([`capabilities(7)`](https://man7.org/linux/man-pages/man7/capabilities.7.html)).
+   The loader clears its ambient set with `PR_CAP_AMBIENT_CLEAR_ALL`, lowers
+   its effective, permitted and inheritable sets to empty with `capset` and
+   reads all three back with `capget`. Lowering needs no capability, and a
+   capability can be ambient only while it is both permitted and
+   inheritable, so empty sets also mean an empty ambient set. `EINVAL` from
+   the ambient clear means a kernel older than Linux 4.3, which has no
+   ambient sets, and is skipped. A refused `capset` is accepted only when the
+   read-back reports nothing to drop; any other failure, or any capability
+   still reported, is a setup error. The bounding set, securebits and user
+   and group IDs are unchanged. Like the dumpable step, this runs before the
+   stage-one filter, which does not permit `capget` or `capset`.
 
    An `execveat` of a readable program by a caller whose real and effective
    IDs match resets the dumpable attribute to 1 (`begin_new_exec` in the
@@ -208,7 +228,16 @@ When the launcher's real and effective IDs match, a faked successful one
 must fail the same way, because the read-back catches it. `ENOSYS` or
 `EOPNOTSUPP` from the Landlock version query must be skipped, and `EPERM`
 from it must fail setup. On hosts with Landlock, a refused or faked
-successful `restrict_self` must also fail setup. These steps run before the
-loader's architecture check, so they also run on x86_64. Passing these tests
-does not satisfy the general Darwin process-startup or
-untrusted-guest-isolation capability gates.
+successful `restrict_self` must also fail setup. On every host, a refused
+`capget`, a faked successful one that leaves its buffer unwritten, and a
+refused `PR_CAP_AMBIENT` clear must each end in an `EPERM` setup report,
+while `EINVAL` from the clear must be skipped. Where an unprivileged user
+namespace grants and reports capabilities, the launcher first makes
+`CAP_SYS_PTRACE` ambient, permitted, effective and inheritable, so the loader
+starts holding it. The real drop must then succeed, `capset` alone must
+succeed when the ambient clear returns `EINVAL`, and a refused or faked
+successful `capset` must fail with `EPERM` because the read-back still
+reports the capability. Hosts without such namespaces skip only these
+holding cases. These steps run before the loader's architecture check, so
+they also run on x86_64. Passing these tests does not satisfy the general
+Darwin process-startup or untrusted-guest-isolation capability gates.

@@ -719,14 +719,86 @@ typedef struct {
     int setup_errno;     /* expected loader SETUP errno; 0 means LOADER_STAGE */
 } loader_case;
 
+#ifndef CLONE_NEWUSER
+#define CLONE_NEWUSER 0x10000000
+#endif
+#ifndef PR_CAP_AMBIENT
+#define PR_CAP_AMBIENT 47
+#endif
+#ifndef PR_CAP_AMBIENT_IS_SET
+#define PR_CAP_AMBIENT_IS_SET 1
+#endif
+#ifndef PR_CAP_AMBIENT_RAISE
+#define PR_CAP_AMBIENT_RAISE 2
+#endif
+#define TEST_CAPABILITY_VERSION_3 UINT32_C(0x20080522)
+#define TEST_CAPABILITY 19u /* CAP_SYS_PTRACE */
+
+typedef struct {
+    uint32_t version;
+    int pid;
+} test_cap_header;
+
+typedef struct {
+    uint32_t effective;
+    uint32_t permitted;
+    uint32_t inheritable;
+} test_cap_data;
+
+/* Make TEST_CAPABILITY ambient in the calling single-threaded process. A
+ * new user namespace starts with every capability permitted and effective
+ * inside it. Adding the capability to the inheritable set lets it be raised
+ * as ambient, and an ambient capability survives the supervisor's execveat
+ * of the loader. Succeeds only when capget reports the capability as
+ * effective, permitted and inheritable and PR_CAP_AMBIENT_IS_SET reports
+ * it as ambient, so a policy that refuses or hides namespace capabilities
+ * is detected instead of being tested against. */
+static int hold_ambient_capability(void) {
+    test_cap_header header = {TEST_CAPABILITY_VERSION_3, 0};
+    test_cap_data data[2];
+    const uint32_t bit = UINT32_C(1) << TEST_CAPABILITY;
+    memset(data, 0, sizeof(data));
+    if (syscall(SYS_unshare, CLONE_NEWUSER) ||
+        syscall(SYS_capget, &header, data))
+        return -1;
+    data[0].inheritable |= bit;
+    if (syscall(SYS_capset, &header, data) ||
+        prctl(PR_CAP_AMBIENT, (unsigned long)PR_CAP_AMBIENT_RAISE,
+              (unsigned long)TEST_CAPABILITY, 0ul, 0ul))
+        return -1;
+    memset(data, 0, sizeof(data));
+    if (syscall(SYS_capget, &header, data) ||
+        !(data[0].effective & data[0].permitted & data[0].inheritable & bit))
+        return -1;
+    return prctl(PR_CAP_AMBIENT, (unsigned long)PR_CAP_AMBIENT_IS_SET,
+                 (unsigned long)TEST_CAPABILITY, 0ul, 0ul) == 1 ? 0 : -1;
+}
+
+/* Try hold_ambient_capability in a throwaway child. Hosts without
+ * unprivileged user namespaces, or whose policy refuses or hides their
+ * capabilities, skip the capability-holding loader cases. */
+static int ambient_capability_available(void) {
+    pid_t child = fork();
+    int status;
+    assert(child >= 0);
+    if (!child) _exit(hold_ambient_capability() ? 1 : 0);
+    assert(waitpid(child, &status, 0) == child);
+    assert(WIFEXITED(status));
+    return WEXITSTATUS(status) == 0;
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the loader's
- * dumpable and Landlock setup. Reaching LOADER_STAGE means the loader
- * cleared and read back its dumpable attribute, either enforced its
- * deny-all domain (its own probe of "/" must fail with EACCES) or skipped an
- * absent Landlock as documented, and then opened the payload. */
-static void loader_landlock_case(const char *loader_path, loader_case test) {
+ * capability, dumpable and Landlock setup. With hold_capability the
+ * launcher first makes TEST_CAPABILITY ambient, so the loader starts with
+ * it. Reaching LOADER_STAGE means the loader dropped its capabilities and
+ * read back empty sets, cleared and read back its dumpable attribute,
+ * either enforced its deny-all domain (its own probe of "/" must fail with
+ * EACCES) or skipped an absent Landlock as documented, and then opened the
+ * payload. */
+static void loader_landlock_case(const char *loader_path, loader_case test,
+                                 int hold_capability) {
     pid_t launcher = fork();
     int status;
     assert(launcher >= 0);
@@ -739,6 +811,7 @@ static void loader_landlock_case(const char *loader_path, loader_case test) {
         char error[160], expected[160];
         int loader = open(loader_path, O_RDONLY | O_CLOEXEC), payload = -1;
         assert(loader >= 0);
+        if (hold_capability) assert(!hold_ambient_capability());
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
@@ -937,19 +1010,50 @@ int main(int argc, char **argv) {
         assert(argc == 2 && argv[1][0]);
         assert(abi > 0 || query_errno == ENOSYS || query_errno == EOPNOTSUPP);
         for (size_t i = 0u; i < sizeof(cases) / sizeof(cases[0]); ++i)
-            loader_landlock_case(argv[1], cases[i]);
+            loader_landlock_case(argv[1], cases[i], 0);
         /* With matching real and effective IDs, execveat of the readable
          * loader leaves it dumpable (begin_new_exec in fs/exec.c), so a
          * faked successful PR_SET_DUMPABLE must be caught by the read-back.
          * Otherwise the starting value follows fs.suid_dumpable. */
         if (geteuid() == getuid() && getegid() == getgid()) {
             const loader_case faked = {SYS_prctl, PR_SET_DUMPABLE, 0, EPERM};
-            loader_landlock_case(argv[1], faked);
+            loader_landlock_case(argv[1], faked, 0);
         }
         printf("guest loader Landlock: %s (host ABI %ld)\n",
                abi > 0 ? "deny-all domain enforced and probed" :
                          "unavailable, best-effort skip",
                abi > 0 ? abi : 0L);
+    }
+    {
+        /* On any host the capability read-back must succeed and report no
+         * capability; a faked capget leaves its all-ones buffer. Only
+         * EINVAL, a kernel without ambient sets, skips the ambient clear. */
+        const loader_case any_host[] = {
+            {SYS_capget, ANY_ARGUMENT, EPERM, EPERM},
+            {SYS_capget, ANY_ARGUMENT, 0, EPERM},
+            {SYS_prctl, PR_CAP_AMBIENT, EPERM, EPERM},
+            {SYS_prctl, PR_CAP_AMBIENT, EINVAL, 0}
+        };
+        /* Here the loader starts with TEST_CAPABILITY ambient, permitted,
+         * effective and inheritable. The real drop must remove it, capset
+         * alone must also empty the ambient set, and a refused or faked
+         * capset must fail setup because the read-back still reports it. */
+        const loader_case holding[] = {
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            {SYS_capset, ANY_ARGUMENT, EPERM, EPERM},
+            {SYS_capset, ANY_ARGUMENT, 0, EPERM},
+            {SYS_prctl, PR_CAP_AMBIENT, EINVAL, 0}
+        };
+        int available = ambient_capability_available();
+        for (size_t i = 0u; i < sizeof(any_host) / sizeof(any_host[0]); ++i)
+            loader_landlock_case(argv[1], any_host[i], 0);
+        if (available) {
+            for (size_t i = 0u; i < sizeof(holding) / sizeof(holding[0]); ++i)
+                loader_landlock_case(argv[1], holding[i], 1);
+        }
+        printf("guest loader capabilities: %s\n",
+               available ? "ambient CAP_SYS_PTRACE dropped and read back" :
+                           "read back empty; user-namespace holding cases skipped");
     }
     assert(getpid() == parent && fd_count() == descriptors);
     assert(prctl(PR_GET_NO_NEW_PRIVS, 0ul, 0ul, 0ul, 0ul) == no_new_privs);
