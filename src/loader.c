@@ -237,6 +237,31 @@ static int require_parent_death_signal(void) {
     return 0;
 }
 
+/* An ordinary execveat keeps the caller's persona. begin_new_exec in
+ * fs/exec.c masks out bprm->per_clear, which bprm_fill_uid sets only for
+ * set-user-ID and set-group-ID programs and skips under no_new_privs, and
+ * which cap_bprm_creds_from_file in security/commoncap.c sets only when the
+ * permitted set grows. The native arm64 SET_PERSONALITY and x86_64
+ * set_personality_64bit clear only READ_IMPLIES_EXEC. The supervisor's
+ * child therefore resets its persona to PER_LINUX (0) before the exec.
+ * ADDR_NO_RANDOMIZE, ADDR_COMPAT_LAYOUT and MMAP_PAGE_ZERO have already
+ * shaped this address space by the time the loader runs, and
+ * READ_IMPLIES_EXEC would let a
+ * later PROT_READ mapping become executable after a syscall filter has
+ * checked the requested protection. Any persona other than plain
+ * PER_LINUX, including one the kernel's ELF loader adjusted, is therefore
+ * a setup error, not something to repair here. personality(0xffffffff)
+ * reads the persona without changing it. */
+static int require_plain_persona(void) {
+    long persona = syscall(SYS_personality, 0xfffffffful);
+    if (persona < 0) return -1;
+    if (persona != 0) {
+        errno = EPERM;
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -249,10 +274,11 @@ int main(int argc, char **argv) {
         return 2;
     }
     /* Capabilities, core dumps and same-UID ptrace access end, and the
-     * parent-death signal is confirmed, before any payload byte is read. */
+     * parent-death signal and plain persona are confirmed, before any
+     * payload byte is read. */
     if (setrlimit(RLIMIT_CORE, &core) || drop_capabilities() ||
         clear_dumpable() || require_parent_death_signal() ||
-        enter_landlock_domain())
+        require_plain_persona() || enter_landlock_domain())
         loader_exit(IOS27_REPORT_SETUP, errno);
     if (ios27_launch_payload_open(IOS27_LOADER_PAYLOAD_FD, &payload))
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PAYLOAD);

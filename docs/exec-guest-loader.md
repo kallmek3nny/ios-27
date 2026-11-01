@@ -71,17 +71,18 @@ the seal set is final.
 
 ## Child and loader sequence
 
-1. The supervisor forks a child that resets signals, disables core dumps,
-   keeps only the report pipe (descriptor 3) and the payload (descriptor 4),
-   sets `PR_SET_NO_NEW_PRIVS` and executes the loader descriptor with a
-   single `argv` entry and an empty environment. The signal mask stays fully
-   blocked across the exec.
+1. The supervisor forks a child that resets signals and its persona,
+   disables core dumps, keeps only the report pipe (descriptor 3) and the
+   payload (descriptor 4), sets `PR_SET_NO_NEW_PRIVS` and executes the
+   loader descriptor with a single `argv` entry and an empty environment.
+   The signal mask stays fully blocked across the exec.
 2. The loader refuses to start unless it has exactly one argument and
    descriptor 3 is a FIFO. If you run it by hand, it prints a note and exits
    with 2 rather than adopting descriptors 3 and 4.
 3. It sets `RLIMIT_CORE` to zero, drops its capabilities, clears its dumpable
    attribute, confirms that the supervisor's parent-death `SIGKILL` survived
-   the exec and enters a deny-all Landlock domain, then opens the payload.
+   the exec and that its persona is plain `PER_LINUX`, and enters a deny-all
+   Landlock domain, then opens the payload.
    All four launch seals must be present (`F_GET_SEALS`) and the size must
    match. The file is mapped `PROT_READ` and `MAP_PRIVATE`, and the
    NULL-terminated vectors are rebuilt with bounds checks on every count,
@@ -139,6 +140,26 @@ the seal set is final.
    failed call or any value other than `SIGKILL` is a setup error. Like the
    dumpable step, this runs before the stage-one filter, which does not
    permit `PR_GET_PDEATHSIG`.
+
+   An ordinary `execveat` keeps the caller's persona. `begin_new_exec` in the
+   kernel's `fs/exec.c` masks out only `bprm->per_clear`, which
+   `bprm_fill_uid` sets for set-user-ID and set-group-ID programs but skips
+   under `no_new_privs`, and which `cap_bprm_creds_from_file` in
+   `security/commoncap.c` sets when the permitted set grows. The native arm64
+   `SET_PERSONALITY` and x86_64 `set_personality_64bit` clear only
+   `READ_IMPLIES_EXEC`. An inherited `ADDR_NO_RANDOMIZE`,
+   `ADDR_COMPAT_LAYOUT` or `MMAP_PAGE_ZERO` would therefore shape the
+   loader's new address space, and a set `READ_IMPLIES_EXEC` would let a
+   `PROT_READ` mapping become executable after a syscall filter has checked
+   the requested protection. The supervisor's child sets its persona to
+   `PER_LINUX` (0) before the exec, and a refused reset is a setup error.
+   The loader then reads the persona with `personality(0xffffffff)`, which
+   queries it without changing it
+   ([`personality(2)`](https://man7.org/linux/man-pages/man2/personality.2.html)).
+   A failed call or any value other than 0, including one the kernel's ELF
+   loader adjusted, is a setup error and is not repaired. Like the dumpable
+   step, this runs before the stage-one filter, which does not permit
+   `personality`.
 
    The Landlock ruleset has no rules. Depending on the ABI version the kernel
    reports, it handles every filesystem right through
@@ -260,7 +281,13 @@ reports the capability. Hosts without such namespaces skip only these
 holding cases. A refused `PR_GET_PDEATHSIG`, a faked successful one that
 leaves its result unwritten, and a faked successful `PR_SET_PDEATHSIG` in
 the supervisor's child, which leaves the signal unset across the exec, must
-each end in an `EPERM` setup report. These steps run before the loader's
-architecture check, so they also run on x86_64. Passing these tests does
-not satisfy the general Darwin process-startup or untrusted-guest-isolation
-capability gates.
+each end in an `EPERM` setup report, and so must a refused persona reset in
+the supervisor's child or a refused persona query in the loader. Where the
+host permits it, the launcher first sets `ADDR_NO_RANDOMIZE`, which an
+ordinary `execveat` keeps. The real reset must then let the loader reach
+the payload stage, and a faked successful reset must fail with `EPERM`
+because the read-back still reports the bit. Hosts whose policy refuses the
+persona change skip only these inherited cases. These steps run before the
+loader's architecture check, so they also run on x86_64. Passing these
+tests does not satisfy the general Darwin process-startup or
+untrusted-guest-isolation capability gates.

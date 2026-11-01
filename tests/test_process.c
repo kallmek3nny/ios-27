@@ -787,19 +787,49 @@ static int ambient_capability_available(void) {
     return WEXITSTATUS(status) == 0;
 }
 
+/* Launcher setups for loader_landlock_case. */
+#define LAUNCHER_CAPABILITY 1
+#define LAUNCHER_PERSONA 2
+/* A persona bit the supervisor's child must clear. Native 64-bit exec on
+ * arm64 and x86_64 already clears READ_IMPLIES_EXEC, but an ordinary
+ * execveat keeps ADDR_NO_RANDOMIZE. */
+#define TEST_PERSONA 0x0040000ul /* ADDR_NO_RANDOMIZE */
+
+/* Set TEST_PERSONA in the calling process and read it back;
+ * personality(0xffffffff) only reads the persona. */
+static int hold_persona(void) {
+    if (syscall(SYS_personality, TEST_PERSONA) < 0) return -1;
+    return syscall(SYS_personality, 0xfffffffful) == (long)TEST_PERSONA ? 0 : -1;
+}
+
+/* Seccomp policies, container defaults among them, may refuse some persona
+ * values, so try hold_persona in a throwaway child first. Hosts that refuse
+ * it skip the inherited-persona loader cases. */
+static int persona_available(void) {
+    pid_t child = fork();
+    int status;
+    assert(child >= 0);
+    if (!child) _exit(hold_persona() ? 1 : 0);
+    assert(waitpid(child, &status, 0) == child);
+    assert(WIFEXITED(status));
+    return WEXITSTATUS(status) == 0;
+}
+
 /* Drive the project's real ios27-loader through ios27_process_supervise_exec
  * from a separate launcher, so an injected seccomp answer stays local. The
  * filter is inherited across fork and execveat and steers the supervisor
- * child's PR_SET_PDEATHSIG and the loader's capability, dumpable,
- * parent-death and Landlock setup. With hold_capability the launcher first
- * makes TEST_CAPABILITY ambient, so the loader starts with it. Reaching
- * LOADER_STAGE means the loader dropped its capabilities and read back
- * empty sets, cleared and read back its dumpable attribute, read back the
- * supervisor's parent-death SIGKILL, either enforced its deny-all domain
- * (its own probe of "/" must fail with EACCES) or skipped an absent
- * Landlock as documented, and then opened the payload. */
+ * child's PR_SET_PDEATHSIG and persona reset and the loader's capability,
+ * dumpable, parent-death, persona and Landlock setup. LAUNCHER_CAPABILITY
+ * first makes TEST_CAPABILITY ambient in the launcher, so the loader starts
+ * with it, and LAUNCHER_PERSONA first sets TEST_PERSONA, so the
+ * supervisor's child starts with it. Reaching LOADER_STAGE means the loader
+ * dropped its capabilities and read back empty sets, cleared and read back
+ * its dumpable attribute, read back the supervisor's parent-death SIGKILL
+ * and a plain PER_LINUX persona, either enforced its deny-all domain (its
+ * own probe of "/" must fail with EACCES) or skipped an absent Landlock as
+ * documented, and then opened the payload. */
 static void loader_landlock_case(const char *loader_path, loader_case test,
-                                 int hold_capability) {
+                                 int launcher_mode) {
     pid_t launcher = fork();
     int status;
     assert(launcher >= 0);
@@ -812,7 +842,9 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
         char error[160], expected[160];
         int loader = open(loader_path, O_RDONLY | O_CLOEXEC), payload = -1;
         assert(loader >= 0);
-        if (hold_capability) assert(!hold_ambient_capability());
+        if (launcher_mode == LAUNCHER_CAPABILITY)
+            assert(!hold_ambient_capability());
+        if (launcher_mode == LAUNCHER_PERSONA) assert(!hold_persona());
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
         if (test.syscall_number != NO_INJECTION) {
@@ -1005,6 +1037,11 @@ int main(int argc, char **argv) {
             {SYS_prctl, PR_GET_PDEATHSIG, EPERM, EPERM},
             {SYS_prctl, PR_GET_PDEATHSIG, 0, EPERM},
             {SYS_prctl, PR_SET_PDEATHSIG, 0, EPERM},
+            /* A refused persona reset in the supervisor's child (arg0 0)
+             * or a refused read-only query in the loader (arg0 0xffffffff)
+             * fails setup. */
+            {SYS_personality, 0L, EPERM, EPERM},
+            {SYS_personality, 0xffffffffL, EPERM, EPERM},
             /* Absent or disabled Landlock is skipped, as documented. */
             {SYS_landlock_create_ruleset, ANY_ARGUMENT, ENOSYS, 0},
             {SYS_landlock_create_ruleset, ANY_ARGUMENT, EOPNOTSUPP, 0},
@@ -1030,6 +1067,24 @@ int main(int argc, char **argv) {
                abi > 0 ? "deny-all domain enforced and probed" :
                          "unavailable, best-effort skip",
                abi > 0 ? abi : 0L);
+    }
+    {
+        /* The supervisor's child starts with TEST_PERSONA, which an ordinary
+         * execveat keeps. Its real reset must leave the loader reading back
+         * plain PER_LINUX, while a faked successful reset leaves the bit set
+         * and the loader's read-back must fail setup. */
+        const loader_case inherited[] = {
+            {NO_INJECTION, ANY_ARGUMENT, 0, 0},
+            {SYS_personality, 0L, 0, EPERM}
+        };
+        int available = persona_available();
+        if (available) {
+            for (size_t i = 0u; i < sizeof(inherited) / sizeof(inherited[0]); ++i)
+                loader_landlock_case(argv[1], inherited[i], LAUNCHER_PERSONA);
+        }
+        printf("guest loader persona: %s\n",
+               available ? "inherited ADDR_NO_RANDOMIZE reset and read back" :
+                           "persona change refused; inherited-persona cases skipped");
     }
     {
         /* On any host the capability read-back must succeed and report no
