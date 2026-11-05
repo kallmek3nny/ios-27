@@ -72,6 +72,8 @@ public final class MainActivity extends Activity implements SurfaceHolder.Callba
         super.onResume();
         if (host == 0) return;
         resumed = nativeLifecycle(host, 1) == 0;
+        if (ready && bitmap == null && surfaceWidth > 0 && surfaceHeight > 0)
+            allocateFrame(surfaceWidth, surfaceHeight);
         scheduleFrame();
     }
     @Override protected void onPause() {
