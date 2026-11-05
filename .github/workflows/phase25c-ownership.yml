@@ -1,0 +1,26 @@
+name: phase25c ARC ownership
+on:
+  pull_request:
+    paths:
+      - 'src/phase25c_*'
+      - 'include/ios27/phase25c_*'
+      - 'tests/phase25c-*'
+      - 'tools/phase25c-*'
+      - 'docs/phase25c-*'
+      - '.github/workflows/phase25c-*.yml'
+  workflow_dispatch:
+
+jobs:
+  ownership:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Native race/stress tests, ASan/UBSan and Darwin ARC build
+        run: python3 tools/phase25c-run.py
