@@ -1,0 +1,49 @@
+name: phase22e isolated ipc
+on:
+  pull_request:
+    paths:
+      - 'src/phase22e_*'
+      - 'include/ios27/phase22e_*'
+      - 'tests/phase22e-*'
+      - 'tools/phase22e-*'
+      - 'docs/phase22e-*'
+      - '.github/workflows/phase22e-ipc.yml'
+  push:
+    branches:
+      - 'phase22e-*'
+    paths:
+      - 'src/phase22e_*'
+      - 'include/ios27/phase22e_*'
+      - 'tests/phase22e-*'
+      - 'tools/phase22e-*'
+      - 'docs/phase22e-*'
+      - '.github/workflows/phase22e-ipc.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            compiler: clang
+            sanitize: address,undefined
+          - runner: ubuntu-24.04
+            compiler: gcc
+            sanitize: ''
+          - runner: macos-15
+            compiler: clang
+            sanitize: ''
+          - runner: macos-15-arm64
+            compiler: clang
+            sanitize: ''
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile native integration programs and run bounded tests
+        env:
+          CC: ${{ matrix.compiler }}
+          PHASE22E_SANITIZE: ${{ matrix.sanitize }}
+        run: python3 tools/phase22e-test.py
