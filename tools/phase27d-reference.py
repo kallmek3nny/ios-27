@@ -20,10 +20,10 @@ def convert(raw: pathlib.Path) -> pathlib.Path:
     if len(rgba) != W * H * 4:
         raise ValueError(f"{raw}: invalid rgba size {len(rgba)}")
     scanlines = b"".join(
-        b"\\0" + rgba[y * W * 4:(y + 1) * W * 4]
+        b"\0" + rgba[y * W * 4:(y + 1) * W * 4]
         for y in range(H)
     )
-    png = (b"\\x89PNG\\r\\n\\x1a\\n" +
+    png = (b"\x89PNG\r\n\x1a\n" +
            chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 6, 0, 0, 0)) +
            chunk(b"IDAT", zlib.compress(scanlines, level=9)) +
            chunk(b"IEND", b""))
