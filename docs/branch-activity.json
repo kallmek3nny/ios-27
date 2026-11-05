@@ -9,21 +9,23 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "8b36a271dc4bdda8ac5521750097c44a66539df2",
+      "sha": "8f1e243cf81f0179a8c698704db28401cad3000a",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 12,
+      "files_checked": 22,
       "possibly_truncated": false,
       "groups": [
         {
           "group_id": "mach-o",
           "source_files": 2,
           "fixture_files": 0,
-          "additions": 7,
-          "deletions": 3,
-          "symbols_preview": [],
+          "additions": 33,
+          "deletions": 11,
+          "symbols_preview": [
+            "ios27_native_handoff_extension"
+          ],
           "example_paths": [
             "include/ios27/macho.h",
             "src/runner.c"
@@ -31,16 +33,19 @@
         },
         {
           "group_id": "unclassified",
-          "source_files": 3,
-          "fixture_files": 2,
-          "additions": 629,
+          "source_files": 7,
+          "fixture_files": 5,
+          "additions": 1092,
           "deletions": 21,
-          "symbols_preview": [],
+          "symbols_preview": [
+            "ios27_native_handoff_extension",
+            "ios27_service_bridge_initialize"
+          ],
           "example_paths": [
+            "include/ios27/service_bridge.h",
+            "src/loader.c",
             "src/main.c",
-            "src/process.c",
-            "src/process_internal.h",
-            "tests/test_process_cli.py"
+            "src/process.c"
           ]
         }
       ]
@@ -1273,8 +1278,8 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 3,
-        "fixture_files": 2,
+        "source_files": 7,
+        "fixture_files": 5,
         "ci": "passing_checks"
       }
     ]
@@ -2118,5 +2123,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T00:24:58Z"
+  "observed_at": "2026-11-05T02:15:52Z"
 }

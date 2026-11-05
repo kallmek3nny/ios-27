@@ -8,10 +8,12 @@ candidate branches with mapped changes: **31** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `8b36a271dc4b` · ci: **passing_checks** · unmerged, not credited.
+head: `8f1e243cf81f` · ci: **passing_checks** · unmerged, not credited.
 
-- **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +7/-3 lines
-- **unclassified**: 3 source files, 2 test/fixture files, +629/-21 lines
+- **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +33/-11 lines
+  - candidate declarations: `ios27_native_handoff_extension`
+- **unclassified**: 7 source files, 5 test/fixture files, +1092/-21 lines
+  - candidate declarations: `ios27_native_handoff_extension`, `ios27_service_bridge_initialize`
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 
