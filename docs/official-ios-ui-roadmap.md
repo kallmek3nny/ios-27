@@ -53,12 +53,14 @@ and x86_64 CI runs exercise the compiler-produced workload and clearly labeled
 synthetic fault cases. This work is under review; consult the PR's exact head
 and checks before treating it as merged.
 
-The explicit research callback-table boundary is now exercised together with
-resource ownership, failure reporting and teardown. The next boundary is a
-compiler-produced Darwin shim/import ABI that can use these bounded services
-without the custom fifth entry argument, with an auditable symbol allowlist
-and executable callsite tests. This work does not establish standard Darwin
-libSystem symbol binding merely by sharing an ARM64 instruction set.
+The explicit research callback-table boundary and a
+[named static service shim](named-service-shim.md) are exercised together with
+resource ownership, failure reporting and teardown. A separately compiled
+four-argument client imports ten Darwin-named functions; LLVM resolves them
+against an original shim, and the loader binds only a validated private data
+record while clearing x4. An object-symbol allowlist and native callsite tests
+make that boundary auditable. General dynamic libSystem/dylib binding, more
+POSIX behavior and thread-local errno remain future boundaries.
 General Darwin startup, TLS, dyld/shared-cache loading, arm64e, graphics and
 official Apple services remain separate blockers. Native Linux CI also does
 not establish compatibility or isolation on the Galaxy S25+.

@@ -173,4 +173,13 @@ file, memory and Darwin-numbered userspace services:
 This uses an explicit research callback table, not Apple's libSystem ABI
 or Darwin syscall translation. The regular helper does not expose the table.
 
+The [named service shim](docs/named-service-shim.md) also lets a separately
+compiled four-argument client call ten declared Darwin-named functions with
+ordinary C buffers. The services helper binds a validated private data record;
+that client uses no fifth entry argument:
+
+```sh
+./build/ios27 run-exec ./build/ios27-services-loader ./build/service-shim-executable --unsafe
+```
+
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.

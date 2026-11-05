@@ -45,17 +45,22 @@ int ios27_service_binding_inspect(const uint8_t *bytes, size_t size,
         if (read32(command) == 0x19u) {
             for (uint32_t j = 0; j < read32(command + 64u); ++j) {
                 const uint8_t *section = command + 72u + (size_t)j * 80u;
-                uint64_t vmaddr, offset;
+                uint64_t vmaddr, offset, alignment_mask;
+                uint32_t alignment;
                 if (memcmp(section, section_name, sizeof(section_name))) continue;
                 if (staged.present)
                     return fail(error, error_size, "duplicate service binding section");
                 vmaddr = read64(section + 32u);
                 offset = read32(section + 48u);
+                alignment = read32(section + 52u);
+                if (alignment < 3u || alignment > 14u)
+                    return fail(error, error_size, "unsupported service binding alignment");
+                alignment_mask = (UINT64_C(1) << alignment) - 1u;
                 if (memcmp(command + 8u, segment_name, sizeof(segment_name)) ||
                     read32(command + 56u) != 3u || read32(command + 60u) != 3u ||
                     read64(section + 40u) != IOS27_SERVICE_BINDING_BYTES ||
-                    (vmaddr & 7u) || (offset & 7u) ||
-                    read32(section + 52u) < 3u || read32(section + 64u) != 0u ||
+                    (vmaddr & alignment_mask) || (offset & alignment_mask) ||
+                    read32(section + 64u) != 0u ||
                     offset > size || IOS27_SERVICE_BINDING_BYTES > size - offset)
                     return fail(error, error_size, "invalid service binding section");
                 const uint8_t *slot = bytes + (size_t)offset;

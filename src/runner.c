@@ -277,8 +277,9 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                      error, error_size);
 }
 
-/* Opt-in loader only: an original research capability table in x4. The
- * ordinary public C-main entrypoints always supply NULL in that register. */
+/* Opt-in services loader: bind the approved private shim record when present,
+ * otherwise retain the earlier x4 callback interface. Ordinary public C-main
+ * entrypoints neither bind a record nor supply an extension register. */
 int ios27_native_handoff_extension(const uint8_t *data, size_t size,
                                     const ios27_macho_info *info,
                                     const ios27_startup_context *context,

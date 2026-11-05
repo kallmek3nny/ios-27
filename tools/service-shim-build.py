@@ -102,7 +102,7 @@ def main():
     args.manifest.write_text(json.dumps({
         "format": "ios27-static-service-shim-v1", "entry": "_main",
         "entry_arguments": ["argc", "argv", "envp", "apple"],
-        "client_imports": sorted(imported), "shim_exports": sorted(shim_exports),
+        "client_imports": sorted(imported), "shim_object_definitions": sorted(shim_exports),
         "unresolved_linked_symbols": sorted(remaining),
         "source_sha256": {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                           for path in [*inputs, ROOT / "src/darwin_shim_internal.h",

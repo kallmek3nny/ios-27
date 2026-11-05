@@ -42,6 +42,12 @@ Neither helper is meant to be invoked directly.
 
 ## Deliberate ABI and resource boundary
 
+The [named static shim](named-service-shim.md) builds on this model. It
+marshals ordinary C pointers for ten declared functions and receives its
+table through a validated private data record. Its client keeps a normal
+four-argument `main` and the entry trampoline clears x4. The explicit table
+interface described below remains supported for the original callback client.
+
 The first four registers keep the existing bounded `LC_MAIN` C ABI:
 x0=argc, x1=argv, x2=envp, x3=apple. Only the separate services helper places
 a pointer to `ios27_service_api` in x4. The table in

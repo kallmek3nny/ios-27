@@ -121,6 +121,9 @@ int main(int argc, char **argv) {
     put32(copy + section + 52u, 2u);
     rejected(copy, size);
     memcpy(copy, bytes, size);
+    put32(copy + section + 52u, UINT32_MAX);
+    rejected(copy, size);
+    memcpy(copy, bytes, size);
     put32(copy + section + 64u, UINT32_C(0x80000000));
     rejected(copy, size);
     memcpy(copy, bytes, size);
