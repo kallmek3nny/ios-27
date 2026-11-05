@@ -9,14 +9,25 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "8f1e243cf81f0179a8c698704db28401cad3000a",
+      "sha": "7248d7973099dd6a722ae0f8a23b3ae4417c7cb1",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 22,
+      "files_checked": 23,
       "possibly_truncated": false,
       "groups": [
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 4,
+          "deletions": 2,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h"
+          ]
+        },
         {
           "group_id": "mach-o",
           "source_files": 2,
@@ -1129,6 +1140,15 @@
         "ci": "passing_checks"
       }
     ],
+    "libsystem-host-model": [
+      {
+        "branch": "codex/cpu-limit-expiry",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/126",
+        "source_files": 1,
+        "fixture_files": 0,
+        "ci": "passing_checks"
+      }
+    ],
     "libsystem-pthread": [
       {
         "branch": "phase21j-deterministic-sync-diagnostics",
@@ -2123,5 +2143,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T02:15:52Z"
+  "observed_at": "2026-11-05T02:19:20Z"
 }

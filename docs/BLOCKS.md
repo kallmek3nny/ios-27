@@ -85,6 +85,7 @@ the purple dashed outlines identify components with new source or test changes o
 - **Metal / IOSurface / gpu**: 1 unmerged candidate branch(es), not counted
 - **Android host integration**: 1 unmerged candidate branch(es), not counted
 - **ObjC host prototype (not Apple libobjc)**: 7 unmerged candidate branch(es), not counted
+- **libSystem guest model (not dylib)**: 1 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
 
