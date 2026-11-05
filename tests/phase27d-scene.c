@@ -135,8 +135,10 @@ static void demo_and_events(const char *output_dir) {
     pixel(frames[0],128,2,16,255,200,0,255);
     pixel(frames[0],128,7,7,0,255,0,255);
     pixel(frames[0],128,0,0,20,30,40,255); /* outside layer + shadow */
-    pixel(frames[1],128,2,16,20,30,40,255);
-    pixel(frames[2],128,2,16,20,30,40,255);
+    /* The panel shadow can cover the dot's old position after it moves. */
+    assert(memcmp(frames[0]+16u*128u+2u*4u,frames[1]+16u*128u+2u*4u,4)!=0);
+    pixel(frames[1],128,0,20,20,30,40,255);
+    pixel(frames[2],128,0,20,20,30,40,255);
     CHECK(p27d_get(s,moving,false,&model));
     CHECK(p27d_get(s,moving,true,&present));
     assert(model.layer.x==2 && present.layer.x==22);
