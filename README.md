@@ -162,4 +162,15 @@ for the API, syscall restrictions, outcomes, and host requirements. The
 [exec guest loader](docs/exec-guest-loader.md) variant runs the same
 fixtures in a fresh address space instead of a fork.
 
+The separate [native service bridge](docs/native-service-bridge.md) helper
+connects an SDK-free compiler-produced Mach-O fixture to bounded virtual
+file, memory and Darwin-numbered userspace services:
+
+```sh
+./build/ios27 run-exec ./build/ios27-services-loader ./build/service-bridge-executable --unsafe
+```
+
+This uses an explicit research callback table, not Apple's libSystem ABI
+or Darwin syscall translation. The regular helper does not expose the table.
+
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.

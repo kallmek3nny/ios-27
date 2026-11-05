@@ -18,16 +18,26 @@ def main():
     parser.add_argument("--clang", required=True)
     parser.add_argument("--linker", required=True)
     parser.add_argument("--out", required=True, type=pathlib.Path)
+    parser.add_argument("--fallback-out", type=pathlib.Path)
     args = parser.parse_args()
+    fallback = args.fallback_out or args.out.with_name(args.out.name + "-fallback")
+    if fallback == args.out:
+        raise ValueError("primary and fallback outputs must be distinct")
     support = runpy.run_path(str(ROOT / "tools/phase19a-build.py"))
     command = support["command"]
     args.out.unlink(missing_ok=True)
+    fallback.unlink(missing_ok=True)
     obj = args.out.with_suffix(".o")
     command([args.clang, "--target=arm64-apple-darwin", "-ffreestanding",
              "-fno-builtin", "-fno-stack-protector", "-fno-unwind-tables",
              "-fno-asynchronous-unwind-tables", "-O2", "-Wall", "-Wextra",
              "-Werror", "-Wpedantic", "-I", str(ROOT / "include"), "-c",
              str(ROOT / "tests/fixtures/service-bridge.c"), "-o", str(obj)])
+    # Exercise the unchanged narrow linker even when LLVM is installed, so
+    # a local LLVM build cannot hide a source-profile regression from CI.
+    command([sys.executable, str(ROOT / "tools/phase19a-link-fallback.py"),
+             str(obj), str(fallback)])
+    support["inspect"](fallback)
     if args.linker != "none":
         common = [args.linker, "-arch", "arm64", "-platform_version", "macos",
                   "13.0", "13.0", "-e", "_main", "-fatal_warnings",
@@ -39,8 +49,7 @@ def main():
                 raise
             command(common + [str(support["no_platform_command"](obj))])
     else:
-        command([sys.executable, str(ROOT / "tools/phase19a-link-fallback.py"),
-                 str(obj), str(args.out)])
+        args.out.write_bytes(fallback.read_bytes())
     support["inspect"](args.out)
     print(f"service bridge: original linked ARM64 MH_EXECUTE: {args.out}")
 

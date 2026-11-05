@@ -50,13 +50,14 @@ int IOS27_SERVICE_ENTRY(int argc, char **argv, char **envp, char **apple,
     if (!api) return 201;
     if (api->version != IOS27_SERVICE_ABI_VERSION || api->size != sizeof(*api) ||
         !api->syscall || !api->memory || !api->error) return 202;
-    if (initialized != 11 || zero_tail[0] || zero_tail[63]) return 203;
+    if (initialized != 11) return 203;
     for (unsigned i = 0; i < 8u; ++i) sum += weights[i];
     if (sum != 31) return 204;
     if (argc == 2 && (!same(argv[0], "service-fixture") ||
         !same(argv[1], "vectors") || !envp || !apple ||
         !same(envp[0], "MODE=guest") || envp[1] ||
         !same(apple[0], "service=explicit") || apple[1])) return 205;
+    if (zero_tail[0] || zero_tail[63]) return 203;
 
     /* These IDs are deliberate virtual model values, never host identities. */
     if (call3(api, 20, 0, 0, 0) != 101 ||

@@ -89,6 +89,12 @@ signals through both public runners, including a stopped launcher; see
 
 ## Launch payload
 
+An optional, separately named `ios27-services-loader` uses the same exec
+protocol and filters but supplies an explicit original research service table
+to reviewed fixtures. See the [native service bridge](native-service-bridge.md)
+for its ABI, virtual resources and executable evidence. The ordinary helper
+supplies no such extension.
+
 After repeating the Mach-O layout preflight with the host page size, the
 launcher copies its inputs into a memfd named `ios27-launch`:
 

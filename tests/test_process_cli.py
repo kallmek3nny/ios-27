@@ -53,9 +53,9 @@ def entry_offset(image):
 
 
 def main():
-    if len(sys.argv) != 4:
-        raise SystemExit("expected ios27, trusted ios27-loader and phase19a fixture")
-    executable, loader, fixture = map(pathlib.Path, sys.argv[1:])
+    if len(sys.argv) not in (4, 6):
+        raise SystemExit("expected ios27, trusted loader, phase19a fixture and optional services helper/fixture")
+    executable, loader, fixture = map(pathlib.Path, sys.argv[1:4])
     native = platform.machine().lower() in {"aarch64", "arm64"}
     check([executable], 2, "usage: ios27")
     check([executable, "run-exec"], 2, "trusted-ios27-loader")
@@ -151,6 +151,28 @@ def main():
                   1, "guest loader is not a regular file")
             check([executable, "run-exec", directory, fixture, "--unsafe"],
                   1, "guest loader is not a regular file")
+        if len(sys.argv) == 6:
+            service_loader, service_fixture = map(pathlib.Path, sys.argv[4:])
+            service = [executable, "run-exec", service_loader, service_fixture]
+            check(service, 2, "explicit --unsafe flag")
+            check([service_loader], 2, "started only by ios27_run_executable_exec")
+            if native:
+                check([*service, "--unsafe"], 0, "entry returned 42")
+                check([*service, "--unsafe", "--arg", "service-fixture",
+                       "--arg", "vectors", "--env", "MODE=guest",
+                       "--apple", "service=explicit"], 0, "entry returned 42")
+                check([executable, "run-exec", loader, service_fixture, "--unsafe"],
+                      0, "entry returned 201")
+                for mode, code, message in (
+                    ("trap", 128 + signal.SIGTRAP, f"terminated by signal {signal.SIGTRAP}"),
+                    ("raw-syscall", 128 + signal.SIGSYS, f"terminated by signal {signal.SIGSYS}"),
+                    ("loop", 124, "exceeded 100 ms"),
+                ):
+                    check([*service, "--unsafe", "--arg", mode,
+                           "--timeout-ms", "100"], code, message)
+                    check([*service, "--unsafe"], 0, "entry returned 42")
+            else:
+                check([*service, "--unsafe"], 1, "ARM64")
     print("process CLI: parsing, explicit execution opt-in, input rejection and "
           + ("native outcomes/recovery passed" if native else
              "x86_64 refusal passed; native outcomes require ARM64"))

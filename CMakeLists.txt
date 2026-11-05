@@ -297,21 +297,24 @@ if(IOS27_BUILD_TESTS)
             "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"
             "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
+        set(IOS27_SERVICE_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-executable")
+        set(IOS27_SERVICE_FALLBACK_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-fallback")
         add_test(NAME contained-process-cli
             COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_process_cli.py"
                 "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>"
-                "${IOS27_CONTAINED_STARTUP}")
+                "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-services-loader>"
+                "${IOS27_SERVICE_FIXTURE}")
         set_tests_properties(contained-process-cli PROPERTIES TIMEOUT 30)
 
-        set(IOS27_SERVICE_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-executable")
         add_custom_command(
-            OUTPUT "${IOS27_SERVICE_FIXTURE}"
+            OUTPUT "${IOS27_SERVICE_FIXTURE}" "${IOS27_SERVICE_FALLBACK_FIXTURE}"
             COMMAND timeout 75s "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
                 --clang "${IOS27_DARWIN_CLANG}"
                 --linker "${IOS27_DARWIN_LD64_LLD}"
                 --out "${IOS27_SERVICE_FIXTURE}"
+                --fallback-out "${IOS27_SERVICE_FALLBACK_FIXTURE}"
             DEPENDS
                 "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
@@ -319,7 +322,8 @@ if(IOS27_BUILD_TESTS)
                 "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bridge.h"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/service-bridge.c"
             VERBATIM COMMENT "Link original SDK-free ARM64 service bridge fixture")
-        add_custom_target(ios27_service_fixture ALL DEPENDS "${IOS27_SERVICE_FIXTURE}")
+        add_custom_target(ios27_service_fixture ALL DEPENDS
+            "${IOS27_SERVICE_FIXTURE}" "${IOS27_SERVICE_FALLBACK_FIXTURE}")
 
         add_executable(test_service_exec tests/test_service_exec.c tests/fixtures/service-bridge.c)
         set_source_files_properties(tests/fixtures/service-bridge.c PROPERTIES
@@ -334,8 +338,12 @@ if(IOS27_BUILD_TESTS)
         add_test(NAME contained-native-services COMMAND test_service_exec
             "${IOS27_SERVICE_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
             "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        add_test(NAME contained-native-services-fallback COMMAND test_service_exec
+            "${IOS27_SERVICE_FALLBACK_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+            "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
         set_tests_properties(contained-service-callbacks PROPERTIES TIMEOUT 15)
-        set_tests_properties(contained-native-services PROPERTIES TIMEOUT 30
+        set_tests_properties(contained-native-services contained-native-services-fallback
+            PROPERTIES TIMEOUT 30
             SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
     endif()
 endif()
