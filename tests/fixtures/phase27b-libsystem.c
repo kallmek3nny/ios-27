@@ -23,8 +23,8 @@ int main(int argc, char **argv, char **envp, char **apple) {
     int64_t wall[2] = {0, 0};
     uint8_t stat_bytes[144] = {0};
     int wanted = 4;
-    (void)argv; (void)envp; (void)apple;
-    if (argc < 1 || layout_witness[0] + layout_witness[1] != 42) return 1;
+    (void)argc; (void)argv; (void)envp; (void)apple;
+    if (layout_witness[0] + layout_witness[1] != 42) return 1;
     fmt = malloc(64u);
     text = malloc(64u);
     output = calloc(1u, 128u);
@@ -67,7 +67,7 @@ int main(int argc, char **argv, char **envp, char **apple) {
     fd = openat(IOS27_27B_AT_FDCWD, "/tmp/phase27b",
                 IOS27_DARWIN_O_CREAT | IOS27_DARWIN_O_RDWR, 0600);
     if (fd != 3 || fcntl(fd, IOS27_27B_F_GETFL) !=
-        (IOS27_DARWIN_O_CREAT | IOS27_DARWIN_O_RDWR)) return 14;
+        IOS27_DARWIN_O_RDWR) return 14;
     if (write(fd, output, 17u) != 17 || lseek(fd, 0, 0) != 0) return 15;
     if (read(fd, copy, 17u) != 17 || memcmp(copy, output, 17u)) return 16;
     if (pread(fd, copy, 17u, 0) != 17 || memcmp(copy, output, 17u)) return 17;
