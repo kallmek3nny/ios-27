@@ -4,8 +4,8 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 31,
-  "candidate_count": 31,
+  "candidates_checked": 32,
+  "candidate_count": 32,
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
@@ -1044,6 +1044,93 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "agent/phase27b-integrated-libsystem-20261105",
+      "sha": "d9fb76645a5a91cf6bc60c7987431a7e06706f2f",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 54,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "libsystem-c",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 571,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_26a_calloc",
+            "ios27_26a_free",
+            "ios27_26a_getenv",
+            "ios27_26a_last_error",
+            "ios27_26a_live_bytes",
+            "ios27_26a_malloc",
+            "ios27_26a_memcmp",
+            "ios27_26a_memcpy",
+            "ios27_26a_memmove",
+            "ios27_26a_memset",
+            "ios27_26a_realloc",
+            "ios27_26a_setenv"
+          ],
+          "example_paths": [
+            "include/ios27/phase26a_libc.h",
+            "src/phase26a_libc.c",
+            "tests/phase26a-host.c"
+          ]
+        },
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 2,
+          "fixture_files": 1,
+          "additions": 139,
+          "deletions": 2,
+          "symbols_preview": [
+            "ios27_27b_run_exit_handlers"
+          ],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h",
+            "include/ios27/phase27b_libsystem.h",
+            "tests/fixtures/phase27b-libsystem.c"
+          ]
+        },
+        {
+          "group_id": "mach-o",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 55,
+          "deletions": 11,
+          "symbols_preview": [
+            "ios27_native_handoff_extension"
+          ],
+          "example_paths": [
+            "include/ios27/macho.h",
+            "src/runner.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 16,
+          "fixture_files": 11,
+          "additions": 2281,
+          "deletions": 32,
+          "symbols_preview": [
+            "ios27_27b_run_exit_handlers",
+            "ios27_27b_syscall",
+            "ios27_native_handoff_extension",
+            "ios27_service_binding_inspect",
+            "ios27_service_bridge_initialize"
+          ],
+          "example_paths": [
+            "include/ios27/darwin_shim.h",
+            "include/ios27/phase27b_syscalls.h",
+            "include/ios27/service_bindings.h",
+            "include/ios27/service_bridge.h"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -1139,6 +1226,13 @@
         "source_files": 2,
         "fixture_files": 5,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase27b-integrated-libsystem-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "not_checked"
       }
     ],
     "libsystem-host-model": [
@@ -1148,6 +1242,13 @@
         "source_files": 1,
         "fixture_files": 0,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase27b-integrated-libsystem-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
+        "source_files": 2,
+        "fixture_files": 1,
+        "ci": "not_checked"
       }
     ],
     "libsystem-pthread": [
@@ -1224,6 +1325,13 @@
         "source_files": 2,
         "fixture_files": 3,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase27b-integrated-libsystem-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "not_checked"
       }
     ],
     "metal": [
@@ -1302,6 +1410,13 @@
         "source_files": 12,
         "fixture_files": 9,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase27b-integrated-libsystem-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
+        "source_files": 16,
+        "fixture_files": 11,
+        "ci": "not_checked"
       }
     ]
   },
@@ -2144,5 +2259,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T03:05:02Z"
+  "observed_at": "2026-11-05T13:25:13Z"
 }

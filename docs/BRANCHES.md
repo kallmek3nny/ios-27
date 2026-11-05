@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **31** · audited base: `2674b2b42c0b`
+candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
@@ -215,6 +215,19 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [agent/phase27b-integrated-libsystem-20261105](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105)
+
+head: `d9fb76645a5a` · ci: **not_checked** · unmerged, not credited.
+
+- **libsystem_c / libc**: 2 source files, 1 test/fixture files, +571/-0 lines
+  - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
+- **libSystem guest model (not dylib)**: 2 source files, 1 test/fixture files, +139/-2 lines
+  - candidate declarations: `ios27_27b_run_exit_handlers`
+- **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +55/-11 lines
+  - candidate declarations: `ios27_native_handoff_extension`
+- **unclassified**: 16 source files, 11 test/fixture files, +2281/-32 lines
+  - candidate declarations: `ios27_27b_run_exit_handlers`, `ios27_27b_syscall`, `ios27_native_handoff_extension`, `ios27_service_binding_inspect`, `ios27_service_bridge_initialize`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 
