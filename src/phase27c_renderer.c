@@ -148,9 +148,9 @@ p26_status p27c_upload_rgba(p27c_renderer *r, uint32_t x, uint32_t y,
     if (r->drawing && bounds_ok(&r->desc, x, y, width, height) &&
         source_stride >= (size_t)width * 4U &&
         (size_t)(height - 1U) <= SIZE_MAX / source_stride) {
-        size_t required = (size_t)(height - 1U) * source_stride +
-                          (size_t)width * 4U;
-        if (required <= length) {
+        size_t span = (size_t)(height - 1U) * source_stride;
+        size_t visible = (size_t)width * 4U;
+        if (span <= SIZE_MAX - visible && span + visible <= length) {
             uint8_t *data = (uint8_t *)r->mapped.bytes;
             for (uint32_t row = 0; row < height; ++row)
                 for (uint32_t col = 0; col < width; ++col)
