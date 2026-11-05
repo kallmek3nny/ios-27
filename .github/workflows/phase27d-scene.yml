@@ -1,0 +1,61 @@
+name: phase27d animated scene and reference pixels
+
+on:
+  pull_request:
+    branches: [main, phase26d-coreanimation-compositor]
+    paths:
+      - 'src/phase27d_*'
+      - 'include/ios27/phase27d_*'
+      - 'tests/phase27d-*'
+      - 'tools/phase27d-*'
+      - 'docs/phase27d-*'
+      - '.github/workflows/phase27d-scene.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    name: scene / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitize]
+    steps:
+      - uses: actions/checkout@v4
+      - name: toolchain provenance
+        run: |
+          timeout 30s git rev-parse HEAD
+          timeout 30s clang --version
+      - name: strict independent C11 build
+        shell: bash
+        run: |
+          set -euo pipefail
+          flags="-std=c11 -O1 -g -Wall -Wextra -Werror -Wpedantic -pthread"
+          if [ "${{ matrix.mode }}" = sanitize ]; then
+            flags="$flags -fsanitize=address,undefined -fno-omit-frame-pointer"
+          fi
+          timeout 300s clang $flags -Iinclude src/phase26d_compositor.c src/phase27d_scene.c tests/phase27d-scene.c -lm -o /tmp/phase27d-test
+      - name: golden RGBA, transaction, event, animation and race tests
+        shell: bash
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/phase27d-frames
+          timeout 180s /tmp/phase27d-test /tmp/phase27d-frames
+          timeout 30s python3 tools/phase27d-reference.py /tmp/phase27d-frames
+          timeout 30s sha256sum /tmp/phase27d-frames/frame-*.png
+      - name: archive visual reference frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase27d-png-${{ matrix.runner }}-${{ matrix.mode }}
+          path: /tmp/phase27d-frames/*.png
+          if-no-files-found: ignore
+          retention-days: 14
