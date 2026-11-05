@@ -3,6 +3,12 @@
 /* Independently compiled four-argument LC_MAIN client. Every service call
  * uses an ordinary unresolved C name, linked against separate shim objects.
  * There is NO callback-table entry parameter and NO host file descriptor. */
+#if defined(__APPLE__)
+__attribute__((used, section("__DATA_CONST,__const")))
+#else
+__attribute__((used))
+#endif
+static const volatile int layout_witness[2] = {17, 25};
 static volatile int exited;
 static void on_exit_first(void) { exited = exited * 10 + 1; }
 static void on_exit_second(void) { exited = exited * 10 + 2; }
@@ -18,7 +24,7 @@ int main(int argc, char **argv, char **envp, char **apple) {
     uint8_t stat_bytes[144] = {0};
     int wanted = 4;
     (void)argv; (void)envp; (void)apple;
-    if (argc < 1) return 1;
+    if (argc < 1 || layout_witness[0] + layout_witness[1] != 42) return 1;
     fmt = malloc(64u);
     text = malloc(64u);
     output = calloc(1u, 128u);
