@@ -1,0 +1,51 @@
+name: phase25d objective-c lifecycle scheduler
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase25d_*'
+      - 'include/ios27/phase25d_*'
+      - 'tests/phase25d-*'
+      - 'tools/phase25d-*'
+      - 'docs/phase25d-*'
+      - '.github/workflows/phase25d-*.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scheduler:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: verify immutable checkout
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(timeout 30s git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SHA"
+          uname -m
+      - name: install strict compiler prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120s sudo apt-get update -qq
+          timeout 180s sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends clang lld
+      - name: host scheduler tests and Darwin ObjC2 provenance
+        shell: bash
+        run: timeout 300s python3 tools/phase25d-verify.py
+      - name: x86_64 ASan UBSan
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE25D_SANITIZE: '1'
+        shell: bash
+        run: timeout 300s python3 tools/phase25d-verify.py
