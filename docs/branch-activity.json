@@ -4,9 +4,37 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 32,
-  "candidate_count": 32,
+  "candidates_checked": 33,
+  "candidate_count": 33,
   "candidates": [
+    {
+      "branch": "agent/phase27a-objc-integrated-startup-20261105",
+      "sha": "39c05bcc26dd629c323e5acd6478fdc2cd978dbc",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/128",
+      "pr_number": 128,
+      "ci": "running",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 737,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase27a_launch"
+          ],
+          "example_paths": [
+            "include/ios27/phase27a_startup.h",
+            "src/phase27a_startup.c",
+            "tests/phase27a-host-integration.cpp",
+            "tests/phase27a-startup.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "codex/cpu-limit-expiry",
       "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
@@ -1047,12 +1075,12 @@
     },
     {
       "branch": "agent/phase27b-integrated-libsystem-20261105",
-      "sha": "d9fb76645a5a91cf6bc60c7987431a7e06706f2f",
+      "sha": "2788b873f3d67602183cd1429d988d8d33fe4ae2",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
       "pr_number": null,
       "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 54,
+      "files_checked": 57,
       "possibly_truncated": false,
       "groups": [
         {
@@ -1113,8 +1141,8 @@
         {
           "group_id": "unclassified",
           "source_files": 16,
-          "fixture_files": 11,
-          "additions": 2281,
+          "fixture_files": 12,
+          "additions": 2340,
           "deletions": 32,
           "symbols_preview": [
             "ios27_27b_run_exit_handlers",
@@ -1405,6 +1433,13 @@
     ],
     "unclassified": [
       {
+        "branch": "agent/phase27a-objc-integrated-startup-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/128",
+        "source_files": 2,
+        "fixture_files": 3,
+        "ci": "running"
+      },
+      {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 12,
@@ -1415,7 +1450,7 @@
         "branch": "agent/phase27b-integrated-libsystem-20261105",
         "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
         "source_files": 16,
-        "fixture_files": 11,
+        "fixture_files": 12,
         "ci": "not_checked"
       }
     ]
@@ -2259,5 +2294,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T13:25:13Z"
+  "observed_at": "2026-11-05T13:28:29Z"
 }

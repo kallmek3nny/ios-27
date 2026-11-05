@@ -9,6 +9,15 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 128,
+      "branch": "agent/phase27a-objc-integrated-startup-20261105",
+      "sha": "39c05bcc26dd629c323e5acd6478fdc2cd978dbc",
+      "title": "phase27a: isolated ObjC startup transaction and cross-PR integration gates",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/128",
+      "updated_at": "2026-11-05T13:27:38Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
       "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
@@ -291,10 +300,10 @@
   "ahead_branches": [
     {
       "branch": "agent/phase27b-integrated-libsystem-20261105",
-      "sha": "d9fb76645a5a91cf6bc60c7987431a7e06706f2f",
-      "ahead_by": 26,
+      "sha": "2788b873f3d67602183cd1429d988d8d33fe4ae2",
+      "ahead_by": 31,
       "behind_by": 0,
-      "last_commit_at": "2026-11-05T13:24:44Z",
+      "last_commit_at": "2026-11-05T13:27:43Z",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
       "status": "unmerged: not counted"
     }
@@ -503,5 +512,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T13:25:07Z"
+  "observed_at": "2026-11-05T13:28:22Z"
 }
