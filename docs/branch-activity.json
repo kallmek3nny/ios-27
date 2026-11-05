@@ -4,9 +4,34 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 30,
-  "candidate_count": 30,
+  "candidates_checked": 31,
+  "candidate_count": 31,
   "candidates": [
+    {
+      "branch": "codex/cpu-limit-expiry",
+      "sha": "7b704f91ee986774a744b38c372824b3cb14be75",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/126",
+      "pr_number": 126,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 1,
+          "fixture_files": 2,
+          "additions": 436,
+          "deletions": 13,
+          "symbols_preview": [],
+          "example_paths": [
+            "src/main.c",
+            "tests/test_process_cli.py",
+            "tests/test_process_cpu.c"
+          ]
+        }
+      ]
+    },
     {
       "branch": "phase26e-android-host-scenes-input",
       "sha": "63310d737d10b2e5265ba55891062895998439ef",
@@ -1223,6 +1248,15 @@
         "fixture_files": 9,
         "ci": "passing_checks"
       }
+    ],
+    "unclassified": [
+      {
+        "branch": "codex/cpu-limit-expiry",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/126",
+        "source_files": 1,
+        "fixture_files": 2,
+        "ci": "passing_checks"
+      }
     ]
   },
   "recent_merged_count": 21,
@@ -2064,5 +2098,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-01T21:08:36Z"
+  "observed_at": "2026-11-05T00:11:26Z"
 }
