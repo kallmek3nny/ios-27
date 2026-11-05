@@ -187,6 +187,7 @@ static int expiry_case(const native_program *program, rlim_t soft,
     }
     if (stopped) {
         struct pollfd exited;
+        siginfo_t stopped_state;
         pid_t child = -1;
         REQUIRE(inherited_filters >= 0);
         for (;;) {
@@ -222,8 +223,13 @@ static int expiry_case(const native_program *program, rlim_t soft,
         exited.revents = 0;
         REQUIRE(poll(&exited, 1u, 0) == 0);
         REQUIRE(!kill(launcher, SIGSTOP));
-        REQUIRE(waitpid(launcher, &status, WUNTRACED) == launcher);
-        REQUIRE(WIFSTOPPED(status) && WSTOPSIG(status) == SIGSTOP);
+        memset(&stopped_state, 0, sizeof(stopped_state));
+        /* Keep even an unexpectedly exited launcher waitable, so failure
+         * cleanup never signals a PID that this observer already reaped. */
+        REQUIRE(!waitid(P_PID, (id_t)launcher, &stopped_state,
+                        WSTOPPED | WEXITED | WNOWAIT));
+        REQUIRE(stopped_state.si_code == CLD_STOPPED &&
+                stopped_state.si_status == SIGSTOP);
         /* The launcher is stopped and the guest receives no test signal.
          * Only the kernel's CPU timer can end this syscall-free busy loop. */
         while (poll(&exited, 1u, 0) == 0) {
@@ -231,7 +237,7 @@ static int expiry_case(const native_program *program, rlim_t soft,
             pause_briefly();
         }
         REQUIRE(exited.revents & POLLIN);
-        REQUIRE(waitpid(launcher, &status, WNOHANG) == 0);
+        REQUIRE(launcher_alive(launcher));
         REQUIRE(!kill(launcher, SIGCONT));
     }
     REQUIRE(!wait_launcher(launcher, &status, deadline));
