@@ -8,7 +8,7 @@ candidate branches with mapped changes: **31** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `d1dc114a4748` · ci: **running** · unmerged, not credited.
+head: `d1dc114a4748` · ci: **passing_checks** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 1 source files, 0 test/fixture files, +4/-2 lines
 - **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +55/-11 lines
