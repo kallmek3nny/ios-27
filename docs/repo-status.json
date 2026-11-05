@@ -297,17 +297,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "agent/phase27b-integrated-libsystem-20261105",
-      "sha": "d5c8084e0da15d1829b2d195da067850956ef0e4",
-      "ahead_by": 35,
-      "behind_by": 0,
-      "last_commit_at": "2026-11-05T13:32:03Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 125,
@@ -512,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T13:40:55Z"
+  "observed_at": "2026-11-05T17:40:15Z"
 }
