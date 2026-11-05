@@ -24,7 +24,7 @@ int main(void) {
     assert(p.guest_errno == 45);
     fd = CALL(&p, 463u, UINT64_MAX - 1u, BASE, 0x202u, 0u);
     assert(fd == 3);
-    assert(CALL(&p, 92u, (uint64_t)fd, 3u, 0u, 0u) == 0x202);
+    assert(CALL(&p, 92u, (uint64_t)fd, 3u, 0u, 0u) == 2);
     assert(CALL(&p, 92u, (uint64_t)fd, 0u, 0u, 0u) == -1);
     assert(p.guest_errno == 45);
     assert(CALL(&p, 4u, (uint64_t)fd, SRC, 9u, 0u) == 9);
