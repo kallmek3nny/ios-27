@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "dcd040d0be7153338a2042fe73f8f475bf2a14d5",
+      "sha": "8b36a271dc4bdda8ac5521750097c44a66539df2",
       "title": "feat(process): expose configurable exec CLI and verify live CPU expiry",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T00:21:15Z",
+      "updated_at": "2026-11-05T00:23:41Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T00:22:29Z"
+  "observed_at": "2026-11-05T00:24:52Z"
 }
