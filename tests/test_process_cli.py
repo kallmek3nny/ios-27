@@ -71,13 +71,49 @@ def main():
             # Refusal must precede opening or parsing an image.
             check([*base, missing], 2, "explicit --unsafe flag")
             check([*base, fixture, "--wrong"], 2, "explicit --unsafe flag")
-            check([*base, fixture, "--unsafe", "extra"], 2, "explicit --unsafe flag")
+            check([*base, fixture, "--unsafe", "extra"], 2, "requires a value")
+            check([*base, fixture, "--unsafe", "--unknown", "value"],
+                  2, "unknown process option")
+            for invalid in ("", "0", "60001", "-1", "+1", "1x", " 1", "1.5",
+                            "18446744073709551616"):
+                check([*base, missing, "--unsafe", "--timeout-ms", invalid],
+                      2, "one decimal value from 1 through 60000")
+            check([*base, missing, "--unsafe", "--timeout-ms", "1",
+                   "--timeout-ms", "2"], 2, "one decimal value")
+            for valid in ("1", "60000"):
+                check([*base, missing, "--unsafe", "--timeout-ms", valid],
+                      1, "could not read file")
+            for option in ("--arg", "--env", "--apple"):
+                check([*base, missing, "--unsafe", option], 2, "requires a value")
+                check([*base, missing, "--unsafe", option, "x" * 4095],
+                      1, "could not read file")
+                check([*base, missing, "--unsafe", option, "x" * 4096],
+                      2, "exceed vector/string/payload limits")
+                check([*base, missing, "--unsafe", *([option, ""] * 128)],
+                      1, "could not read file")
+                check([*base, missing, "--unsafe", *([option, ""] * 129)],
+                      2, "exceed vector/string/payload limits")
+            # The 64 KiB string budget is shared across all three vectors.
+            exact = ["--arg", "x" * 4095] * 16
+            check([*base, missing, "--unsafe", *exact], 1, "could not read file")
+            check([*base, missing, "--unsafe", *exact, "--env", ""],
+                  2, "exceed vector/string/payload limits")
             check([*base, missing, "--unsafe"], 1, "could not read file")
             check([*base, malformed, "--unsafe"], 1, "mach-o rejected")
             if not native:
                 check([*base, fixture, "--unsafe"], 1, "ARM64")
                 continue
             check([*base, fixture, "--unsafe"], 0, f"{mode} ARM64 entry returned 101")
+            startup = ["--arg", "ios27", "--arg", "oak", "--arg", "pine",
+                       "--arg", "cedar", "--env", "MODE=phase19a", "--env",
+                       "REPEAT=1", "--apple", "executable_path=/ios27/phase19a",
+                       "--apple", "ios27.mode=native"]
+            # Run the unchanged full workload twice: recursive stack use,
+            # every startup vector, writable globals and BSS must be fresh.
+            for _ in range(2):
+                check([*base, fixture, "--unsafe", *startup], 0, "entry returned 42")
+            check([*base, fixture, "--unsafe", "--arg", "ios27"],
+                  0, "entry returned 102")
             original = fixture.read_bytes()
             offset = entry_offset(original)
             # MOV W0,#300; RET checks full-width reporting and CLI success.
@@ -97,6 +133,9 @@ def main():
                 path = directory / f"synthetic {name} fixture"
                 path.write_bytes(mutated)
                 check([*base, path, "--unsafe"], code, message)
+                if name == "loop":
+                    check([*base, path, "--unsafe", "--timeout-ms", "50"],
+                          124, "exceeded 50 ms")
             check([*base, fixture, "--unsafe"], 0, "entry returned 101")
         if native:
             check([executable, "run-exec", missing, fixture, "--unsafe"],

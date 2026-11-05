@@ -85,9 +85,9 @@ int ios27_process_install_loader_filter(int report_fd);
  * applec NUL-terminated startup strings in argv, envp, apple order. */
 #define IOS27_LAUNCH_MAGIC UINT32_C(0x4c373249)
 #define IOS27_LAUNCH_VERSION 1u
-#define IOS27_LAUNCH_MAX_VECTOR 128u
-#define IOS27_LAUNCH_MAX_STRING 4096u /* including the terminator */
-#define IOS27_LAUNCH_MAX_STRINGS (64u * 1024u)
+#define IOS27_LAUNCH_MAX_VECTOR IOS27_STARTUP_MAX_VECTOR
+#define IOS27_LAUNCH_MAX_STRING IOS27_STARTUP_MAX_STRING
+#define IOS27_LAUNCH_MAX_STRINGS IOS27_STARTUP_MAX_STRINGS
 #define IOS27_LAUNCH_MAX_IMAGE (64u * 1024u * 1024u)
 
 typedef struct {

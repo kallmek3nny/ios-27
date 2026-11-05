@@ -153,6 +153,9 @@ The exec variant starts the trusted helper in a fresh address space:
 
 Both commands require native ARM64 Linux and reviewed SDK-free fixtures.
 The helper path must name this project's own trusted `ios27-loader` build.
+Optional `--timeout-ms`, `--arg`, `--env` and `--apple` pairs after `--unsafe`
+configure the deadline and explicit guest startup vectors. See the
+[exec CLI example](docs/exec-guest-loader.md#api) for the full startup workload.
 
 See [contained native process execution](docs/contained-native-process.md)
 for the API, syscall restrictions, outcomes, and host requirements. The

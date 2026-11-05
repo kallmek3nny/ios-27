@@ -15,8 +15,11 @@ On ARM64 Linux, build the project and run its original SDK-free linked fixture:
 # contained ARM64 entry returned 43
 ```
 
-The explicit `--unsafe` flag is required. The command uses an empty startup
-context and a fixed 1000 ms deadline. Its host exit status is 0 after a normal
+The explicit `--unsafe` flag is required. By default the command uses an empty
+startup context and a 1000 ms deadline. Optional `--timeout-ms`, `--arg`,
+`--env` and `--apple` pairs after `--unsafe` select a bounded deadline and
+explicit startup vectors, as documented for the
+[exec CLI](exec-guest-loader.md#api). Its host exit status is 0 after a normal
 guest return (the full guest C `int` is printed), 124 after a deadline,
 `128 + signal` after a terminating signal, 1 for setup/preflight failure, and
 2 for incorrect command usage.

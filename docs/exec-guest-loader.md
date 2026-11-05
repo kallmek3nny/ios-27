@@ -42,15 +42,44 @@ The CLI exposes the same API with an explicit trusted-helper path:
 ```
 
 The helper must be this project's own trusted build output. `--unsafe` is
-mandatory, the startup context is empty, and the deadline is fixed at
-1000 ms including loader setup. A normal return prints the full guest C
+mandatory. With no additional options the startup context is empty and the
+deadline is 1000 ms including loader setup. A normal return prints the full guest C
 `int` and exits 0; a deadline exits 124; a signal exits `128 + signal`;
 setup or input failure exits 1; invalid arguments exit 2. The original
 `run-contained` command continues to select the fork runner.
 
+Both commands accept these options after `--unsafe`:
+
+| Option | Meaning |
+| --- | --- |
+| `--timeout-ms N` | Set the wall-clock deadline to a decimal value from 1 through 60000; allowed once. |
+| `--arg VALUE` | Append one guest `argv` entry, including `argv[0]`; may repeat. |
+| `--env VALUE` | Append one explicit guest `envp` string; may repeat. |
+| `--apple VALUE` | Append one explicit guest `apple` string; may repeat. |
+
+No host environment or executable path is forwarded automatically. Entry
+order within each vector is preserved, even when different options are
+interleaved. Each vector is capped at 128 entries, each string at 4095 bytes
+plus its terminator, and the combined string table at 64 KiB. The CLI, fork
+stack builder and exec payload share the public `IOS27_STARTUP_MAX_*`
+constants. Invalid options fail with exit 2 before the image is opened.
+
+This command exercises the unchanged phase19a workload's recursion, stack,
+read-only data, initialized globals, BSS and all three startup vectors:
+
+```sh
+./build/ios27 run-exec ./build/ios27-loader ./build/contained-phase19a-process --unsafe \
+  --timeout-ms 2000 \
+  --arg ios27 --arg oak --arg pine --arg cedar \
+  --env MODE=phase19a --env REPEAT=1 \
+  --apple executable_path=/ios27/phase19a --apple ios27.mode=native
+# exec ARM64 entry returned 42
+```
+
 CTest's `contained-process-cli` checks argument refusal before image access,
-malformed and missing images, and unsupported-host diagnostics. On ARM64 it
-also checks the original fixture return and explicitly synthetic full-width
+malformed and missing images, timeout syntax, vector/string/payload limits
+and unsupported-host diagnostics. On ARM64 it also checks repeated unchanged
+startup workloads, the original empty-context return and explicitly synthetic full-width
 return, trap, syscall and timeout cases through both commands, followed by a
 successful recovery run. `contained-native-cpu-expiry` covers real CPU-limit
 signals through both public runners, including a stopped launcher; see

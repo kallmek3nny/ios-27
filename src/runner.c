@@ -89,9 +89,9 @@ extern int ios27_arm64_enter_main(uintptr_t entry, uintptr_t guest_sp,
                                   int argc, char **argv, char **envp,
                                   char **apple);
 
-#define IOS27_GUEST_MAX_ARGS 128u
-#define IOS27_GUEST_MAX_STRING 4096u
-#define IOS27_GUEST_MAX_BYTES (64u * 1024u)
+#define IOS27_GUEST_MAX_ARGS IOS27_STARTUP_MAX_VECTOR
+#define IOS27_GUEST_MAX_STRING IOS27_STARTUP_MAX_STRING
+#define IOS27_GUEST_MAX_BYTES IOS27_STARTUP_MAX_STRINGS
 #define IOS27_GUEST_DEFAULT_STACK (1024u * 1024u)
 #define IOS27_GUEST_MAX_STACK (8u * 1024u * 1024u)
 
