@@ -1,0 +1,66 @@
+name: phase24e native application startup
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase24e_*'
+      - 'include/ios27/phase24e_*'
+      - 'tests/phase24e-*'
+      - 'tools/phase24e-*'
+      - 'docs/phase24e-*'
+      - '.github/workflows/phase24e-native-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: phase24e / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: frozen head and toolchain
+        run: |
+          timeout 30s git rev-parse HEAD
+          timeout 30s uname -m
+          timeout 30s clang --version
+      - name: install open-source Darwin linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y lld clang
+      - name: configure unchanged merged core with Werror
+        shell: bash
+        run: |
+          if [ "${{ matrix.mode }}" = sanitizers ]; then
+            timeout 120s cmake -S . -B build/phase24e-core -DIOS27_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
+          else
+            timeout 120s cmake -S . -B build/phase24e-core -DIOS27_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-Wall -Wextra -Wpedantic -Werror"
+          fi
+      - name: build unchanged merged core
+        run: timeout 300s cmake --build build/phase24e-core --parallel 2
+      - name: compiler-linked three executables and six dylibs
+        shell: bash
+        run: |
+          if [ "${{ matrix.mode }}" = sanitizers ]; then
+            timeout 300s python3 tools/phase24e-build.py --core build/phase24e-core/libios27_core.a --output-dir build/phase24e-results --runs 100 --sanitizers
+          else
+            timeout 300s python3 tools/phase24e-build.py --core build/phase24e-core/libios27_core.a --output-dir build/phase24e-results --runs 100
+          fi
+      - name: retain exact JSON compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase24e-${{ matrix.runner }}-${{ matrix.mode }}
+          path: build/phase24e-results/phase24e-report.json
+          if-no-files-found: ignore
