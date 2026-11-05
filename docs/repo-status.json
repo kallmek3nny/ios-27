@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "d1dc114a47487998328374e624bb8e390936fa04",
-      "title": "feat(runtime): execute native Mach-O clients against bounded userspace services",
+      "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
+      "title": "feat(runtime): link named Darwin service shims for native four-argument clients",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T02:54:14Z",
+      "updated_at": "2026-11-05T03:03:42Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T02:55:02Z"
+  "observed_at": "2026-11-05T03:04:56Z"
 }
