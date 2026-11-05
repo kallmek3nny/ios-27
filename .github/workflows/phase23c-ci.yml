@@ -1,0 +1,28 @@
+name: phase23c objc bridge
+on:
+  pull_request:
+    paths:
+      - 'src/phase23c_*'
+      - 'include/ios27/phase23c_*'
+      - 'tests/phase23c-*'
+      - 'tools/phase23c-*'
+      - 'docs/phase23c-*'
+      - '.github/workflows/phase23c-*.yml'
+  workflow_dispatch:
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitizer: [0, 1]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: bounded native compile, Darwin fixture compile and stress
+        env:
+          PHASE23C_SANITIZE: ${{ matrix.sanitizer }}
+        run: timeout 900s bash tools/phase23c-test.sh "${{ runner.temp }}/phase23c"
