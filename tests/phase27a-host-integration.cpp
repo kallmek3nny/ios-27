@@ -1,5 +1,7 @@
+extern "C" {
 #include "ios27/phase27a_startup.h"
 #include "ios27/phase25c_lifetime.h"
+}
 #include "ios27/phase25d_lifecycle.hpp"
 #include <atomic>
 #include <cassert>
