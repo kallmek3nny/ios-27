@@ -31,7 +31,12 @@ or changes to shared CMake or existing agents' files.
    explicit request, per-thread enabled/disabled state, pending cancellation
    preserved during disabled intervals, and deterministic checkpoints returning
    `ECANCELED`. Cancellation requests never terminate a thread asynchronously.
-   Exit invalidates outstanding tokens, protecting against reused slots.
+   Exit atomically retires outstanding tokens before any cleanup or TLS
+   destructor callback, protecting against reused slots and preventing new
+   cancellation requests from targeting a thread already tearing down.
+   Exit callbacks observing the former token receive `EINVAL`.
+   A recycled token remains valid even if the old worker is still draining
+   a long-running destructor, because old ownership was retired first.
 3. **Scoped cleanup and teardown**: strictly nested, capped 64-entry cleanup
    stacks; process-unique non-repeating scope IDs (even after same-thread
    detach/reattach and cross-runtime recycling); LIFO pop/unwind; callback ownership
@@ -58,12 +63,24 @@ or changes to shared CMake or existing agents' files.
    key deletion), 3,072 LIFO handlers and 2,048 TLS destructor calls,
    under both automatic and manual detach. A dedicated allocation-fault
    injection fixture verifies `ENOMEM` rollback across create, attach,
-   TLS assignment, cancellation registration and cleanup registration.
+   TLS assignment, cancellation registration and cleanup registration. A
+   separate GNU-linker-wrapped integration test also forces failures at
+   host `pthread_mutex_init`, `pthread_key_create`, and four distinct
+   `pthread_setspecific` attach sites to verify deterministic status and
+   leak-free rollback.
    Run both `-O0` and `-O2` with `-Werror`,
    optional ASan+UBSan, plus a genuine SDK-free Clang ARM64 Mach-O object.
    The object inspection checks CPU/filetype, bounded Mach-O load commands,
    symbol table bounds and seven actual unresolved API callsites, not just
-   a magic-number prefix. The real Darwin ABI remains out of scope.
+   a magic-number prefix. A separate 256,000-operation randomized state
+   machine checks per-thread TLS values, cancellation states, scoped cleanup
+   models, stale scope rejection, and deterministic cleanup accounting under
+   16 competing workers. Another compiled integration app runs 256 races
+   reusing cancellation tokens while the prior owner is blocked in a TLS
+   destructor, validating early token retirement. The state-machine fixture
+   also accepts bounded build-time `-DACTIONS=N` and `-DMODEL_SEED=0x...`
+   overrides; five independently seeded 960,000-operation runs passed. The real Darwin ABI remains
+   out of scope.
 
 ## standalone verification
 
@@ -116,8 +133,10 @@ CI matrix results must be checked on the PR's **unchanged head SHA**.
 
 Initial engineering began at 2026-10-28 19:45 UTC. The first isolated PR
 (#72) merged at 19:56:54 UTC after roughly twelve minutes of engineering
-and CI. The second PR (#74) merged at 20:05:34 UTC, after additional scope/lifetime
-hardening and x86_64+ARM64 CI. A third batch targets stronger cancellation
-races, allocation rollback, cross-context cleanup identity and resource-ownership
-verification. Do not mistake cumulative test counts or elapsed waits for an
+and CI. The second PR (#74) merged at 20:05:34 UTC after additional scope/lifetime
+hardening and x86_64+ARM64 CI. The third PR (#75) merged at 20:14:11 UTC
+after global scope identities, stronger cancellation races, allocation
+rollback, and resource ownership verification. A fourth batch targets
+early token retirement, randomized state-model regression and injected
+host pthread error boundaries. Do not mistake cumulative test counts or elapsed waits for an
 actual sixty-minute active engineering session.
