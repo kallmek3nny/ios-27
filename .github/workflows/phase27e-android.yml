@@ -1,0 +1,65 @@
+name: phase27e android native demo
+on:
+  push:
+    branches: ['phase27e-*']
+    paths:
+      - 'android/phase27e/**'
+      - 'src/phase27e_*'
+      - 'include/ios27/phase27e_*'
+      - 'tests/phase27e-*'
+      - 'tools/phase27e-*'
+      - '.github/workflows/phase27e-android.yml'
+  pull_request:
+    paths:
+      - 'android/phase27e/**'
+      - 'src/phase27e_*'
+      - 'include/ios27/phase27e_*'
+      - 'tests/phase27e-*'
+      - 'tools/phase27e-*'
+      - '.github/workflows/phase27e-android.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-reference:
+    strategy:
+      fail-fast: false
+      matrix: { os: [ubuntu-24.04, ubuntu-24.04-arm] }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: strict C11 and sanitizers
+        run: PHASE27E_SANITIZE=1 timeout 180s bash tools/phase27e-verify.sh
+  android-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: provision pinned SDK/NDK/CMake
+        run: |
+          set -euo pipefail
+          timeout 120s sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
+      - name: assemble arm64 APK
+        working-directory: android/phase27e
+        run: timeout 300s gradle :app:assembleDebug --no-daemon --console plain -Pandroid.injected.testOnly=false
+      - name: inspect package
+        run: |
+          set -euo pipefail
+          unzip -l android/phase27e/app/build/outputs/apk/debug/app-debug.apk | grep -E 'lib/arm64-v8a/libphase27e_host.so|classes.*dex'
+          sha256sum android/phase27e/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase27e-arm64-debug-apk
+          path: android/phase27e/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
