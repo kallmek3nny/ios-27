@@ -9,4 +9,5 @@ add_library(phase27e_host SHARED
     "${PROJECT_ROOT}/src/phase27e_demo.c")
 target_include_directories(phase27e_host PRIVATE "${PROJECT_ROOT}/include")
 target_compile_options(phase27e_host PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_link_options(phase27e_host PRIVATE "-Wl,-z,max-page-size=16384")
 target_link_libraries(phase27e_host PRIVATE m)
