@@ -31,6 +31,11 @@ typedef struct {
 typedef enum {
     P27D_DETACHED=0, P27D_ATTACHED=1, P27D_VISIBLE=2
 } p27d_window_state;
+typedef enum {
+    P27D_CONTROLLER_UNLOADED=0,
+    P27D_CONTROLLER_LOADED=1,
+    P27D_CONTROLLER_VISIBLE=2
+} p27d_controller_state;
 typedef struct {
     uint64_t revision, timestamp_ns;
     bool full;
@@ -80,6 +85,12 @@ p27d_result p27d_get(p27d_scene *scene, p27d_id id, bool presentation, p27d_view
  * A controller root is represented by the same stable view identity. */
 p27d_result p27d_window(p27d_scene *scene, p27d_id root, p27d_window_state state);
 p27d_result p27d_window_get(p27d_scene *scene, p27d_id *root, p27d_window_state *state);
+/* Original controller-root lifecycle; valid transitions UNLOADED -> LOADED
+ * -> VISIBLE, and VISIBLE -> LOADED -> UNLOADED. */
+p27d_result p27d_controller_set(p27d_scene *scene, p27d_id view,
+                                  p27d_controller_state state);
+p27d_result p27d_controller_get(p27d_scene *scene, p27d_id *view,
+                                  p27d_controller_state *state);
 
 p27d_result p27d_animate(p27d_scene *scene, p27d_id id, p27d_anim_kind kind,
                           double from, double to, uint64_t start_ns, uint64_t duration_ns,
