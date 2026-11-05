@@ -1,0 +1,29 @@
+name: phase25a native objc linked metadata
+on:
+  pull_request:
+    paths:
+      - 'src/phase25a_*'
+      - 'include/ios27/phase25a_*'
+      - 'tools/phase25a-*'
+      - 'tools/phase25a_*'
+      - 'tests/phase25a-*'
+      - '.github/workflows/phase25a-*.yml'
+  workflow_dispatch:
+jobs:
+  compiled-macho-objc:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install upstream LLVM linker and compiler
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y clang-18 lld-18
+      - name: Verify six real arm64 Mach-O linked dylibs and 160k lookups
+        run: timeout 180s python3 tools/phase25a-verify.py
+      - name: Native host ASan/UBSan on linked Darwin metadata
+        run: timeout 180s python3 tools/phase25a-verify.py --sanitize
