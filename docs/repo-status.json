@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "927010fe51a4c8c86dcc18e9724628632f184d62",
+      "sha": "d1dc114a47487998328374e624bb8e390936fa04",
       "title": "feat(runtime): execute native Mach-O clients against bounded userspace services",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T02:47:02Z",
+      "updated_at": "2026-11-05T02:54:14Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T02:48:18Z"
+  "observed_at": "2026-11-05T02:55:02Z"
 }
