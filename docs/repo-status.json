@@ -14,7 +14,7 @@
       "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
       "title": "feat(runtime): link named Darwin service shims for native four-argument clients",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T03:03:42Z",
+      "updated_at": "2026-11-05T03:05:11Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T03:04:56Z"
+  "observed_at": "2026-11-05T03:16:55Z"
 }
