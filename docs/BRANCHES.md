@@ -8,9 +8,10 @@ candidate branches with mapped changes: **31** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `7b704f91ee98` · ci: **passing_checks** · unmerged, not credited.
+head: `2ea9dfadce8a` · ci: **passing_checks** · unmerged, not credited.
 
-- **unclassified**: 1 source files, 2 test/fixture files, +436/-13 lines
+- **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +7/-3 lines
+- **unclassified**: 2 source files, 2 test/fixture files, +552/-19 lines
 
 ### [phase26e-android-host-scenes-input](https://github.com/kallmek3nny/ios-27/pull/112)
 

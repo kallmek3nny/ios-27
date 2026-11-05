@@ -76,7 +76,7 @@ the purple dashed outlines identify components with new source or test changes o
 
 - **libsystem_c / libc**: 1 unmerged candidate branch(es), not counted
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
-- **mach-o parser and native loader**: 2 unmerged candidate branch(es), not counted
+- **mach-o parser and native loader**: 3 unmerged candidate branch(es), not counted
 - **dyld / image graph**: 5 unmerged candidate branch(es), not counted
 - **mach ipc model**: 1 unmerged candidate branch(es), not counted
 - **bsd syscall boundary**: 4 unmerged candidate branch(es), not counted

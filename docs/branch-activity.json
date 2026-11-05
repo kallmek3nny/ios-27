@@ -9,23 +9,36 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "7b704f91ee986774a744b38c372824b3cb14be75",
+      "sha": "2ea9dfadce8ae8963b99af491f5c043bb4f79e35",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
+      "files_checked": 10,
       "possibly_truncated": false,
       "groups": [
         {
+          "group_id": "mach-o",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 7,
+          "deletions": 3,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/macho.h",
+            "src/runner.c"
+          ]
+        },
+        {
           "group_id": "unclassified",
-          "source_files": 1,
+          "source_files": 2,
           "fixture_files": 2,
-          "additions": 436,
-          "deletions": 13,
+          "additions": 552,
+          "deletions": 19,
           "symbols_preview": [],
           "example_paths": [
             "src/main.c",
+            "src/process_internal.h",
             "tests/test_process_cli.py",
             "tests/test_process_cpu.c"
           ]
@@ -1166,6 +1179,13 @@
     ],
     "mach-o": [
       {
+        "branch": "codex/cpu-limit-expiry",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/126",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "passing_checks"
+      },
+      {
         "branch": "phase24e-native-application-startup",
         "url": "https://github.com/kallmek3nny/ios-27/pull/98",
         "source_files": 2,
@@ -1253,7 +1273,7 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 1,
+        "source_files": 2,
         "fixture_files": 2,
         "ci": "passing_checks"
       }
@@ -2098,5 +2118,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T00:11:26Z"
+  "observed_at": "2026-11-05T00:15:23Z"
 }
