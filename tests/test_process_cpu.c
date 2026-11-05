@@ -147,7 +147,20 @@ static int expiry_case(const native_program *program, rlim_t soft,
     REQUIRE(launcher >= 0);
     if (!launcher) {
         ios27_process_options options = {IOS27_PROCESS_MAX_TIMEOUT_MS};
+        struct rlimit after;
+        struct sigaction action = {0}, observed;
+        sigset_t blocked, mask;
         if (setpgid(0, 0) || set_cpu_limits(soft, hard)) _exit(2);
+        /* A launcher may ignore and block SIGXCPU. The child must reset
+         * both states, or the soft-limit cases would die at the hard limit
+         * with SIGKILL instead of the required SIGXCPU. */
+        if (expected == SIGXCPU) {
+            action.sa_handler = SIG_IGN;
+            if (sigemptyset(&action.sa_mask) ||
+                sigaction(SIGXCPU, &action, NULL) || sigemptyset(&blocked) ||
+                sigaddset(&blocked, SIGXCPU) ||
+                sigprocmask(SIG_BLOCK, &blocked, NULL)) _exit(2);
+        }
         if (program) {
             ios27_startup_context context = {0, NULL, NULL, NULL};
             if (program->loader)
@@ -163,6 +176,13 @@ static int expiry_case(const native_program *program, rlim_t soft,
                                                 &seen->result, seen->error,
                                                 sizeof(seen->error));
         }
+        if (getrlimit(RLIMIT_CPU, &after) || after.rlim_cur != soft ||
+            after.rlim_max != hard) _exit(3);
+        if (expected == SIGXCPU &&
+            (sigaction(SIGXCPU, NULL, &observed) ||
+             observed.sa_handler != SIG_IGN ||
+             sigprocmask(SIG_SETMASK, NULL, &mask) ||
+             sigismember(&mask, SIGXCPU) != 1)) _exit(3);
         _exit(0);
     }
     if (stopped) {
@@ -187,6 +207,14 @@ static int expiry_case(const native_program *program, rlim_t soft,
             pause_briefly();
         }
         REQUIRE(child > 0);
+        {
+            struct rlimit observed;
+            rlim_t bounded_hard = hard == RLIM_INFINITY ||
+                                 hard > (rlim_t)IOS27_LOADER_CPU_LIMIT ?
+                                 (rlim_t)IOS27_LOADER_CPU_LIMIT : hard;
+            REQUIRE(!prlimit(child, RLIMIT_CPU, NULL, &observed));
+            REQUIRE(observed.rlim_cur == soft && observed.rlim_max == bounded_hard);
+        }
         guest = (int)syscall(SYS_pidfd_open, child, 0u);
         REQUIRE(guest >= 0);
         exited.fd = guest;
@@ -288,6 +316,15 @@ int main(int argc, char **argv) {
             failed = expiry_case(program, 1u, 2u, stopped) ||
                      expiry_case(program, 1u, 1u, stopped);
         }
+        /* Unlike the equal lower limits above, this enters the production
+         * clamp branch: retain a one-second soft limit while lowering a
+         * larger (possibly unlimited) hard limit to the 61-second bound.
+         * The observer reads the real limits, and expiry still occurs at
+         * the preserved soft limit while the launcher is stopped. */
+        if (!failed && (original.rlim_max == RLIM_INFINITY ||
+                        original.rlim_max > (rlim_t)IOS27_LOADER_CPU_LIMIT))
+            failed = expiry_case(argc == 3 ? &native : NULL, 1u,
+                                  original.rlim_max, 1);
     }
     free(native.bytes);
     if (failed) return 1;
@@ -296,6 +333,6 @@ int main(int argc, char **argv) {
         return 1;
     errno = 0;
     if (waitpid(-1, &status, WNOHANG) != -1 || errno != ECHILD) return 1;
-    puts("live CPU expiry: soft/hard enforcement, paused launcher, unchanged parent limits and reaping passed");
+    puts("live CPU expiry: soft/hard enforcement, paused launcher, inherited SIGXCPU reset, unchanged parent state and reaping passed");
     return 0;
 }

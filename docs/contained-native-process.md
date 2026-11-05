@@ -143,6 +143,16 @@ process groups, reaps descendants and verifies its own CPU limits did not
 change. This tests enforcement of lower inherited limits; it does not wait
 61 seconds to exercise the default clamp's expiration.
 
+Soft-limit cases deliberately start with `SIGXCPU` ignored and blocked in
+the launcher. The guest must still die with `SIGXCPU`, proving its inherited
+signal disposition and mask were reset, while the launcher's original state
+must remain intact. Where the inherited hard limit is above the production
+bound, one additional stopped-launcher case combines a one-second soft limit
+with that larger or unlimited hard limit. The observer uses `prlimit` to
+confirm that the guest retained the soft limit and clamped only the hard
+limit, then verifies real soft-limit expiry. Hosts already restricted to a
+hard limit at or below the bound omit only this additional clamp case.
+
 `contained-native-cpu-expiry` repeats those cases through both public Mach-O
 runners on ARM64 Linux. It uses a temporary copy of the 16 KiB-compatible
 phase19a fixture with an explicitly synthetic `B .` loop at `LC_MAIN`.

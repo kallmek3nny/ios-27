@@ -238,7 +238,7 @@ if(IOS27_BUILD_TESTS)
         target_compile_options(test_process_cpu PRIVATE -Wall -Wextra -Werror -Wpedantic)
         add_test(NAME contained-process-cpu-expiry COMMAND test_process_cpu)
         set_tests_properties(contained-process-cpu-expiry PROPERTIES
-            TIMEOUT 65 SKIP_RETURN_CODE 77 LABELS "cpu-expiry")
+            TIMEOUT 80 SKIP_RETURN_CODE 77 LABELS "cpu-expiry")
 
         add_executable(test_contained_macho tests/test_contained_macho.c)
         target_link_libraries(test_contained_macho PRIVATE ios27_core)
@@ -266,7 +266,7 @@ if(IOS27_BUILD_TESTS)
         add_test(NAME contained-native-cpu-expiry COMMAND test_process_cpu
             "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-cpu-expiry PROPERTIES
-            TIMEOUT 125 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;native-arm64")
+            TIMEOUT 155 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;native-arm64")
         # The exec-mode cases run the project's own trusted loader build output.
         add_test(NAME contained-native-macho COMMAND test_contained_macho
             "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"
