@@ -134,7 +134,7 @@ static void demo_and_events(const char *output_dir) {
     assert(hashes[0]!=hashes[1] && hashes[1]!=hashes[2]);
     pixel(frames[0],128,2,16,255,200,0,255);
     pixel(frames[0],128,7,7,0,255,0,255);
-    pixel(frames[0],128,4,4,20,30,40,255); /* rounded clip corner */
+    pixel(frames[0],128,0,0,20,30,40,255); /* outside layer + shadow */
     pixel(frames[1],128,2,16,20,30,40,255);
     pixel(frames[2],128,2,16,20,30,40,255);
     CHECK(p27d_get(s,moving,false,&model));
