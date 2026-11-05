@@ -1,0 +1,54 @@
+name: phase24b darwin image lifecycle
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase24b_*'
+      - 'include/ios27/phase24b_*'
+      - 'tests/phase24b-*'
+      - 'tools/phase24b-*'
+      - 'docs/phase24b-*'
+      - '.github/workflows/phase24b-*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase24b:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: verify immutable checkout head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(timeout 30s git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SHA"
+          uname -m
+      - name: install clang and LLVM Mach-O linker
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 180s sudo apt-get update -qq
+          timeout 180s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends clang lld
+      - name: phase24b compiler-linked fixtures and stress tests
+        shell: bash
+        run: timeout 300s python3 tools/phase24b-check.py
+      - name: address and undefined behavior sanitizers
+        if: matrix.runner == 'ubuntu-24.04'
+        env:
+          PHASE24B_SANITIZE: '1'
+        shell: bash
+        run: timeout 300s python3 tools/phase24b-check.py
