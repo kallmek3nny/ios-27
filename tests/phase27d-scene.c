@@ -106,6 +106,8 @@ static void demo_and_events(const char *output_dir) {
     p27d_id moving=make(s,d);
     CHECK(p27d_parent(s,moving,root));
     CHECK(p27d_window(s,root,P27D_VISIBLE));
+    CHECK(p27d_controller_set(s,root,P27D_CONTROLLER_LOADED));
+    CHECK(p27d_controller_set(s,root,P27D_CONTROLLER_VISIBLE));
     CHECK(p27d_animate(s,moving,P27D_ANIM_X,2,22,0,UINT64_C(1000000000),P27D_SMOOTH));
     CHECK(p27d_animate(s,moving,P27D_ANIM_SCALE,1,1.5,0,UINT64_C(1000000000),P27D_LINEAR));
     CHECK(p27d_animate(s,moving,P27D_ANIM_OPACITY,255,128,0,UINT64_C(1000000000),P27D_LINEAR));
@@ -116,6 +118,10 @@ static void demo_and_events(const char *output_dir) {
     CHECK(p27d_set(s,control,&d));
     CHECK(p27d_rollback(s)); /* nested savepoint must not publish */
     CHECK(p27d_commit(s));
+    p27d_id controller;
+    p27d_controller_state controller_state;
+    CHECK(p27d_controller_get(s,&controller,&controller_state));
+    assert(eq(controller,root) && controller_state==P27D_CONTROLLER_VISIBLE);
     p27d_view_desc model,present;
     CHECK(p27d_get(s,moving,false,&model));
     assert(model.layer.x==2);
@@ -188,6 +194,8 @@ static void demo_and_events(const char *output_dir) {
     CHECK(p27d_cancel(s,moving,P27D_ANIM_SCALE));
     CHECK(p27d_window(s,root,P27D_ATTACHED));
     CHECK(p27d_commit(s));
+    CHECK(p27d_controller_get(s,&controller,&controller_state));
+    assert(controller_state==P27D_CONTROLLER_LOADED);
     CHECK(p27d_render(s,(phase26d_frame){repeated,32,24,128,sizeof(repeated)},&h));
     pixel(repeated,128,0,0,0,0,0,0);
     CHECK(p27d_hit_test(s,8,8,&hit));
@@ -202,6 +210,11 @@ static void demo_and_events(const char *output_dir) {
     CHECK(p27d_remove(s,panel));
     CHECK(p27d_commit(s));
     assert(p27d_get(s,control,false,&model)==P27D_STALE);
+    CHECK(p27d_begin(s));
+    CHECK(p27d_remove(s,root));
+    CHECK(p27d_commit(s));
+    CHECK(p27d_controller_get(s,&controller,&controller_state));
+    assert(controller_state==P27D_CONTROLLER_UNLOADED && !controller.generation);
     p27d_free(s);
 }
 typedef struct { p27d_scene *scene; p27d_id id; int fail; } thread_arg;
