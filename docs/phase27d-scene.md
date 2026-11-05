@@ -68,8 +68,11 @@ Only ten simultaneously captured pointer IDs are supported.
   explicit. This is a deliberately narrow UIView-style coordinate model:
   each view has local bounds [0,width) x [0,height), and position + affine
   translation are relative to its parent.
-- A minimal UIWindow/controller-root lifecycle supports detached, attached,
-  and visible. It does not implement `UIApplication`, UINavigationController,
+- Minimal UIWindow detached/attached/visible and independent controller-root
+  unloaded/loaded/visible lifecycles provide explicit transactional transitions.
+  Controller appearance requires a visible window with the same root and a
+  previously loaded controller; hiding the window downgrades its controller,
+  and subtree teardown invalidates controller identity. This does not implement `UIApplication`, UINavigationController,
   UIKit appearance callbacks, first responder or platform window services.
 - No external node/backing pointers escape synchronization. Read/render/step,
   transaction mutation, and retirement are mutex-serialized. Callers must
