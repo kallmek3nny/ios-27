@@ -86,6 +86,10 @@ installed, and native tests run both linked outputs. Their section layouts
 are checked for both 4 KiB and 16 KiB granules. The same C
 client is also compiled as a native-host fixture; these are distinct execution
 paths and the host build is not evidence that Mach-O entry ran.
+The linked-dylib CI workflow installs LLVM and runs both service execution
+tests on its native ARM64 runner. CMake recognizes version-suffixed LLVM
+linker names as well as `ld64.lld`, so an installed linker is not silently
+missed while the fallback alone is tested.
 
 CTest includes:
 

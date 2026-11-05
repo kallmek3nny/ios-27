@@ -184,7 +184,8 @@ if(IOS27_BUILD_TESTS)
 
     # Phase 15a: link original freestanding Darwin Clang MH_OBJECTs into a
     # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
-    find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
+    find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld ld64.lld-21 ld64.lld-20
+        ld64.lld-19 ld64.lld-18 ld64.lld-17)
     if(NOT IOS27_DARWIN_LD64_LLD)
         message(STATUS "Phase15a: using narrow source linker fallback, LLVM ld64.lld not installed")
         set(IOS27_DARWIN_LD64_LLD "none")
