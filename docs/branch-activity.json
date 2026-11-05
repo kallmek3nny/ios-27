@@ -9,12 +9,12 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "2ea9dfadce8ae8963b99af491f5c043bb4f79e35",
+      "sha": "765c3a110f1c69f4534cc65e26e52047ec953a34",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 10,
+      "files_checked": 12,
       "possibly_truncated": false,
       "groups": [
         {
@@ -31,16 +31,16 @@
         },
         {
           "group_id": "unclassified",
-          "source_files": 2,
+          "source_files": 3,
           "fixture_files": 2,
-          "additions": 552,
-          "deletions": 19,
+          "additions": 586,
+          "deletions": 21,
           "symbols_preview": [],
           "example_paths": [
             "src/main.c",
+            "src/process.c",
             "src/process_internal.h",
-            "tests/test_process_cli.py",
-            "tests/test_process_cpu.c"
+            "tests/test_process_cli.py"
           ]
         }
       ]
@@ -1183,7 +1183,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1273,9 +1273,9 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 2,
+        "source_files": 3,
         "fixture_files": 2,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ]
   },
@@ -2118,5 +2118,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T00:15:23Z"
+  "observed_at": "2026-11-05T00:18:54Z"
 }
