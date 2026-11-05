@@ -1,0 +1,75 @@
+name: phase27a ObjC integration prerequisites
+on:
+  pull_request:
+    paths:
+      - 'include/ios27/phase27a_*'
+      - 'src/phase27a_*'
+      - 'tests/phase27a-*'
+      - 'tools/phase27a-*'
+      - 'docs/phase27a-*'
+      - '.github/workflows/phase27a-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  startup-and-pr-integration:
+    name: phase27a / ${{ matrix.runner }} / ${{ matrix.mode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitize]
+    env:
+      PR102_SHA: 70d7d9826a034b3076a8c066d81aa085dbced285
+      PR103_SHA: ae4bdd5788437d4eb31e90c29cc7840a127b85c7
+      PR104_SHA: 7c434d616cf2935e4dbf9f2a0ccd44840e4a1744
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: confirm immutable PR head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(timeout 30s git rev-parse HEAD)" = "$EXPECTED_SHA"
+          uname -m
+      - name: obtain verified upstream source without rewriting shared loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          for entry in "102:$PR102_SHA" "103:$PR103_SHA" "104:$PR104_SHA"; do
+            pr="${entry%%:*}"
+            expected="${entry#*:}"
+            timeout 30s git fetch --no-tags --depth=1 origin "+refs/pull/$pr/head:refs/remotes/origin/phase27a-pr$pr"
+            actual="$(timeout 30s git rev-parse "refs/remotes/origin/phase27a-pr$pr")"
+            test "$actual" = "$expected" || { echo "unreviewed upstream change in PR $pr" >&2; exit 1; }
+          done
+      - name: install SDK-free clang and ld64.lld
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y --no-install-recommends clang lld
+      - name: strict startup, lifecycle and ARC host integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 300s python3 tools/phase27a-verify.py \
+            --mode "${{ matrix.mode }}" \
+            --pr102 "$PR102_SHA" --pr103 "$PR103_SHA" --pr104 "$PR104_SHA" \
+            ${{ matrix.mode == 'normal' && '--linked' || '' }}
+      - name: preserve linked-fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase27a-${{ matrix.runner }}-${{ matrix.mode }}
+          path: build/phase27a/upstream/build/phase25e/phase25e-evidence.json
+          if-no-files-found: ignore
