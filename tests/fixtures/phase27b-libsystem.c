@@ -23,6 +23,7 @@ int main(int argc, char **argv, char **envp, char **apple) {
     int64_t wall[2] = {0, 0};
     uint8_t stat_bytes[144] = {0};
     int wanted = 4;
+    const char patch_data[] = "BRAVO";
     (void)argc; (void)argv; (void)envp; (void)apple;
     if (layout_witness[0] + layout_witness[1] != 42) return 1;
     fmt = malloc(64u);
@@ -72,9 +73,9 @@ int main(int argc, char **argv, char **envp, char **apple) {
     if (read(fd, copy, 17u) != 17 || memcmp(copy, output, 17u)) return 16;
     if (pread(fd, copy, 17u, 0) != 17 || memcmp(copy, output, 17u)) return 17;
     if (lseek(fd, 0, 1) != 17) return 18; /* positioned read preserved offset */
-    if (pwrite(fd, text, 5u, 5) != 5 || lseek(fd, 0, 1) != 17) return 19;
+    if (pwrite(fd, patch_data, 5u, 5) != 5 || lseek(fd, 0, 1) != 17) return 19;
     if (pread(fd, copy, 17u, 0) != 17) return 20;
-    if (copy[5] != 'a' || copy[9] != 'a') return 21;
+    if (copy[5] != 'B' || copy[9] != 'O' || copy[4] != '=' || copy[10] != ' ') return 21;
     if (fstat(fd, stat_bytes)) return 22;
     if (stat_bytes[96] != 17 || stat_bytes[97]) return 23;
     if (close(fd) || read(fd, copy, 1u) != -1 || *__error() != 9) return 24;
