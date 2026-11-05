@@ -9,12 +9,12 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "a03c23d6413f03cd60717bc5ce950529ee5a05d0",
+      "sha": "927010fe51a4c8c86dcc18e9724628632f184d62",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
-      "files_checked": 24,
+      "files_checked": 33,
       "possibly_truncated": false,
       "groups": [
         {
@@ -32,7 +32,7 @@
           "group_id": "mach-o",
           "source_files": 2,
           "fixture_files": 0,
-          "additions": 33,
+          "additions": 54,
           "deletions": 11,
           "symbols_preview": [
             "ios27_native_handoff_extension"
@@ -44,19 +44,20 @@
         },
         {
           "group_id": "unclassified",
-          "source_files": 7,
-          "fixture_files": 5,
-          "additions": 1092,
+          "source_files": 12,
+          "fixture_files": 8,
+          "additions": 1759,
           "deletions": 21,
           "symbols_preview": [
             "ios27_native_handoff_extension",
+            "ios27_service_binding_inspect",
             "ios27_service_bridge_initialize"
           ],
           "example_paths": [
+            "include/ios27/darwin_shim.h",
+            "include/ios27/service_bindings.h",
             "include/ios27/service_bridge.h",
-            "src/loader.c",
-            "src/main.c",
-            "src/process.c"
+            "src/darwin_shim.c"
           ]
         }
       ]
@@ -1298,8 +1299,8 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 7,
-        "fixture_files": 5,
+        "source_files": 12,
+        "fixture_files": 8,
         "ci": "passing_checks"
       }
     ]
@@ -2143,5 +2144,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T02:23:38Z"
+  "observed_at": "2026-11-05T02:48:23Z"
 }
