@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "3ad79d63e275b0f66d6ea4608e6024c6f95f2627",
-      "title": "feat(process): expose configurable exec CLI and verify live CPU expiry",
+      "sha": "a03c23d6413f03cd60717bc5ce950529ee5a05d0",
+      "title": "feat(runtime): execute native Mach-O clients against bounded userspace services",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T02:19:25Z",
+      "updated_at": "2026-11-05T02:22:12Z",
       "status": "unmerged: not counted"
     },
     {
@@ -493,5 +493,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T02:19:39Z"
+  "observed_at": "2026-11-05T02:23:34Z"
 }

@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "3ad79d63e275b0f66d6ea4608e6024c6f95f2627",
+      "sha": "a03c23d6413f03cd60717bc5ce950529ee5a05d0",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
-      "ci": "running",
+      "ci": "passing_checks",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 24,
       "possibly_truncated": false,
@@ -1146,7 +1146,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 1,
         "fixture_files": 0,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ],
     "libsystem-pthread": [
@@ -1208,7 +1208,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "running"
+        "ci": "passing_checks"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1300,7 +1300,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 7,
         "fixture_files": 5,
-        "ci": "running"
+        "ci": "passing_checks"
       }
     ]
   },
@@ -2143,5 +2143,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T02:19:43Z"
+  "observed_at": "2026-11-05T02:23:38Z"
 }
