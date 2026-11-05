@@ -184,8 +184,7 @@ if(IOS27_BUILD_TESTS)
 
     # Phase 15a: link original freestanding Darwin Clang MH_OBJECTs into a
     # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
-    find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld ld64.lld-21 ld64.lld-20
-        ld64.lld-19 ld64.lld-18 ld64.lld-17)
+    find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
     if(NOT IOS27_DARWIN_LD64_LLD)
         message(STATUS "Phase15a: using narrow source linker fallback, LLVM ld64.lld not installed")
         set(IOS27_DARWIN_LD64_LLD "none")
@@ -300,6 +299,14 @@ if(IOS27_BUILD_TESTS)
         set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
         set(IOS27_SERVICE_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-executable")
         set(IOS27_SERVICE_FALLBACK_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-fallback")
+        # The service fixture accepts both supported compiler-linker outputs.
+        # Keep this discovery separate from older fixture profiles, whose
+        # tests intentionally expect their established load-command shapes.
+        find_program(IOS27_SERVICE_LD64_LLD NAMES ld64.lld ld64.lld-21 ld64.lld-20
+            ld64.lld-19 ld64.lld-18 ld64.lld-17)
+        if(NOT IOS27_SERVICE_LD64_LLD)
+            set(IOS27_SERVICE_LD64_LLD "none")
+        endif()
         add_test(NAME contained-process-cli
             COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_process_cli.py"
@@ -313,7 +320,7 @@ if(IOS27_BUILD_TESTS)
             COMMAND timeout 75s "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
                 --clang "${IOS27_DARWIN_CLANG}"
-                --linker "${IOS27_DARWIN_LD64_LLD}"
+                --linker "${IOS27_SERVICE_LD64_LLD}"
                 --out "${IOS27_SERVICE_FIXTURE}"
                 --fallback-out "${IOS27_SERVICE_FALLBACK_FIXTURE}"
             DEPENDS
