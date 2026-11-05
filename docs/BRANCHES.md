@@ -8,7 +8,7 @@ candidate branches with mapped changes: **33** · audited base: `2674b2b42c0b`
 
 ### [agent/phase27a-objc-integrated-startup-20261105](https://github.com/kallmek3nny/ios-27/pull/128)
 
-head: `39c05bcc26dd` · ci: **running** · unmerged, not credited.
+head: `c86df9e5fbf0` · ci: **passing_checks** · unmerged, not credited.
 
 - **unclassified**: 2 source files, 3 test/fixture files, +737/-0 lines
   - candidate declarations: `ios27_phase27a_launch`
@@ -225,11 +225,11 @@ head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 ### [agent/phase27b-integrated-libsystem-20261105](https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105)
 
-head: `2788b873f3d6` · ci: **not_checked** · unmerged, not credited.
+head: `91f6f97a9a0e` · ci: **not_checked** · unmerged, not credited.
 
 - **libsystem_c / libc**: 2 source files, 1 test/fixture files, +571/-0 lines
   - candidate declarations: `ios27_26a_calloc`, `ios27_26a_free`, `ios27_26a_getenv`, `ios27_26a_last_error`, `ios27_26a_live_bytes`, `ios27_26a_malloc`, `ios27_26a_memcmp`, `ios27_26a_memcpy`, `ios27_26a_memmove`, `ios27_26a_memset`, `ios27_26a_realloc`, `ios27_26a_setenv`
-- **libSystem guest model (not dylib)**: 2 source files, 1 test/fixture files, +139/-2 lines
+- **libSystem guest model (not dylib)**: 2 source files, 1 test/fixture files, +145/-2 lines
   - candidate declarations: `ios27_27b_run_exit_handlers`
 - **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +55/-11 lines
   - candidate declarations: `ios27_native_handoff_extension`
