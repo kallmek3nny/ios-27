@@ -1,0 +1,19 @@
+name: phase21f fifo mutex bridge
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-fifo-mutex:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile and run independent multithreaded suites
+        run: timeout 300s python3 tools/phase21f-standalone.py
