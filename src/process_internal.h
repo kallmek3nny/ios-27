@@ -141,4 +141,14 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                          void (*handoff)(int (*entry)(void *), void *call),
                          char *error, size_t error_size);
 
+/* Same entry and containment contract, with an explicitly selected private
+ * research extension in x4. Only the separate services helper uses this;
+ * the ordinary loader and all public runner APIs supply no extension. */
+int ios27_native_handoff_extension(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const void *extension,
+                                    void (*handoff)(int (*entry)(void *), void *call),
+                                    char *error, size_t error_size);
+
 #endif

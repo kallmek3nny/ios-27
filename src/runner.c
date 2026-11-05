@@ -77,6 +77,7 @@ __asm__(".text\n"
         "mov x1, x3\n"
         "mov x2, x4\n"
         "mov x3, x5\n"
+        "mov x4, x6\n"
         "mov sp, x10\n"
         "blr x9\n"
         "mov sp, x19\n"
@@ -87,7 +88,7 @@ __asm__(".text\n"
 
 extern int ios27_arm64_enter_main(uintptr_t entry, uintptr_t guest_sp,
                                   int argc, char **argv, char **envp,
-                                  char **apple);
+                                  char **apple, const void *extension);
 
 #define IOS27_GUEST_MAX_ARGS IOS27_STARTUP_MAX_VECTOR
 #define IOS27_GUEST_MAX_STRING IOS27_STARTUP_MAX_STRING
@@ -114,13 +115,14 @@ typedef struct {
     uintptr_t entry;
     ios27_guest_stack *stack;
     int argc;
+    const void *extension;
 } prepared_entry;
 
 static int enter_prepared(void *opaque) {
     const prepared_entry *call = opaque;
     return ios27_arm64_enter_main(call->entry, call->stack->sp, call->argc,
                                   call->stack->argv, call->stack->envp,
-                                  call->stack->apple);
+                                  call->stack->apple, call->extension);
 }
 
 /* All argument checks precede stack allocation and executable mappings. No
@@ -248,7 +250,8 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size);
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size);
 
 static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_macho_info *info,
@@ -258,7 +261,7 @@ static int run_executable_context(const uint8_t *data, size_t size,
                                  ios27_process_result *process_result, char *error,
                                  size_t error_size) {
     return run_image(data, size, info, context, exit_code, options,
-                     process_result, NULL, error, error_size);
+                     process_result, NULL, NULL, error, error_size);
 }
 
 /* Loader mode: identical preflight, guarded guest stack and final W^X
@@ -269,7 +272,21 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                          void (*handoff)(int (*entry)(void *), void *call),
                          char *error, size_t error_size) {
     if (!handoff) return fail(error, error_size, "null guest loader handoff");
-    return run_image(data, size, info, context, NULL, NULL, NULL, handoff,
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, NULL,
+                     error, error_size);
+}
+
+/* Opt-in loader only: an original research capability table in x4. The
+ * ordinary public C-main entrypoints always supply NULL in that register. */
+int ios27_native_handoff_extension(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const void *extension,
+                                    void (*handoff)(int (*entry)(void *), void *call),
+                                    char *error, size_t error_size) {
+    if (!handoff || !extension)
+        return fail(error, error_size, "null guest loader handoff or extension");
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, extension,
                      error, error_size);
 }
 
@@ -278,10 +295,11 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size) {
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)context; (void)options; (void)process_result; (void)handoff;
+    (void)context; (void)options; (void)process_result; (void)handoff; (void)extension;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
@@ -353,7 +371,7 @@ static int run_image(const uint8_t *data, size_t size,
     {
         uintptr_t entry = (uintptr_t)(mapping +
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        prepared_entry call = {entry, &guest, context->argc};
+        prepared_entry call = {entry, &guest, context->argc, extension};
         ios27_process_result completed = {0};
         int result = 0, status = 0;
         if (handoff) {

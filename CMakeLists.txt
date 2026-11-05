@@ -13,17 +13,42 @@ add_executable(ios27 src/main.c)
 target_link_libraries(ios27 PRIVATE ios27_core)
 target_compile_options(ios27 PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
+# Original-source bounded userspace model, exposed only by a separate helper.
+# The ordinary ios27-loader never links these services or supplies the table.
+add_library(ios27_service_bridge STATIC src/service_bridge.c src/libsystem20e_services.c)
+target_include_directories(ios27_service_bridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(ios27_service_bridge PRIVATE -Wall -Wextra -Werror -Wpedantic)
+
 # Trusted helper that ios27_run_executable_exec execveat()s into a fresh
 # address space. Linux/Android only; it is never meant to be run directly.
 if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
     add_executable(ios27-loader src/loader.c)
     target_link_libraries(ios27-loader PRIVATE ios27_core)
     target_compile_options(ios27-loader PRIVATE -Wall -Wextra -Werror -Wpedantic)
+
+    add_executable(ios27-services-loader src/loader.c)
+    target_compile_definitions(ios27-services-loader PRIVATE IOS27_WITH_SERVICES=1)
+    target_link_libraries(ios27-services-loader PRIVATE ios27_core ios27_service_bridge)
+    target_compile_options(ios27-services-loader PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    # Resolve libc memory/string helpers before seccomp, avoiding lazy ELF
+    # binding while the guest is restricted to the mandatory syscall filter.
+    target_link_options(ios27-services-loader PRIVATE "LINKER:-z,now")
 endif()
 
 option(IOS27_BUILD_TESTS "Build parser and runtime tests" ON)
 if(IOS27_BUILD_TESTS)
     enable_testing()
+    add_executable(test_service_bridge tests/test_service_bridge.c)
+    target_link_libraries(test_service_bridge PRIVATE ios27_service_bridge)
+    target_include_directories(test_service_bridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_compile_options(test_service_bridge PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-service-table COMMAND test_service_bridge)
+
+    add_executable(test_userspace_services tests/phase20e-standalone.c
+        tests/phase20e-darwin-fixture.c)
+    target_link_libraries(test_userspace_services PRIVATE ios27_service_bridge)
+    target_compile_options(test_userspace_services PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-userspace-services COMMAND test_userspace_services)
     add_executable(test_macho tests/test_macho.c)
     target_link_libraries(test_macho PRIVATE ios27_core)
     target_compile_options(test_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -278,5 +303,39 @@ if(IOS27_BUILD_TESTS)
                 "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>"
                 "${IOS27_CONTAINED_STARTUP}")
         set_tests_properties(contained-process-cli PROPERTIES TIMEOUT 30)
+
+        set(IOS27_SERVICE_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-executable")
+        add_custom_command(
+            OUTPUT "${IOS27_SERVICE_FIXTURE}"
+            COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
+                --clang "${IOS27_DARWIN_CLANG}"
+                --linker "${IOS27_DARWIN_LD64_LLD}"
+                --out "${IOS27_SERVICE_FIXTURE}"
+            DEPENDS
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-link-fallback.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bridge.h"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/service-bridge.c"
+            VERBATIM COMMENT "Link original SDK-free ARM64 service bridge fixture")
+        add_custom_target(ios27_service_fixture ALL DEPENDS "${IOS27_SERVICE_FIXTURE}")
+
+        add_executable(test_service_exec tests/test_service_exec.c tests/fixtures/service-bridge.c)
+        set_source_files_properties(tests/fixtures/service-bridge.c PROPERTIES
+            COMPILE_DEFINITIONS IOS27_SERVICE_ENTRY=ios27_service_fixture_entry)
+        target_include_directories(test_service_exec PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(test_service_exec PRIVATE ios27_core ios27_service_bridge)
+        target_compile_options(test_service_exec PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        target_link_options(test_service_exec PRIVATE "LINKER:-z,now")
+        add_dependencies(test_service_exec ios27_service_fixture ios27-loader
+            ios27-services-loader ios27_contained_startup)
+        add_test(NAME contained-service-callbacks COMMAND test_service_exec)
+        add_test(NAME contained-native-services COMMAND test_service_exec
+            "${IOS27_SERVICE_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+            "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        set_tests_properties(contained-service-callbacks PROPERTIES TIMEOUT 15)
+        set_tests_properties(contained-native-services PROPERTIES TIMEOUT 30
+            SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
     endif()
 endif()
