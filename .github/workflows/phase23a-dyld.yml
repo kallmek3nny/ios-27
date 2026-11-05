@@ -1,0 +1,47 @@
+name: phase23a incremental dyld namespaces
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/phase23a_*'
+      - 'include/ios27/phase23a_*'
+      - 'tests/phase23a-*'
+      - 'tools/phase23a-*'
+      - 'docs/phase23a-*'
+      - '.github/workflows/phase23a-dyld.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase23a:
+    name: "arm64 darwin dylibs / ${{ matrix.runner }} / ${{ matrix.mode }}"
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        mode: [normal, sanitizers]
+    steps:
+      - uses: actions/checkout@v4
+      - name: install Apple-free LLVM Mach-O linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y -qq clang lld-18 cmake
+      - name: record provenance
+        run: |
+          timeout 30s uname -m
+          timeout 30s clang --version
+          timeout 30s ld64.lld-18 --version
+      - name: compile five genuine arm64 Darwin dylibs and verify loader
+        env:
+          PHASE23A_SANITIZE: ${{ matrix.mode == 'sanitizers' && '1' || '0' }}
+        run: |
+          if [ "$PHASE23A_SANITIZE" = "1" ]; then
+            timeout 900s python3 tools/phase23a-verify.py --ld ld64.lld-18 --sanitize
+          else
+            timeout 900s python3 tools/phase23a-verify.py --ld ld64.lld-18
+          fi
