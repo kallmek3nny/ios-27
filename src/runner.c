@@ -1,4 +1,5 @@
 #include "ios27/macho.h"
+#include "ios27/service_bindings.h"
 #include "process_internal.h"
 
 #include <stdint.h>
@@ -306,6 +307,7 @@ static int run_image(const uint8_t *data, size_t size,
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
+    ios27_service_binding_plan binding = {0};
     if (!data || !info || !context ||
         (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
@@ -313,6 +315,9 @@ static int run_image(const uint8_t *data, size_t size,
      * All checks complete before any executable memory becomes accessible. */
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
+        return -1;
+    if (extension && ios27_service_binding_inspect(data, size, &binding,
+                                                  error, error_size))
         return -1;
     if (prepare_guest_stack(context, info->stacksize,
                             layout.page_size, &guest, error, error_size))
@@ -349,6 +354,19 @@ static int run_image(const uint8_t *data, size_t size,
                                     (char *)(target + (size_t)s->filesize));
     }
     initialize_zerofill(data, &layout, mapping);
+    if (binding.present) {
+        /* Preflight approved this exact RW/non-executable slot. Only the
+         * private staged image receives the pointer; file bytes stay intact. */
+        uintptr_t pointer = (uintptr_t)extension;
+        _Static_assert(sizeof(pointer) == 8u, "ARM64 binding pointer width");
+        if (binding.vmaddr < layout.min_vmaddr ||
+            binding.vmaddr - layout.min_vmaddr > layout.span ||
+            IOS27_SERVICE_BINDING_BYTES >
+                layout.span - (size_t)(binding.vmaddr - layout.min_vmaddr))
+            goto mapping_failed;
+        memcpy(mapping + (size_t)(binding.vmaddr - layout.min_vmaddr) + 8u,
+               &pointer, sizeof(pointer));
+    }
     /*
      * Commit the complete image only after every segment has been populated.
      * No guest code is executable during staging, and all pages get their
@@ -371,7 +389,10 @@ static int run_image(const uint8_t *data, size_t size,
     {
         uintptr_t entry = (uintptr_t)(mapping +
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        prepared_entry call = {entry, &guest, context->argc, extension};
+        /* Bound named shims use their private slot and a normal four-argument
+         * entry. Keep x4 only for the earlier explicit callback-table client. */
+        prepared_entry call = {entry, &guest, context->argc,
+                              binding.present ? NULL : extension};
         ios27_process_result completed = {0};
         int result = 0, status = 0;
         if (handoff) {

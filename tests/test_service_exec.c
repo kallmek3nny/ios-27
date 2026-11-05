@@ -132,7 +132,7 @@ static void native_cases(const uint8_t *bytes, size_t size,
         assert(result.outcome == IOS27_PROCESS_RETURNED && result.exit_code == 101);
         free(old);
     }
-    puts("native Mach-O service exec: virtual file read/write/seek/close, mapping protection, errno, all five entry arguments, failure teardown and fresh launches passed");
+    puts("native Mach-O service exec: virtual file read/write/seek/close, mapping protection, errno, startup vectors, failure teardown and fresh launches passed");
 }
 #endif
 
@@ -143,6 +143,10 @@ int main(int argc, char **argv) {
     ios27_exec_layout layout;
     char error[192];
     if (argc == 1) { callbacks(); return 0; }
+    if (argc == 2 && !strcmp(argv[1], "--no-linker")) {
+        puts("named Mach-O service shim requires LLVM ld64.lld");
+        return 77;
+    }
     assert(argc == 5);
     bytes = read_file(argv[1], &size);
     assert(!ios27_macho_parse(bytes, size, &info, error, sizeof(error)));

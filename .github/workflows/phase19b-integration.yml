@@ -27,5 +27,5 @@ jobs:
         run: timeout 300s cmake --build build --parallel 2
       - name: genuine compiler-linked four-image graph
         run: timeout 180s python3 tools/phase19b-build.py --output-dir build/phase19b --core build/libios27_core.a
-      - name: native services with LLVM and narrow linker outputs
-        run: timeout 60s ctest --test-dir build -R '^contained-native-services(-fallback)?$' --timeout 30 --output-on-failure
+      - name: native services and named shim with LLVM
+        run: timeout 60s ctest --test-dir build -R '^(contained-native-services(-fallback)?|contained-native-service-shim|service-binding-metadata)$' --timeout 30 --output-on-failure

@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/service_bindings.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -49,6 +49,16 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_userspace_services PRIVATE ios27_service_bridge)
     target_compile_options(test_userspace_services PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME bounded-userspace-services COMMAND test_userspace_services)
+
+    add_library(ios27_shim_host STATIC src/darwin_shim.c)
+    target_include_directories(ios27_shim_host PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_definitions(ios27_shim_host PUBLIC IOS27_SHIM_HOST_TEST=1)
+    target_compile_options(ios27_shim_host PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_executable(test_darwin_shim tests/test_darwin_shim.c)
+    target_include_directories(test_darwin_shim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_darwin_shim PRIVATE ios27_shim_host ios27_service_bridge)
+    target_compile_options(test_darwin_shim PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-named-service-shim COMMAND test_darwin_shim)
     add_executable(test_macho tests/test_macho.c)
     target_link_libraries(test_macho PRIVATE ios27_core)
     target_compile_options(test_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -307,12 +317,37 @@ if(IOS27_BUILD_TESTS)
         if(NOT IOS27_SERVICE_LD64_LLD)
             set(IOS27_SERVICE_LD64_LLD "none")
         endif()
+        set(IOS27_SHIM_CLI_ARGUMENT)
+        if(NOT IOS27_SERVICE_LD64_LLD STREQUAL "none")
+            set(IOS27_SHIM_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-shim-executable")
+            set(IOS27_SHIM_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/service-shim-symbols.json")
+            set(IOS27_SHIM_CLI_ARGUMENT "${IOS27_SHIM_FIXTURE}")
+            add_custom_command(
+                OUTPUT "${IOS27_SHIM_FIXTURE}" "${IOS27_SHIM_MANIFEST}"
+                COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-shim-build.py"
+                    --clang "${IOS27_DARWIN_CLANG}"
+                    --linker "${IOS27_SERVICE_LD64_LLD}"
+                    --out "${IOS27_SHIM_FIXTURE}" --manifest "${IOS27_SHIM_MANIFEST}"
+                DEPENDS
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-shim-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/service-shim-client.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/darwin_shim.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/darwin_shim_internal.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/darwin_shim.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bindings.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bridge.h"
+                VERBATIM COMMENT "Audit and link original named-service Darwin client and shim")
+            add_custom_target(ios27_service_shim ALL
+                DEPENDS "${IOS27_SHIM_FIXTURE}" "${IOS27_SHIM_MANIFEST}")
+        endif()
         add_test(NAME contained-process-cli
             COMMAND "${Python3_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_process_cli.py"
                 "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>"
                 "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-services-loader>"
-                "${IOS27_SERVICE_FIXTURE}")
+                "${IOS27_SERVICE_FIXTURE}" ${IOS27_SHIM_CLI_ARGUMENT})
         set_tests_properties(contained-process-cli PROPERTIES TIMEOUT 30)
 
         add_custom_command(
@@ -353,5 +388,29 @@ if(IOS27_BUILD_TESTS)
         set_tests_properties(contained-native-services contained-native-services-fallback
             PROPERTIES TIMEOUT 30
             SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
+        if(TARGET ios27_service_shim)
+            add_dependencies(test_service_exec ios27_service_shim)
+            add_test(NAME contained-native-service-shim COMMAND test_service_exec
+                "${IOS27_SHIM_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+                "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        else()
+            add_test(NAME contained-native-service-shim COMMAND test_service_exec --no-linker)
+        endif()
+        set_tests_properties(contained-native-service-shim PROPERTIES TIMEOUT 30
+            SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
+
+        add_executable(test_service_bindings tests/test_service_bindings.c)
+        target_link_libraries(test_service_bindings PRIVATE ios27_core)
+        target_compile_options(test_service_bindings PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_dependencies(test_service_bindings ios27_service_fixture ios27-services-loader)
+        if(TARGET ios27_service_shim)
+            add_dependencies(test_service_bindings ios27_service_shim)
+            add_test(NAME service-binding-metadata COMMAND test_service_bindings
+                "${IOS27_SHIM_FIXTURE}" "${IOS27_SERVICE_FIXTURE}"
+                "$<TARGET_FILE:ios27-services-loader>")
+        else()
+            add_test(NAME service-binding-metadata COMMAND test_service_bindings --no-linker)
+        endif()
+        set_tests_properties(service-binding-metadata PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
     endif()
 endif()

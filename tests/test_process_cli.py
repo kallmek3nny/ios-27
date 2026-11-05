@@ -53,7 +53,7 @@ def entry_offset(image):
 
 
 def main():
-    if len(sys.argv) not in (4, 6):
+    if len(sys.argv) not in (4, 6, 7):
         raise SystemExit("expected ios27, trusted loader, phase19a fixture and optional services helper/fixture")
     executable, loader, fixture = map(pathlib.Path, sys.argv[1:4])
     native = platform.machine().lower() in {"aarch64", "arm64"}
@@ -151,8 +151,8 @@ def main():
                   1, "guest loader is not a regular file")
             check([executable, "run-exec", directory, fixture, "--unsafe"],
                   1, "guest loader is not a regular file")
-        if len(sys.argv) == 6:
-            service_loader, service_fixture = map(pathlib.Path, sys.argv[4:])
+        if len(sys.argv) >= 6:
+            service_loader, service_fixture = map(pathlib.Path, sys.argv[4:6])
             service = [executable, "run-exec", service_loader, service_fixture]
             check(service, 2, "explicit --unsafe flag")
             check([service_loader], 2, "started only by ios27_run_executable_exec")
@@ -173,6 +173,18 @@ def main():
                     check([*service, "--unsafe"], 0, "entry returned 42")
             else:
                 check([*service, "--unsafe"], 1, "ARM64")
+            if len(sys.argv) == 7:
+                shim = pathlib.Path(sys.argv[6])
+                command = [executable, "run-exec", service_loader, shim, "--unsafe"]
+                if native:
+                    check(command, 0, "entry returned 42")
+                    check([*command, "--arg", "service-fixture", "--arg", "vectors",
+                           "--env", "MODE=guest", "--apple", "service=explicit"],
+                          0, "entry returned 42")
+                    check([executable, "run-exec", loader, shim, "--unsafe"],
+                          0, "entry returned 201")
+                else:
+                    check(command, 1, "ARM64")
     print("process CLI: parsing, explicit execution opt-in, input rejection and "
           + ("native outcomes/recovery passed" if native else
              "x86_64 refusal passed; native outcomes require ARM64"))
