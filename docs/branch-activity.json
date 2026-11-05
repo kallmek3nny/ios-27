@@ -1075,7 +1075,7 @@
     },
     {
       "branch": "agent/phase27b-integrated-libsystem-20261105",
-      "sha": "6d91ef785c856a5e17b0fc31aff458144fb702af",
+      "sha": "d5c8084e0da15d1829b2d195da067850956ef0e4",
       "url": "https://github.com/kallmek3nny/ios-27/tree/agent%2Fphase27b-integrated-libsystem-20261105",
       "pr_number": null,
       "ci": "not_checked",
@@ -1113,7 +1113,7 @@
           "group_id": "libsystem-host-model",
           "source_files": 2,
           "fixture_files": 1,
-          "additions": 145,
+          "additions": 146,
           "deletions": 2,
           "symbols_preview": [
             "ios27_27b_run_exit_handlers"
@@ -2294,5 +2294,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T13:31:20Z"
+  "observed_at": "2026-11-05T13:41:00Z"
 }
