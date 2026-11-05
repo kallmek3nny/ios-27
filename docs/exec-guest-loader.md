@@ -27,7 +27,9 @@ The startup context, outcomes, status codes, full-width `exit_code` and the
 deadline also covers `execveat` and the loader's re-parse and mapping work.
 
 `loader_path` must name the trusted `ios27-loader` build output. The launcher
-opens it once with `O_RDONLY | O_CLOEXEC` and requires a regular file. The
+opens it once with `O_RDONLY | O_CLOEXEC | O_NONBLOCK` and requires a regular
+file. Nonblocking open lets a FIFO reach this check without waiting for a
+writer before the supervised deadline begins. The
 child then executes that descriptor with `AT_EMPTY_PATH`, so the path is not
 resolved a second time. A NULL or empty path, a path that cannot be opened,
 or a non-regular file fails before a child is created. Nothing authenticates
@@ -77,7 +79,7 @@ read-only data, initialized globals, BSS and all three startup vectors:
 ```
 
 CTest's `contained-process-cli` checks argument refusal before image access,
-malformed and missing images, timeout syntax, vector/string/payload limits
+malformed and missing images, FIFO/directory rejection, timeout syntax, vector/string/payload limits
 and unsupported-host diagnostics. On ARM64 it also checks repeated unchanged
 startup workloads, the original empty-context return and explicitly synthetic full-width
 return, trap, syscall and timeout cases through both commands, followed by a

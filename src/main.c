@@ -11,12 +11,33 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__linux__)
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 #define MAX_INPUT_BYTES (256u * 1024u * 1024u)
 
 static uint8_t *read_image(const char *path, size_t *size) {
-    FILE *f = fopen(path, "rb");
+    FILE *f;
     uint8_t *buffer;
     long length;
+#if defined(__linux__)
+    struct stat metadata;
+    /* A FIFO or device path must not block before validation or before the
+     * process runner can start its supervised execution deadline. */
+    int fd = open(path, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+    if (fd < 0) return NULL;
+    if (fstat(fd, &metadata) || !S_ISREG(metadata.st_mode)) {
+        (void)close(fd);
+        return NULL;
+    }
+    f = fdopen(fd, "rb");
+    if (!f) (void)close(fd);
+#else
+    f = fopen(path, "rb");
+#endif
     if (!f) return NULL;
     if (fseek(f, 0, SEEK_END) != 0 || (length = ftell(f)) < 0 ||
         (unsigned long)length > MAX_INPUT_BYTES ||

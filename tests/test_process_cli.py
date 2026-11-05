@@ -5,6 +5,7 @@ Native fault cases explicitly inject ARM64 instructions into temporary copies
 of the build fixture. x86_64 checks host refusal rather than native execution.
 """
 
+import os
 import pathlib
 import platform
 import signal
@@ -63,6 +64,8 @@ def main():
         malformed = directory / "malformed image"
         malformed.write_bytes(b"this is not a Mach-O image")
         missing = directory / "missing image"
+        fifo = directory / "FIFO is not an image or trusted loader"
+        os.mkfifo(fifo)
         for command, prefix, mode in (
             ("run-contained", [], "contained"),
             ("run-exec", [loader], "exec"),
@@ -99,6 +102,8 @@ def main():
             check([*base, missing, "--unsafe", *exact, "--env", ""],
                   2, "exceed vector/string/payload limits")
             check([*base, missing, "--unsafe"], 1, "could not read file")
+            check([*base, fifo, "--unsafe"], 1, "could not read file")
+            check([*base, directory, "--unsafe"], 1, "could not read file")
             check([*base, malformed, "--unsafe"], 1, "mach-o rejected")
             if not native:
                 check([*base, fixture, "--unsafe"], 1, "ARM64")
@@ -142,6 +147,10 @@ def main():
                   1, "cannot execute exec fixture")
             check([executable, "run-exec", fixture, fixture, "--unsafe"],
                   1, "cannot execute exec fixture")
+            check([executable, "run-exec", fifo, fixture, "--unsafe"],
+                  1, "guest loader is not a regular file")
+            check([executable, "run-exec", directory, fixture, "--unsafe"],
+                  1, "guest loader is not a regular file")
     print("process CLI: parsing, explicit execution opt-in, input rejection and "
           + ("native outcomes/recovery passed" if native else
              "x86_64 refusal passed; native outcomes require ARM64"))
