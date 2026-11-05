@@ -1,0 +1,33 @@
+name: phase22b isolated darwin bsd userspace
+on:
+  pull_request:
+    paths:
+      - 'src/phase22b_*'
+      - 'include/ios27/phase22b_*'
+      - 'tests/phase22b-*'
+      - 'tools/phase22b-*'
+      - '.github/workflows/phase22b-standalone.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/phase22b_*'
+      - 'include/ios27/phase22b_*'
+      - 'tests/phase22b-*'
+      - 'tools/phase22b-*'
+      - '.github/workflows/phase22b-standalone.yml'
+jobs:
+  compiled:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitize: ['0', '1']
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: native and compiled arm64 darwin suites
+        env:
+          CC: clang
+          PHASE22B_SANITIZE: ${{ matrix.sanitize }}
+        run: timeout 300s python3 tools/phase22b-standalone.py
