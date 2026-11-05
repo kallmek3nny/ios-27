@@ -1,0 +1,26 @@
+name: phase27c software graphics frame contract
+on:
+  pull_request:
+    paths:
+      - 'src/phase27c_*'
+      - 'include/ios27/phase27c_*'
+      - 'tests/phase27c-*'
+      - 'tools/phase27c-*'
+      - 'docs/phase27c-*'
+      - '.github/workflows/phase27c-*.yml'
+  workflow_dispatch:
+jobs:
+  software-render:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        sanitizer: ['0', '1']
+    steps:
+      - uses: actions/checkout@v4
+      - name: strict native C11 compositor and frame-handoff tests
+        env:
+          P27C_SANITIZE: ${{ matrix.sanitizer }}
+        run: timeout 180s bash tools/phase27c-verify.sh "$RUNNER_TEMP/phase27c-render-test"
