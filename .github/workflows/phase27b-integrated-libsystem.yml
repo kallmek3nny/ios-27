@@ -1,0 +1,33 @@
+name: phase27b linked native libc bsd
+
+on:
+  pull_request:
+    branches: [main, codex/cpu-limit-expiry]
+  push:
+    branches: [agent/phase27b-integrated-libsystem-20261105]
+
+permissions:
+  contents: read
+
+jobs:
+  named-libsystem:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: install llvm linker
+        run: |
+          timeout 120s sudo apt-get update -qq
+          timeout 120s sudo apt-get install -y clang lld
+      - name: configure
+        run: timeout 120s cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DIOS27_BUILD_TESTS=ON
+      - name: build all targets with strict warnings
+        run: timeout 300s cmake --build build --parallel 2
+      - name: phase27b host tests and compiler-linked native fixture
+        run: timeout 180s ctest --test-dir build -R '^(phase27b-.*|bounded-named-service-shim|service-binding-metadata|contained-native-service-shim)$' --timeout 50 --output-on-failure
+      - name: original named shim and host-wide native regressions
+        run: timeout 180s ctest --test-dir build --timeout 50 --output-on-failure
