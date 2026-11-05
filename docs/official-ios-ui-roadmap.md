@@ -24,7 +24,7 @@ kernel, dyld or Apple graphics compatibility.
 | --- | --- | --- |
 | Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; SDK-free compiler-linked ARM64 `MH_EXECUTE` fixtures, multisegment W^X mapping, bounded `LC_MAIN` argc/argv/envp/apple startup, and transactional cross-object relocation; **no general Darwin process ABI or Apple app compatibility** |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
-| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default probe plus **synthetic task-local Mach message queues, checked guest arena, transactional task teardown and register-selector facade**; no real XNU traps/services |
+| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | native SDK-free Mach-O fixture calls into a bounded virtual file/memory service table under exec supervision; synthetic task-local Mach queues and register-selector facade; **no Darwin SVC translation or real XNU services** |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
 | UIKit / SwiftUI | render genuine controls, view tree and Liquid Glass using Apple's own framework components | **not implemented** |
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
@@ -43,15 +43,22 @@ globals, BSS and explicit Darwin C startup vectors. It can run under
 
 [PR #126](https://github.com/kallmek3nny/ios-27/pull/126) adds a configurable
 exec CLI, explicit guest startup vectors and real kernel CPU-expiry tests,
-including guest termination while the launcher is stopped. Its native ARM64
+including guest termination while the launcher is stopped. It also connects
+a compiler-produced Mach-O client to the original bounded userspace service
+model through a separate [native service helper](native-service-bridge.md).
+The client makes real native callback calls for virtual files, checked
+memory, mapping protections and errno under the mandatory syscall filter.
+Both LLVM and the unchanged narrow source-linker outputs are tested. Its native ARM64
 and x86_64 CI runs exercise the compiler-produced workload and clearly labeled
 synthetic fault cases. This work is under review; consult the PR's exact head
 and checks before treating it as merged.
 
-The next runtime boundary is a reviewed native guest that uses a deliberately
-specified Darwin service/import ABI through the supervised exec path, with
-resource ownership, failure reporting and teardown tested together. Standalone
-host models and instruction-set compatibility do not establish that integration.
+The explicit research callback-table boundary is now exercised together with
+resource ownership, failure reporting and teardown. The next boundary is a
+compiler-produced Darwin shim/import ABI that can use these bounded services
+without the custom fifth entry argument, with an auditable symbol allowlist
+and executable callsite tests. This work does not establish standard Darwin
+libSystem symbol binding merely by sharing an ARM64 instruction set.
 General Darwin startup, TLS, dyld/shared-cache loading, arm64e, graphics and
 official Apple services remain separate blockers. Native Linux CI also does
 not establish compatibility or isolation on the Galaxy S25+.
