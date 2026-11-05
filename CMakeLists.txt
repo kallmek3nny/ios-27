@@ -15,7 +15,8 @@ target_compile_options(ios27 PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
 # Original-source bounded userspace model, exposed only by a separate helper.
 # The ordinary ios27-loader never links these services or supplies the table.
-add_library(ios27_service_bridge STATIC src/service_bridge.c src/libsystem20e_services.c)
+add_library(ios27_service_bridge STATIC src/service_bridge.c src/libsystem20e_services.c
+    src/phase27b_syscalls.c)
 target_include_directories(ios27_service_bridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_service_bridge PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -59,6 +60,18 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_darwin_shim PRIVATE ios27_shim_host ios27_service_bridge)
     target_compile_options(test_darwin_shim PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME bounded-named-service-shim COMMAND test_darwin_shim)
+    # Phase27b: use the audited phase26a heap and the same bounded v1
+    # service backend on both CI host architectures.
+    add_executable(test_phase27b_libc tests/phase26a-host.c src/phase26a_libc.c)
+    target_include_directories(test_phase27b_libc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_phase27b_libc PRIVATE -Wall -Wextra -Werror -Wpedantic -fno-builtin)
+    add_test(NAME phase27b-bounded-libc COMMAND test_phase27b_libc)
+
+    add_executable(test_phase27b_syscalls tests/test_phase27b_syscalls.c)
+    target_link_libraries(test_phase27b_syscalls PRIVATE ios27_service_bridge)
+    target_compile_options(test_phase27b_syscalls PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME phase27b-bounded-bsd COMMAND test_phase27b_syscalls)
+
     add_executable(test_macho tests/test_macho.c)
     target_link_libraries(test_macho PRIVATE ios27_core)
     target_compile_options(test_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -341,6 +354,38 @@ if(IOS27_BUILD_TESTS)
                 VERBATIM COMMENT "Audit and link original named-service Darwin client and shim")
             add_custom_target(ios27_service_shim ALL
                 DEPENDS "${IOS27_SHIM_FIXTURE}" "${IOS27_SHIM_MANIFEST}")
+
+            # Separate stacked fixture; do not change the agent 1 / phase19b
+            # binding version, old service-shim manifest or import allowlist.
+            set(IOS27_PHASE27B_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/phase27b-executable")
+            set(IOS27_PHASE27B_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/phase27b-symbols.json")
+            add_custom_command(
+                OUTPUT "${IOS27_PHASE27B_FIXTURE}" "${IOS27_PHASE27B_MANIFEST}"
+                COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase27b-build.py"
+                    --clang "${IOS27_DARWIN_CLANG}"
+                    --linker "${IOS27_SERVICE_LD64_LLD}"
+                    --out "${IOS27_PHASE27B_FIXTURE}"
+                    --manifest "${IOS27_PHASE27B_MANIFEST}"
+                DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase27b-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-shim-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/phase27b-libsystem.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/phase26a_libc.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/phase27b_extras.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/phase27b_bsd_shim.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/darwin_shim.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/phase27b_libsystem.h"
+                VERBATIM COMMENT "Link and audit phase27b named libc/BSD Mach-O")
+            add_custom_target(ios27_phase27b_executable ALL
+                DEPENDS "${IOS27_PHASE27B_FIXTURE}" "${IOS27_PHASE27B_MANIFEST}")
+            add_test(NAME phase27b-compiler-linked-file-io
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_phase27b_exec.py"
+                    "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-services-loader>"
+                    "${IOS27_PHASE27B_FIXTURE}" "${IOS27_PHASE27B_MANIFEST}")
+            set_tests_properties(phase27b-compiler-linked-file-io PROPERTIES
+                TIMEOUT 50 SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
+
         endif()
         add_test(NAME contained-process-cli
             COMMAND "${Python3_EXECUTABLE}"
