@@ -22,7 +22,7 @@ kernel, dyld or Apple graphics compatibility.
 
 | Area | Runtime contract | Actual implementation state |
 | --- | --- | --- |
-| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; genuine SDK-free Clang ARM64 Darwin MH_OBJECT validation, real external BRANCH26 relocation and trusted native ARM64 cross-object call returning 43; **no linked Darwin executable** |
+| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; SDK-free compiler-linked ARM64 `MH_EXECUTE` fixtures, multisegment W^X mapping, bounded `LC_MAIN` argc/argv/envp/apple startup, and transactional cross-object relocation; **no general Darwin process ABI or Apple app compatibility** |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
 | Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default probe plus **synthetic task-local Mach message queues, checked guest arena, transactional task teardown and register-selector facade**; no real XNU traps/services |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
@@ -30,11 +30,31 @@ kernel, dyld or Apple graphics compatibility.
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
 | SystemUI | Apple's SpringBoard, backboardd, launchd, FrontBoard, SpringBoardServices, security and app lifecycle | **not implemented** |
 | Apps | launch signed or legally acquired app executables and their linked services without CPU emulation | **not implemented** |
-| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | synthetic private anonymous W^X mappings and rollback only; **not** a sandbox |
+| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | trusted-fixture fork and fresh-address-space exec runners, guarded stacks, sealed exec payloads, mandatory seccomp, wall-clock supervision and kernel CPU bounds; **not** an untrusted-code sandbox or Android device validation |
 
 ## Concrete next technical milestone
 
-**Phase 13 is verified:** [PR #22](https://github.com/kallmek3nny/ios-27/pull/22) validates a genuine Clang-emitted ARM64 Darwin BRANCH26 relocation between two independently compiled C objects and natively executes the patched function returning 43 with W^X on ARM64 Linux. This is **not a linked Mach-O process, iOS application, Apple framework or official UI**. The available ld64.lld rejects macOS platform linking. **Phase 14:** establish a reproducible open-source ARM64 Darwin linker or rigorously extend bounded object relocation handling; investigate XNU, arm64e, signing, dyld caches and graphics blockers.
+The repository has progressed beyond the original Phase 13 object-call proof.
+The [phase19a startup workload](phase19a-startup.md) is a real SDK-free,
+compiler-produced linked executable with recursion, read-only data, writable
+globals, BSS and explicit Darwin C startup vectors. It can run under
+[fork supervision](contained-native-process.md) or the
+[fresh-address-space exec loader](exec-guest-loader.md) on ARM64 Linux.
+
+[PR #126](https://github.com/kallmek3nny/ios-27/pull/126) adds a configurable
+exec CLI, explicit guest startup vectors and real kernel CPU-expiry tests,
+including guest termination while the launcher is stopped. Its native ARM64
+and x86_64 CI runs exercise the compiler-produced workload and clearly labeled
+synthetic fault cases. This work is under review; consult the PR's exact head
+and checks before treating it as merged.
+
+The next runtime boundary is a reviewed native guest that uses a deliberately
+specified Darwin service/import ABI through the supervised exec path, with
+resource ownership, failure reporting and teardown tested together. Standalone
+host models and instruction-set compatibility do not establish that integration.
+General Darwin startup, TLS, dyld/shared-cache loading, arm64e, graphics and
+official Apple services remain separate blockers. Native Linux CI also does
+not establish compatibility or isolation on the Galaxy S25+.
 
 ### Longer-term audit task
 
