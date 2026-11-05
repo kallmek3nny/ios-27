@@ -24,6 +24,8 @@ typedef struct {
     view v[P27D_MAX_VIEWS];
     p27d_id window;
     p27d_window_state state;
+    p27d_id controller;
+    p27d_controller_state controller_state;
 } tree;
 typedef struct {
     bool active;
@@ -210,13 +212,19 @@ p27d_result p27d_remove(p27d_scene *s,p27d_id id) {
                 s->working.window=(p27d_id){0,0};
                 s->working.state=P27D_DETACHED;
             }
+            if (s->working.controller.generation &&
+                !find_const(&s->working,s->working.controller)) {
+                s->working.controller=(p27d_id){0,0};
+                s->working.controller_state=P27D_CONTROLLER_UNLOADED;
+            }
         }
     }
     pthread_mutex_unlock(&s->mutex);
     return r;
 }
 p27d_result p27d_window(p27d_scene *s,p27d_id root,p27d_window_state state) {
-    if (!s || state>P27D_VISIBLE || (state==P27D_DETACHED && root.generation) ||
+    if (!s || state<P27D_DETACHED || state>P27D_VISIBLE ||
+        (state==P27D_DETACHED && root.generation) ||
         (state!=P27D_DETACHED && !root.generation)) return P27D_INVALID;
     pthread_mutex_lock(&s->mutex);
     p27d_result r=P27D_STATE;
@@ -230,6 +238,9 @@ p27d_result p27d_window(p27d_scene *s,p27d_id root,p27d_window_state state) {
         if (r==P27D_OK) {
             s->working.window=root;
             s->working.state=state;
+            if (state!=P27D_VISIBLE &&
+                s->working.controller_state==P27D_CONTROLLER_VISIBLE)
+                s->working.controller_state=P27D_CONTROLLER_LOADED;
         }
     }
     pthread_mutex_unlock(&s->mutex);
@@ -239,6 +250,40 @@ p27d_result p27d_window_get(p27d_scene *s,p27d_id *root,p27d_window_state *state
     if (!s || !root || !state) return P27D_INVALID;
     pthread_mutex_lock(&s->mutex);
     *root=s->model.window; *state=s->model.state;
+    pthread_mutex_unlock(&s->mutex);
+    return P27D_OK;
+}
+p27d_result p27d_controller_set(p27d_scene *s,p27d_id id,p27d_controller_state state) {
+    if (!s || state<P27D_CONTROLLER_UNLOADED || state>P27D_CONTROLLER_VISIBLE ||
+        (state==P27D_CONTROLLER_UNLOADED && id.generation) ||
+        (state!=P27D_CONTROLLER_UNLOADED && !id.generation)) return P27D_INVALID;
+    pthread_mutex_lock(&s->mutex);
+    p27d_result r=P27D_STATE;
+    if (owns(s)) {
+        r=P27D_OK;
+        if (state!=P27D_CONTROLLER_UNLOADED && !find_const(&s->working,id))
+            r=P27D_STALE;
+        else if (state==P27D_CONTROLLER_VISIBLE &&
+                 (s->working.controller_state!=P27D_CONTROLLER_LOADED ||
+                  !same_id(id,s->working.controller) ||
+                  !same_id(id,s->working.window) ||
+                  s->working.state!=P27D_VISIBLE)) r=P27D_INVALID;
+        else if (state==P27D_CONTROLLER_LOADED &&
+                 s->working.controller_state==P27D_CONTROLLER_VISIBLE &&
+                 !same_id(id,s->working.controller)) r=P27D_INVALID;
+        if (r==P27D_OK) {
+            s->working.controller=id;
+            s->working.controller_state=state;
+        }
+    }
+    pthread_mutex_unlock(&s->mutex);
+    return r;
+}
+p27d_result p27d_controller_get(p27d_scene *s,p27d_id *id,p27d_controller_state *state) {
+    if (!s || !id || !state) return P27D_INVALID;
+    pthread_mutex_lock(&s->mutex);
+    *id=s->model.controller;
+    *state=s->model.controller_state;
     pthread_mutex_unlock(&s->mutex);
     return P27D_OK;
 }
@@ -273,7 +318,7 @@ p27d_result p27d_animate(p27d_scene *s,p27d_id id,p27d_anim_kind kind,
                           double from,double to,uint64_t start,uint64_t duration,
                           p27d_curve curve) {
     if (!s || !valid_anim(kind,from,to) || curve>P27D_SMOOTH ||
-        !duration || start>UINT64_MAX-duration) return P27D_INVALID;
+        !duration || start>UINT64_MAX-duration || curve<P27D_LINEAR) return P27D_INVALID;
     animation a={0};
     a.active=true; a.kind=kind; a.curve=curve;
     a.from=from; a.to=to; a.start=start; a.duration=duration;
@@ -286,7 +331,8 @@ p27d_result p27d_animate_transform(p27d_scene *s,p27d_id id,
                           phase26d_affine from,phase26d_affine to,
                           uint64_t start,uint64_t duration,p27d_curve curve) {
     if (!s || !valid_affine(from) || !valid_affine(to) ||
-        curve>P27D_SMOOTH || !duration || start>UINT64_MAX-duration)
+        curve>P27D_SMOOTH || curve<P27D_LINEAR ||
+        !duration || start>UINT64_MAX-duration)
         return P27D_INVALID;
     animation a={0};
     a.active=true; a.kind=P27D_ANIM_TRANSFORM; a.curve=curve;
