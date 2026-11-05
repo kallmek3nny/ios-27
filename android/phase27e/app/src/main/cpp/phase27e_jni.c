@@ -96,6 +96,8 @@ static void drain_events(struct runtime *r,uint64_t now) {
             phase26e_event *ev=&events[i];
             if (ev->kind>=P26_DOWN && ev->kind<=P26_CANCEL && r->width && r->height) {
                 float x=ev->x/(float)r->width, y=ev->y/(float)r->height;
+                if (x < 0.f) x = 0.f; else if (x > 1.f) x = 1.f;
+                if (y < 0.f) y = 0.f; else if (y > 1.f) y = 1.f;
                 if (ev->kind==P26_CANCEL) { /* cancellation may carry zero coords */
                     for(unsigned j=0;j<P27_MAX_POINTERS;++j) if(r->demo.pointers[j].active && r->demo.pointers[j].id==ev->pointer){
                         x=r->demo.pointers[j].x;y=r->demo.pointers[j].y;break;
@@ -112,8 +114,8 @@ JNIEXPORT jint JNICALL Java_dev_ios27_phase27e_MainActivity_nativePointer(JNIEnv
     pthread_mutex_lock(&guard);
     struct runtime *r=lookup(token);
     int result=P26_INVALID;
-    if (r && now>=0 && isfinite(x) && isfinite(y) && x>=0 && y>=0 &&
-        x<(float)r->width && y<(float)r->height) {
+    if (r && now>=0 && isfinite(x) && isfinite(y) &&
+        (kind!=P26_DOWN || (x>=0 && y>=0 && x<(float)r->width && y<(float)r->height))) {
         result=phase26e_pointer(r->host,(phase26e_event_kind)kind,id,x,y);
         if (result==P26_OK) drain_events(r,(uint64_t)now);
     }
