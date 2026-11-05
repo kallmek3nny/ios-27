@@ -34,8 +34,27 @@ or a non-regular file fails before a child is created. Nothing authenticates
 the helper beyond these checks, so callers must not pass any other
 executable.
 
-The `run-contained` command still uses the fork runner. No command-line
-option selects exec mode.
+The CLI exposes the same API with an explicit trusted-helper path:
+
+```sh
+./build/ios27 run-exec ./build/ios27-loader ./build/contained-phase19a-process --unsafe
+# exec ARM64 entry returned 101
+```
+
+The helper must be this project's own trusted build output. `--unsafe` is
+mandatory, the startup context is empty, and the deadline is fixed at
+1000 ms including loader setup. A normal return prints the full guest C
+`int` and exits 0; a deadline exits 124; a signal exits `128 + signal`;
+setup or input failure exits 1; invalid arguments exit 2. The original
+`run-contained` command continues to select the fork runner.
+
+CTest's `contained-process-cli` checks argument refusal before image access,
+malformed and missing images, and unsupported-host diagnostics. On ARM64 it
+also checks the original fixture return and explicitly synthetic full-width
+return, trap, syscall and timeout cases through both commands, followed by a
+successful recovery run. `contained-native-cpu-expiry` covers real CPU-limit
+signals through both public runners, including a stopped launcher; see
+[CPU expiry verification](contained-native-process.md#verification-scope).
 
 ## Launch payload
 

@@ -125,7 +125,32 @@ They also start the fork runner from a launcher that holds unlimited, large
 or small `RLIMIT_CPU` limits. The guest must run in each mode. When a
 seccomp answer fakes the child's clamp, the read-back must fail setup with
 `EPERM` for the unlimited and large limits, and must accept the small
-limit. No test runs a guest until it reaches the CPU limit.
+limit.
+
+`contained-process-cpu-expiry` separately exercises real kernel CPU expiry.
+Each throwaway launcher inherits a one-second soft limit and either a
+two-second hard limit (expecting `SIGXCPU`) or a one-second hard limit
+(expecting `SIGKILL`). Its syscall-free callback must reach guest entry and
+the API must report a signal rather than its 60-second wall-clock deadline.
+Both cases are repeated with the launcher stopped by `SIGSTOP`: a separate
+observer confirms the guest is still alive, stops only the launcher, observes
+guest death through a pidfd, then resumes the launcher and checks the signal
+report. The observer has a 15-second watchdog per case, cleans up failed
+process groups, reaps descendants and verifies its own CPU limits did not
+change. This tests enforcement of lower inherited limits; it does not wait
+61 seconds to exercise the default clamp's expiration.
+
+`contained-native-cpu-expiry` repeats those cases through both public Mach-O
+runners on ARM64 Linux. It uses a temporary copy of the 16 KiB-compatible
+phase19a fixture with an explicitly synthetic `B .` loop at `LC_MAIN`.
+Since exec discards the callback's shared readiness word, the observer waits
+until the native child's final syscall filter is visible in `/proc` before
+stopping the launcher. The eventual API result must still confirm readiness
+and the expected signal. x86_64 reports this test as skipped; it cannot
+establish native ARM64 enforcement. These observer tests require `/proc`,
+pidfds and child-subreaper support in addition to the runner requirements.
+An inherited CPU hard limit below two seconds produces an explicit CTest
+skip rather than a pass.
 
 The Mach-O test uses the unmodified compiler-linked phase15a and phase19a
 fixtures. Native ARM64 checks exercise the real return values, recursive stack
@@ -134,6 +159,6 @@ Clearly labeled synthetic instruction injections exercise a trap, a loop,
 a forbidden Linux syscall, and recovery afterward. Those injected cases are
 fault tests, not additional compiler-produced program capabilities.
 
-Both new tests run in the existing x86_64 and native ARM64 CI matrix. Passing
+The suites run in the existing x86_64 and native ARM64 CI matrix. Passing
 fixture tests do not satisfy the audited general Darwin process-startup or
 untrusted-guest-isolation capability gates.

@@ -232,6 +232,14 @@ if(IOS27_BUILD_TESTS)
             "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15)
 
+        add_executable(test_process_cpu tests/test_process_cpu.c)
+        target_link_libraries(test_process_cpu PRIVATE ios27_core)
+        target_include_directories(test_process_cpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_compile_options(test_process_cpu PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_test(NAME contained-process-cpu-expiry COMMAND test_process_cpu)
+        set_tests_properties(contained-process-cpu-expiry PROPERTIES
+            TIMEOUT 65 SKIP_RETURN_CODE 77 LABELS "cpu-expiry")
+
         add_executable(test_contained_macho tests/test_contained_macho.c)
         target_link_libraries(test_contained_macho PRIVATE ios27_core)
         target_compile_options(test_contained_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -252,10 +260,23 @@ if(IOS27_BUILD_TESTS)
         add_custom_target(ios27_contained_startup DEPENDS "${IOS27_CONTAINED_STARTUP}")
         add_dependencies(test_contained_macho ios27_phase15a_executable
             ios27_contained_startup ios27-loader)
+        add_dependencies(test_process_cpu ios27_contained_startup ios27-loader)
+        # The 16 KiB-granular phase19a fixture also works on 4 KiB hosts.
+        # x86_64 reports this separate native-execution test as skipped.
+        add_test(NAME contained-native-cpu-expiry COMMAND test_process_cpu
+            "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
+        set_tests_properties(contained-native-cpu-expiry PROPERTIES
+            TIMEOUT 125 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;native-arm64")
         # The exec-mode cases run the project's own trusted loader build output.
         add_test(NAME contained-native-macho COMMAND test_contained_macho
             "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"
             "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
+        add_test(NAME contained-process-cli
+            COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_process_cli.py"
+                "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>"
+                "${IOS27_CONTAINED_STARTUP}")
+        set_tests_properties(contained-process-cli PROPERTIES TIMEOUT 30)
     endif()
 endif()

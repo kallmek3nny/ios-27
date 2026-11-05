@@ -145,6 +145,15 @@ supervised child with a one-second deadline:
 ./build/ios27 run-contained ./build/phase15a-executable --unsafe
 ```
 
+The exec variant starts the trusted helper in a fresh address space:
+
+```sh
+./build/ios27 run-exec ./build/ios27-loader ./build/contained-phase19a-process --unsafe
+```
+
+Both commands require native ARM64 Linux and reviewed SDK-free fixtures.
+The helper path must name this project's own trusted `ios27-loader` build.
+
 See [contained native process execution](docs/contained-native-process.md)
 for the API, syscall restrictions, outcomes, and host requirements. The
 [exec guest loader](docs/exec-guest-loader.md) variant runs the same
