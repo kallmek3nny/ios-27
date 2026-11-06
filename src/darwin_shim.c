@@ -206,3 +206,74 @@ int32_t mprotect(void *address, uint64_t length, int32_t protection) {
 int32_t munmap(void *address, uint64_t length) {
     return protect_or_unmap(73, address, length, 0);
 }
+
+/* Metadata stays in the image, separate from client-writable heap pages.
+ * Page allocation deliberately favors a small auditable boundary over a
+ * general-purpose allocator. Explicit mmap shares the same model quota. */
+static struct {
+    void *pointer;
+    uint64_t size, reserved;
+} allocations[8];
+
+void *malloc(uint64_t size) {
+    unsigned slot;
+    void *pointer;
+    uint64_t reserved;
+    if (!api()) return NULL;
+    if (!size) size = 1;
+    if (size > IOS27_SERVICE_ARENA_BYTES / 2u) {
+        guest_errno = 12;
+        return NULL;
+    }
+    for (slot = 0; slot < 8u && allocations[slot].pointer; ++slot) {}
+    if (slot == 8u) { guest_errno = 12; return NULL; }
+    reserved = (size + 4095u) & ~UINT64_C(4095);
+    pointer = mmap(NULL, reserved, 3, 0x1002, -1, 0);
+    if (pointer == IOS27_DARWIN_MAP_FAILED) return NULL;
+    allocations[slot].pointer = pointer;
+    allocations[slot].size = size;
+    allocations[slot].reserved = reserved;
+    return pointer;
+}
+
+void *calloc(uint64_t count, uint64_t size) {
+    /* The model zeros newly mapped pages, including reused pages. */
+    if (count && size > UINT64_MAX / count) {
+        guest_errno = 12;
+        return NULL;
+    }
+    return malloc(count * size);
+}
+
+void free(void *pointer) {
+    unsigned slot;
+    if (!pointer) return;
+    if (!api()) return;
+    for (slot = 0; slot < 8u; ++slot)
+        if (allocations[slot].pointer == pointer) break;
+    if (slot == 8u) { guest_errno = EINVAL_VALUE; return; }
+    if (munmap(pointer, allocations[slot].reserved)) return;
+    allocations[slot].pointer = NULL;
+    allocations[slot].size = allocations[slot].reserved = 0;
+}
+
+void *realloc(void *pointer, uint64_t size) {
+    unsigned slot;
+    uint8_t *replacement;
+    if (!pointer) return malloc(size);
+    if (!api()) return NULL;
+    for (slot = 0; slot < 8u; ++slot)
+        if (allocations[slot].pointer == pointer) break;
+    if (slot == 8u) { guest_errno = EINVAL_VALUE; return NULL; }
+    if (!size) { free(pointer); return NULL; }
+    if (size <= allocations[slot].reserved) {
+        allocations[slot].size = size;
+        return pointer;
+    }
+    replacement = malloc(size);
+    if (!replacement) return NULL; /* Original allocation remains owned. */
+    for (uint64_t i = 0; i < allocations[slot].size; ++i)
+        replacement[i] = ((const uint8_t *)pointer)[i];
+    free(pointer);
+    return replacement;
+}

@@ -56,7 +56,8 @@ and checks before treating it as merged.
 The explicit research callback-table boundary and a
 [named static service shim](named-service-shim.md) are exercised together with
 resource ownership, failure reporting and teardown. A separately compiled
-four-argument client imports ten Darwin-named functions; LLVM resolves them
+four-argument client imports fourteen Darwin-named functions, including bounded
+malloc/calloc/realloc/free for compiled runtime allocation; LLVM resolves them
 against an original shim, and the loader binds only a validated private data
 record while clearing x4. An object-symbol allowlist and native callsite tests
 make that boundary auditable. General dynamic libSystem/dylib binding, more

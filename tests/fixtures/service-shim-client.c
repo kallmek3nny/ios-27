@@ -63,6 +63,29 @@ int main(int argc, char **argv, char **envp, char **apple) {
         return 244;
     if (write(1, mapping, 1) != -1 || *__error() != 14) return 245;
 
+    /* Real named allocator callsites; every supervised launch starts fresh. */
+    {
+        unsigned char *heap = calloc(2, 4096), *grown;
+        void *blocks[8];
+        if (!heap || ((uintptr_t)heap & 15u) || heap[0] || heap[8191]) return 246;
+        heap[0] = 19; heap[8191] = 71;
+        grown = realloc(heap, 12288);
+        if (!grown || grown[0] != 19 || grown[8191] != 71) return 247;
+        if (realloc(grown, UINT64_MAX) || *__error() != 12 || grown[8191] != 71)
+            return 248;
+        free(grown);
+        if (calloc(UINT64_MAX, 2) || *__error() != 12) return 249;
+        for (unsigned i = 0; i < 8; ++i) {
+            blocks[i] = malloc(1);
+            if (!blocks[i]) return 250;
+        }
+        if (malloc(1) || *__error() != 12) return 251;
+        for (unsigned i = 0; i < 8; ++i) free(blocks[i]);
+        heap = calloc(1, 32768);
+        if (!heap || heap[0] || heap[32767]) return 252;
+        free(heap);
+    }
+
     if (argc == 1 && same(argv[0], "trap")) __builtin_trap();
     if (argc == 1 && same(argv[0], "loop")) for (;;) zero_tail[0] = 1;
     if (argc == 1 && same(argv[0], "raw-syscall")) {

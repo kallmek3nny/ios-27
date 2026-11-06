@@ -33,6 +33,10 @@
 #define mprotect ios27_shim_mprotect
 #define munmap ios27_shim_munmap
 #define __error ios27_shim_error
+#define malloc ios27_shim_malloc
+#define calloc ios27_shim_calloc
+#define realloc ios27_shim_realloc
+#define free ios27_shim_free
 #endif
 
 int32_t getpid(void);
@@ -46,5 +50,12 @@ void *mmap(void *hint, uint64_t length, int32_t protection, int32_t flags,
 int32_t mprotect(void *address, uint64_t length, int32_t protection);
 int32_t munmap(void *address, uint64_t length);
 int32_t *__error(void);
+/* Single-threaded page-backed heap sharing the 32 KiB mmap quota. Zero-byte
+ * allocations reserve one byte; realloc(p,0) frees p and returns NULL.
+ * Only allocator-owned base pointers may be passed to realloc/free. */
+void *malloc(uint64_t size);
+void *calloc(uint64_t count, uint64_t size);
+void *realloc(void *pointer, uint64_t size);
+void free(void *pointer);
 
 #endif

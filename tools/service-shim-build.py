@@ -15,7 +15,8 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 IMPORTS = {"_getpid", "_open", "_read", "_write", "_close", "_lseek",
-           "_mmap", "_mprotect", "_munmap", "___error"}
+           "_mmap", "_mprotect", "_munmap", "___error",
+           "_malloc", "_calloc", "_realloc", "_free"}
 
 
 def need(condition, message):
@@ -111,7 +112,7 @@ def main():
                                        ROOT / "include/ios27/service_bridge.h"]},
         "executable_sha256": hashlib.sha256(data).hexdigest(),
     }, indent=2) + "\n", encoding="utf-8")
-    print("named shim: audited 10 client imports, no shim runtime imports, linked 4-argument LC_MAIN")
+    print("named shim: audited 14 client imports, no shim runtime imports, linked 4-argument LC_MAIN")
 
 
 if __name__ == "__main__":

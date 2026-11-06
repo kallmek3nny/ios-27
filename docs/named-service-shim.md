@@ -2,7 +2,7 @@
 
 The original static shim lets an SDK-free ARM64 Darwin client call named
 `getpid`, `open`, `read`, `write`, `close`, `lseek`, `mmap`, `mprotect`,
-`munmap` and `__error` functions. LLVM resolves those client imports against
+`munmap`, `__error`, `malloc`, `calloc`, `realloc` and `free` functions. LLVM resolves those client imports against
 a separately compiled original shim object. The resulting `MH_EXECUTE` uses
 an ordinary `main(argc, argv, envp, apple)` entry; it does not receive or read
 the earlier callback-table argument in x4.
@@ -81,6 +81,29 @@ read/write protections before marshalling I/O.
 | Errno | Guest-local `__error()` storage; successful calls preserve it. One guest thread, without TLS errno. |
 | Mappings | At most 32 KiB total in the virtual model; page-aligned mprotect/munmap addresses and 4096-byte-multiple lengths. |
 | Host effects | No host file or syscall passthrough. Virtual stdout/stderr remain captured in model buffers. |
+| Heap | Eight page-backed allocations sharing the 32 KiB mapping quota; no host allocator calls. |
+
+## Bounded guest heap
+
+The four named allocation functions support original compiled runtime clients.
+Each allocation reserves whole 4096-byte model pages, aligned to at least 16
+bytes. Sizes above 32 KiB, quota exhaustion and calloc multiplication overflow
+return NULL with Darwin ENOMEM (12). Zero-sized malloc/calloc reserve one byte;
+free(NULL) does nothing. Newly allocated pages, including reused pages, are zero.
+
+Realloc preserves the smaller old/new logical size. Shrinking within reserved
+pages keeps the pointer and reservation; growth across that boundary allocates,
+copies and releases the old block. Failed growth leaves the old block and its
+contents intact. realloc(p,0) releases p and returns NULL. Successful operations
+preserve errno. Invalid base pointers are refused with EINVAL as a research
+extension; stale pointers after address reuse cannot be distinguished.
+
+This is a single-threaded allocator, not Apple's malloc zones. Do not explicitly
+munmap or mprotect allocator-owned pages, or reset the service model while
+allocations remain live. Each exec helper starts with fresh heap metadata and
+pages. General allocation performance, thread safety and large heaps remain
+future work. Host tests and the linked ARM64 client cover zeroing, alignment,
+copy preservation, overflow, exhausted quotas, failed growth and reuse.
 
 Ordinary client buffers must be valid trusted C objects. Invalid non-arena
 pointers can fault the supervised child. Virtual mapping protections are
@@ -92,7 +115,7 @@ direct C pointer dereferences. This remains trusted-fixture containment.
 `tools/service-shim-build.py` separately compiles the client and shim as real
 ARM64 Darwin objects, then checks:
 
-- The client imports exactly the ten named functions listed above.
+- The client imports exactly the fourteen named functions listed above.
 - The shim has no unresolved runtime imports and only the expected object
   definitions, including its private binding record.
 - The final linked executable has no unresolved symbols.
