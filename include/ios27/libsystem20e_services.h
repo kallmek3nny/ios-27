@@ -3,8 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Original-source, sandboxed Darwin-like ABI boundary. Guest pointers are
- * offsets, NEVER host pointers. All structures are caller-owned. */
+/* Original-source bounded in-memory Darwin-like service model. Syscall
+ * pointer arguments are arena offsets; the checked guest_ptr accessor is
+ * for trusted callers. All structures are caller-owned. This model alone
+ * does not isolate untrusted native code or enforce host page protections. */
 #define IOS27_20E_BYTES 65536u
 #define IOS27_20E_PAGE 4096u
 #define IOS27_20E_FDS 16u

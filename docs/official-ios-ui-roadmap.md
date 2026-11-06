@@ -22,19 +22,60 @@ kernel, dyld or Apple graphics compatibility.
 
 | Area | Runtime contract | Actual implementation state |
 | --- | --- | --- |
-| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; genuine SDK-free Clang ARM64 Darwin MH_OBJECT validation, real external BRANCH26 relocation and trusted native ARM64 cross-object call returning 43; **no linked Darwin executable** |
+| Mach-O | validate, select native ARM64 slice, read loads/imports | thin parser + FAT/FAT64; SDK-free compiler-linked ARM64 `MH_EXECUTE` fixtures, multisegment W^X mapping, bounded `LC_MAIN` argc/argv/envp/apple startup, and transactional cross-object relocation; **no general Darwin process ABI or Apple app compatibility** |
 | dyld | link Apple's private/system binaries with fixups, chained binds, closures, @rpath semantics | **partial fixture-only**: classic/chained binds, bounded explicit image DAG, cross-image relocation, W^X native mapping; no real Apple dyld/shared cache |
-| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | deny-by-default probe plus **synthetic task-local Mach message queues, checked guest arena, transactional task teardown and register-selector facade**; no real XNU traps/services |
+| Darwin / XNU | syscall, threads, pthread workqueues, Mach ports/messages, entitlement-facing APIs | native SDK-free Mach-O fixture calls into a bounded virtual file/memory service table under exec supervision; synthetic task-local Mach queues and register-selector facade; **no Darwin SVC translation or real XNU services** |
 | ObjC / Swift | metadata, libobjc, autorelease, Swift ABI, Foundation | **not implemented** |
 | UIKit / SwiftUI | render genuine controls, view tree and Liquid Glass using Apple's own framework components | **not implemented** |
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
 | SystemUI | Apple's SpringBoard, backboardd, launchd, FrontBoard, SpringBoardServices, security and app lifecycle | **not implemented** |
 | Apps | launch signed or legally acquired app executables and their linked services without CPU emulation | **not implemented** |
-| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | synthetic private anonymous W^X mappings and rollback only; **not** a sandbox |
+| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | trusted-fixture fork and fresh-address-space exec runners, guarded stacks, sealed exec payloads, mandatory seccomp, wall-clock supervision and kernel CPU bounds; the original workload passed in the Android host on a 4 KiB S25+; **not** an untrusted-code sandbox or general Android compatibility |
 
 ## Concrete next technical milestone
 
-**Phase 13 is verified:** [PR #22](https://github.com/kallmek3nny/ios-27/pull/22) validates a genuine Clang-emitted ARM64 Darwin BRANCH26 relocation between two independently compiled C objects and natively executes the patched function returning 43 with W^X on ARM64 Linux. This is **not a linked Mach-O process, iOS application, Apple framework or official UI**. The available ld64.lld rejects macOS platform linking. **Phase 14:** establish a reproducible open-source ARM64 Darwin linker or rigorously extend bounded object relocation handling; investigate XNU, arm64e, signing, dyld caches and graphics blockers.
+The repository has progressed beyond the original Phase 13 object-call proof.
+The [phase19a startup workload](phase19a-startup.md) is a real SDK-free,
+compiler-produced linked executable with recursion, read-only data, writable
+globals, BSS and explicit Darwin C startup vectors. It can run under
+[fork supervision](contained-native-process.md) or the
+[fresh-address-space exec loader](exec-guest-loader.md) on ARM64 Linux.
+
+[PR #126](https://github.com/kallmek3nny/ios-27/pull/126) adds a configurable
+exec CLI, explicit guest startup vectors and real kernel CPU-expiry tests,
+including guest termination while the launcher is stopped. It also connects
+a compiler-produced Mach-O client to the original bounded userspace service
+model through a separate [native service helper](native-service-bridge.md).
+The client makes real native callback calls for virtual files, checked
+memory, mapping protections and errno under the mandatory syscall filter.
+Both LLVM and the unchanged narrow source-linker outputs are tested. Its native ARM64
+and x86_64 CI runs exercise the compiler-produced workload and clearly labeled
+synthetic fault cases. This work is under review; consult the PR's exact head
+and checks before treating it as merged.
+
+The explicit research callback-table boundary and a
+[named static service shim](named-service-shim.md) are exercised together with
+resource ownership, failure reporting and teardown. A separately compiled
+four-argument client imports fourteen Darwin-named functions, including bounded
+malloc/calloc/realloc/free for compiled runtime allocation; LLVM resolves them
+against an original shim, and the loader binds only a validated private data
+record while clearing x4. An object-symbol allowlist and native callsite tests
+make that boundary auditable. General dynamic libSystem/dylib binding, more
+POSIX behavior and thread-local errno remain future boundaries.
+General Darwin startup, TLS, dyld/shared-cache loading, arm64e, graphics and
+official Apple services remain separate blockers. The
+[Android runtime host](android-runtime-host.md) now packages the original
+Mach-O workload into an APK; two fresh launches passed on the physical S25+
+with 4096-byte pages. This is native fixture execution evidence, not Apple
+framework compatibility or a general isolation guarantee.
+
+The [internal pointer-rebase path](static-pointer-rebases.md) now applies
+validated data-only chained rebases in a private copy before image sealing;
+Android 0.2.0 exercises an actual global pointer on the phone. The
+[Apple runtime acquisition and inventory](apple-runtime-inputs.md) obtained
+the real iOS 27.0 ARM64 simulator archive and inspected SpringBoard and its
+framework dependencies. Those binaries are external local research inputs;
+they have not been executed or included in the APK.
 
 ### Longer-term audit task
 

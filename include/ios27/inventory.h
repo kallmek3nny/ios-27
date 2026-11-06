@@ -4,7 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define IOS27_MAX_IMPORTS 128u
+/* Read-only framework inventory: SpringBoard.framework has 228 direct
+ * imports in the inspected iOS 27.0 simulator build. Execution limits and
+ * support remain separate from this bounded observation capacity. */
+#define IOS27_MAX_IMPORTS 512u
 #define IOS27_IMPORT_NAME_MAX 256u
 
 typedef struct {

@@ -24,6 +24,12 @@
 
 **Development status:** check [verified capability progress](docs/PROGRESS.md), [live main provenance](docs/repo-status.json), and [technical ceilings](docs/CEILINGS.md). The legacy [HANDOFF.md](HANDOFF.md) may describe older phases; verify against the latest merged main.
 
+The [Android runtime host](docs/android-runtime-host.md) builds an installable
+APK and runs the original compiled ARM64 Mach-O workload on a phone. Its
+supervised file/mapping/heap workload has passed on an S25+; Apple UI remains
+unimplemented. Build with `android/gradlew.bat -p android :app:assembleDebug`
+on Windows or `bash android/gradlew -p android :app:assembleDebug` on Linux.
+
 **Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
 Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.
@@ -145,9 +151,41 @@ supervised child with a one-second deadline:
 ./build/ios27 run-contained ./build/phase15a-executable --unsafe
 ```
 
+The exec variant starts the trusted helper in a fresh address space:
+
+```sh
+./build/ios27 run-exec ./build/ios27-loader ./build/contained-phase19a-process --unsafe
+```
+
+Both commands require native ARM64 Linux and reviewed SDK-free fixtures.
+The helper path must name this project's own trusted `ios27-loader` build.
+Optional `--timeout-ms`, `--arg`, `--env` and `--apple` pairs after `--unsafe`
+configure the deadline and explicit guest startup vectors. See the
+[exec CLI example](docs/exec-guest-loader.md#api) for the full startup workload.
+
 See [contained native process execution](docs/contained-native-process.md)
 for the API, syscall restrictions, outcomes, and host requirements. The
 [exec guest loader](docs/exec-guest-loader.md) variant runs the same
 fixtures in a fresh address space instead of a fork.
+
+The separate [native service bridge](docs/native-service-bridge.md) helper
+connects an SDK-free compiler-produced Mach-O fixture to bounded virtual
+file, memory and Darwin-numbered userspace services:
+
+```sh
+./build/ios27 run-exec ./build/ios27-services-loader ./build/service-bridge-executable --unsafe
+```
+
+This uses an explicit research callback table, not Apple's libSystem ABI
+or Darwin syscall translation. The regular helper does not expose the table.
+
+The [named service shim](docs/named-service-shim.md) also lets a separately
+compiled four-argument client call fourteen declared Darwin-named functions with
+ordinary C buffers. The services helper binds a validated private data record;
+that client uses no fifth entry argument:
+
+```sh
+./build/ios27 run-exec ./build/ios27-services-loader ./build/service-shim-executable --unsafe
+```
 
 See [docs/architecture.md](docs/architecture.md) for design and limitations. Avoid running untrusted Mach-O code: execution is intended only for deliberately constructed local test fixtures. Child supervision contains faults and loops but does not provide an untrusted-code sandbox.

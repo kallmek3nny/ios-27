@@ -11,12 +11,33 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__linux__)
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 #define MAX_INPUT_BYTES (256u * 1024u * 1024u)
 
 static uint8_t *read_image(const char *path, size_t *size) {
-    FILE *f = fopen(path, "rb");
+    FILE *f;
     uint8_t *buffer;
     long length;
+#if defined(__linux__)
+    struct stat metadata;
+    /* A FIFO or device path must not block before validation or before the
+     * process runner can start its supervised execution deadline. */
+    int fd = open(path, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+    if (fd < 0) return NULL;
+    if (fstat(fd, &metadata) || !S_ISREG(metadata.st_mode)) {
+        (void)close(fd);
+        return NULL;
+    }
+    f = fdopen(fd, "rb");
+    if (!f) (void)close(fd);
+#else
+    f = fopen(path, "rb");
+#endif
     if (!f) return NULL;
     if (fseek(f, 0, SEEK_END) != 0 || (length = ftell(f)) < 0 ||
         (unsigned long)length > MAX_INPUT_BYTES ||
@@ -43,12 +64,78 @@ static void version(uint32_t packed) {
            packed & 0xffu);
 }
 
+typedef struct {
+    ios27_process_options execution;
+    const char *vectors[3][IOS27_STARTUP_MAX_VECTOR + 1u];
+    size_t counts[3];
+} process_cli_options;
+
+/* Options are explicit guest data. In particular, neither argv[0] nor any
+ * entry from the launcher's host environment is forwarded automatically. */
+static int process_options(int argc, char **argv, int first,
+                            process_cli_options *options) {
+    size_t payload = 0u;
+    int timeout_seen = 0;
+    memset(options, 0, sizeof(*options));
+    options->execution.timeout_ms = 1000u;
+    for (int i = first; i < argc; i += 2) {
+        unsigned vector;
+        size_t length;
+        const char *value;
+        if (i + 1 == argc) {
+            fprintf(stderr, "process option requires a value: %s\n", argv[i]);
+            return -1;
+        }
+        value = argv[i + 1];
+        if (!strcmp(argv[i], "--timeout-ms")) {
+            uint32_t timeout = 0u;
+            if (timeout_seen++ || !*value) goto invalid_timeout;
+            for (const char *digit = value; *digit; ++digit) {
+                if (*digit < '0' || *digit > '9' ||
+                    timeout > (IOS27_PROCESS_MAX_TIMEOUT_MS -
+                               (uint32_t)(*digit - '0')) / 10u)
+                    goto invalid_timeout;
+                timeout = timeout * 10u + (uint32_t)(*digit - '0');
+            }
+            if (!timeout) goto invalid_timeout;
+            options->execution.timeout_ms = timeout;
+            continue;
+        }
+        if (!strcmp(argv[i], "--arg")) vector = 0u;
+        else if (!strcmp(argv[i], "--env")) vector = 1u;
+        else if (!strcmp(argv[i], "--apple")) vector = 2u;
+        else {
+            fprintf(stderr, "unknown process option: %s\n", argv[i]);
+            return -1;
+        }
+        length = strlen(value);
+        if (options->counts[vector] == IOS27_STARTUP_MAX_VECTOR ||
+            length >= IOS27_STARTUP_MAX_STRING ||
+            length + 1u > IOS27_STARTUP_MAX_STRINGS - payload) {
+            fprintf(stderr, "guest startup options exceed vector/string/payload limits\n");
+            return -1;
+        }
+        options->vectors[vector][options->counts[vector]++] = value;
+        payload += length + 1u;
+    }
+    return 0;
+invalid_timeout:
+    fprintf(stderr, "--timeout-ms requires one decimal value from 1 through %u\n",
+            IOS27_PROCESS_MAX_TIMEOUT_MS);
+    return -1;
+}
+
 int main(int argc, char **argv) {
     uint8_t *data;
     size_t size;
     char error[192] = {0};
     ios27_macho_info image;
     int result;
+    int exec_mode = argc >= 2 && strcmp(argv[1], "run-exec") == 0;
+    int process_mode = exec_mode ||
+                       (argc >= 2 && strcmp(argv[1], "run-contained") == 0);
+    int image_argument = exec_mode ? 3 : 2;
+    process_cli_options process;
     if (argc >= 2 && strcmp(argv[1], "resolve-dyld") == 0) {
         const char *paths[IOS27_DYLD_MAX_CANDIDATES] = {0};
         ios27_dyld_candidates candidates;
@@ -71,6 +158,7 @@ int main(int argc, char **argv) {
     if (argc < 3 || (strcmp(argv[1], "inspect") != 0 &&
                      strcmp(argv[1], "run-freestanding") != 0 &&
                      strcmp(argv[1], "run-contained") != 0 &&
+                     !exec_mode &&
                      strcmp(argv[1], "probe-darwin") != 0 &&
                      strcmp(argv[1], "audit-ios") != 0 &&
                      strcmp(argv[1], "symbols") != 0 &&
@@ -82,24 +170,30 @@ int main(int argc, char **argv) {
                         "       ios27 binds <thin-or-fat-arm64-macho>\n"
                         "       ios27 resolve-dyld <name> <loader> <main> [rpath ...]\n"
                         "       ios27 run-freestanding <trusted-macho> --unsafe\n"
-                        "       ios27 run-contained <trusted-macho> --unsafe\n");
+                        "       ios27 run-contained <trusted-macho> --unsafe [process options]\n"
+                        "       ios27 run-exec <trusted-ios27-loader> <trusted-macho> --unsafe [process options]\n"
+                        "process options: --timeout-ms <1..60000>, --arg <value>,\n"
+                        "                 --env <value>, --apple <value> (vectors may repeat)\n");
         return 2;
     }
     if (strcmp(argv[1], "run-freestanding") != 0 &&
-        strcmp(argv[1], "run-contained") != 0 && argc != 3) {
+        strcmp(argv[1], "run-contained") != 0 && !exec_mode && argc != 3) {
         fprintf(stderr, "expected exactly one image path\n");
         return 2;
     }
-    if ((strcmp(argv[1], "run-freestanding") == 0 ||
-         strcmp(argv[1], "run-contained") == 0) &&
-        (argc != 4 || strcmp(argv[3], "--unsafe") != 0)) {
+    if ((process_mode && (argc < image_argument + 2 ||
+                          strcmp(argv[image_argument + 1], "--unsafe") != 0)) ||
+        (strcmp(argv[1], "run-freestanding") == 0 &&
+         (argc != 4 || strcmp(argv[3], "--unsafe") != 0))) {
         fprintf(stderr, "refusing to run code without explicit --unsafe flag\n");
         return 2;
     }
-    data = read_image(argv[2], &size);
+    if (process_mode && process_options(argc, argv, image_argument + 2, &process))
+        return 2;
+    data = read_image(argv[image_argument], &size);
     if (!data) {
         fprintf(stderr, "could not read file or file exceeds %u bytes: %s\n",
-                MAX_INPUT_BYTES, argv[2]);
+                MAX_INPUT_BYTES, argv[image_argument]);
         return 1;
     }
     if (strcmp(argv[1], "binds") == 0) {
@@ -237,27 +331,35 @@ int main(int argc, char **argv) {
         free(data);
         return 0;
     }
-    if (strcmp(argv[1], "run-contained") == 0) {
-        ios27_process_options options = {1000u};
-        ios27_startup_context context = {0, NULL, NULL, NULL};
+    if (process_mode) {
+        ios27_process_options options = process.execution;
+        ios27_startup_context context = {
+            (int)process.counts[0], process.vectors[0],
+            process.vectors[1], process.vectors[2]
+        };
         ios27_process_result completed;
-        if (ios27_run_executable_contained(data, size, &image, &context,
+        const char *mode = exec_mode ? "exec" : "contained";
+        int status = exec_mode ?
+            ios27_run_executable_exec(argv[2], data, size, &image, &context,
+                                       &options, &completed, error, sizeof(error)) :
+            ios27_run_executable_contained(data, size, &image, &context,
                                             &options, &completed, error,
-                                            sizeof(error))) {
-            fprintf(stderr, "cannot execute contained fixture: %s\n", error);
+                                            sizeof(error));
+        if (status) {
+            fprintf(stderr, "cannot execute %s fixture: %s\n", mode, error);
             free(data);
             return 1;
         }
         free(data);
         if (completed.outcome == IOS27_PROCESS_TIMED_OUT) {
-            fprintf(stderr, "contained ARM64 entry exceeded %u ms\n", options.timeout_ms);
+            fprintf(stderr, "%s ARM64 entry exceeded %u ms\n", mode, options.timeout_ms);
             return 124;
         }
         if (completed.outcome == IOS27_PROCESS_SIGNALED) {
-            fprintf(stderr, "contained ARM64 entry terminated by signal %d\n", completed.signal);
+            fprintf(stderr, "%s ARM64 entry terminated by signal %d\n", mode, completed.signal);
             return 128 + completed.signal;
         }
-        printf("contained ARM64 entry returned %d\n", completed.exit_code);
+        printf("%s ARM64 entry returned %d\n", mode, completed.exit_code);
         return 0;
     }
     if (ios27_run_freestanding(data, size, &image, &result,

@@ -1,5 +1,8 @@
 #define _GNU_SOURCE
 #include "process_internal.h"
+#if defined(IOS27_WITH_SERVICES)
+#include "service_bridge_internal.h"
+#endif
 
 #include <errno.h>
 #include <fcntl.h>
@@ -387,9 +390,16 @@ int main(int argc, char **argv) {
                                           &info, (size_t)page, &layout,
                                           error, sizeof(error)))
             loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_IMAGE);
+#if defined(IOS27_WITH_SERVICES)
+        const ios27_service_api *services = ios27_service_bridge_initialize();
+        (void)ios27_native_handoff_extension(payload.image, payload.image_size,
+                                   &info, &payload.context, services, enter_guest,
+                                   error, sizeof(error));
+#else
         (void)ios27_native_handoff(payload.image, payload.image_size, &info,
                                    &payload.context, enter_guest,
                                    error, sizeof(error));
+#endif
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PREPARE);
     }
 #endif
