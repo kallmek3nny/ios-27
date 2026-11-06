@@ -8,36 +8,8 @@
   "candidate_count": 32,
   "candidates": [
     {
-      "branch": "agent/phase27a-objc-integrated-startup-20261105",
-      "sha": "f416b9d16b2f8612464d5ba2e71877fcd77629c9",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/128",
-      "pr_number": 128,
-      "ci": "passing_checks",
-      "status": "candidate changes, NOT verified API support",
-      "files_checked": 7,
-      "possibly_truncated": false,
-      "groups": [
-        {
-          "group_id": "unclassified",
-          "source_files": 2,
-          "fixture_files": 3,
-          "additions": 739,
-          "deletions": 0,
-          "symbols_preview": [
-            "ios27_phase27a_launch"
-          ],
-          "example_paths": [
-            "include/ios27/phase27a_startup.h",
-            "src/phase27a_startup.c",
-            "tests/phase27a-host-integration.cpp",
-            "tests/phase27a-startup.c"
-          ]
-        }
-      ]
-    },
-    {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
+      "sha": "39031a9acc47ddb5b0262a92c9e3bf36b560051c",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -74,7 +46,7 @@
           "group_id": "unclassified",
           "source_files": 12,
           "fixture_files": 9,
-          "additions": 1786,
+          "additions": 1933,
           "deletions": 32,
           "symbols_preview": [
             "ios27_native_handoff_extension",
@@ -86,6 +58,34 @@
             "include/ios27/service_bindings.h",
             "include/ios27/service_bridge.h",
             "src/darwin_shim.c"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "agent/phase27a-objc-integrated-startup-20261105",
+      "sha": "f416b9d16b2f8612464d5ba2e71877fcd77629c9",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/128",
+      "pr_number": 128,
+      "ci": "passing_checks",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 7,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "unclassified",
+          "source_files": 2,
+          "fixture_files": 3,
+          "additions": 739,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_phase27a_launch"
+          ],
+          "example_paths": [
+            "include/ios27/phase27a_startup.h",
+            "src/phase27a_startup.c",
+            "tests/phase27a-host-integration.cpp",
+            "tests/phase27a-startup.c"
           ]
         }
       ]
@@ -1325,17 +1325,17 @@
     ],
     "unclassified": [
       {
-        "branch": "agent/phase27a-objc-integrated-startup-20261105",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/128",
-        "source_files": 2,
-        "fixture_files": 3,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 12,
         "fixture_files": 9,
+        "ci": "passing_checks"
+      },
+      {
+        "branch": "agent/phase27a-objc-integrated-startup-20261105",
+        "url": "https://github.com/kallmek3nny/ios-27/pull/128",
+        "source_files": 2,
+        "fixture_files": 3,
         "ci": "passing_checks"
       }
     ]
@@ -2179,5 +2179,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-05T17:40:19Z"
+  "observed_at": "2026-11-06T00:43:08Z"
 }

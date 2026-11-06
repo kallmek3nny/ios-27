@@ -9,21 +9,21 @@
   "method": "only reviewed evidence merged into main can change confirmed target statuses",
   "open_pull_requests": [
     {
+      "number": 126,
+      "branch": "codex/cpu-limit-expiry",
+      "sha": "39031a9acc47ddb5b0262a92c9e3bf36b560051c",
+      "title": "feat(runtime): link named Darwin service shims for native four-argument clients",
+      "url": "https://github.com/kallmek3nny/ios-27/pull/126",
+      "updated_at": "2026-11-06T00:41:46Z",
+      "status": "unmerged: not counted"
+    },
+    {
       "number": 128,
       "branch": "agent/phase27a-objc-integrated-startup-20261105",
       "sha": "f416b9d16b2f8612464d5ba2e71877fcd77629c9",
       "title": "phase27a: isolated ObjC startup transaction and cross-PR integration gates",
       "url": "https://github.com/kallmek3nny/ios-27/pull/128",
       "updated_at": "2026-11-05T13:31:47Z",
-      "status": "unmerged: not counted"
-    },
-    {
-      "number": 126,
-      "branch": "codex/cpu-limit-expiry",
-      "sha": "fa30b4b6e301784779e5cd4b73ed425ee75b5f0d",
-      "title": "feat(runtime): link named Darwin service shims for native four-argument clients",
-      "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-05T03:05:11Z",
       "status": "unmerged: not counted"
     },
     {
@@ -502,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-05T17:40:15Z"
+  "observed_at": "2026-11-06T00:43:02Z"
 }

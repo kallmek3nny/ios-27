@@ -59,8 +59,8 @@ confirmed evidence is drawn only from merged main. the [live provenance snapshot
 
 main source: `2674b2b42c0b`
 
-- [PR #128](https://github.com/kallmek3nny/ios-27/pull/128) · incoming, not counted
 - [PR #126](https://github.com/kallmek3nny/ios-27/pull/126) · incoming, not counted
+- [PR #128](https://github.com/kallmek3nny/ios-27/pull/128) · incoming, not counted
 - [PR #112](https://github.com/kallmek3nny/ios-27/pull/112) · incoming, not counted
 - [PR #109](https://github.com/kallmek3nny/ios-27/pull/109) · incoming, not counted
 - [PR #111](https://github.com/kallmek3nny/ios-27/pull/111) · incoming, not counted
