@@ -30,7 +30,7 @@ kernel, dyld or Apple graphics compatibility.
 | Graphics | translate CoreAnimation, IOSurface and Metal operations into Android-compatible Vulkan/GPU surfaces | **not implemented** |
 | SystemUI | Apple's SpringBoard, backboardd, launchd, FrontBoard, SpringBoardServices, security and app lifecycle | **not implemented** |
 | Apps | launch signed or legally acquired app executables and their linked services without CPU emulation | **not implemented** |
-| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | trusted-fixture fork and fresh-address-space exec runners, guarded stacks, sealed exec payloads, mandatory seccomp, wall-clock supervision and kernel CPU bounds; **not** an untrusted-code sandbox or Android device validation |
+| Security | preserve Android SELinux/verified boot, isolate guest resources, protect host files and phone state | trusted-fixture fork and fresh-address-space exec runners, guarded stacks, sealed exec payloads, mandatory seccomp, wall-clock supervision and kernel CPU bounds; the original workload passed in the Android host on a 4 KiB S25+; **not** an untrusted-code sandbox or general Android compatibility |
 
 ## Concrete next technical milestone
 
@@ -63,8 +63,11 @@ record while clearing x4. An object-symbol allowlist and native callsite tests
 make that boundary auditable. General dynamic libSystem/dylib binding, more
 POSIX behavior and thread-local errno remain future boundaries.
 General Darwin startup, TLS, dyld/shared-cache loading, arm64e, graphics and
-official Apple services remain separate blockers. Native Linux CI also does
-not establish compatibility or isolation on the Galaxy S25+.
+official Apple services remain separate blockers. The
+[Android runtime host](android-runtime-host.md) now packages the original
+Mach-O workload into an APK; two fresh launches passed on the physical S25+
+with 4096-byte pages. This is native fixture execution evidence, not Apple
+framework compatibility or a general isolation guarantee.
 
 ### Longer-term audit task
 

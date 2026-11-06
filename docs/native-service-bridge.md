@@ -118,4 +118,7 @@ CTest includes:
 The trap/loop/raw-syscall modes are deliberately authored C/inline assembly
 test workloads. Service behavior comes from the original bounded userspace
 model, not Linux syscall passthrough. Native ARM64 Linux CI is required to
-validate the Mach-O bridge; Android/physical-device behavior remains unverified.
+validate the Mach-O bridge. The [Android runtime host](android-runtime-host.md)
+also passed two fresh launches of the named file/mapping/heap workload on a
+physical 4 KiB-page S25+. The Android smoke check covers normal execution;
+the fault/deadline modes above remain separately evidenced by native Linux CI.
