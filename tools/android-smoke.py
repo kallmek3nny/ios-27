@@ -7,6 +7,7 @@ Reports intentionally omit the device serial. Requires an authorized ADB device.
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import time
@@ -39,6 +40,14 @@ def main():
             raise RuntimeError('APK installation did not report success')
         for _ in range(2):
             adb('shell', 'am', 'force-stop', 'org.ios27.host')
+            # Wait for process death before removing the old result; a
+            # finishing previous worker must not publish a stale completion.
+            for attempt in range(20):
+                if adb('shell', 'pidof', 'org.ios27.host', check=False).returncode:
+                    break
+                time.sleep(0.1)
+            else:
+                raise RuntimeError('Previous app process did not stop')
             adb('shell', 'run-as', 'org.ios27.host', 'rm', '-f', 'files/last-result.txt')
             launch = adb('shell', 'am', 'start', '-W', '-n',
                          'org.ios27.host/.MainActivity', '--ez', 'run_fixture', 'true')
@@ -56,7 +65,8 @@ def main():
             text = result.stdout.decode('utf-8', errors='replace')
             report['runs'].append(text)
             if ('PASS: native ARM64 Mach-O returned 42.' not in text or
-                    'Launcher exit: 0' not in text or 'Fixture SHA-256 verified' not in text):
+                    'Launcher exit: 0' not in text or 'Fixture SHA-256 verified' not in text or
+                    not re.search(r'Static internal pointer rebases: [1-9][0-9]*', text)):
                 raise RuntimeError('Native execution failed: ' + text)
         report['passed'] = True
         if args.screenshot:

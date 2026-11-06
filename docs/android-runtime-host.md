@@ -5,6 +5,9 @@ launcher and services loader, and a compiler-produced ARM64 Mach-O workload.
 It exercises the named file, mapping and heap interfaces on Android. It contains
 no Apple binaries, general framework loader, graphics bridge or iOS system UI.
 
+Version 0.2.0 also requires a real internal global-pointer rebase in the workload
+and reports the actual fixup count. See [static pointer rebases](static-pointer-rebases.md).
+
 ## Build and install
 
 Requirements: Java 17+, Python 3, Android SDK platform 35, NDK 29.0.13846066,
@@ -50,7 +53,8 @@ python tools/android-smoke.py --serial DEVICE_SERIAL \
 
 This installs/updates only org.ios27.host, clears its previous result, and
 performs two cold app launches using a debug-only test extra. Each launch must
-produce a fresh hash-verified result with guest return 42 and launcher exit 0.
+produce a fresh hash-verified result with a positive internal rebase count,
+guest return 42 and launcher exit 0.
 The report records APK SHA-256, model, SDK, ABI, page size and both actual result
 texts, excluding device serial. The screenshot is optional. Reports/screenshots
 are local ignored artifacts; inspect before sharing.

@@ -133,3 +133,8 @@ setup refusal before readiness and recovery with the valid image. Existing
 native and CLI suites exercise the four-argument client with normal returns,
 startup vectors, faults, deadlines, blocked syscalls and repeated fresh state.
 The LLVM-installing CI workflow runs the named shim and metadata checks too.
+
+The compiled client now includes a volatile global string pointer. Its link
+requests chained fixups; the [static rebase path](static-pointer-rebases.md)
+relocates that pointer in a private staging copy before W^X sealing. The
+static-executable-rebases suite checks this real linked record separately.

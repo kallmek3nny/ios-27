@@ -69,6 +69,14 @@ Mach-O workload into an APK; two fresh launches passed on the physical S25+
 with 4096-byte pages. This is native fixture execution evidence, not Apple
 framework compatibility or a general isolation guarantee.
 
+The [internal pointer-rebase path](static-pointer-rebases.md) now applies
+validated data-only chained rebases in a private copy before image sealing;
+Android 0.2.0 exercises an actual global pointer on the phone. The
+[Apple runtime acquisition and inventory](apple-runtime-inputs.md) obtained
+the real iOS 27.0 ARM64 simulator archive and inspected SpringBoard and its
+framework dependencies. Those binaries are external local research inputs;
+they have not been executed or included in the APK.
+
 ### Longer-term audit task
 
 Use `ios27 audit-ios <file>` on a **legitimately obtained**, unencrypted

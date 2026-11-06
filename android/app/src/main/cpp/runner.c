@@ -1,4 +1,5 @@
 #include "ios27/process.h"
+#include "ios27/chained.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,6 +10,7 @@ int main(int argc, char **argv) {
     uint8_t *bytes;
     ios27_macho_info info;
     ios27_exec_layout layout;
+    ios27_chained_plan rebases;
     ios27_process_result result;
     ios27_process_options options = {2000};
     ios27_startup_context context = {0, NULL, NULL, NULL};
@@ -25,6 +27,10 @@ int main(int argc, char **argv) {
         printf("FAIL: Mach-O validation: %s\n", error); free(bytes); return 3;
     }
     printf("Mach-O validated; host page size %ld bytes\n", sysconf(_SC_PAGESIZE));
+    if (ios27_chained_static_plan(bytes, (size_t)length, &info, &rebases, error, sizeof(error))) {
+        printf("FAIL: static rebase plan: %s\n", error); free(bytes); return 3;
+    }
+    printf("Static internal pointer rebases: %zu\n", rebases.count);
 #if !defined(__aarch64__)
     puts("UNSUPPORTED: native guest execution requires ARM64. Metadata validation passed.");
     free(bytes); return 77;

@@ -4,6 +4,7 @@
 *.so
 *.a
 .DS_Store
+__pycache__/
 /android/.gradle/
 /android/.cxx/
 /android/local.properties

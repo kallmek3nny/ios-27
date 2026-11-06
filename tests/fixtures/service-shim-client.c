@@ -10,6 +10,8 @@ __attribute__((used))
 static const volatile int weights[8] = {3, 1, 4, 1, 5, 9, 2, 6};
 static volatile int initialized = 11;
 static volatile int zero_tail[64];
+/* Real linked pointer rebases must survive arbitrary native load addresses. */
+static const char *volatile heap_message = "named shim data";
 
 __attribute__((noinline))
 static int same(const char *a, const char *b) {
@@ -36,7 +38,7 @@ int main(int argc, char **argv, char **envp, char **apple) {
     if (open("/tmp/named-shim", IOS27_DARWIN_O_RDONLY) != -1 || *__error() != 2)
         return 232;
     fd = open("/tmp/named-shim", IOS27_DARWIN_O_CREAT | IOS27_DARWIN_O_RDWR, 0600);
-    if (fd != 3 || write(fd, "named shim data", 16) != 16 || lseek(fd, 0, 0) != 0)
+    if (fd != 3 || write(fd, heap_message, 16) != 16 || lseek(fd, 0, 0) != 0)
         return 233;
     if (read(fd, output, 16) != 16 || !same(output, "named shim data")) return 234;
     if (lseek(fd, -1, 2) != 15 || read(fd, output, 1) != 1 || output[0] != 0)

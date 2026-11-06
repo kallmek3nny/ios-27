@@ -1,5 +1,6 @@
 #include "ios27/macho.h"
 #include "ios27/service_bindings.h"
+#include "ios27/chained.h"
 #include "process_internal.h"
 
 #include <stdint.h>
@@ -309,6 +310,9 @@ static int run_image(const uint8_t *data, size_t size,
     uint8_t *mapping;
     ios27_guest_stack guest;
     ios27_service_binding_plan binding = {0};
+    ios27_chained_plan rebases;
+    uint8_t *staged_file = NULL;
+    const uint8_t *segment_file = data;
     if (!data || !info || !context ||
         (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
@@ -320,6 +324,14 @@ static int run_image(const uint8_t *data, size_t size,
     if (extension && ios27_service_binding_inspect(data, size, &binding,
                                                   error, error_size))
         return -1;
+    if (ios27_chained_static_plan(data, size, info, &rebases, error, error_size))
+        return -1;
+    if (binding.present) for (size_t i = 0; i < rebases.count; ++i) {
+        const ios27_chained_patch *p = &rebases.patches[i];
+        uint64_t address = info->segments[p->segment_index].vmaddr + p->segment_offset;
+        if (address < binding.vmaddr + IOS27_SERVICE_BINDING_BYTES && binding.vmaddr < address + 8u)
+            return fail(error, error_size, "rebase overlaps service binding record");
+    }
     if (prepare_guest_stack(context, info->stacksize,
                             layout.page_size, &guest, error, error_size))
         return -1;
@@ -328,6 +340,17 @@ static int run_image(const uint8_t *data, size_t size,
     if (mapping == MAP_FAILED) {
         release_guest_stack(&guest);
         return fail(error, error_size, "native VM reservation failed");
+    }
+    if (rebases.count) {
+        staged_file = mmap(NULL, size, PROT_NONE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (staged_file == MAP_FAILED) { staged_file = NULL; goto mapping_failed; }
+        if (mprotect(staged_file, size, PROT_READ | PROT_WRITE)) goto mapping_failed;
+        memcpy(staged_file, data, size);
+        if (ios27_chained_apply(staged_file, size, info, &rebases,
+                                 (uint64_t)(uintptr_t)mapping, NULL, NULL, error, error_size))
+            goto mapping_failed;
+        segment_file = staged_file;
     }
 
     for (size_t i = 0u; i < info->segment_count; ++i) {
@@ -349,12 +372,16 @@ static int run_image(const uint8_t *data, size_t size,
         if (mprotect(staging, bytes, PROT_READ | PROT_WRITE) != 0)
             goto mapping_failed;
         if (s->filesize != 0u)
-            memcpy(target, data + (size_t)s->fileoff, (size_t)s->filesize);
+            memcpy(target, segment_file + (size_t)s->fileoff, (size_t)s->filesize);
         if (s->initprot & 4u)
             __builtin___clear_cache((char *)target,
                                     (char *)(target + (size_t)s->filesize));
     }
     initialize_zerofill(data, &layout, mapping);
+    if (staged_file) {
+        if (munmap(staged_file, size)) goto mapping_failed;
+        staged_file = NULL;
+    }
     if (binding.present) {
         /* Preflight approved this exact RW/non-executable slot. Only the
          * private staged image receives the pointer; file bytes stay intact. */
@@ -421,6 +448,7 @@ static int run_image(const uint8_t *data, size_t size,
     return 0;
 
 mapping_failed:
+    if (staged_file) (void)munmap(staged_file, size);
     (void)munmap(mapping, layout.span); /* unwind the entire reservation */
     release_guest_stack(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");

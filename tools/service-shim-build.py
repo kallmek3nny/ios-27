@@ -90,7 +90,7 @@ def main():
     need(shim_exports == IMPORTS | {"_ios27_shim_binding"}, "unexpected shim export set")
     # Android NDK ships the unified LLVM linker rather than ld64.lld.
     flavor = ["-flavor", "darwin"] if pathlib.Path(args.linker).name in ("ld.lld", "ld.lld.exe") else []
-    common = [args.linker, *flavor, "-arch", "arm64", "-platform_version", "macos",
+    common = [args.linker, *flavor, "-fixup_chains", "-arch", "arm64", "-platform_version", "macos",
               "13.0", "13.0", "-e", "_main", "-fatal_warnings",
               "-segprot", "__DATA_CONST", "r--", "r--", "-o", str(args.out)]
     try:

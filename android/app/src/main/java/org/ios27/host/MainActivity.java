@@ -1,6 +1,7 @@
 package org.ios27.host;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Build;
 import android.graphics.Color;
@@ -41,7 +42,13 @@ public final class MainActivity extends Activity {
         output.setTypeface(Typeface.MONOSPACE); output.setTextIsSelectable(true); scroll.addView(output);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(root); run.setOnClickListener(v -> execute());
-        if (BuildConfig.DEBUG && getIntent().getBooleanExtra("run_fixture", false)) execute();
+        maybeRunFixture(getIntent());
+    }
+    private void maybeRunFixture(Intent intent) {
+        if (BuildConfig.DEBUG && intent.getBooleanExtra("run_fixture", false) && run.isEnabled()) execute();
+    }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent); setIntent(intent); maybeRunFixture(intent);
     }
     private byte[] asset(String name) throws IOException {
         try (InputStream in = getAssets().open(name); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
