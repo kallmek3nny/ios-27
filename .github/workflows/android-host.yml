@@ -17,6 +17,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - name: Install pinned native toolchain
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;29.0.13846066' 'cmake;3.22.1'
       - name: Build and lint both host ABIs
