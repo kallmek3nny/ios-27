@@ -8,12 +8,12 @@ candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `39031a9acc47` · ci: **passing_checks** · unmerged, not credited.
+head: `719bd8d555c3` · ci: **running** · unmerged, not credited.
 
 - **libSystem guest model (not dylib)**: 1 source files, 0 test/fixture files, +4/-2 lines
 - **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +55/-11 lines
   - candidate declarations: `ios27_native_handoff_extension`
-- **unclassified**: 12 source files, 9 test/fixture files, +1933/-32 lines
+- **unclassified**: 12 source files, 9 test/fixture files, +1939/-32 lines
   - candidate declarations: `ios27_native_handoff_extension`, `ios27_service_binding_inspect`, `ios27_service_bridge_initialize`
 
 ### [agent/phase27a-objc-integrated-startup-20261105](https://github.com/kallmek3nny/ios-27/pull/128)
