@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "500a4715465663eba66a2e7005543af7141b01d7",
+      "sha": "4c0f4cb716dc7aea546ffe845740c38383560840",
       "title": "feat(android): run supervised native Mach-O workloads from an APK",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-06T01:09:56Z",
+      "updated_at": "2026-11-06T01:54:51Z",
       "status": "unmerged: not counted"
     },
     {
@@ -502,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-06T01:16:57Z"
+  "observed_at": "2026-11-06T01:55:05Z"
 }
