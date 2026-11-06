@@ -4,3 +4,8 @@
 *.so
 *.a
 .DS_Store
+/android/.gradle/
+/android/.cxx/
+/android/local.properties
+/android/**/build/
+/android/**/.cxx/

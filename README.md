@@ -24,6 +24,12 @@
 
 **Development status:** check [verified capability progress](docs/PROGRESS.md), [live main provenance](docs/repo-status.json), and [technical ceilings](docs/CEILINGS.md). The legacy [HANDOFF.md](HANDOFF.md) may describe older phases; verify against the latest merged main.
 
+The [Android runtime host](docs/android-runtime-host.md) builds an installable
+APK and runs the original compiled ARM64 Mach-O workload on a phone. Its
+supervised file/mapping/heap workload has passed on an S25+; Apple UI remains
+unimplemented. Build with `android/gradlew.bat -p android :app:assembleDebug`
+on Windows or `bash android/gradlew -p android :app:assembleDebug` on Linux.
+
 **Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
 Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.

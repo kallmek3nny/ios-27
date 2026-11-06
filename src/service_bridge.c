@@ -3,7 +3,11 @@
 
 #include <stddef.h>
 
-static ios27_20e_ctx services;
+/* Named malloc returns page-offset pointers into guest[], so the backing
+ * arena must explicitly meet its 16-byte alignment contract on every ELF
+ * linker, rather than relying on incidental global placement. */
+_Alignas(16) static ios27_20e_ctx services;
+_Static_assert(offsetof(ios27_20e_ctx, guest) == 0u, "aligned arena base");
 
 _Static_assert(IOS27_SERVICE_ARENA_BYTES == IOS27_20E_BYTES, "service arena ABI");
 #if UINTPTR_MAX == UINT64_MAX

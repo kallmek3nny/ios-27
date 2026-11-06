@@ -16,6 +16,8 @@ int main(void) {
     uint8_t *span;
     int64_t fd;
     assert(api && api->version == 1u && api->size == sizeof(*api));
+    const void *arena = api->memory(32768u, 0u, 0u);
+    assert(arena && !((uintptr_t)arena & 15u));
     assert(api->error() == 0);
     assert(call3(api, UINT64_C(0x100000014), 0, 0, 0) == -1);
     assert(api->error() == IOS27_20E_ENOSYS);
