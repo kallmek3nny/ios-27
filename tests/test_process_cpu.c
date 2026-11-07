@@ -133,11 +133,24 @@ static int expiry_case(const native_program *program, rlim_t soft,
                         rlim_t hard, int stopped) {
     observation *seen = mmap(NULL, sizeof(*seen), PROT_READ | PROT_WRITE,
                               MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    uint64_t deadline = milliseconds() + 15000u;
+    const rlim_t bound = (rlim_t)IOS27_LOADER_CPU_LIMIT;
+    /* The supervisor's child lowers a hard limit above the bound, unlimited
+     * included, to it along with any soft limit above it, and keeps lower
+     * limits (clamp_cpu_limit in src/process.c). The soft limit never
+     * exceeds the hard one, so the guest runs under each inherited limit
+     * capped at the bound. Expiry takes guest_soft seconds of CPU time,
+     * which a loaded host may grant more slowly than wall-clock time. The
+     * one-second cases keep their 15-second watchdog, and each further
+     * second of CPU time adds two seconds to it. */
+    const rlim_t guest_soft = soft > bound ? bound : soft;
+    const rlim_t guest_hard = hard > bound ? bound : hard;
+    const uint64_t started = milliseconds();
+    uint64_t deadline = started + 15000u +
+        (guest_soft > 1u ? 2000u * ((uint64_t)guest_soft - 1u) : 0u);
     pid_t launcher = -1;
     int status = 0, guest = -1, success = 0, reaped = 0;
     int inherited_filters = filter_count(getpid());
-    const int expected = soft < hard ? SIGXCPU : SIGKILL;
+    const int expected = guest_soft < guest_hard ? SIGXCPU : SIGKILL;
     const char *mode = !program ? "fork callback" :
                         program->loader ? "native exec" : "native fork";
     if (seen == MAP_FAILED) return -1;
@@ -210,11 +223,9 @@ static int expiry_case(const native_program *program, rlim_t soft,
         REQUIRE(child > 0);
         {
             struct rlimit observed;
-            rlim_t bounded_hard = hard == RLIM_INFINITY ||
-                                 hard > (rlim_t)IOS27_LOADER_CPU_LIMIT ?
-                                 (rlim_t)IOS27_LOADER_CPU_LIMIT : hard;
             REQUIRE(!prlimit(child, RLIMIT_CPU, NULL, &observed));
-            REQUIRE(observed.rlim_cur == soft && observed.rlim_max == bounded_hard);
+            REQUIRE(observed.rlim_cur == guest_soft &&
+                    observed.rlim_max == guest_hard);
         }
         guest = (int)syscall(SYS_pidfd_open, child, 0u);
         REQUIRE(guest >= 0);
@@ -237,6 +248,11 @@ static int expiry_case(const native_program *program, rlim_t soft,
             pause_briefly();
         }
         REQUIRE(exited.revents & POLLIN);
+        /* The single-threaded guest was forked after started, so it cannot
+         * have used guest_soft seconds of CPU time any sooner. One second is
+         * allowed for tick-based CPU accounting. */
+        REQUIRE(guest_soft <= 1u ||
+                milliseconds() - started >= ((uint64_t)guest_soft - 1u) * 1000u);
         REQUIRE(launcher_alive(launcher));
         REQUIRE(!kill(launcher, SIGCONT));
     }
@@ -297,7 +313,13 @@ static int prepare_native(const char *path, native_program *program) {
 int main(int argc, char **argv) {
     struct rlimit original, after;
     native_program native = {0};
-    int status, failed = 0;
+    int status, failed = 0, default_clamp = 0;
+    const char *long_runs = getenv("IOS27_LONG_CPU_EXPIRY");
+    if (argc > 1 && !strcmp(argv[1], "--default-clamp")) {
+        default_clamp = 1;
+        --argc;
+        ++argv;
+    }
     if (argc != 1 && argc != 3) return 2;
 #if !defined(__aarch64__)
     if (argc == 3) {
@@ -305,9 +327,22 @@ int main(int argc, char **argv) {
         return 77;
     }
 #endif
+    /* Expiry of the default clamp takes IOS27_LOADER_CPU_LIMIT seconds of
+     * guest CPU time per case, so it runs only on request. */
+    if (default_clamp && (!long_runs || strcmp(long_runs, "1"))) {
+        puts("default CPU clamp expiry needs over a minute per case; "
+             "set IOS27_LONG_CPU_EXPIRY=1 to run it");
+        return 77;
+    }
     if (getrlimit(RLIMIT_CPU, &original)) return 1;
     if (original.rlim_max != RLIM_INFINITY && original.rlim_max < 2u) {
         fprintf(stderr, "CPU expiry tests require an inherited hard limit >= 2s\n");
+        return 77;
+    }
+    if (default_clamp && original.rlim_max != RLIM_INFINITY &&
+        original.rlim_max <= (rlim_t)IOS27_LOADER_CPU_LIMIT) {
+        fprintf(stderr, "default CPU clamp expiry requires an inherited hard "
+                "limit above %lus\n", (unsigned long)IOS27_LOADER_CPU_LIMIT);
         return 77;
     }
     if (prctl(PR_SET_CHILD_SUBREAPER, 1ul, 0ul, 0ul, 0ul)) return 1;
@@ -317,6 +352,16 @@ int main(int argc, char **argv) {
     }
     for (int mode = 0; mode < (argc == 3 ? 2 : 1) && !failed; ++mode) {
         native.loader = mode ? argv[2] : NULL;
+        if (default_clamp) {
+            /* Both inherited limits are above the bound, so the clamp lowers
+             * them to IOS27_LOADER_CPU_LIMIT seconds and the guest dies with
+             * SIGKILL at that hard limit. A running launcher's
+             * IOS27_PROCESS_MAX_TIMEOUT_MS deadline would end the guest first,
+             * so only the stopped-launcher case reaches the kernel bound. */
+            failed = expiry_case(argc == 3 ? &native : NULL,
+                                 original.rlim_max, original.rlim_max, 1);
+            continue;
+        }
         for (int stopped = 0; stopped <= 1 && !failed; ++stopped) {
             const native_program *program = argc == 3 ? &native : NULL;
             failed = expiry_case(program, 1u, 2u, stopped) ||
@@ -339,6 +384,8 @@ int main(int argc, char **argv) {
         return 1;
     errno = 0;
     if (waitpid(-1, &status, WNOHANG) != -1 || errno != ECHILD) return 1;
-    puts("live CPU expiry: soft/hard enforcement, paused launcher, inherited SIGXCPU reset, unchanged parent state and reaping passed");
+    puts(default_clamp ?
+         "live default CPU clamp expiry: limits above the bound lowered to it, SIGKILL at the bound with the launcher stopped, unchanged parent state and reaping passed" :
+         "live CPU expiry: soft/hard enforcement, paused launcher, inherited SIGXCPU reset, unchanged parent state and reaping passed");
     return 0;
 }

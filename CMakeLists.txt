@@ -299,6 +299,13 @@ if(IOS27_BUILD_TESTS)
         add_test(NAME contained-process-cpu-expiry COMMAND test_process_cpu)
         set_tests_properties(contained-process-cpu-expiry PROPERTIES
             TIMEOUT 80 SKIP_RETURN_CODE 77 LABELS "cpu-expiry")
+        # Expiry of the default IOS27_LOADER_CPU_LIMIT clamp takes over a
+        # minute of guest CPU time per case, so the default-clamp tests skip
+        # with 77 unless ctest runs with IOS27_LONG_CPU_EXPIRY=1.
+        add_test(NAME contained-process-cpu-default-clamp COMMAND test_process_cpu
+            --default-clamp)
+        set_tests_properties(contained-process-cpu-default-clamp PROPERTIES
+            TIMEOUT 150 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;cpu-default-clamp")
 
         add_executable(test_contained_macho tests/test_contained_macho.c)
         target_link_libraries(test_contained_macho PRIVATE ios27_core)
@@ -327,6 +334,13 @@ if(IOS27_BUILD_TESTS)
             "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-cpu-expiry PROPERTIES
             TIMEOUT 155 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;native-arm64")
+        # One opt-in fork case and one exec case, each over a minute of guest
+        # CPU time. x86_64 skips it like contained-native-cpu-expiry.
+        add_test(NAME contained-native-cpu-default-clamp COMMAND test_process_cpu
+            --default-clamp "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
+        set_tests_properties(contained-native-cpu-default-clamp PROPERTIES
+            TIMEOUT 285 SKIP_RETURN_CODE 77
+            LABELS "cpu-expiry;cpu-default-clamp;native-arm64")
         # The exec-mode cases run the project's own trusted loader build output.
         add_test(NAME contained-native-macho COMMAND test_contained_macho
             "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"

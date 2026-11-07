@@ -140,8 +140,8 @@ observer confirms the guest is still alive, stops only the launcher, observes
 guest death through a pidfd, then resumes the launcher and checks the signal
 report. The observer has a 15-second watchdog per case, cleans up failed
 process groups, reaps descendants and verifies its own CPU limits did not
-change. This tests enforcement of lower inherited limits; it does not wait
-61 seconds to exercise the default clamp's expiration.
+change. This tests enforcement of lower inherited limits; the opt-in
+default-clamp tests described below wait for the clamp's own expiration.
 
 Soft-limit cases deliberately start with `SIGXCPU` ignored and blocked in
 the launcher. The guest must still die with `SIGXCPU`, proving its inherited
@@ -152,6 +152,23 @@ with that larger or unlimited hard limit. The observer uses `prlimit` to
 confirm that the guest retained the soft limit and clamped only the hard
 limit, then verifies real soft-limit expiry. Hosts already restricted to a
 hard limit at or below the bound omit only this additional clamp case.
+
+`contained-process-cpu-default-clamp` and, on ARM64 Linux,
+`contained-native-cpu-default-clamp` exercise expiration of the default
+clamp itself. Each case needs over a minute of guest CPU time, so both
+tests report a skip unless CTest runs with `IOS27_LONG_CPU_EXPIRY=1`. They
+also skip on hosts whose inherited hard limit is already at or below the
+61-second bound. The launcher inherits that larger or unlimited limit as
+both its soft and hard limit, and the child lowers both to 61 seconds. A
+running launcher's 60-second deadline would end the guest first, so only
+the stopped-launcher case runs. The observer uses `prlimit` to confirm that
+the guest holds 61 seconds for both limits, stops the launcher, and
+requires guest death no sooner than 60 seconds after the case started.
+The resumed launcher must then report `SIGKILL` from the kernel rather
+than a timeout. The fork-callback test runs on any supported host; the
+native test runs the synthetic loop once through each public Mach-O
+runner. The watchdog adds two seconds for each second of expected CPU time
+beyond the first.
 
 `contained-native-cpu-expiry` repeats those cases through both public Mach-O
 runners on ARM64 Linux. It uses a temporary copy of the 16 KiB-compatible
