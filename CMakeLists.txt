@@ -198,6 +198,18 @@ if(IOS27_BUILD_TESTS)
     add_test(NAME compiled-darwin-got-load COMMAND test_compiled_darwin_got
              "${IOS27_DARWIN_DATA_CONSUMER}" "${IOS27_DARWIN_DATA_PROVIDER}")
 
+    # N t-ffb060: fixed-seed truncation and mutation sweep over the four
+    # Darwin MH_OBJECT inspectors, fed by the genuine fixtures built above.
+    add_executable(test_darwin_inspect_mutations tests/test_darwin_inspect_mutations.c)
+    target_link_libraries(test_darwin_inspect_mutations PRIVATE ios27_core)
+    target_compile_options(test_darwin_inspect_mutations PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_dependencies(test_darwin_inspect_mutations ios27_compiled_darwin_fixture
+        ios27_compiled_darwin_consumer ios27_compiled_darwin_got_objects)
+    add_test(NAME darwin-inspector-mutations COMMAND test_darwin_inspect_mutations
+             "${IOS27_DARWIN_FIXTURE}" "${IOS27_DARWIN_CONSUMER}"
+             "${IOS27_DARWIN_DATA_CONSUMER}" "${IOS27_DARWIN_DATA_PROVIDER}")
+    set_tests_properties(darwin-inspector-mutations PROPERTIES TIMEOUT 120)
+
     # Phase 15a: link original freestanding Darwin Clang MH_OBJECTs into a
     # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
     find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
