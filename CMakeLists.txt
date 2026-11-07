@@ -79,6 +79,11 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-virtual-paths COMMAND test_dyld_paths)
 
+    add_executable(test_dyld_paths_adversarial tests/test_dyld_paths_adversarial.c)
+    target_link_libraries(test_dyld_paths_adversarial PRIVATE ios27_core)
+    target_compile_options(test_dyld_paths_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME dyld-virtual-paths-adversarial COMMAND test_dyld_paths_adversarial)
+
     add_executable(test_exports tests/test_exports.c)
     target_link_libraries(test_exports PRIVATE ios27_core)
     target_compile_options(test_exports PRIVATE -Wall -Wextra -Werror -Wpedantic)
