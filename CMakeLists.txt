@@ -109,6 +109,12 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_mach_v2 PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME task-local-mach-names COMMAND test_mach_v2)
 
+    add_executable(test_mach_v2_props tests/test_mach_v2_props.c)
+    target_link_libraries(test_mach_v2_props PRIVATE ios27_core)
+    target_compile_options(test_mach_v2_props PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME mach-rights-properties COMMAND test_mach_v2_props)
+    set_tests_properties(mach-rights-properties PROPERTIES TIMEOUT 60)
+
     add_executable(test_mach_guest tests/test_mach_guest.c)
     target_link_libraries(test_mach_guest PRIVATE ios27_core)
     target_compile_options(test_mach_guest PRIVATE -Wall -Wextra -Werror -Wpedantic)
