@@ -1,4 +1,6 @@
 #include "ios27/macho.h"
+#include "ios27/service_bindings.h"
+#include "ios27/chained.h"
 #include "process_internal.h"
 
 #include <stdint.h>
@@ -77,6 +79,7 @@ __asm__(".text\n"
         "mov x1, x3\n"
         "mov x2, x4\n"
         "mov x3, x5\n"
+        "mov x4, x6\n"
         "mov sp, x10\n"
         "blr x9\n"
         "mov sp, x19\n"
@@ -87,11 +90,11 @@ __asm__(".text\n"
 
 extern int ios27_arm64_enter_main(uintptr_t entry, uintptr_t guest_sp,
                                   int argc, char **argv, char **envp,
-                                  char **apple);
+                                  char **apple, const void *extension);
 
-#define IOS27_GUEST_MAX_ARGS 128u
-#define IOS27_GUEST_MAX_STRING 4096u
-#define IOS27_GUEST_MAX_BYTES (64u * 1024u)
+#define IOS27_GUEST_MAX_ARGS IOS27_STARTUP_MAX_VECTOR
+#define IOS27_GUEST_MAX_STRING IOS27_STARTUP_MAX_STRING
+#define IOS27_GUEST_MAX_BYTES IOS27_STARTUP_MAX_STRINGS
 #define IOS27_GUEST_DEFAULT_STACK (1024u * 1024u)
 #define IOS27_GUEST_MAX_STACK (8u * 1024u * 1024u)
 
@@ -114,13 +117,14 @@ typedef struct {
     uintptr_t entry;
     ios27_guest_stack *stack;
     int argc;
+    const void *extension;
 } prepared_entry;
 
 static int enter_prepared(void *opaque) {
     const prepared_entry *call = opaque;
     return ios27_arm64_enter_main(call->entry, call->stack->sp, call->argc,
                                   call->stack->argv, call->stack->envp,
-                                  call->stack->apple);
+                                  call->stack->apple, call->extension);
 }
 
 /* All argument checks precede stack allocation and executable mappings. No
@@ -248,7 +252,8 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size);
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size);
 
 static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_macho_info *info,
@@ -258,7 +263,7 @@ static int run_executable_context(const uint8_t *data, size_t size,
                                  ios27_process_result *process_result, char *error,
                                  size_t error_size) {
     return run_image(data, size, info, context, exit_code, options,
-                     process_result, NULL, error, error_size);
+                     process_result, NULL, NULL, error, error_size);
 }
 
 /* Loader mode: identical preflight, guarded guest stack and final W^X
@@ -269,7 +274,22 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                          void (*handoff)(int (*entry)(void *), void *call),
                          char *error, size_t error_size) {
     if (!handoff) return fail(error, error_size, "null guest loader handoff");
-    return run_image(data, size, info, context, NULL, NULL, NULL, handoff,
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, NULL,
+                     error, error_size);
+}
+
+/* Opt-in services loader: bind the approved private shim record when present,
+ * otherwise retain the earlier x4 callback interface. Ordinary public C-main
+ * entrypoints neither bind a record nor supply an extension register. */
+int ios27_native_handoff_extension(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const void *extension,
+                                    void (*handoff)(int (*entry)(void *), void *call),
+                                    char *error, size_t error_size) {
+    if (!handoff || !extension)
+        return fail(error, error_size, "null guest loader handoff or extension");
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, extension,
                      error, error_size);
 }
 
@@ -278,16 +298,21 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size) {
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)context; (void)options; (void)process_result; (void)handoff;
+    (void)context; (void)options; (void)process_result; (void)handoff; (void)extension;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
+    ios27_service_binding_plan binding = {0};
+    ios27_chained_plan rebases;
+    uint8_t *staged_file = NULL;
+    const uint8_t *segment_file = data;
     if (!data || !info || !context ||
         (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
@@ -296,6 +321,17 @@ static int run_image(const uint8_t *data, size_t size,
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
         return -1;
+    if (extension && ios27_service_binding_inspect(data, size, &binding,
+                                                  error, error_size))
+        return -1;
+    if (ios27_chained_static_plan(data, size, info, &rebases, error, error_size))
+        return -1;
+    if (binding.present) for (size_t i = 0; i < rebases.count; ++i) {
+        const ios27_chained_patch *p = &rebases.patches[i];
+        uint64_t address = info->segments[p->segment_index].vmaddr + p->segment_offset;
+        if (address < binding.vmaddr + IOS27_SERVICE_BINDING_BYTES && binding.vmaddr < address + 8u)
+            return fail(error, error_size, "rebase overlaps service binding record");
+    }
     if (prepare_guest_stack(context, info->stacksize,
                             layout.page_size, &guest, error, error_size))
         return -1;
@@ -304,6 +340,17 @@ static int run_image(const uint8_t *data, size_t size,
     if (mapping == MAP_FAILED) {
         release_guest_stack(&guest);
         return fail(error, error_size, "native VM reservation failed");
+    }
+    if (rebases.count) {
+        staged_file = mmap(NULL, size, PROT_NONE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (staged_file == MAP_FAILED) { staged_file = NULL; goto mapping_failed; }
+        if (mprotect(staged_file, size, PROT_READ | PROT_WRITE)) goto mapping_failed;
+        memcpy(staged_file, data, size);
+        if (ios27_chained_apply(staged_file, size, info, &rebases,
+                                 (uint64_t)(uintptr_t)mapping, NULL, NULL, error, error_size))
+            goto mapping_failed;
+        segment_file = staged_file;
     }
 
     for (size_t i = 0u; i < info->segment_count; ++i) {
@@ -325,12 +372,29 @@ static int run_image(const uint8_t *data, size_t size,
         if (mprotect(staging, bytes, PROT_READ | PROT_WRITE) != 0)
             goto mapping_failed;
         if (s->filesize != 0u)
-            memcpy(target, data + (size_t)s->fileoff, (size_t)s->filesize);
+            memcpy(target, segment_file + (size_t)s->fileoff, (size_t)s->filesize);
         if (s->initprot & 4u)
             __builtin___clear_cache((char *)target,
                                     (char *)(target + (size_t)s->filesize));
     }
     initialize_zerofill(data, &layout, mapping);
+    if (staged_file) {
+        if (munmap(staged_file, size)) goto mapping_failed;
+        staged_file = NULL;
+    }
+    if (binding.present) {
+        /* Preflight approved this exact RW/non-executable slot. Only the
+         * private staged image receives the pointer; file bytes stay intact. */
+        uintptr_t pointer = (uintptr_t)extension;
+        _Static_assert(sizeof(pointer) == 8u, "ARM64 binding pointer width");
+        if (binding.vmaddr < layout.min_vmaddr ||
+            binding.vmaddr - layout.min_vmaddr > layout.span ||
+            IOS27_SERVICE_BINDING_BYTES >
+                layout.span - (size_t)(binding.vmaddr - layout.min_vmaddr))
+            goto mapping_failed;
+        memcpy(mapping + (size_t)(binding.vmaddr - layout.min_vmaddr) + 8u,
+               &pointer, sizeof(pointer));
+    }
     /*
      * Commit the complete image only after every segment has been populated.
      * No guest code is executable during staging, and all pages get their
@@ -353,7 +417,10 @@ static int run_image(const uint8_t *data, size_t size,
     {
         uintptr_t entry = (uintptr_t)(mapping +
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        prepared_entry call = {entry, &guest, context->argc};
+        /* Bound named shims use their private slot and a normal four-argument
+         * entry. Keep x4 only for the earlier explicit callback-table client. */
+        prepared_entry call = {entry, &guest, context->argc,
+                              binding.present ? NULL : extension};
         ios27_process_result completed = {0};
         int result = 0, status = 0;
         if (handoff) {
@@ -381,6 +448,7 @@ static int run_image(const uint8_t *data, size_t size,
     return 0;
 
 mapping_failed:
+    if (staged_file) (void)munmap(staged_file, size);
     (void)munmap(mapping, layout.span); /* unwind the entire reservation */
     release_guest_stack(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");

@@ -71,6 +71,24 @@ int main(void) {
     memcpy(broken,thin,thin_len);
     memset(broken+56,'x',thin_len-56u);
     assert(ios27_inventory_parse(broken,thin_len,&inv,err,sizeof(err))!=0);
+    {
+        static uint8_t large[32u+(IOS27_MAX_IMPORTS+1u)*64u];
+        memset(large,0,sizeof(large));
+        le32(large,0xfeedfacfu); le32(large+4,0x0100000cu); le32(large+12,6u);
+        for (unsigned i=0;i<=IOS27_MAX_IMPORTS;++i) {
+            uint8_t *cmd=large+32u+(size_t)i*64u;
+            le32(cmd,0x0cu); le32(cmd+4,64u); le32(cmd+8,24u);
+            (void)snprintf((char *)cmd+24,40,"/usr/lib/test%03u.dylib",i);
+        }
+        le32(large+16,228u); le32(large+20,228u*64u);
+        assert(!ios27_inventory_parse(large,32u+228u*64u,&inv,err,sizeof(err)));
+        assert(inv.imports_count==228u && !ios27_inventory_native_ui_ready(&inv));
+        le32(large+16,IOS27_MAX_IMPORTS); le32(large+20,IOS27_MAX_IMPORTS*64u);
+        assert(!ios27_inventory_parse(large,32u+IOS27_MAX_IMPORTS*64u,&inv,err,sizeof(err)));
+        assert(inv.imports_count==IOS27_MAX_IMPORTS);
+        le32(large+16,IOS27_MAX_IMPORTS+1u); le32(large+20,(IOS27_MAX_IMPORTS+1u)*64u);
+        assert(ios27_inventory_parse(large,sizeof(large),&inv,err,sizeof(err))==-1);
+    }
     puts("inventory tests passed");
     return 0;
 }

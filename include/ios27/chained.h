@@ -48,6 +48,15 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
                         ios27_chained_plan *out,
                         char *error, size_t error_size);
 
+/* Native executable subset: only internal, unauthenticated data rebases.
+ * No imports or bind pointers; duplicate/overlapping and zero-fill targets
+ * are refused. Empty/absent chains produce an empty plan. Failure clears it.
+ * Call executable_layout as well to validate complete image geometry. */
+int ios27_chained_static_plan(const uint8_t *file, size_t size,
+                               const ios27_macho_info *info,
+                               ios27_chained_plan *out,
+                               char *error, size_t error_size);
+
 /*
  * Resolve all imports and relocations before writing a single byte. 'copy'
  * must be a caller-owned COPY of the original file bytes. 'load_base' is

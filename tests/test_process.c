@@ -895,13 +895,14 @@ static int scheduling_policy_available(long policy) {
 #define TEST_LARGE_CPU ((rlim_t)(2u * IOS27_LOADER_CPU_LIMIT))
 #define TEST_SMALL_CPU ((rlim_t)(IOS27_LOADER_CPU_LIMIT / 2u))
 
-/* Set both RLIMIT_CPU limits of the calling process to limit and read them
- * back. Without privilege a hard limit can only be lowered (getrlimit(2)),
- * so a current hard limit below limit fails. The RLIMIT_STACK soft limit is
- * first lowered to IOS27_LOADER_STACK_LIMIT when it is above it, which also
- * needs no privilege, so the loader's earlier stack read-back cannot be the
- * check that fails a CPU-limit case. */
-static int hold_cpu_limit(rlim_t limit) {
+/* Set the RLIMIT_CPU soft and hard limits of the calling process to soft
+ * and hard and read them back. Without privilege a hard limit can only be
+ * lowered (getrlimit(2)), so a current hard limit below hard fails, and
+ * setrlimit refuses a soft limit above the hard limit. The RLIMIT_STACK soft
+ * limit is first lowered to IOS27_LOADER_STACK_LIMIT when it is above it,
+ * which also needs no privilege, so the loader's earlier stack read-back
+ * cannot be the check that fails a CPU-limit case. */
+static int hold_cpu_limits(rlim_t soft, rlim_t hard) {
     struct rlimit stack, cpu;
     if (getrlimit(RLIMIT_STACK, &stack)) return -1;
     if (stack.rlim_cur == RLIM_INFINITY ||
@@ -910,12 +911,18 @@ static int hold_cpu_limit(rlim_t limit) {
         if (setrlimit(RLIMIT_STACK, &stack)) return -1;
     }
     if (getrlimit(RLIMIT_CPU, &cpu) ||
-        (cpu.rlim_max != RLIM_INFINITY && cpu.rlim_max < limit))
+        (cpu.rlim_max != RLIM_INFINITY && cpu.rlim_max < hard))
         return -1;
-    cpu.rlim_cur = limit;
-    cpu.rlim_max = limit;
+    cpu.rlim_cur = soft;
+    cpu.rlim_max = hard;
     if (setrlimit(RLIMIT_CPU, &cpu) || getrlimit(RLIMIT_CPU, &cpu)) return -1;
-    return cpu.rlim_cur == limit && cpu.rlim_max == limit ? 0 : -1;
+    return cpu.rlim_cur == soft && cpu.rlim_max == hard ? 0 : -1;
+}
+
+/* Set both RLIMIT_CPU limits of the calling process to limit, as
+ * hold_cpu_limits does. */
+static int hold_cpu_limit(rlim_t limit) {
+    return hold_cpu_limits(limit, limit);
 }
 
 /* Try hold_cpu_limit in a throwaway child. Hosts whose RLIMIT_CPU hard

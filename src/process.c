@@ -901,7 +901,9 @@ int ios27_run_executable_exec(const char *loader_path,
     if (ios27_macho_executable_layout(data, size, info, (size_t)page,
                                       &layout, error, error_size))
         return -1;
-    loader = open(loader_path, O_RDONLY | O_CLOEXEC);
+    /* A FIFO must reach the regular-file check without waiting for a
+     * writer. Opening happens before the supervised child's deadline. */
+    loader = open(loader_path, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
     if (loader < 0)
         return fail(error, error_size, "guest loader open failed");
     if (fstat(loader, &st) || !S_ISREG(st.st_mode)) {
