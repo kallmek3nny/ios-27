@@ -47,6 +47,9 @@ UNREADABLE = "could not read file"
 REJECTED = "mach-o rejected"
 EXEC_FAILED = "cannot execute exec fixture"
 ENTERED = "entry returned"
+# Per-case subprocess limit in seconds. The slowest ASan+UBSan case took
+# 0.008 s, and a few hangs must not use up the CTest TIMEOUT of 120 s.
+CASE_TIMEOUT = 5
 
 failures = []
 executed = 0
@@ -87,14 +90,15 @@ def check(name, arguments, codes, text=None, forbid=(), cwd=None,
     command = [argument if isinstance(argument, bytes)
                else os.fsencode(argument) for argument in arguments]
     try:
-        result = subprocess.run(command, capture_output=True, timeout=20,
+        result = subprocess.run(command, capture_output=True,
+                                timeout=CASE_TIMEOUT,
                                 stdin=subprocess.DEVNULL, cwd=cwd,
                                 check=False)
         code = result.returncode
         stdout = result.stdout
         output = (result.stdout + result.stderr).decode("utf-8", "replace")
     except subprocess.TimeoutExpired as error:
-        code, output = None, "<no exit within 20 s>"
+        code, output = None, f"<no exit within {CASE_TIMEOUT} s>"
         stdout = error.stdout or b""
     problems = []
     if code not in codes:
@@ -109,9 +113,13 @@ def check(name, arguments, codes, text=None, forbid=(), cwd=None,
             problems.append(f"unexpected {marker!r}")
     if problems:
         summary = "; ".join(problems)
-        failures.append(f"{name}: {summary}\n"
-                        f"    argv: {describe(arguments)}\n"
-                        f"    output: {output.strip()[:600]}")
+        failure = (f"{name}: {summary}\n"
+                   f"    argv: {describe(arguments)}\n"
+                   f"    output: {output.strip()[:600]}")
+        failures.append(failure)
+        # Print at once: if later cases hang until the CTest TIMEOUT kills
+        # this script, the failures already found still reach the log.
+        print(failure, file=sys.stderr, flush=True)
 
 
 def full_vectors():
@@ -355,10 +363,9 @@ def main():
                 native_boundaries(base, fixture, mode)
         loader_paths(executable, loader, fixture, directory, cases, native)
     if failures:
+        # check() already printed each failure to stderr as it was recorded.
         print(f"exec CLI adversarial: {len(failures)} of {executed} cases "
-              "failed", file=sys.stderr)
-        for failure in failures:
-            print(failure, file=sys.stderr)
+              "failed", file=sys.stderr, flush=True)
         return 1
     print(f"exec CLI adversarial: {executed} fail-closed cases passed; "
           + ("native runner boundaries and recovery passed" if native
