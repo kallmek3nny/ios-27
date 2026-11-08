@@ -1,6 +1,7 @@
 package org.ios27.host;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Build;
@@ -14,10 +15,14 @@ import java.util.concurrent.*;
 import org.json.JSONObject;
 
 public final class MainActivity extends Activity {
+    private static final String DIRTYFRAG_PACKAGE = "df.root";
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private volatile Process running;
     private TextView status, output;
-    private Button run;
+    private LinearLayout session;
+    private ScrollView picker;
+    private Button run, openSession, openDirtyFrag;
+    private boolean sessionStarted;
     private int dp(int n) { return Math.round(n * getResources().getDisplayMetrics().density); }
     private TextView text(String value, int size, int color) {
         TextView v = new TextView(this); v.setText(value); v.setTextSize(size); v.setTextColor(color);
@@ -30,22 +35,89 @@ public final class MainActivity extends Activity {
         root.setOnApplyWindowInsetsListener((v, insets) -> {
             v.setPadding(dp(24), dp(16) + insets.getSystemWindowInsetTop(), dp(24), dp(16) + insets.getSystemWindowInsetBottom()); return insets;
         });
-        root.addView(text("ios-27 / RUNTIME", 14, Color.rgb(113,205,194)));
-        root.addView(text("Native execution host", 28, Color.WHITE));
-        root.addView(text("An Android foundation for Darwin runtime research. Apple’s system UI and frameworks are not running yet.", 16, Color.LTGRAY));
-        root.addView(text(Build.MODEL + " · " + Build.SUPPORTED_ABIS[0] + " · Android " + Build.VERSION.RELEASE, 13, Color.LTGRAY));
-        status = text("Ready to test", 20, Color.WHITE); root.addView(status);
-        run = new Button(this); run.setText("Run bundled ARM64 workload"); run.setAllCaps(false); root.addView(run);
-        root.addView(text("Runs only our original bundled test program in a supervised child process. Checks virtual files, memory mappings and heap allocation. No Apple binaries or network access.", 14, Color.LTGRAY));
+        LinearLayout home = new LinearLayout(this);
+        home.setOrientation(LinearLayout.VERTICAL);
+        picker = new ScrollView(this);
+        picker.addView(home);
+        root.addView(picker);
+        home.addView(text("ios-27 / GUEST SYSTEMS", 14, Color.rgb(113,205,194)));
+        home.addView(text("Choose a session", 28, Color.WHITE));
+        home.addView(text(Build.MODEL + " · " + Build.SUPPORTED_ABIS[0] + " · Android " + Build.VERSION.RELEASE, 13, Color.LTGRAY));
+        home.addView(text("Darwin runtime check", 20, Color.WHITE));
+        home.addView(text("Run the bundled ARM64 Mach-O workload in a supervised child process.", 16, Color.LTGRAY));
+        openSession = new Button(this);
+        openSession.setText("Start runtime session");
+        openSession.setAllCaps(false);
+        openSession.setOnClickListener(v -> {
+            showSession(true);
+            if (!sessionStarted) execute();
+        });
+        home.addView(openSession);
+        home.addView(text("Apple system UI · Unavailable", 20, Color.WHITE));
+        home.addView(text("SpringBoard needs Apple frameworks and system services that the current runtime cannot start.", 16, Color.LTGRAY));
+        home.addView(text("Optional host setup", 20, Color.WHITE));
+        home.addView(text("DirtyFrag is a separate app for temporary root on compatible Android builds. The runtime check does not require it.", 16, Color.LTGRAY));
+        openDirtyFrag = new Button(this);
+        openDirtyFrag.setAllCaps(false);
+        openDirtyFrag.setOnClickListener(v -> {
+            Intent launch = getPackageManager().getLaunchIntentForPackage(DIRTYFRAG_PACKAGE);
+            if (launch != null) {
+                try {
+                    startActivity(launch);
+                    return;
+                } catch (ActivityNotFoundException ignored) {
+                    // The companion may have been removed since the package lookup.
+                }
+            }
+            updateDirtyFragButton();
+        });
+        home.addView(openDirtyFrag);
+
+        session = new LinearLayout(this);
+        session.setOrientation(LinearLayout.VERTICAL);
+        root.addView(session, new LinearLayout.LayoutParams(-1, 0, 1));
+        session.addView(text("ios-27 / RUNTIME SESSION", 14, Color.rgb(113,205,194)));
+        status = text("Ready to test", 20, Color.WHITE);
+        session.addView(status);
+        run = new Button(this);
+        run.setText("Run checks again");
+        run.setAllCaps(false);
+        session.addView(run);
+        Button returnToPicker = new Button(this);
+        returnToPicker.setText("Return to session picker");
+        returnToPicker.setAllCaps(false);
+        returnToPicker.setOnClickListener(v -> showSession(false));
+        session.addView(returnToPicker);
         ScrollView scroll = new ScrollView(this);
         output = text("The test result will appear here.", 13, Color.rgb(196,219,231));
         output.setTypeface(Typeface.MONOSPACE); output.setTextIsSelectable(true); scroll.addView(output);
-        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        session.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(root); run.setOnClickListener(v -> execute());
+        showSession(false);
         maybeRunFixture(getIntent());
     }
+    private void showSession(boolean visible) {
+        picker.setVisibility(visible ? View.GONE : View.VISIBLE);
+        session.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        updateDirtyFragButton();
+    }
+    private void updateDirtyFragButton() {
+        boolean available = getPackageManager().getLaunchIntentForPackage(DIRTYFRAG_PACKAGE) != null;
+        openDirtyFrag.setText(available ? "Open DirtyFrag" : "DirtyFrag app unavailable");
+        openDirtyFrag.setEnabled(available);
+    }
+    @Override public void onBackPressed() {
+        if (session.getVisibility() == View.VISIBLE) showSession(false);
+        else super.onBackPressed();
+    }
     private void maybeRunFixture(Intent intent) {
-        if (BuildConfig.DEBUG && intent.getBooleanExtra("run_fixture", false) && run.isEnabled()) execute();
+        if (BuildConfig.DEBUG && intent.getBooleanExtra("run_fixture", false) && run.isEnabled()) {
+            showSession(true);
+            execute();
+        }
     }
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent); setIntent(intent); maybeRunFixture(intent);
@@ -61,7 +133,11 @@ public final class MainActivity extends Activity {
         }
     }
     private void execute() {
-        run.setEnabled(false); status.setText("Running native checks…"); output.setText("");
+        sessionStarted = true;
+        run.setEnabled(false);
+        openSession.setText("View running session");
+        status.setText("Running native checks…");
+        output.setText("");
         worker.execute(() -> {
             String report; boolean passed = false;
             try {
@@ -88,7 +164,13 @@ public final class MainActivity extends Activity {
             finally { Process p = running; if (p != null) p.destroy(); running = null; }
             try (FileOutputStream out = new FileOutputStream(new File(getFilesDir(), "last-result.txt"))) { out.write(report.getBytes(java.nio.charset.StandardCharsets.UTF_8)); } catch (IOException ignored) {}
             final String result = report; final boolean success = passed;
-            runOnUiThread(() -> { if (!isDestroyed()) { output.setText(result); status.setText(success ? "Native workload passed" : "Execution not verified"); run.setEnabled(true); } });
+            runOnUiThread(() -> {
+                if (isDestroyed()) return;
+                output.setText(result);
+                status.setText(success ? "Native workload passed" : "Execution not verified");
+                run.setEnabled(true);
+                openSession.setText("View runtime result");
+            });
         });
     }
     @Override public void onDestroy() {

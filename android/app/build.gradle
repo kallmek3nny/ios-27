@@ -1,11 +1,14 @@
 plugins { id 'com.android.application' }
 
+def sessionPreview = providers.gradleProperty('sessionPreview').isPresent()
+
 android {
     namespace 'org.ios27.host'
     compileSdk 35
     ndkVersion '29.0.13846066'
     defaultConfig {
-        applicationId 'org.ios27.host'
+        applicationId sessionPreview ? 'org.ios27.host.sessionpreview' : 'org.ios27.host'
+        manifestPlaceholders = [appLabel: sessionPreview ? 'ios-27 Session Preview' : 'ios-27 Runtime']
         minSdk 30
         targetSdk 35
         versionCode 2
