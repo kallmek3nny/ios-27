@@ -499,4 +499,14 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_objc20_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME objc20-adversarial COMMAND test_objc20_adversarial)
     set_tests_properties(objc20-adversarial PROPERTIES TIMEOUT 60)
+
+    # X t-2cfb43: host-side adversarial tests for the phase 19e libSystem BSD
+    # trap dispatch. ios27_core does not build src/libsystem_user.c, so link it
+    # directly.
+    add_executable(test_libsystem_user_adversarial tests/test_libsystem_user_adversarial.c
+        src/libsystem_user.c)
+    target_include_directories(test_libsystem_user_adversarial PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_libsystem_user_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME libsystem-user-adversarial COMMAND test_libsystem_user_adversarial)
+    set_tests_properties(libsystem-user-adversarial PROPERTIES TIMEOUT 60)
 endif()
