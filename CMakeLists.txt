@@ -477,4 +477,14 @@ if(IOS27_BUILD_TESTS)
         add_test(NAME exec-cli-adversarial COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_exec_cli_adversarial.py" "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>" "${IOS27_CONTAINED_STARTUP}")
         set_tests_properties(exec-cli-adversarial PROPERTIES TIMEOUT 120 SKIP_RETURN_CODE 77)
     endif()
+
+    # Z1 t-8da2da: host-side adversarial tests for the phase 20 ObjC substrate.
+    # ios27_core does not build the objc20 sources, so link them directly.
+    add_executable(test_objc20_adversarial tests/test_objc20_adversarial.c
+        src/objc20a_reader.c src/objc20a_registry.c src/objc20b_dispatch.c
+        src/objc20c_lifetime.c)
+    target_include_directories(test_objc20_adversarial PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_objc20_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME objc20-adversarial COMMAND test_objc20_adversarial)
+    set_tests_properties(objc20-adversarial PROPERTIES TIMEOUT 60)
 endif()
