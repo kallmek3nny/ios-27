@@ -107,6 +107,12 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_exports PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-export-trie COMMAND test_exports)
 
+    add_executable(test_parser_mutation tests/test_parser_mutation.c)
+    target_link_libraries(test_parser_mutation PRIVATE ios27_core)
+    target_compile_options(test_parser_mutation PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME parser-mutations COMMAND test_parser_mutation)
+    set_tests_properties(parser-mutations PROPERTIES TIMEOUT 120)
+
     add_executable(test_binds tests/test_binds.c)
     target_link_libraries(test_binds PRIVATE ios27_core)
     target_compile_options(test_binds PRIVATE -Wall -Wextra -Werror -Wpedantic)
