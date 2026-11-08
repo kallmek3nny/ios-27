@@ -80,6 +80,12 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_inventory PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME macho-inventory COMMAND test_inventory)
 
+    add_executable(test_inventory_census tests/test_inventory_census.c)
+    target_link_libraries(test_inventory_census PRIVATE ios27_core)
+    target_compile_options(test_inventory_census PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME macho-inventory-census COMMAND test_inventory_census)
+    set_tests_properties(macho-inventory-census PROPERTIES TIMEOUT 120)
+
     add_executable(test_dyld_paths tests/test_dyld_paths.c)
     target_link_libraries(test_dyld_paths PRIVATE ios27_core)
     target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
