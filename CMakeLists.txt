@@ -509,4 +509,12 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_libsystem_user_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME libsystem-user-adversarial COMMAND test_libsystem_user_adversarial)
     set_tests_properties(libsystem-user-adversarial PROPERTIES TIMEOUT 60)
+
+    # Y t-ce4d0f: deterministic mutation tests for the bounded guest-memory
+    # Mach boundary in src/mach_guest.c, driven host-side with no native exec.
+    add_executable(test_mach_guest_mutation tests/test_mach_guest_mutation.c)
+    target_link_libraries(test_mach_guest_mutation PRIVATE ios27_core)
+    target_compile_options(test_mach_guest_mutation PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME mach-guest-mutations COMMAND test_mach_guest_mutation)
+    set_tests_properties(mach-guest-mutations PROPERTIES TIMEOUT 120)
 endif()
