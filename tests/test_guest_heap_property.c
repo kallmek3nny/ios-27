@@ -296,6 +296,11 @@ static void op_realloc(unsigned index, uint64_t size) {
         after.reserved = round_pages(size);
         after.pattern = before.pattern;
         CHECK(holds(&after, before.size));
+        /* Bytes past the old size sit on newly mapped pages, which the shim
+         * model zeros (src/darwin_shim.c:240). include/ios27/darwin_shim.h
+         * does not document this, so the check relies on that model. */
+        for (uint64_t i = before.size; i < size; ++i)
+            CHECK(after.pointer[i] == 0);
         claim(after.pointer, after.reserved, PAGE_HEAP);
         release(before.pointer, before.reserved, PAGE_HEAP);
         live[index] = after;
