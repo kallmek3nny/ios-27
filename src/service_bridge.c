@@ -1,5 +1,6 @@
 #include "service_bridge_internal.h"
 #include "ios27/libsystem20e_services.h"
+#include "ios27/phase27b_syscalls.h"
 
 #include <stddef.h>
 
@@ -24,7 +25,7 @@ static int64_t service_call(uint64_t number, uint64_t a0, uint64_t a1,
         services.guest_errno = IOS27_20E_ENOSYS;
         return -1;
     }
-    return ios27_20e_syscall(&services, (uint32_t)number, a0, a1, a2, a3, a4, a5);
+    return ios27_27b_syscall(&services, (uint32_t)number, a0, a1, a2, a3, a4, a5);
 }
 
 static void *service_memory(uint64_t offset, uint64_t length, uint32_t write_access) {
