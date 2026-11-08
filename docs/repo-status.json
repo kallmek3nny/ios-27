@@ -297,17 +297,7 @@
       "status": "unmerged: not counted"
     }
   ],
-  "ahead_branches": [
-    {
-      "branch": "codex/oneos-session-flow",
-      "sha": "2d739ea8c285feb7c83bb204488195a509cc2a7f",
-      "ahead_by": 21,
-      "behind_by": 0,
-      "last_commit_at": "2026-11-08T02:28:42Z",
-      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
-      "status": "unmerged: not counted"
-    }
-  ],
+  "ahead_branches": [],
   "recent_merged_pull_requests": [
     {
       "number": 125,
@@ -512,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-08T02:40:17Z"
+  "observed_at": "2026-11-08T06:32:57Z"
 }
