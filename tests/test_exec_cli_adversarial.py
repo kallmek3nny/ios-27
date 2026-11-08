@@ -70,11 +70,20 @@ def describe(arguments):
     return " ".join(shown)
 
 
-def check(name, arguments, codes, text=None, forbid=(), cwd=None):
-    """Run one CLI case; record every mismatch instead of stopping."""
+def check(name, arguments, codes, text=None, forbid=(), cwd=None,
+          quiet=None):
+    """Run one CLI case; record every mismatch instead of stopping.
+
+    In process modes src/main.c writes only its success line to stdout,
+    so a case that cannot exit 0 must leave stdout empty: any byte there
+    is partial output. quiet=None derives this from codes, quiet=False
+    keeps a case lenient and quiet=True forces the check.
+    """
     global executed
     executed += 1
     codes = (codes,) if isinstance(codes, int) else tuple(codes)
+    if quiet is None:
+        quiet = 0 not in codes
     command = [argument if isinstance(argument, bytes)
                else os.fsencode(argument) for argument in arguments]
     try:
@@ -82,13 +91,17 @@ def check(name, arguments, codes, text=None, forbid=(), cwd=None):
                                 stdin=subprocess.DEVNULL, cwd=cwd,
                                 check=False)
         code = result.returncode
+        stdout = result.stdout
         output = (result.stdout + result.stderr).decode("utf-8", "replace")
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as error:
         code, output = None, "<no exit within 20 s>"
+        stdout = error.stdout or b""
     problems = []
     if code not in codes:
         expected = " or ".join(str(value) for value in codes)
         problems.append(f"exit {code}, expected {expected}")
+    if quiet and stdout:
+        problems.append(f"{len(stdout)} unexpected stdout bytes")
     if text is not None and text not in output:
         problems.append(f"missing {text!r}")
     for marker in (*forbid, *SANITIZER_MARKERS):
@@ -288,11 +301,12 @@ def loader_paths(executable, loader, fixture, directory, cases, native):
     if true:
         wrong.append(("true(1)", pathlib.Path(true)))
     # Executable but wrong loaders never report readiness: a setup failure
-    # or the deadline is acceptable, a guest result never is.
+    # or the deadline is acceptable, a guest result never is. A foreign
+    # loader may write its own stdout, so those bytes stay unchecked.
     for label, path in wrong:
         check(f"wrong loader {label}",
               [*base, path, fixture, "--unsafe", "--timeout-ms", "500"],
-              (1, 124), forbid=(ENTERED,))
+              (1, 124), forbid=(ENTERED,), quiet=False)
     if native:
         check("exec recovery after hostile loaders",
               [*base, loader, fixture, "--unsafe"], 0,
