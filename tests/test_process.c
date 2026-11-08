@@ -1093,6 +1093,16 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
     no_children();
 }
 
+/* GCC defines __SANITIZE_ADDRESS__ and Clang reports the address_sanitizer
+ * feature when the build uses -fsanitize=address. */
+#if defined(__SANITIZE_ADDRESS__)
+#define IOS27_TEST_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define IOS27_TEST_ASAN 1
+#endif
+#endif
+
 int main(int argc, char **argv) {
     ios27_process_options options = {1000u};
     ios27_process_result result;
@@ -1102,6 +1112,17 @@ int main(int argc, char **argv) {
     int no_new_privs = prctl(PR_GET_NO_NEW_PRIVS, 0ul, 0ul, 0ul, 0ul);
     int seccomp = prctl(PR_GET_SECCOMP, 0ul, 0ul, 0ul, 0ul);
     pid_t parent = getpid();
+#if defined(IOS27_TEST_ASAN)
+    /* The ASan runtime calls sigaltstack inside the forked guest before a
+     * noreturn call. The mandatory guest seccomp filter forbids that syscall
+     * and kills the guest, so the RETURNED assertions below cannot hold. The
+     * filter stays as it is and the suite reports a CTest skip instead.
+     * UBSan-only builds still run it. */
+    fputs("contained-process-supervisor: skipped under AddressSanitizer; "
+          "the mandatory guest seccomp filter kills the ASan runtime at "
+          "sigaltstack (see docs/contained-native-process.md)\n", stderr);
+    return 77;
+#endif
     assert(no_new_privs >= 0 && seccomp >= 0);
     for (size_t i = 0u; i < sizeof(values) / sizeof(values[0]); ++i) {
         int value = values[i];

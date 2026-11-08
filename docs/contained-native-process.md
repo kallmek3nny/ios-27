@@ -130,6 +130,13 @@ seccomp answer fakes the child's clamp, the read-back must fail setup with
 `EPERM` for the unlimited and large limits, and must accept the small
 limit.
 
+AddressSanitizer builds report `contained-process-supervisor` and
+`contained-service-callbacks` as skipped (exit 77). In the forked guest, the
+ASan hook that runs before a noreturn call invokes `sigaltstack`, and the
+mandatory filter correctly kills the guest with `SIGSYS` before it can
+return. The filter is not widened for sanitizer builds. Plain and
+UBSan-only builds still run both suites.
+
 `contained-process-cpu-expiry` separately exercises real kernel CPU expiry.
 Each throwaway launcher inherits a one-second soft limit and either a
 two-second hard limit (expecting `SIGXCPU`) or a one-second hard limit

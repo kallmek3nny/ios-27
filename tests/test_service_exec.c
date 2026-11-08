@@ -136,13 +136,37 @@ static void native_cases(const uint8_t *bytes, size_t size,
 }
 #endif
 
+/* GCC defines __SANITIZE_ADDRESS__ and Clang reports the address_sanitizer
+ * feature when the build uses -fsanitize=address. */
+#if defined(__SANITIZE_ADDRESS__)
+#define IOS27_TEST_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define IOS27_TEST_ASAN 1
+#endif
+#endif
+
 int main(int argc, char **argv) {
     size_t size;
     uint8_t *bytes;
     ios27_macho_info info;
     ios27_exec_layout layout;
     char error[192];
-    if (argc == 1) { callbacks(); return 0; }
+    if (argc == 1) {
+#if defined(IOS27_TEST_ASAN)
+        /* The ASan runtime calls sigaltstack inside the forked guest before
+         * a noreturn call. The mandatory guest seccomp filter forbids that
+         * syscall and kills the guest, so no callback case can return. The
+         * filter stays as it is and the suite reports a CTest skip instead.
+         * UBSan-only builds still run it. */
+        fputs("contained-service-callbacks: skipped under AddressSanitizer; "
+              "the mandatory guest seccomp filter kills the ASan runtime at "
+              "sigaltstack (see docs/contained-native-process.md)\n", stderr);
+        return 77;
+#endif
+        callbacks();
+        return 0;
+    }
     if (argc == 2 && !strcmp(argv[1], "--no-linker")) {
         puts("named Mach-O service shim requires LLVM ld64.lld");
         return 77;

@@ -296,7 +296,7 @@ if(IOS27_BUILD_TESTS)
         # The Landlock cases exec the project's own trusted loader build output.
         add_test(NAME contained-process-supervisor COMMAND test_process
             "$<TARGET_FILE:ios27-loader>")
-        set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15)
+        set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
 
         add_executable(test_process_cpu tests/test_process_cpu.c)
         target_link_libraries(test_process_cpu PRIVATE ios27_core)
@@ -429,7 +429,7 @@ if(IOS27_BUILD_TESTS)
         add_test(NAME contained-native-services-fallback COMMAND test_service_exec
             "${IOS27_SERVICE_FALLBACK_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
             "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
-        set_tests_properties(contained-service-callbacks PROPERTIES TIMEOUT 15)
+        set_tests_properties(contained-service-callbacks PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
         set_tests_properties(contained-native-services contained-native-services-fallback
             PROPERTIES TIMEOUT 30
             SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
