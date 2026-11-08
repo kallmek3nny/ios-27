@@ -335,8 +335,10 @@ def native_boundaries(base, fixture, mode):
 
 
 def main():
-    if not sys.platform.startswith("linux"):
-        print("exec CLI adversarial: skipped, requires a Linux host")
+    # Python 3.13+ reports "android" on Android, which runs a Linux kernel.
+    if not sys.platform.startswith(("linux", "android")):
+        print("exec CLI adversarial: skipped, requires a Linux or Android "
+              "host")
         return 77
     if len(sys.argv) != 4:
         raise SystemExit("expected ios27, trusted ios27-loader and "
