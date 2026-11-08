@@ -77,6 +77,7 @@ static const char *ctx_fixture = "";
 static const char *ctx_kind = "";
 static size_t ctx_pos;
 static unsigned long long ctx_value;
+static size_t ctx_cap = ERROR_CAP; /* error_cap of the current call */
 static uint64_t rng_state;
 
 static void die(const char *what) {
@@ -85,9 +86,10 @@ static void die(const char *what) {
 }
 
 static void fail(int which, const char *what) {
-    fprintf(stderr, "FAIL %s on %s mutant %s at %zu value 0x%llx: %s\n",
+    fprintf(stderr,
+            "FAIL %s on %s mutant %s at %zu value 0x%llx error_cap %zu: %s\n",
             inspector_names[which], ctx_fixture, ctx_kind, ctx_pos, ctx_value,
-            what);
+            ctx_cap, what);
     exit(1);
 }
 
@@ -176,6 +178,7 @@ static int inspect_one(int which, const uint8_t *input, size_t size,
                        char *error, size_t cap) {
     int rc = -1;
 
+    ctx_cap = cap;
     memset(error, 'Z', cap);
     switch (which) {
     case INSPECT_OBJECT: {
