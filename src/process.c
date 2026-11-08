@@ -709,20 +709,28 @@ static int supervise(const child_plan *plan,
         (void)close(pipefd[0]);
         return fail(error, error_size, "native child fork failed");
     }
+    /* Each pass reads the clock before waitpid, never after it. A timeout is
+     * then reported only for a child that waitpid found not yet exited at or
+     * after the deadline. In the opposite order, a launcher stopped between
+     * the two calls could resume past the deadline after the guest had
+     * already died, then kill and reap that dead guest and report TIMED_OUT
+     * instead of its real outcome, such as the RLIMIT_CPU SIGKILL. */
     for (;;) {
         uint64_t current, remaining;
-        pid_t waited = waitpid(child, &status, WNOHANG);
-        if (waited == child) break;
-        if (waited < 0 && errno != EINTR) {
-            /* A competing reaper may have consumed it: do not signal a PID
-             * which is no longer our waitable child. */
-            (void)close(pipefd[0]);
-            return fail(error, error_size, "native child wait failed");
-        }
+        pid_t waited;
         if (now_ms(&current)) {
             (void)kill_and_reap(child, &status);
             (void)close(pipefd[0]);
             return fail(error, error_size, "monotonic child clock failed");
+        }
+        waited = waitpid(child, &status, WNOHANG);
+        if (waited == child) break;
+        if (waited < 0) {
+            if (errno == EINTR) continue;
+            /* A competing reaper may have consumed it: do not signal a PID
+             * which is no longer our waitable child. */
+            (void)close(pipefd[0]);
+            return fail(error, error_size, "native child wait failed");
         }
         if (current >= deadline) {
             int reaped = kill_and_reap(child, &status);
