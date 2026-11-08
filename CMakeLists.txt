@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/service_bindings.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/service_bindings.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c src/codesign.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
@@ -87,6 +87,12 @@ if(IOS27_BUILD_TESTS)
     set_tests_properties(macho-inventory-census PROPERTIES TIMEOUT 120)
 
     add_executable(test_dyld_paths tests/test_dyld_paths.c)
+    add_executable(test_codesign tests/test_codesign.c)
+    target_link_libraries(test_codesign PRIVATE ios27_core)
+    target_compile_options(test_codesign PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME macho-codesign COMMAND test_codesign)
+    set_tests_properties(macho-codesign PROPERTIES TIMEOUT 120)
+
     target_link_libraries(test_dyld_paths PRIVATE ios27_core)
     target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-virtual-paths COMMAND test_dyld_paths)
