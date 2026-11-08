@@ -4,7 +4,7 @@
 
 **purple dashed = active unmerged branch; blue solid = recently merged source awaiting compatibility audit.** neither is a verified Apple ABI function or application. the verified green/amber counts remain strictly controlled by reviewed main catalogs.
 
-candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
+candidate branches with mapped changes: **33** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
@@ -224,6 +224,18 @@ head: `9da58aba0436` · ci: **passing_checks** · unmerged, not credited.
 head: `298e5e8bcf28` · ci: **passing_checks** · unmerged, not credited.
 
 - **libsystem_pthread**: 1 source files, 5 test/fixture files, +358/-11 lines
+
+### [codex/oneos-session-flow](https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow)
+
+head: `2d739ea8c285` · ci: **not_checked** · unmerged, not credited.
+
+- **dyld / image graph**: 2 source files, 0 test/fixture files, +84/-0 lines
+  - candidate declarations: `ios27_chained_static_plan`
+- **libSystem guest model (not dylib)**: 1 source files, 0 test/fixture files, +4/-2 lines
+- **mach-o parser and native loader**: 4 source files, 0 test/fixture files, +102/-20 lines
+  - candidate declarations: `ios27_native_handoff_extension`
+- **unclassified**: 12 source files, 12 test/fixture files, +2175/-32 lines
+  - candidate declarations: `ios27_native_handoff_extension`, `ios27_service_binding_inspect`, `ios27_service_bridge_initialize`
 
 ## recently merged agent source changes · not yet compatibility-reviewed
 

@@ -4,8 +4,8 @@
   "repository": "kallmek3nny/ios-27",
   "main_source_sha": "2674b2b42c0b016defc7e9c1dc17b1156ade81eb",
   "method": "unmerged source diffs and recently merged source evidence; neither auto-promotes compatibility",
-  "candidates_checked": 32,
-  "candidate_count": 32,
+  "candidates_checked": 33,
+  "candidate_count": 33,
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
@@ -1088,6 +1088,77 @@
           ]
         }
       ]
+    },
+    {
+      "branch": "codex/oneos-session-flow",
+      "sha": "2d739ea8c285feb7c83bb204488195a509cc2a7f",
+      "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
+      "pr_number": null,
+      "ci": "not_checked",
+      "status": "candidate changes, NOT verified API support",
+      "files_checked": 70,
+      "possibly_truncated": false,
+      "groups": [
+        {
+          "group_id": "dyld-engine",
+          "source_files": 2,
+          "fixture_files": 0,
+          "additions": 84,
+          "deletions": 0,
+          "symbols_preview": [
+            "ios27_chained_static_plan"
+          ],
+          "example_paths": [
+            "include/ios27/chained.h",
+            "src/chained.c"
+          ]
+        },
+        {
+          "group_id": "libsystem-host-model",
+          "source_files": 1,
+          "fixture_files": 0,
+          "additions": 4,
+          "deletions": 2,
+          "symbols_preview": [],
+          "example_paths": [
+            "include/ios27/libsystem20e_services.h"
+          ]
+        },
+        {
+          "group_id": "mach-o",
+          "source_files": 4,
+          "fixture_files": 0,
+          "additions": 102,
+          "deletions": 20,
+          "symbols_preview": [
+            "ios27_native_handoff_extension"
+          ],
+          "example_paths": [
+            "include/ios27/inventory.h",
+            "include/ios27/macho.h",
+            "src/macho.c",
+            "src/runner.c"
+          ]
+        },
+        {
+          "group_id": "unclassified",
+          "source_files": 12,
+          "fixture_files": 12,
+          "additions": 2175,
+          "deletions": 32,
+          "symbols_preview": [
+            "ios27_native_handoff_extension",
+            "ios27_service_binding_inspect",
+            "ios27_service_bridge_initialize"
+          ],
+          "example_paths": [
+            "include/ios27/darwin_shim.h",
+            "include/ios27/service_bindings.h",
+            "include/ios27/service_bridge.h",
+            "src/darwin_shim.c"
+          ]
+        }
+      ]
     }
   ],
   "groups": {
@@ -1181,6 +1252,13 @@
         "source_files": 2,
         "fixture_files": 5,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "codex/oneos-session-flow",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
+        "source_files": 2,
+        "fixture_files": 0,
+        "ci": "not_checked"
       }
     ],
     "libsystem-c": [
@@ -1199,6 +1277,13 @@
         "source_files": 1,
         "fixture_files": 0,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "codex/oneos-session-flow",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
+        "source_files": 1,
+        "fixture_files": 0,
+        "ci": "not_checked"
       }
     ],
     "libsystem-pthread": [
@@ -1275,6 +1360,13 @@
         "source_files": 2,
         "fixture_files": 3,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "codex/oneos-session-flow",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
+        "source_files": 4,
+        "fixture_files": 0,
+        "ci": "not_checked"
       }
     ],
     "metal": [
@@ -1360,6 +1452,13 @@
         "source_files": 2,
         "fixture_files": 3,
         "ci": "passing_checks"
+      },
+      {
+        "branch": "codex/oneos-session-flow",
+        "url": "https://github.com/kallmek3nny/ios-27/tree/codex%2Foneos-session-flow",
+        "source_files": 12,
+        "fixture_files": 12,
+        "ci": "not_checked"
       }
     ]
   },
@@ -2202,5 +2301,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-06T01:56:17Z"
+  "observed_at": "2026-11-08T02:40:22Z"
 }
