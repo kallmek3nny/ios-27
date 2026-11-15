@@ -13,13 +13,14 @@
     {"directory": "src/external/darlingserver", "path": "patches/0010-shared-cache-signatures.patch"},
     {"directory": "src/external/xnu", "path": "patches/0011-simulator-kernel-callbacks.patch"},
     {"directory": "src/external/libsystem", "path": "patches/0012-libsystem-callback-tag.patch"},
-    {"directory": "src/external/dyld", "path": "patches/0013-simulator-host-lookup.patch"}
+    {"directory": "src/external/dyld", "path": "patches/0013-simulator-host-lookup.patch"},
+    {"directory": ".", "path": "patches/0014-executable-boot-hash.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
     "src/external/bootstrap_cmds/CMakeLists.txt": "012db57f098c718d77ae199c40d59b7e169a6133a7bce2686f4137e9bfbf4f53",
     "src/CMakeLists.txt": "78d4e356f4723c910dcd0fa4d9a5307e1152d92acf201061d73bd579977972a5",
-    "src/startup/mldr/CMakeLists.txt": "4146823735844d7e3cc93da4061c0e1599a4b0502b090f4f747e5d5a8c68eacf",
+    "src/startup/mldr/CMakeLists.txt": "53c668f340f25c6c7fe98e8ad4daa7a5f65b0b2f8913f260e9186a02cd652a69",
     "src/startup/mldr/elfcalls/elfcalls.c": "1218473f6cd6e3d88ad52872bd1377425e50cbceab3e0d6dd33d68b698a408f0",
     "src/startup/mldr/elfcalls/posix_shm.c": "4250623eeb6e929175977664c1bb37455c11076a120d33759637cc4d8739a48d",
     "src/startup/mldr/elfcalls/posix_shm.h": "44f399e52c5ef11e3e7fa7afdfc74df05aabf1dead47b62a04e2f24d9ae64cb3",
@@ -40,6 +41,11 @@
     "src/external/xnu/libsyscall/wrappers/_libkernel_init.c": "2bcd1ad3b200d2a3ed54015bd49b7c13be398036f3589b4a7a8517279e7cce02",
     "src/external/xnu/libsyscall/wrappers/darling_kernel_callbacks.h": "435cfe03aee3f046ed89acebebec9e6a25a402d7c38de065ca81ac963eb62481",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c": "2e3b56329d3df7a0a9e4a52d711805292bad4ff10fcccbcc28f565d32c917826",
-    "src/external/libsystem/init.c": "7ca5b303261dc5573cfc11b084e6aedefdfaa9f56319c753d37e4fe1b9940730"
+    "src/external/libsystem/init.c": "7ca5b303261dc5573cfc11b084e6aedefdfaa9f56319c753d37e4fe1b9940730",
+    "src/startup/mldr/boot_hash.h": "0eb9fd1ff41eb56c807bcae4c04448ced34dd64c20563afea0a38f9fd1dbe009",
+    "src/startup/mldr/boot_hash.c": "a2f319a54fe5d4b2467173f9f6f063754e6de9754d72c865eca08ff6c61a3684",
+    "src/startup/mldr/loader.h": "45b20816a8367f008abe04b738b8b8cf5a2634a443fcd94fdd176b5c9c8b9f10",
+    "src/startup/mldr/mldr.c": "662e0c6da3fc6637e4a06999ac808ed21d26b8f2ed5e7a3799000235851fd51b",
+    "src/startup/mldr/stack.c": "74e9ae9e7caa55c1e21a4244061b3a8cd78cb1d74d3fa2baf423036c6a5b8bcc"
   }
 }

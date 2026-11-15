@@ -35,6 +35,7 @@ git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0011-simulator-kernel-callbacks.patch
 git -C /path/to/pinned/darling/src/external/libsystem apply /path/to/ios-27/integration/darling/patches/0012-libsystem-callback-tag.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0013-simulator-host-lookup.patch
+git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0014-executable-boot-hash.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -132,6 +133,28 @@ and C-library initialization calls on the S25+. The next observed stop is
 Apple's allocator requiring the missing `executable_boothash` metadata.
 `tests/native-trace.c` is the optional native ARM64 Linux fault tracer used
 headlessly for register and stack evidence; it does not emulate instructions.
+
+Patch fourteen supplies the allocator's opaque `executable_boothash` metadata.
+The native loader combines a random, prefix-private key, the Linux boot UUID
+and the executable's registered CDHash using HMAC-SHA256, then exposes the
+first 20 bytes as 40 hex digits. The value is stable for the same executable,
+prefix and boot, and changes when any of those identities changes. This
+implements the documented bucketing-identity properties; it does not claim
+byte-for-byte identity with XNU's salted-hash implementation. The key is kept
+in the prefix's mode-0600 `.darling-boothash-key`, with locking across processes.
+
+```sh
+python3 integration/darling/tests/boot-hash.py --source /path/to/pinned/darling
+# Optional: --host-prefix /path/to/private/usr
+```
+
+The host test passes under ASan/UBSan with an independent HMAC vector,
+boot/executable changes, and eight concurrent processes creating one key.
+The same contract also passes natively on the S25+ with one explicit skip:
+Android denies creating the hardlink rejection fixture (covered by the host
+run). The native Darwin guest still exits zero. Apple's allocator now returns
+from initialization; the next captured fault is `dyld_sim` reading its thread
+pointer from Darwin's `TPIDRRO_EL0`, which Linux leaves zero.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
