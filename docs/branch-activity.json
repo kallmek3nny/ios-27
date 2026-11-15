@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "3271a9cf41fe92290a7917910afeecbefdc36792",
+      "sha": "36beb73ef53cd8ac362b0614ebfe2e9f6ecac56e",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -39,26 +39,12 @@
         {
           "group_id": "libsystem-host-model",
           "source_files": 1,
-          "fixture_files": 2,
-          "additions": 940,
+          "fixture_files": 0,
+          "additions": 4,
           "deletions": 2,
           "symbols_preview": [],
           "example_paths": [
-            "include/ios27/libsystem20e_services.h",
-            "tests/test_libsystem21_adversarial.c",
-            "tests/test_libsystem_user_adversarial.c"
-          ]
-        },
-        {
-          "group_id": "mach-ipc",
-          "source_files": 0,
-          "fixture_files": 2,
-          "additions": 1359,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/test_mach_guest_mutation.c",
-            "tests/test_mach_v2_props.c"
+            "include/ios27/libsystem20e_services.h"
           ]
         },
         {
@@ -82,22 +68,11 @@
           ]
         },
         {
-          "group_id": "objc-host-model",
-          "source_files": 0,
-          "fixture_files": 1,
-          "additions": 578,
-          "deletions": 0,
-          "symbols_preview": [],
-          "example_paths": [
-            "tests/test_objc20_adversarial.c"
-          ]
-        },
-        {
           "group_id": "unclassified",
           "source_files": 20,
-          "fixture_files": 26,
-          "additions": 9153,
-          "deletions": 49,
+          "fixture_files": 19,
+          "additions": 6707,
+          "deletions": 28,
           "symbols_preview": [
             "ios27_codesign_parse",
             "ios27_guest_stack_prepare",
@@ -1238,7 +1213,7 @@
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 1,
-        "fixture_files": 2,
+        "fixture_files": 0,
         "ci": "passing_checks"
       }
     ],
@@ -1288,13 +1263,6 @@
     ],
     "mach-ipc": [
       {
-        "branch": "codex/cpu-limit-expiry",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 0,
-        "fixture_files": 2,
-        "ci": "passing_checks"
-      },
-      {
         "branch": "phase22e-mach-ipc-mig",
         "url": "https://github.com/kallmek3nny/ios-27/pull/87",
         "source_files": 2,
@@ -1335,13 +1303,6 @@
       }
     ],
     "objc-host-model": [
-      {
-        "branch": "codex/cpu-limit-expiry",
-        "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 0,
-        "fixture_files": 1,
-        "ci": "passing_checks"
-      },
       {
         "branch": "agent/phase25a-objc-linked-metadata-20261030",
         "url": "https://github.com/kallmek3nny/ios-27/pull/105",
@@ -1406,7 +1367,7 @@
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 20,
-        "fixture_files": 26,
+        "fixture_files": 19,
         "ci": "passing_checks"
       },
       {
@@ -2257,5 +2218,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-15T19:00:06Z"
+  "observed_at": "2026-11-15T19:24:12Z"
 }

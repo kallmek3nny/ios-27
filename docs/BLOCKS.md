@@ -78,13 +78,13 @@ the purple dashed outlines identify components with new source or test changes o
 - **libsystem_pthread**: 6 unmerged candidate branch(es), not counted
 - **mach-o parser and native loader**: 3 unmerged candidate branch(es), not counted
 - **dyld / image graph**: 6 unmerged candidate branch(es), not counted
-- **mach ipc model**: 2 unmerged candidate branch(es), not counted
+- **mach ipc model**: 1 unmerged candidate branch(es), not counted
 - **bsd syscall boundary**: 4 unmerged candidate branch(es), not counted
 - **guest security / isolation**: 1 unmerged candidate branch(es), not counted
 - **CoreAnimation / compositor**: 1 unmerged candidate branch(es), not counted
 - **Metal / IOSurface / gpu**: 1 unmerged candidate branch(es), not counted
 - **Android host integration**: 1 unmerged candidate branch(es), not counted
-- **ObjC host prototype (not Apple libobjc)**: 8 unmerged candidate branch(es), not counted
+- **ObjC host prototype (not Apple libobjc)**: 7 unmerged candidate branch(es), not counted
 - **libSystem guest model (not dylib)**: 1 unmerged candidate branch(es), not counted
 
 ## recently merged source changes awaiting audit
