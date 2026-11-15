@@ -1,4 +1,4 @@
-#include "ios27/process.h"
+#include "runner_modes.h"
 #include "ios27/chained.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,10 +12,23 @@ int main(int argc, char **argv) {
     ios27_exec_layout layout;
     ios27_chained_plan rebases;
     ios27_process_result result;
-    ios27_process_options options = {2000};
+    ios27_process_options options = {0};
     ios27_startup_context context = {0, NULL, NULL, NULL};
+    const char *guest_argv[1] = {NULL};
+    const runner_mode *mode = &modes[0];
     char error[256] = {0};
-    if (argc != 3) return 2;
+    if (argc != 3 && argc != 4) return 2;
+    if (argc == 4) {
+        mode = runner_mode_find(argv[3]);
+        if (!mode) { puts("FAIL: unknown supervised mode"); return 2; }
+    }
+    options.timeout_ms = mode->timeout_ms;
+    if (mode->guest_argument) {
+        guest_argv[0] = mode->guest_argument;
+        context.argc = 1;
+        context.argv = guest_argv;
+    }
+    printf("Supervised mode: %s, deadline %u ms\n", mode->name, (unsigned)mode->timeout_ms);
     file = fopen(argv[1], "rb");
     if (!file) { puts("FAIL: cannot open packaged fixture"); return 2; }
     if (fseek(file, 0, SEEK_END) || (length = ftell(file)) < 32 || length > 2097152 || fseek(file, 0, SEEK_SET)) { fclose(file); return 2; }
@@ -39,9 +52,9 @@ int main(int argc, char **argv) {
         printf("FAIL: supervised loader setup: %s\n", error); free(bytes); return 4;
     }
     free(bytes);
-    if (result.outcome != IOS27_PROCESS_RETURNED || result.exit_code != 42) {
-        printf("FAIL: outcome=%d return=%d signal=%d\n", result.outcome, result.exit_code, result.signal); return 5;
+    if (!runner_mode_passed(mode, &result)) {
+        printf("FAIL: %s mode outcome=%d return=%d signal=%d\n", mode->name, result.outcome, result.exit_code, result.signal); return 5;
     }
-    puts("PASS: native ARM64 Mach-O returned 42. Named file, mapping and heap checks passed under supervision.");
+    puts(mode->pass);
     return 0;
 }

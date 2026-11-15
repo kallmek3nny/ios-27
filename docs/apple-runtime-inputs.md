@@ -68,13 +68,50 @@ read-only inventory capacity was raised from 128 to 512 declared imports, with
 228/512/513 boundary tests, so the real framework can be inventoried in full.
 Execution eligibility was not widened by that inventory change.
 
-## What blocks launching the UI
+## SpringBoard dependency and binding audit
 
-The first executable import is _SBSystemAppMain from the actual SpringBoard
-framework; it is not among the project's original service shim exports. The
-native executable path still refuses unresolved imports and framework
-dependencies. General dyld/shared-cache loading, Objective-C/Swift initialization,
-Mach/XNU-facing services, window/input lifecycle and CoreAnimation/Metal/IOSurface
-integration remain required. The new internal pointer-rebase support removes
-one narrower loader gap, demonstrated only by the original bundled workload.
-None of these observations constitutes a SpringBoard launch or rendered Apple UI.
+`tools/apple-cache-audit.py` reads both parts of the 24A434 simulator cache,
+validates the subcache UUID and mapping ranges, and uses cache VM addresses to
+find Mach-O headers and export tries, including `__LINKEDIT` in another part.
+It walks the declared dependency graph and audits generic ARM64 chained bind
+sites in standalone images. A local RuntimeRoot supplies binaries that Apple
+ships outside the cache.
+
+```sh
+python tools/apple-cache-audit.py \
+  --cache /path/to/dyld_sim_shared_cache_arm64 \
+  --app /path/to/SpringBoard.app/SpringBoard \
+  --dylib /path/to/SpringBoard.framework/SpringBoard \
+  --runtime-root /path/to/RuntimeRoot
+```
+
+The main cache and explicit dylib alone left 48 required paths unresolved.
+Extracting 66 additional standalone dylibs from the same simulator disk image
+closed the required load-command graph. The final walk found 1,465 cached
+images and 67 standalone dylibs, plus the executable. Four missing paths
+were reachable only through weak or lazy dependencies. The reachable images
+declare 557 initializer slots and 106 Objective-C non-lazy list entries.
+These are metadata counts. They do not predict initializer order or runtime
+registrations.
+
+| Static check | Measured result |
+| --- | --- |
+| App entry | `LC_MAIN` at file offset `0x618`; its branch stub loads the single chained bind slot at image offset `0x18008`. |
+| App import | Ordinal 1 names SpringBoard.framework. Its export trie places `_SBSystemAppMain` at `__TEXT` offset `0x8afc`. |
+| SpringBoard.framework fixups | 44,605 bind sites and 189,335 rebase sites. Its 9,741 chained import entries have 9,739 static export matches and two process-wide weak lookups. |
+| All standalone images | 116,080 bind sites and 389,626 rebase sites. Of 41,706 chained import entries used by these sites, 41,694 have static export matches and 12 need process-wide weak lookup. |
+| Executable preflight | The current runner rejects the real app as `not a freestanding LC_MAIN executable` with both 4 KiB and 16 KiB mapping granules. |
+
+The audit matches exports by install name, including self binds and reexports.
+It reports process-wide lookups separately and does not apply fixups or load
+executable pages. Cache slide application, dynamic loads, initializer order,
+and Objective-C/Swift registration remain outside the audit.
+
+The first instructions of `_SBSystemAppMain` dereference libSystem's
+`___stack_chk_guard`. The initial call sequence also reaches
+`_objc_unsafeClaimAutoreleasedReturnValue` and `_objc_autoreleasePoolPush`.
+A live launch therefore needs a process loader that maps the cache and
+standalone dependencies, applies fixups and initializes those runtimes before
+transferring control to the app. Mach/XNU-facing services, window/input
+lifecycle and CoreAnimation/Metal/IOSurface integration are separate runtime
+requirements. SpringBoard has not entered Apple code or rendered a frame here.

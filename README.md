@@ -32,6 +32,15 @@ on Windows or `bash android/gradlew -p android :app:assembleDebug` on Linux.
 
 **Target: official iOS user interface and apps running natively above Android, NOT an iOS-style launcher.** Liquid Glass/SpringBoard/Apple frameworks are not working yet. The feasibility of the complete target remains unknown.
 
+The [SpringBoard loading checkpoint](docs/springboard-loading.md) loads the
+real simulator cache and 68 standalone images into private **non-executable**
+host memory and verifies the staged entry binding. It does not start
+SpringBoard or render an iOS frame; runtime initialization and graphics remain blockers.
+
+The [platform memory bridge](docs/platform-memory-bridge.md) supplies twelve
+original memory/string routines, verified natively on the S25+, with explicit
+standalone and shared-cache pointer override planning for the real graph.
+
 Experimental ARM64 Darwin/iOS **userspace compatibility research** on Android/Linux, with the Samsung Galaxy S25+ as a target. This project does not install iOS, bypass Android verified boot, or alter the device boot chain.
 
 ## Device safety first

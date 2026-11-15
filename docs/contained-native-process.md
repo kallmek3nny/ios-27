@@ -134,8 +134,15 @@ AddressSanitizer builds report `contained-process-supervisor` and
 `contained-service-callbacks` as skipped (exit 77). In the forked guest, the
 ASan hook that runs before a noreturn call invokes `sigaltstack`, and the
 mandatory filter correctly kills the guest with `SIGSYS` before it can
-return. The filter is not widened for sanitizer builds. Plain and
-UBSan-only builds still run both suites.
+return. The supervisor suite still runs its exec-mode loader assertions
+before reporting the partial-coverage skip; it does not count as a full pass.
+For the ASan-only faked unlimited-stack clamp rejection, it uses a finite
+32 MiB inherited stack to avoid an intermittent pre-main sanitizer failure.
+The real unlimited-stack clamp control remains, and plain/UBSan builds retain
+the true unlimited-stack rejection. Resource-specific injection checks keep
+CPU-clamp failures from masking stack-clamp failures. No production filter
+is widened for sanitizer builds. Plain and UBSan-only builds run both suites
+without these ASan coverage omissions.
 
 `contained-process-cpu-expiry` separately exercises real kernel CPU expiry.
 Each throwaway launcher inherits a one-second soft limit and either a

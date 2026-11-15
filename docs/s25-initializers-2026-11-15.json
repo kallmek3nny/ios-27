@@ -1,0 +1,41 @@
+{
+  "scope": "original ProgramVars/constructor fixtures on physical Android",
+  "date": "2026-11-15",
+  "base_head": "a387567",
+  "working_tree": "evidence captured from an uncommitted snapshot; publication and CI tracked in PR #126",
+  "device": {
+    "model": "SM-S936U1",
+    "architecture": "aarch64",
+    "api": 37,
+    "page_size": 4096,
+    "uid": 2000
+  },
+  "toolchain": {
+    "ndk": "29.0.13846066",
+    "target": "aarch64-linux-android30",
+    "strict_warnings": true,
+    "elf_load_alignment": 16384
+  },
+  "files_sha256": {
+    "test_initializers": "d491ef8fc662f29130e3d0a68eafbda84a40aebbcbc123dc59e384c4bedd1460",
+    "Provider.dylib": "92cd5a210a8cca7f312e4c83b27fa73555948234d0a30e622a79c131848aee59",
+    "Main": "010a5f3f681e2bb55bcb4549ee9ba1670018dbcbd38e157d24fbb6d6d8d06a4c"
+  },
+  "device_hashes_verified": true,
+  "metadata_exit_code": 0,
+  "native_exit_code": 0,
+  "native_output": "native C graph: ProgramVars and 3 ordered constructors before main=42, isolated repeat/fault/timeout/syscall recovery passed",
+  "normal_startups_before_faults": 8,
+  "constructor_modes": ["trap", "loop", "blocked raw Linux syscall", "normal recovery"],
+  "program_vars": {
+    "mapped_main_header_verified": true,
+    "argc_argv_environment_name_cells_verified": true,
+    "private_mutable_cells_verified": true
+  },
+  "temporary_files_removed": true,
+  "apk_installed": false,
+  "device_settings_changed": false,
+  "apple_code_executed": false,
+  "springboard_entered": false,
+  "rendered_ios_frame": false
+}

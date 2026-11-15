@@ -54,10 +54,43 @@ python tools/android-smoke.py --serial DEVICE_SERIAL \
 This installs/updates only org.ios27.host, clears its previous result, and
 performs two cold app launches using a debug-only test extra. Each launch must
 produce a fresh hash-verified result with a positive internal rebase count,
-guest return 42 and launcher exit 0.
-The report records APK SHA-256, model, SDK, ABI, page size and both actual result
-texts, excluding device serial. The screenshot is optional. Reports/screenshots
+guest return 42 and launcher exit 0 by default.
+The report records APK SHA-256, model, SDK, ABI, page size, selected mode and both
+actual result texts, excluding device serial. The screenshot is optional. Reports/screenshots
 are local ignored artifacts; inspect before sharing.
+
+## Debug-only supervised failure modes
+
+The smoke script also accepts `--mode trap`, `--mode deadline`, and
+`--mode raw-syscall`. Omission (or `--mode success`) retains two normal-return
+checks. Each selection still performs two fresh launches; it is not enough for
+any failure, crash, or hang to occur:
+
+- `trap`: supervised `SIGTRAP`, with a 2000 ms supervisor deadline.
+- `deadline`: `TIMED_OUT` followed by `SIGKILL`, with a 1000 ms deadline.
+- `raw-syscall`: supervised `SIGSYS`, with a 2000 ms deadline.
+
+The Java debug intent accepts `fixture_mode` only with `run_fixture=true` in a
+debug build. The ordinary button still selects success. Unknown selectors are
+rejected, not interpreted as guest paths or arbitrary arguments. All modes use
+the same hash-verified original fixture and sealed exec loader. A matching
+mode-specific PASS line, positive rebase count and exact launcher exit 0 are
+required; a normal return from a failure mode is not a pass. The supervisor
+wall deadline includes child setup, so it does not measure guest-only CPU time.
+
+Host-only checks are `python -B tests/test_android_smoke.py` (all ADB subprocesses
+mocked) and CTest `android-runner-modes` (700 synthetic outcome combinations and
+7 invalid selectors). They verify selection and fail-closed result handling,
+not Android Intent delivery or actual signal behavior. **The failure modes are
+implemented; their physical-device runs remain pending.** No device install,
+launch, or other ADB operation was performed for the 2026-11-15 host checks.
+
+On that date, the 15 offline Python tests and the C mode test passed on x86_64;
+the C test also passed ASan+UBSan with strict warnings. An isolated offline
+Gradle `:app:assembleDebug :app:lintDebug` run compiled both native ABIs and the
+Java Activity (52 tasks). Lint reported 0 errors and 5 existing-configuration/UI
+warnings: target API, backup rules, application icon and two hardcoded strings.
+This is build/host-test evidence, not an on-device failure-mode result.
 
 ## Physical evidence and limits
 

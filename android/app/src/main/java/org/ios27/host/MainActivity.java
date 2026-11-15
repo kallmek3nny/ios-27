@@ -41,11 +41,24 @@ public final class MainActivity extends Activity {
         output = text("The test result will appear here.", 13, Color.rgb(196,219,231));
         output.setTypeface(Typeface.MONOSPACE); output.setTextIsSelectable(true); scroll.addView(output);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        setContentView(root); run.setOnClickListener(v -> execute());
+        setContentView(root); run.setOnClickListener(v -> execute("success"));
         maybeRunFixture(getIntent());
     }
+    // Debug-only supervised modes and their PASS prefixes; keep in sync with runner_modes.h.
+    private static final String[][] MODES = {
+        {"success", "PASS: native ARM64 Mach-O returned 42."},
+        {"trap", "PASS: supervised trap mode: signaled by SIGTRAP."},
+        {"deadline", "PASS: supervised deadline mode: timed out and killed by SIGKILL."},
+        {"raw-syscall", "PASS: supervised raw-syscall mode: signaled by SIGSYS."}
+    };
+    private static String expectedPass(String mode) {
+        for (String[] m : MODES) if (m[0].equals(mode)) return m[1];
+        return null;
+    }
     private void maybeRunFixture(Intent intent) {
-        if (BuildConfig.DEBUG && intent.getBooleanExtra("run_fixture", false) && run.isEnabled()) execute();
+        if (!BuildConfig.DEBUG || !intent.getBooleanExtra("run_fixture", false) || !run.isEnabled()) return;
+        String mode = intent.getStringExtra("fixture_mode");
+        execute(mode == null ? "success" : mode);
     }
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent); setIntent(intent); maybeRunFixture(intent);
@@ -60,11 +73,13 @@ public final class MainActivity extends Activity {
             return out.toByteArray();
         }
     }
-    private void execute() {
+    private void execute(String mode) {
         run.setEnabled(false); status.setText("Running native checks…"); output.setText("");
+        final String pass = expectedPass(mode);
         worker.execute(() -> {
             String report; boolean passed = false;
             try {
+                if (pass == null) throw new IOException("Unknown supervised mode: " + mode);
                 byte[] fixture = asset("service-shim-executable");
                 JSONObject manifest = new JSONObject(new String(asset("service-shim-symbols.json"), java.nio.charset.StandardCharsets.UTF_8));
                 StringBuilder digest = new StringBuilder();
@@ -73,7 +88,7 @@ public final class MainActivity extends Activity {
                 File image = new File(getFilesDir(), "service-shim-executable");
                 try (FileOutputStream out = new FileOutputStream(image)) { out.write(fixture); }
                 String libs = getApplicationInfo().nativeLibraryDir;
-                Process process = new ProcessBuilder(libs + "/libios27_android_runner.so", image.getAbsolutePath(), libs + "/libios27_android_loader.so").redirectErrorStream(true).start();
+                Process process = new ProcessBuilder(libs + "/libios27_android_runner.so", image.getAbsolutePath(), libs + "/libios27_android_loader.so", mode).redirectErrorStream(true).start();
                 running = process;
                 if (!process.waitFor(12, TimeUnit.SECONDS)) {
                     process.destroyForcibly(); throw new IOException("Native launcher exceeded 12-second deadline");
@@ -83,7 +98,7 @@ public final class MainActivity extends Activity {
                     while ((n = in.read(chunk)) != -1) { if (out.size() + n > 65536) throw new IOException("Native output exceeded limit"); out.write(chunk, 0, n); }
                     report = "Fixture SHA-256 verified\n" + out.toString("UTF-8") + "\nLauncher exit: " + process.exitValue();
                 }
-                passed = process.exitValue() == 0 && report.contains("PASS: native ARM64 Mach-O returned 42");
+                passed = process.exitValue() == 0 && report.contains(pass);
             } catch (Exception e) { report = "Could not complete native execution: " + e; }
             finally { Process p = running; if (p != null) p.destroy(); running = null; }
             try (FileOutputStream out = new FileOutputStream(new File(getFilesDir(), "last-result.txt"))) { out.write(report.getBytes(java.nio.charset.StandardCharsets.UTF_8)); } catch (IOException ignored) {}

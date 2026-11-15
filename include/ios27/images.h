@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "ios27/process.h"
+
 #define IOS27_IMAGES_MAX 8u
 #define IOS27_IMAGE_NAME_MAX 64u
 
@@ -74,6 +76,25 @@ int ios27_images_symbol(const ios27_images *images, const char *image,
 /* Observe a live image's final state; no transition after unload is exposed. */
 int ios27_images_status(const ios27_images *images, const char *image,
                         ios27_image_state *state);
+
+/* Execute a trusted original-source C graph in a fresh supervised fork.
+ * The whole root dependency closure's modern __init_offsets tables are
+ * validated first. Dependency-first constructors run before LC_MAIN on the
+ * private Darwin startup stack. Each invocation gets independent COW state;
+ * constructors never modify the parent graph. No constructors run on load.
+ *
+ * Legacy pointer constructors, termination hooks, ObjC, Swift and TLS setup
+ * are refused. This is not an Apple-framework bootstrap. The existing native
+ * syscall filter/deadline apply during constructors as well as main.
+ * Requires native ARM64 Linux/Android and a single-threaded launcher with
+ * default SIGCHLD. Keep graph and immutable input buffers alive throughout.
+ * On failure result is cleared. Normal return is the full-width main result.
+ */
+int ios27_images_run_contained(const ios27_images *images, const char *root,
+                               const ios27_startup_context *context,
+                               const ios27_process_options *options,
+                               ios27_process_result *result,
+                               char *error, size_t capacity);
 
 /* Unmaps all VM and frees all staged buffers, safe when images == NULL. */
 void ios27_images_unload(ios27_images *images);

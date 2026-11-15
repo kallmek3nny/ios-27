@@ -5,6 +5,7 @@
 #include "ios27/dyld_paths.h"
 #include "ios27/exports.h"
 #include "ios27/macho.h"
+#include "images_internal.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -48,6 +49,8 @@ typedef struct {
     ios27_chained_plan *chained;
     uint8_t *staging;
     uint8_t *mapping;
+    uint8_t *reservation;
+    size_t reservation_size;
     size_t span;
     uint64_t min_vm;
     ios27_image_state state;
@@ -355,8 +358,8 @@ void ios27_images_unload(ios27_images *images) {
     for (size_t i = 0u; i < images->count; ++i) {
         image_node *node = &images->nodes[i];
 #if IOS27_POSIX_MAPPING
-        if (node->mapping)
-            (void)munmap(node->mapping, node->span);
+        if (node->reservation)
+            (void)munmap(node->reservation, node->reservation_size);
 #endif
         node->mapping = NULL;
         free(node->staging);
@@ -520,6 +523,7 @@ done:
 static int images_load_impl(const ios27_image_spec *specs, size_t count,
                             const char *const *guest_paths,
                             const char *main_executable,
+                            size_t page_override,
                             ios27_images **out, char *error, size_t cap) {
     ios27_images *images;
     unsigned char color[IOS27_IMAGES_MAX] = {0};
@@ -535,10 +539,17 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
         os_page < 4096 || os_page > 65536 ||
         (((unsigned long)os_page & ((unsigned long)os_page - 1u)) != 0u))
         return fail(error, cap, "unsupported host or image graph");
+    /* Internal seam (images_internal.h): 0 keeps the real host page. A
+     * nonzero override may only coarsen it, never go below the host page. */
+    if (page_override != 0u &&
+        (page_override < 4096u || page_override > 65536u ||
+         (page_override & (page_override - 1u)) != 0u ||
+         page_override % (size_t)os_page != 0u))
+        return fail(error, cap, "unsupported image graph page size");
     images = calloc(1u, sizeof(*images));
     if (!images) return fail(error, cap, "graph allocation failed");
     images->count = count;
-    images->page_size = (size_t)os_page;
+    images->page_size = page_override ? page_override : (size_t)os_page;
 
     for (size_t i = 0u; i < count; ++i) {
         image_node *node = &images->nodes[i];
@@ -699,13 +710,23 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
     /* Reserve all guest segments before resolving any cross-image addresses. */
     for (size_t i = 0u; i < count; ++i) {
         image_node *node = &images->nodes[i];
-        void *mapping = mmap(NULL, node->span, PROT_NONE,
-                             MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (mapping == MAP_FAILED) {
+        /* mmap aligns only to the real host page. Reserve enough slack for
+         * an injected coarser page and keep the entire reservation for
+         * rollback; prefix/suffix slack remains inaccessible. */
+        size_t slack = images->page_size - (size_t)os_page;
+        size_t reservation_size = node->span + slack;
+        uint8_t *reservation = mmap(NULL, reservation_size, PROT_NONE,
+                                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        size_t offset;
+        if (reservation == MAP_FAILED) {
             (void)fail(error, cap, "anonymous mapping failed");
             goto rollback;
         }
-        node->mapping = mapping;
+        node->reservation = reservation;
+        node->reservation_size = reservation_size;
+        offset = (images->page_size - (uintptr_t)reservation % images->page_size) %
+                 images->page_size;
+        node->mapping = reservation + offset;
         node->state = IOS27_IMAGE_MAPPED;
         node->staging = malloc(node->source_size);
         if (!node->staging) {
@@ -737,8 +758,9 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
             if (strcmp(seg->name, "__PAGEZERO") == 0) continue;
             uint8_t *destination = node->mapping +
                                    (size_t)(seg->vmaddr - node->min_vm);
-            if (mprotect(destination, (size_t)seg->vmsize,
-                         PROT_READ | PROT_WRITE)) {
+            size_t protected_size = ((size_t)seg->vmsize + images->page_size - 1u) &
+                                    ~(images->page_size - 1u);
+            if (mprotect(destination, protected_size, PROT_READ | PROT_WRITE)) {
                 (void)fail(error, cap, "staged VM mapping failed");
                 goto rollback;
             }
@@ -754,6 +776,8 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
             if (strcmp(seg->name, "__PAGEZERO") == 0) continue;
             uint8_t *destination = node->mapping +
                                    (size_t)(seg->vmaddr - node->min_vm);
+            size_t protected_size = ((size_t)seg->vmsize + images->page_size - 1u) &
+                                    ~(images->page_size - 1u);
             int prot = PROT_READ | ((seg->initprot & 4u) ? PROT_EXEC : 0) |
                        ((seg->initprot & 2u) ? PROT_WRITE : 0);
 #if defined(__GNUC__)
@@ -761,7 +785,7 @@ static int images_load_impl(const ios27_image_spec *specs, size_t count,
                 __builtin___clear_cache((char *)destination,
                                         (char *)destination + (size_t)seg->filesize);
 #endif
-            if (mprotect(destination, (size_t)seg->vmsize, prot)) {
+            if (mprotect(destination, protected_size, prot)) {
                 (void)fail(error, cap, "W^X final protection failed");
                 goto rollback;
             }
@@ -796,6 +820,86 @@ int ios27_images_finalization_image(const ios27_images *images,
     return 0;
 }
 
+static void startup_dependencies(const ios27_images *images, size_t index,
+                                  unsigned char included[IOS27_IMAGES_MAX]) {
+    const image_node *node = &images->nodes[index];
+    if (included[index]) return;
+    included[index] = 1u;
+    for (size_t i = 0u; i < node->dep_count; ++i)
+        if (node->dep_index[i] != SIZE_MAX)
+            startup_dependencies(images, node->dep_index[i], included);
+}
+
+int ios27_images_prepare_startup(const ios27_images *images, const char *root,
+                                 ios27_image_startup *out,
+                                 char *error, size_t capacity) {
+    ios27_image_startup staged = {0};
+    unsigned char included[IOS27_IMAGES_MAX] = {0};
+    int root_index;
+    if (!out) return fail(error, capacity, "null graph startup output");
+    memset(out, 0, sizeof(*out));
+    if (!images || !valid_name(root) || (root_index = index_of(images, root)) < 0 ||
+        images->nodes[root_index].info.filetype != IOS27_MH_EXECUTE)
+        return fail(error, capacity, "graph startup requires an executable root");
+    startup_dependencies(images, (size_t)root_index, included);
+    for (size_t i = 0u; i < images->init_count; ++i) {
+        size_t index = images->init_order[i];
+        const image_node *node = &images->nodes[index];
+        ios27_initializer_plan plan;
+        if (!included[index]) continue;
+        if (node->state != IOS27_IMAGE_READY)
+            return fail(error, capacity, "graph image is not ready for startup planning");
+        if (ios27_initializers_inspect(node->source, node->source_size,
+                                       &plan, error, capacity)) return -1;
+        if (plan.unsupported & IOS27_INIT_LEGACY_POINTERS)
+            return fail(error, capacity, "graph requires legacy pointer initializer setup");
+        if (plan.unsupported & IOS27_INIT_TERMINATORS)
+            return fail(error, capacity, "graph requires termination hook support");
+        if (plan.unsupported & IOS27_INIT_TLS)
+            return fail(error, capacity, "graph requires Darwin TLS initialization");
+        if (plan.unsupported & IOS27_INIT_OBJC)
+            return fail(error, capacity, "graph requires Objective-C image registration");
+        if (plan.unsupported & IOS27_INIT_SWIFT)
+            return fail(error, capacity, "graph requires Swift runtime initialization");
+        if (index != (size_t)root_index && node->info.filetype != 6u)
+            return fail(error, capacity, "graph dependency is not a dylib");
+        for (size_t j = 0u; j < plan.count; ++j) {
+            if (plan.addresses[j] < node->min_vm ||
+                plan.addresses[j] - node->min_vm >= node->span ||
+                staged.count == IOS27_GRAPH_INITIALIZERS_MAX)
+                return fail(error, capacity, "initializer is outside the mapped graph");
+            staged.initializers[staged.count++] = (uintptr_t)node->mapping +
+                                                  (uintptr_t)(plan.addresses[j] - node->min_vm);
+        }
+        if (index == (size_t)root_index) {
+            if (plan.entry_vmaddr < node->min_vm ||
+                plan.entry_vmaddr - node->min_vm >= node->span)
+                return fail(error, capacity, "entry is outside the mapped graph");
+            staged.entry = (uintptr_t)node->mapping + (uintptr_t)(plan.entry_vmaddr - node->min_vm);
+            staged.stack_size = plan.stack_size;
+            /* ProgramVars references the actual root header, not the header
+             * of whichever dylib happens to initialize first. */
+            for (size_t s = 0u; s < node->info.segment_count; ++s) {
+                const ios27_segment *segment = &node->info.segments[s];
+                if (segment->fileoff == 0u && segment->filesize >= 32u &&
+                    (segment->initprot & 1u) && segment->vmaddr >= node->min_vm &&
+                    segment->vmaddr - node->min_vm <= node->span - 32u) {
+                    if (staged.main_header)
+                        return fail(error, capacity, "ambiguous mapped main header");
+                    staged.main_header = (uintptr_t)node->mapping +
+                                          (uintptr_t)(segment->vmaddr - node->min_vm);
+                }
+            }
+            if (!staged.main_header)
+                return fail(error, capacity, "main header is not file-backed in the graph");
+        }
+    }
+    if (!staged.entry) return fail(error, capacity, "missing mapped graph entry");
+    *out = staged;
+    if (error && capacity) error[0] = '\0';
+    return 0;
+}
+
 int ios27_images_load_with_paths(const ios27_image_spec *specs, size_t count,
                                  const char *const *guest_paths,
                                  const char *main_executable,
@@ -805,10 +909,21 @@ int ios27_images_load_with_paths(const ios27_image_spec *specs, size_t count,
         return fail(error, cap, "missing explicit guest path catalog");
     }
     return images_load_impl(specs, count, guest_paths, main_executable,
-                            out, error, cap);
+                            0u, out, error, cap);
 }
 
 int ios27_images_load(const ios27_image_spec *specs, size_t count,
                       ios27_images **out, char *error, size_t cap) {
-    return images_load_impl(specs, count, NULL, NULL, out, error, cap);
+    return images_load_impl(specs, count, NULL, NULL, 0u, out, error, cap);
+}
+
+/* Internal test seam declared only in src/images_internal.h (card E). */
+int ios27_images_load_with_page_size(const ios27_image_spec *specs,
+                                     size_t count,
+                                     const char *const *guest_paths,
+                                     const char *main_executable,
+                                     size_t page_size, ios27_images **out,
+                                     char *error, size_t cap) {
+    return images_load_impl(specs, count, guest_paths, main_executable,
+                            page_size, out, error, cap);
 }
