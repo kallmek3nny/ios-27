@@ -1,0 +1,27 @@
+{
+  "darling_revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+  "purpose": "Minimal open-source inputs for host TSD-adapter contracts; no Apple runtime binaries",
+  "files": [
+    {
+      "repository": "darlinghq/darling",
+      "revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+      "directory": ".",
+      "path": "src/startup/mldr/tsd_rewrite.h",
+      "sha256": "6eea1a3bc308fb887177e869e3f832617ccbe6f9ab58675789780de598e1928d"
+    },
+    {
+      "repository": "darlinghq/darling",
+      "revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+      "directory": ".",
+      "path": "tests/mldr/tsd_rewrite.c",
+      "sha256": "8322f98c02e8a43ebacba0ef48658055a1d2c059ea52cebd9cf5ef34c87ca46d"
+    },
+    {
+      "repository": "darlinghq/darling-dyld",
+      "revision": "e40d0982e59f489ed78332492e80da6a1348192b",
+      "directory": "src/external/dyld",
+      "path": "src/dyld2.cpp",
+      "sha256": "93a31be813ce3ff7462a3378892821a1f78ecfff0271a276ba3325b729ed5855"
+    }
+  ]
+}

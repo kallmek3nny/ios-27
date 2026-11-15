@@ -16,25 +16,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Debug preview of frames actually submitted to the native simulator bridge. */
 public final class NativeFrameActivity extends Activity {
     private final ScheduledExecutorService reader = Executors.newSingleThreadScheduledExecutor();
-    private final ThreadPoolExecutor input = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(64), new ThreadPoolExecutor.DiscardOldestPolicy());
+    private TouchStream input;
     private ScheduledFuture<?> sampling;
     private volatile boolean active;
-    private volatile LocalSocket socket;
-    private volatile int inputEpoch;
+    private volatile int frameEpoch;
     private File frameFile, ringFile, socketFile;
     private final FrameRing ring = new FrameRing();
     private final AtomicBoolean deliveryPending = new AtomicBoolean();
@@ -59,6 +53,16 @@ public final class NativeFrameActivity extends Activity {
         frameFile = new File(data, "framebuffer.bgra");
         ringFile = new File(data, "framebuffer.ring");
         socketFile = new File(data, "simhid.sock");
+        input = new TouchStream(() -> new TouchStream.Connection() {
+            private final LocalSocket socket = new LocalSocket(LocalSocket.SOCKET_STREAM);
+            @Override public void connect() throws IOException {
+                socket.connect(new LocalSocketAddress(socketFile.getAbsolutePath(), LocalSocketAddress.Namespace.FILESYSTEM));
+            }
+            @Override public void send(String command) throws IOException {
+                socket.getOutputStream().write(command.getBytes(StandardCharsets.US_ASCII));
+            }
+            @Override public void close() throws IOException { socket.close(); }
+        }, this::message);
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(Color.BLACK);
         root.setFitsSystemWindows(true);
@@ -80,8 +84,9 @@ public final class NativeFrameActivity extends Activity {
     @Override protected void onStart() {
         super.onStart();
         if (frameFile == null) return;
-        ++inputEpoch;
+        ++frameEpoch;
         active = true;
+        input.start();
         lastModified = -1;
         sampling = reader.scheduleWithFixedDelay(this::loadFrame, 0, 33, TimeUnit.MILLISECONDS);
     }
@@ -89,13 +94,14 @@ public final class NativeFrameActivity extends Activity {
     private void message(String value) {
         if (value.equals(lastMessage)) return;
         lastMessage = value;
-        runOnUiThread(() -> { if (active && !isDestroyed()) status.setText(value); });
+        int epoch = frameEpoch;
+        runOnUiThread(() -> { if (active && epoch == frameEpoch && !isDestroyed()) status.setText(value); });
     }
 
     private void loadFrame() {
         if (!active || !deliveryPending.compareAndSet(false, true)) return;
         boolean queued = false;
-        int epoch = inputEpoch;
+        int epoch = frameEpoch;
         try {
             if (readerEpoch != epoch) {
                 readerEpoch = epoch; ring.reset(); lastFallbackCheck = 0;
@@ -118,7 +124,7 @@ public final class NativeFrameActivity extends Activity {
             }
             runOnUiThread(() -> {
                 try {
-                    if (!active || epoch != inputEpoch || isDestroyed()) return;
+                    if (!active || epoch != frameEpoch || isDestroyed()) return;
                     if (bitmap == null || bitmap.getWidth() != frame.width || bitmap.getHeight() != frame.height) {
                         bitmap = Bitmap.createBitmap(frame.width, frame.height, Bitmap.Config.ARGB_8888);
                         image.setImageBitmap(bitmap);
@@ -157,58 +163,28 @@ public final class NativeFrameActivity extends Activity {
         if (action == MotionEvent.ACTION_DOWN) {
             edge = touchY > .97f ? "bottom" : touchY < .03f ? "top" :
                     touchX < .03f ? "left" : touchX > .97f ? "right" : "none";
-            sendTouch("down", touchX, touchY, edge);
+            input.send(TouchStream.Phase.DOWN, touchX, touchY, edge);
         } else if (action == MotionEvent.ACTION_MOVE) {
-            sendTouch("move", touchX, touchY, edge);
+            input.send(TouchStream.Phase.MOVE, touchX, touchY, edge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL ||
                 (action == MotionEvent.ACTION_POINTER_UP && event.getPointerId(event.getActionIndex()) == pointer)) {
-            sendTouch("up", touchX, touchY, edge); pointer = -1;
+            input.send(TouchStream.Phase.UP, touchX, touchY, edge); pointer = -1;
         }
         return true;
     }
 
-    private void sendTouch(String phase, float x, float y, String fromEdge) {
-        String command = String.format(Locale.ROOT, "touch %s %.6f %.6f %s\n", phase, x, y, fromEdge);
-        int epoch = inputEpoch;
-        try {
-            input.execute(() -> {
-                if (!active || epoch != inputEpoch) return;
-                try {
-                    LocalSocket connected = socket;
-                    if (connected == null) {
-                        connected = new LocalSocket(LocalSocket.SOCKET_STREAM);
-                        socket = connected;
-                        if (!active || epoch != inputEpoch) { closeSocket(); return; }
-                        connected.connect(new LocalSocketAddress(socketFile.getAbsolutePath(), LocalSocketAddress.Namespace.FILESYSTEM));
-                        connected.getOutputStream().write("touch up 0 0 none\n".getBytes(StandardCharsets.US_ASCII));
-                    }
-                    if (!active || epoch != inputEpoch) { closeSocket(); return; }
-                    connected.getOutputStream().write(command.getBytes(StandardCharsets.US_ASCII));
-                } catch (IOException error) {
-                    closeSocket();
-                    message("Native frame preview · touch connection unavailable");
-                }
-            });
-        } catch (RejectedExecutionException ignored) { }
-    }
-
-    private void closeSocket() {
-        LocalSocket previous = socket; socket = null;
-        if (previous != null) try { previous.close(); } catch (IOException ignored) { }
-    }
-
     @Override protected void onStop() {
         active = false; pointer = -1;
-        ++inputEpoch;
+        ++frameEpoch;
         if (sampling != null) sampling.cancel(false);
-        input.getQueue().clear();
-        closeSocket();
+        if (input != null) input.stop();
         super.onStop();
     }
 
     @Override public void onDestroy() {
         active = false;
-        reader.shutdownNow(); input.shutdownNow(); closeSocket();
+        reader.shutdownNow();
+        if (input != null) input.close();
         super.onDestroy();
     }
 }

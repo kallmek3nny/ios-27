@@ -175,6 +175,23 @@ clang -std=gnu11 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all \
 /path/to/tsd-rewrite-test
 ```
 
+The actual simulator mapping-adapter block also has a host contract harness.
+It uses real protected pages to check instruction-section bounds, data-section
+exclusion, idempotence, RX/RW transitions, cache invalidation and protection
+failures. Its ARM64 instruction words are data only. The Android CI job runs
+this harness and the word-level suite from three hash-pinned open-source inputs:
+
+```sh
+python3 integration/darling/tests/simulator-thread-registers.py --fetch-pinned
+# Or test an existing modified checkout:
+python3 integration/darling/tests/simulator-thread-registers.py --source /path/to/pinned/darling
+```
+
+`tests/thread-register-inputs.json` pins the original files. The fetch mode
+applies the maintained patches in order and checks the resulting hashes against
+`source-patches.json` before compiling the tests. It needs neither runtime
+assets nor a phone.
+
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
 depends on x86-64 CPU translation and is **not** the native Android backend.

@@ -16,15 +16,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Verify native frame readers
+      - name: Verify native preview transport
         run: |
           javac --release 17 -Xlint:all -Werror -d "$RUNNER_TEMP/frame-tests" \
             android/app/src/main/java/org/ios27/host/FrameFile.java \
             android/app/src/main/java/org/ios27/host/FrameRing.java \
+            android/app/src/main/java/org/ios27/host/TouchStream.java \
             android/app/src/test/java/org/ios27/host/FrameFileTest.java \
-            android/app/src/test/java/org/ios27/host/FrameRingTest.java
+            android/app/src/test/java/org/ios27/host/FrameRingTest.java \
+            android/app/src/test/java/org/ios27/host/TouchStreamTest.java
           java -cp "$RUNNER_TEMP/frame-tests" org.ios27.host.FrameFileTest
           java -cp "$RUNNER_TEMP/frame-tests" org.ios27.host.FrameRingTest
+          java -cp "$RUNNER_TEMP/frame-tests" org.ios27.host.TouchStreamTest
+      - name: Verify simulator thread-register adapter
+        run: python3 integration/darling/tests/simulator-thread-registers.py --fetch-pinned
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

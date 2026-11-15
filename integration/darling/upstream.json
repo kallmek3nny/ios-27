@@ -174,6 +174,9 @@
     "concurrent_synthetic_publications": 1000,
     "debug_apk_build_passed": true,
     "debug_lint_passed": true,
+    "touch_transport_jvm_passed": true,
+    "touch_transport_slow_peer_and_reconnect_checks": true,
+    "touch_transport_lifecycle_release_checks": true,
     "foreground_tested": false
   },
   "simulator_cache_boot": {
@@ -220,7 +223,7 @@
     "native_guest_regression_exit_code": 0,
     "simulator_allocator_initializer_returned": true,
     "next_failure": "dyld_sim thread pointer read from Linux TPIDRRO_EL0 (zero), fault at offset 0x2dae4",
-    "next_device_test": "ADB disconnected during log collection; reconnect and verify scoped cleanup before retry",
+    "next_device_test": "Phone validation deferred while the device is away; recover logs and verify scoped cleanup when available",
     "foreground_used": false
   },
   "simulator_thread_registers": {
@@ -232,6 +235,8 @@
     "pinned_dyld_sim_static_copy_pairs_adapted": 2,
     "captured_fault_pair_adapted_in_static_copy": true,
     "apple_instructions_executed_by_static_check": false,
+    "mapping_adapter_host_asan_ubsan_passed": true,
+    "mapping_adapter_real_page_protections_checked": true,
     "device_deployed": false,
     "device_execution_verified": false
   },

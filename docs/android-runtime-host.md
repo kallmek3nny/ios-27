@@ -126,6 +126,14 @@ exists.
 
 Single-finger touches and edge swipes are normalized to the displayed image
 and sent through the simulator helper's local `simhid.sock` stream protocol.
+`TouchStream` coalesces pending moves and preserves gesture boundaries in a
+64-event queue. If that queue overflows, it resets the contact and retains the
+current touch state. Connection failures discard stale input; a new connection
+first releases any old contact and re-establishes a held touch as needed.
+Stopping the preview sends a best-effort release off the UI thread, then closes
+the connection. A 250 ms close deadline interrupts stalled I/O. Each preview
+session owns its connection, so an older session's close cannot affect a restart.
+
 Snapshot fallback is limited by the helper's two-second publication interval;
 the ring path reads new publications directly.
 
@@ -136,16 +144,22 @@ truncation and invalid-geometry cases:
 javac --release 17 -Xlint:all -Werror -d /path/to/test-classes \
   android/app/src/main/java/org/ios27/host/FrameFile.java \
   android/app/src/main/java/org/ios27/host/FrameRing.java \
+  android/app/src/main/java/org/ios27/host/TouchStream.java \
   android/app/src/test/java/org/ios27/host/FrameFileTest.java \
-  android/app/src/test/java/org/ios27/host/FrameRingTest.java
+  android/app/src/test/java/org/ios27/host/FrameRingTest.java \
+  android/app/src/test/java/org/ios27/host/TouchStreamTest.java
 java -cp /path/to/test-classes org.ios27.host.FrameFileTest
 java -cp /path/to/test-classes org.ios27.host.FrameRingTest
+java -cp /path/to/test-classes org.ios27.host.TouchStreamTest
 ```
 
 The ring test also checks geometry, invalid metadata, 64-bit
 sequences, producer replacement, and coherent copies during 1,000 concurrent
 synthetic publications. These are host tests of the transport, not evidence of
-an Apple-rendered frame. Both readers run in the Android CI job.
+an Apple-rendered frame. The touch tests use controllable blocking/failing peers
+to check 10,000 queued moves, 1,000 queued gestures, reconnects, stop during
+connection, stalled release, restart isolation and destruction. All three JVM
+tests run in the Android CI job.
 
 The preview APK builds and passes Android lint locally. Its display and input have not yet been tested
 with a running SpringBoard. See [the native Darling integration](../integration/darling/README.md)
