@@ -8,7 +8,7 @@ candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `224cd7076f66` · ci: **running** · unmerged, not credited.
+head: `224cd7076f66` · ci: **passing_checks** · unmerged, not credited.
 
 - **dyld / image graph**: 4 source files, 0 test/fixture files, +232/-12 lines
   - candidate declarations: `ios27_chained_static_plan`, `ios27_images_load_with_page_size`, `ios27_images_prepare_startup`, `ios27_images_run_contained`
