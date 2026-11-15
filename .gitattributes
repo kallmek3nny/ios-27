@@ -1,2 +1,3 @@
 # Unified diffs contain significant context whitespace and must stay LF.
 integration/darling/patches/*.patch text eol=lf -whitespace
+integration/darling/shims/*.patch text eol=lf -whitespace

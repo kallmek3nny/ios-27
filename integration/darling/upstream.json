@@ -134,6 +134,45 @@
     "passed": false,
     "failure": "shellspawn readiness timeout; guest SIGSEGV recorded in dserver log"
   },
+  "simulator_runtime_assets": {
+    "build": "24A434",
+    "version": "27.0",
+    "installed": true,
+    "device_path": "/data/user/0/org.ios27.host/files/ios27-runtime",
+    "source_archive_sha256": "53f15164145e28a5ded3c4e297570b517a745f447f7761b0714c9b9ee63a2b20",
+    "source_archive_bytes": 9184232899,
+    "device_startup_file_hashes_matched": 7,
+    "foreground_used": false
+  },
+  "simulator_signature_registration": {
+    "host_dyld_deployed": true,
+    "host_dyld_sha256": "62f7354a8799c65d20d4d4b93544fde6a0ac47a4e3b0e64d8a2508e14a0f6381",
+    "apple_dyld_sim_entered": true,
+    "native_guest_regression_exit_code": 0,
+    "foreground_used": false
+  },
+  "shared_cache_signature_support": {
+    "patches_reapplied_from_pinned_originals": 10,
+    "resulting_source_hashes_matched": 20,
+    "core_rebuild_and_package_completed": true,
+    "synthetic_parser_asan_ubsan_passed": true,
+    "synthetic_policy_asan_ubsan_passed": true,
+    "upstream_codesign_host_suite_passed": true,
+    "upstream_code_signing_host_suite_passed": true,
+    "real_cache_parts_metadata_parsed": 2,
+    "real_cache_coverage": [2039300096, 1782530048],
+    "enforcement_size_limit_retained": true,
+    "device_deployed": false,
+    "next_device_test": "headless server update and simulator boot; ADB device unavailable"
+  },
+  "native_frame_preview": {
+    "snapshot_decoder_jvm_passed": true,
+    "ring_reader_jvm_passed": true,
+    "concurrent_synthetic_publications": 1000,
+    "debug_apk_build_passed": true,
+    "debug_lint_passed": true,
+    "foreground_tested": false
+  },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
   "rendered_ios_frame": false

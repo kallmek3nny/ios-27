@@ -36,6 +36,11 @@ public final class MainActivity extends Activity {
         root.addView(text(Build.MODEL + " · " + Build.SUPPORTED_ABIS[0] + " · Android " + Build.VERSION.RELEASE, 13, Color.LTGRAY));
         status = text("Ready to test", 20, Color.WHITE); root.addView(status);
         run = new Button(this); run.setText("Run bundled ARM64 workload"); run.setAllCaps(false); root.addView(run);
+        if (BuildConfig.DEBUG) {
+            Button display = new Button(this); display.setText("Open native frame preview"); display.setAllCaps(false);
+            display.setOnClickListener(v -> startActivity(new Intent(this, NativeFrameActivity.class)));
+            root.addView(display);
+        }
         root.addView(text("Runs only our original bundled test program in a supervised child process. Checks virtual files, memory mappings and heap allocation. No Apple binaries or network access.", 14, Color.LTGRAY));
         ScrollView scroll = new ScrollView(this);
         output = text("The test result will appear here.", 13, Color.rgb(196,219,231));

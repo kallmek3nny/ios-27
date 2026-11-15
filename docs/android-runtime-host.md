@@ -2,8 +2,9 @@
 
 The Android app packages the original native runtime, a separate single-threaded
 launcher and services loader, and a compiler-produced ARM64 Mach-O workload.
-It exercises the named file, mapping and heap interfaces on Android. It contains
-no Apple binaries, general framework loader, graphics bridge or iOS system UI.
+It exercises the named file, mapping and heap interfaces on Android. The debug
+build also includes a native-frame preview for the externally staged simulator
+runtime. Apple binaries are not bundled in the APK.
 
 Version 0.2.0 also requires a real internal global-pointer rebase in the workload
 and reports the actual fixup count. See [static pointer rebases](static-pointer-rebases.md).
@@ -101,8 +102,51 @@ exposed an ELF global-alignment assumption in the service arena. Explicit
 the actual exported arena pointer. Desktop incidental alignment was insufficient.
 
 This proves the original workload on the tested Android device, not Apple
-framework execution or broad Android/16 KiB device compatibility. There is no
-SpringBoard, UIKit/SwiftUI, CoreAnimation/Metal bridge or general Darwin runtime.
+framework execution or broad Android/16 KiB device compatibility.
 The native execution boundary remains trusted-fixture failure containment,
 not a sandbox for arbitrary downloaded Mach-O code. The small heap and virtual
 mapping restrictions in named-service-shim.md still apply.
+
+## Native simulator frame preview
+
+The debug-only **Open native frame preview** button opens `NativeFrameActivity`.
+It reads `files/ios27-device-min/data/framebuffer.ring`, the native
+SimFramebuffer port's live SFBR ring. The reader samples at up to approximately
+30 Hz, reuses its pixel buffers, and permits only one pending UI delivery.
+It verifies the publication and slot metadata again after copying to reject
+overwritten or in-progress frames. A fresh descriptor follows atomically
+replaced rings after a producer restart. Positional reads avoid mapping a file
+whose length could change.
+
+When no ring exists, the preview reads `framebuffer.bgra`, the port's atomic
+snapshot output. Both paths validate BGRA channels, row padding, dimensions and
+payload size before creating an Android bitmap. The view fits the frame
+without changing its aspect ratio and waits until an actual framebuffer file
+exists.
+
+Single-finger touches and edge swipes are normalized to the displayed image
+and sent through the simulator helper's local `simhid.sock` stream protocol.
+Snapshot fallback is limited by the helper's two-second publication interval;
+the ring path reads new publications directly.
+
+The decoder's standalone JVM test passes ten color, alpha, row-padding,
+truncation and invalid-geometry cases:
+
+```sh
+javac --release 17 -Xlint:all -Werror -d /path/to/test-classes \
+  android/app/src/main/java/org/ios27/host/FrameFile.java \
+  android/app/src/main/java/org/ios27/host/FrameRing.java \
+  android/app/src/test/java/org/ios27/host/FrameFileTest.java \
+  android/app/src/test/java/org/ios27/host/FrameRingTest.java
+java -cp /path/to/test-classes org.ios27.host.FrameFileTest
+java -cp /path/to/test-classes org.ios27.host.FrameRingTest
+```
+
+The ring test also checks geometry, invalid metadata, 64-bit
+sequences, producer replacement, and coherent copies during 1,000 concurrent
+synthetic publications. These are host tests of the transport, not evidence of
+an Apple-rendered frame. Both readers run in the Android CI job.
+
+The preview APK builds and passes Android lint locally. Its display and input have not yet been tested
+with a running SpringBoard. See [the native Darling integration](../integration/darling/README.md)
+for the verified headless Darwin guest and current simulator startup status.

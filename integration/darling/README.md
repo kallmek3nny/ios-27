@@ -30,6 +30,8 @@ git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/
 git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0006-ptrace-request-type.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0007-bsdln-portable-strrchr.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0008-nonroot-namespace-identities.patch
+git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0009-simulator-signature-registration.patch
+git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0010-shared-cache-signatures.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -74,6 +76,29 @@ the kernel's namespace-link identities; it requires matching mount identities
 and accepts a missing user-namespace interface only when missing on both
 processes. The launcher server/mode suites, including malformed, missing and
 mismatched identity cases, pass on Linux under ASan/UBSan.
+The ninth routes simulator-dyld signature registration through Darling's
+implemented `F_ADDFILESIGS_RETURN` operation. The server's code-signing policy
+and the loader's verified-coverage check continue to apply. The original
+`F_ADDFILESIGS_FOR_DYLD_SIM` operation returned `EINVAL` on the first simulator
+boot attempt. The updated host dyld now enters Apple's `dyld_sim` on the S25+;
+the native Darwin guest regression still exits normally with status zero.
+
+The tenth locates code signatures in `dyld_v1` shared-cache containers before
+using the existing CodeDirectory parser and signature-policy path. The
+ordinary executable parser still rejects cache containers. Bounds, truncated
+headers, malformed signatures, changed code pages and policy enforcement are
+covered by the original `tests/shared-cache-signature.c` and
+`tests/shared-cache-policy.cpp` contracts. These and Darling's existing
+`codesign` and `code_signing` host suites pass under ASan/UBSan. Both real
+24A434 cache parts' signature metadata parse successfully on the host. The
+existing enforcement verification-size limit is retained; large-cache
+metadata parsing is not a claim of whole-cache cryptographic verification.
+
+```sh
+python3 integration/darling/tests/shared-cache.py \
+  --source /path/to/pinned/darling/src/external/darlingserver
+# Optional: --host-prefix /path/to/private/usr --cache /path/to/shared-cache
+```
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
@@ -211,6 +236,12 @@ rejection checks pass under Linux ASan/UBSan:
 ```sh
 python3 integration/darling/tests/sim-env-exec.py --program /path/to/host-built/sim-env-exec
 ```
+
+The full iOS 27.0 `24A434` runtime has also been extracted into the app's
+private `files/ios27-runtime` directory. Device hashes match the two
+SpringBoard images, both cache parts, dyld_sim, launchd_sim and xpcproxy_sim.
+The native framebuffer/input helper build and its verified raw Linux IPC
+adapter are described in [shims/README.md](shims/README.md).
 
 ## Remaining integration
 

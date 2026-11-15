@@ -1,0 +1,203 @@
+diff --git a/include/darlingserver/dc_codesign.h b/include/darlingserver/dc_codesign.h
+--- a/include/darlingserver/dc_codesign.h
++++ b/include/darlingserver/dc_codesign.h
+@@ -178,6 +178,17 @@ int dc_cs_header_length(const uint8_t* head, size_t head_length, uint64_t image_
+  */
+ int dc_cs_locate(const uint8_t* head, size_t head_length, uint64_t image_size, struct dc_cs_image* image, char* err, size_t errlen);
+ 
++/**
++ * Finds the signature in a whole dyld_v1 shared-cache file, not a Mach-O image.
++ * The first 56 bytes suffice. Validates the architecture magic, mapping-table
++ * bounds and signature footer against image_size; clears image first.
++ *
++ * Only signature location is handled here. The same CodeDirectory, code-page
++ * and CMS checks as for Mach-O images must still be applied by the caller.
++ * This does not make shared caches acceptable executable Mach-O files.
++ */
++int dc_cs_locate_shared_cache(const uint8_t* head, size_t head_length, uint64_t image_size, struct dc_cs_image* image, char* err, size_t errlen);
++
+ /**
+  * Parses the signature that `dc_cs_locate()` found. @p signature holds the `signature_size`
+  * bytes at `signature_offset`.
+diff --git a/src/code-signing.cpp b/src/code-signing.cpp
+--- a/src/code-signing.cpp
++++ b/src/code-signing.cpp
+@@ -364,6 +364,7 @@ DarlingServer::CodeSigning::Image DarlingServer::CodeSigning::readImage(int fd,
+ 
+ 	uint64_t fileSize = static_cast<uint64_t>(st.st_size);
+ 	uint64_t imageSize = 0;
++	bool sharedCache = false;
+ 
+ 	{
+ 		uint8_t head[DC_CS_FAT_HEADER_MAX];
+@@ -372,52 +373,63 @@ DarlingServer::CodeSigning::Image DarlingServer::CodeSigning::readImage(int fd,
+ 			result.error = "cannot read the file header";
+ 			return result;
+ 		}
+-		if (dc_cs_image_at(head, headLength, fileSize, imageOffset, &imageSize, err, sizeof(err)) != 0) {
++		if (headLength >= 8 && memcmp(head, "dyld_v1 ", 8) == 0) {
++			if (imageOffset != 0) {
++				result.error = "a shared cache starts only at file offset zero";
++				return result;
++			}
++			if (dc_cs_locate_shared_cache(head, headLength, fileSize, &image, err, sizeof(err)) != 0) {
++				result.error = err;
++				return result;
++			}
++			sharedCache = true;
++		} else if (dc_cs_image_at(head, headLength, fileSize, imageOffset, &imageSize, err, sizeof(err)) != 0) {
+ 			result.error = err;
+ 			return result;
+ 		}
+ 	}
+ 
+-	uint64_t headerLength = 0;
+-	{
+-		uint8_t head[DC_CS_MACHO_HEADER_MAX];
+-		size_t headLength = imageSize < sizeof(head) ? static_cast<size_t>(imageSize) : sizeof(head);
+-		if (!readAt(fd, imageOffset, head, headLength)) {
+-			result.error = "cannot read the Mach-O header";
+-			return result;
++	if (!sharedCache) {
++		uint64_t headerLength = 0;
++		{
++			uint8_t head[DC_CS_MACHO_HEADER_MAX];
++			size_t headLength = imageSize < sizeof(head) ? static_cast<size_t>(imageSize) : sizeof(head);
++			if (!readAt(fd, imageOffset, head, headLength)) {
++				result.error = "cannot read the Mach-O header";
++				return result;
++			}
++			if (dc_cs_header_length(head, headLength, imageSize, &headerLength, err, sizeof(err)) != 0) {
++				result.error = err;
++				return result;
++			}
+ 		}
+-		if (dc_cs_header_length(head, headLength, imageSize, &headerLength, err, sizeof(err)) != 0) {
+-			result.error = err;
++
++		if (headerLength > maxLoadCommandsSize) {
++			result.error = "the load commands are too large";
+ 			return result;
+ 		}
+-	}
+-
+-	if (headerLength > maxLoadCommandsSize) {
+-		result.error = "the load commands are too large";
+-		return result;
+-	}
+ 
+-	// `image` points into these two buffers
+-	std::vector<uint8_t> header(static_cast<size_t>(headerLength));
+-	std::vector<uint8_t> signature;
+-
+-	if (!readAt(fd, imageOffset, header.data(), header.size())) {
+-		result.error = "cannot read the load commands";
+-		return result;
+-	}
++		std::vector<uint8_t> header(static_cast<size_t>(headerLength));
++		if (!readAt(fd, imageOffset, header.data(), header.size())) {
++			result.error = "cannot read the load commands";
++			return result;
++		}
+ 
+-	int located = dc_cs_locate(header.data(), header.size(), imageSize, &image, err, sizeof(err));
+-	if (located == DC_CS_UNSIGNED) {
+-		result.state.status = dserver_cs_status_unsigned;
+-		return result;
+-	} else if (located != 0) {
+-		return signatureProblem(err);
++		int located = dc_cs_locate(header.data(), header.size(), imageSize, &image, err, sizeof(err));
++		if (located == DC_CS_UNSIGNED) {
++			result.state.status = dserver_cs_status_unsigned;
++			return result;
++		} else if (located != 0) {
++			return signatureProblem(err);
++		}
+ 	}
+ 
+ 	if (image.signature_size > maxSignatureSize) {
+ 		return signatureProblem("the signature is too large");
+ 	}
+ 
++	// The parsed CodeDirectories point into this buffer for the rest of the call.
++	std::vector<uint8_t> signature;
+ 	signature.resize(image.signature_size);
+ 	if (!readAt(fd, imageOffset + image.signature_offset, signature.data(), signature.size())) {
+ 		return signatureProblem("cannot read the signature");
+diff --git a/src/codesign/dc_codesign.c b/src/codesign/dc_codesign.c
+--- a/src/codesign/dc_codesign.c
++++ b/src/codesign/dc_codesign.c
+@@ -77,6 +77,10 @@ static uint32_t read_le32(const uint8_t* p) {
+ 	return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+ }
+ 
++static uint64_t read_le64(const uint8_t* p) {
++	return (uint64_t)read_le32(p) | ((uint64_t)read_le32(p + 4) << 32);
++}
++
+ // whether [offset, offset + length) lies within [0, total), without overflowing
+ static bool in_range(uint64_t total, uint64_t offset, uint64_t length) {
+ 	return offset <= total && length <= total - offset;
+@@ -318,6 +322,62 @@ int dc_cs_locate(const uint8_t* head, size_t head_length, uint64_t image_size, s
+ 	return 0;
+ }
+ 
++int dc_cs_locate_shared_cache(const uint8_t* head, size_t head_length, uint64_t image_size, struct dc_cs_image* image, char* err, size_t errlen) {
++	if (!image) {
++		return fail(err, errlen, "null shared-cache result");
++	}
++	memset(image, 0, sizeof(*image));
++	if (!head || head_length < 56 || image_size < 56) {
++		return fail(err, errlen, "truncated shared-cache header");
++	}
++
++	/* Public mach-o/dyld_cache_format.h: dyld_cache_header and
++	 * dyld_cache_mapping_info. Read bytes, never unaligned native structs. */
++	static const struct {
++		char magic[16];
++		uint32_t cputype;
++		uint32_t cpusubtype;
++	} architectures[] = {
++		{ "dyld_v1   arm64",  0x0100000cu, 0 },
++		{ "dyld_v1  arm64e",  0x0100000cu, 2 },
++		{ "dyld_v1  x86_64",  0x01000007u, 3 },
++		{ "dyld_v1 x86_64h",  0x01000007u, 8 },
++	};
++	size_t arch;
++	for (arch = 0; arch < sizeof(architectures) / sizeof(architectures[0]); ++arch) {
++		if (memcmp(head, architectures[arch].magic, 16) == 0) {
++			break;
++		}
++	}
++	if (arch == sizeof(architectures) / sizeof(architectures[0])) {
++		return fail(err, errlen, "unsupported shared-cache magic");
++	}
++
++	uint64_t mapping_offset = read_le32(head + 16);
++	uint64_t mapping_count = read_le32(head + 20);
++	uint64_t mapping_size = mapping_count * 32;
++	uint64_t signature_offset = read_le64(head + 40);
++	uint64_t signature_size = read_le64(head + 48);
++	if (mapping_offset < 56 || mapping_count == 0 || !in_range(image_size, mapping_offset, mapping_size)) {
++		return fail(err, errlen, "shared-cache mapping table lies outside the file");
++	}
++	uint64_t mapping_end = mapping_offset + mapping_size;
++	if (signature_size < 12 || signature_size > UINT32_MAX || signature_offset < mapping_end ||
++		!in_range(image_size, signature_offset, signature_size) || signature_size != image_size - signature_offset) {
++		return fail(err, errlen, "invalid shared-cache signature footer");
++	}
++
++	image->size = image_size;
++	image->is_64 = true;
++	image->cputype = architectures[arch].cputype;
++	image->cpusubtype = architectures[arch].cpusubtype;
++	/* Require the signed range to cover both header and mapping table. */
++	image->load_commands_end = mapping_end;
++	image->signature_offset = signature_offset;
++	image->signature_size = (uint32_t)signature_size;
++	return 0;
++}
++
+ // what one CodeDirectory says; filled in by `parse_codedirectory`
+ struct cd_info {
+ 	uint32_t version;
