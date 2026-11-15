@@ -50,8 +50,10 @@
   },
   "posix_shared_object_test": {
     "linux_asan_ubsan_passed": true,
-    "s25_full_test_passed": false,
-    "s25_result": "cross-process and unlink checks reached; final mkfifo fixture denied with EACCES",
+    "s25_adb_shell_full_test_passed": false,
+    "s25_adb_shell_result": "cross-process and unlink checks reached; final mkfifo fixture denied with EACCES",
+    "s25_app_debug_full_test_passed": true,
+    "s25_app_debug_test_sha256": "592647372abeebf84dcf7c0c5c12117c943350e1f6a1c8fa071bc8b4a8b89750",
     "temporary_files_removed": true
   },
   "configured_named_semaphore_test": {
@@ -62,7 +64,76 @@
     "cross_process_and_unlink_lifetime_passed": true,
     "temporary_files_removed": true
   },
-  "runtime_installed": false,
+  "core_build_and_private_package_completed": true,
+  "runtime_installed": true,
+  "installation_scope": "headless run-as org.ios27.host; /data/user/0/org.ios27.host/files/darling; earlier shell-context files retained for debugging",
+  "first_guest_boot": {
+    "passed": false,
+    "failure": "launcher namespace inspection before guest execution",
+    "user_namespace_interface_present": false,
+    "mount_namespace_stat": "EACCES",
+    "mount_namespace_readlink_succeeded": true,
+    "leftover_runtime_processes": 0
+  },
+  "namespace_fix_host_validation": {
+    "launcher_server_asan_ubsan_passed": true,
+    "launcher_mode_asan_ubsan_passed": true,
+    "missing_init_mutation_checks_passed": 4,
+    "patches_reapplied_from_pinned_originals": 8,
+    "resulting_source_hashes_matched": 16
+  },
+  "second_guest_boot": {
+    "passed": false,
+    "failure": "adb-shell context denied pathname Unix-socket bind with EACCES",
+    "reached_native_mach_server": true,
+    "darwin_guest_started": false
+  },
+  "app_debug_ipc_probe": {
+    "package": "org.ios27.host",
+    "uid": 10033,
+    "native_execution_passed": true,
+    "pathname_datagram_bind_passed": true,
+    "pathname_stream_bind_passed": true,
+    "abstract_datagram_bind_passed": true,
+    "abstract_stream_bind_passed": true,
+    "foreground_used": false,
+    "probe_files_removed": true
+  },
+  "native_darwin_guest": {
+    "custom_init_passed": true,
+    "context": "run-as org.ios27.host on SM-S936U1",
+    "cpu": "native ARM64",
+    "stage_archive_sha256": "304dc5b1b113d9be1a917669dd916a5c0e966b63f82680aa6b37e2bc79b85920",
+    "guest_sha256": "66660caa27717fb3c2a566f59894d76702c9f9efce80436da99d706b43a93e28",
+    "init_runner_sha256": "6fac8ecc2907720027f56d0a9b5532e6fdf8b3e26fc4527db3df816ee8b58acf",
+    "child_waited": true,
+    "child_exit_code": 0,
+    "child_signal": 0,
+    "stdout": "DARWIN_GUEST_STARTUP_OK constructors=ok pthread_tls=ok mach_ipc=ok heap=ok",
+    "foreground_used": false,
+    "controller_exit": 137,
+    "controller_exit_reason": "bounded test ends the waiting custom-init supervisor",
+    "scoped_cleanup_killed_remaining_server": true
+  },
+  "native_darwin_guest_virtual_user": {
+    "custom_init_passed": true,
+    "init_runner_sha256": "f80cf8debc203100bcc7ffcbb71075459dc21bd41e4d16b7c149d4d591add32c",
+    "guest_uid": 501,
+    "guest_gid": 20,
+    "host_uid": 10033,
+    "child_waited": true,
+    "child_exit_code": 0,
+    "child_signal": 0,
+    "foreground_used": false
+  },
+  "simulator_environment_exec_checks": {
+    "linux_asan_ubsan_contract_cases_passed": 10,
+    "native_arm64_macho_linked": true
+  },
+  "default_launchd_boot": {
+    "passed": false,
+    "failure": "shellspawn readiness timeout; guest SIGSEGV recorded in dserver log"
+  },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
   "rendered_ios_frame": false

@@ -10,7 +10,8 @@ Upstream Darling now contains native ARM64 support, Android install-layout
 handling and a `DARLING_NONROOT=1` mode that avoids namespaces. These provide
 a substantially more complete starting point for Darwin process, thread,
 Mach IPC and libSystem support than the project's small fixture runtime.
-This is source capability, not proof that Darling or SpringBoard boots here.
+A native Darwin guest now passes the integrated checks through Darling's
+custom-init path. Genuine SpringBoard startup remains the next integration goal.
 
 The pinned sources are recorded in [upstream.json](upstream.json). The Darling
 source and its core submodules are kept in an external Linux checkout. Local
@@ -25,6 +26,10 @@ git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches
 git -C /path/to/pinned/darling/src/external/bootstrap_cmds apply /path/to/ios-27/integration/darling/patches/0002-mig-host-resource-headers.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0003-guest-resource-header-scope.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0004-android-posix-shared-objects.patch
+git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0005-system-config-test-headers.patch
+git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0006-ptrace-request-type.patch
+git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0007-bsdln-portable-strrchr.patch
+git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0008-nonroot-namespace-identities.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -49,10 +54,26 @@ The fourth supplies the missing Android `shm_open`/`shm_unlink` backend using
 file-backed objects beneath the runtime's temporary directory. It preserves
 cross-process mapping visibility, descriptor close-on-exec, atomic exclusive
 creation, truncation and unlink lifetime. Its contract test passes under
-Linux ASan/UBSan. On the S25+ it reached the final foreign-FIFO fixture, whose
-creation Android denied with `EACCES`; the **whole device test did not pass**.
+Linux ASan/UBSan. The adb-shell run on the S25+ reached the final foreign-FIFO
+fixture, whose creation Android denied with `EACCES`. The **same unchanged
+binary passes the complete test in the installed host app's debug context**
+(`run-as org.ios27.host`), including that fixture, without taking the screen.
 The test and implementation are original and based on the linked POSIX
 contract. File backing consumes runtime filesystem space; it is not a tmpfs.
+The fifth patch restricts the system-configuration test's imported headers to
+the two it needs, so libc++ does not accidentally select Darwin's `mbstate_t`
+declaration when compiling for Android. Its test assertions are retained.
+The sixth uses the host's public ptrace request type in the thread-discovery
+test instead of a glibc-only enum name.
+The seventh uses standard `strrchr` in `bsdln` instead of the legacy `rindex`
+entry point absent from Bionic.
+The eighth fixes namespace-free startup on kernels without user namespaces or
+with restricted namespace handles. Duplicate-server detection retains the
+real-UID, pinned executable and exact-prefix checks. Non-root mode compares
+the kernel's namespace-link identities; it requires matching mount identities
+and accepts a missing user-namespace interface only when missing on both
+processes. The launcher server/mode suites, including malformed, missing and
+mismatched identity cases, pass on Linux under ASan/UBSan.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
@@ -144,16 +165,58 @@ directory; build success is not inferred merely from source availability.
 The three native programs (`darling`, `mldr`, `darlingserver`) now build as
 AArch64 ELF using `/system/bin/linker64`. Each loaded its dependencies and
 returned its expected no-argument diagnostic on the S25+. Their hashes are in
-`upstream.json`. This exercised native ELF startup only. The guest-side
-Darwin libraries and a complete Darling boot remain under development.
+`upstream.json`. This exercised native ELF startup only. The complete core
+build and private install/package also completed, including the ARM64 Darwin
+libraries, dyld and launchd.
+
+The first headless S25+ guest boot stopped before guest execution because the
+launcher required namespace handles: `/proc/self/ns/user` is absent and
+following `/proc/self/ns/mnt` returns `EACCES`, while reading its link identity
+works. Patch eight fixes that observed failure.
+
+The next shell-context attempt reached the Mach server but could not bind its
+filesystem Unix socket (`EACCES`). A native probe confirmed that the shell can
+create ordinary files and abstract sockets but cannot bind pathname sockets.
+The installed app's debug context successfully executed the same native probe
+and bound both pathname datagram and stream sockets. The runtime is installed
+in the app-owned prefix `/data/user/0/org.ios27.host/files/darling`. Execution
+uses the installed debug app's `run-as` context without a foreground activity.
+
+`tests/guest-startup.c` is the integrated Mach-O guest check for constructors,
+arguments/environment, heap allocation, pthread TLS/destruction and Mach IPC.
+It **passes natively on the S25+**, linked against the built Darwin libraries:
+
+```text
+DARWIN_GUEST_STARTUP_OK constructors=ok pthread_tls=ok mach_ipc=ok heap=ok
+```
+
+`tests/init-runner.c` supervises the guest through Darling's `DSERVER_INIT`
+entry point and records the child's actual `waitpid` result: normal exit,
+status zero. The external controller ends the waiting supervisor after the
+test and cleans up remaining executables under the private runtime prefix.
+The first successful run used package SHA-256
+`304dc5b1b113d9be1a917669dd916a5c0e966b63f82680aa6b37e2bc79b85920`
+and guest SHA-256
+`66660caa27717fb3c2a566f59894d76702c9f9efce80436da99d706b43a93e28`.
+
+The default launchd path executes Darwin `vchroot`, `launchd`, `launchctl`,
+CoreFoundation and shellspawn initializers, but still times out waiting for
+shellspawn readiness; its server log records a guest `SIGSEGV`. The passing
+custom-init check does not establish that the default boot is complete.
+
+`sim-env-exec.c` applies a bounded simulator environment immediately before
+exec, after the host helper has initialized. Ten argument/environment and
+rejection checks pass under Linux ASan/UBSan:
+
+```sh
+python3 integration/darling/tests/sim-env-exec.py --program /path/to/host-built/sim-env-exec
+```
 
 ## Remaining integration
 
-1. Establish a complete native Android core build and namespace-free startup.
-2. Verify original Darwin programs against its process/thread/Mach interfaces.
-3. Integrate the simulator-specific host services and matching dyld startup.
-4. Connect native graphics presentation and input to the Android host.
-5. Verify actual SpringBoard startup and an Apple-rendered frame.
+1. Integrate the simulator-specific host services and matching dyld startup.
+2. Resolve the default launchd/shellspawn startup failure.
+3. Connect native graphics presentation and input to the Android host.
+4. Verify actual SpringBoard startup and an Apple-rendered frame.
 
-No Darling guest, SpringBoard entry point or Apple UI frame has yet been
-verified through this integration.
+SpringBoard entry and an Apple-rendered UI frame remain unverified.

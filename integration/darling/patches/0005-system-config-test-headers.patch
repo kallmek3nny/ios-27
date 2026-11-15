@@ -1,0 +1,20 @@
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 208afea..ec25692 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -35,8 +35,13 @@ target_include_directories(dserver_logging_test BEFORE PRIVATE ${host}/logging-s
+ 
+ dserver_host_test(system_config SOURCES ${host}/system_config_test.cpp ${root}/src/system-config.cpp ${root}/duct-tape/src/csr.c)
+ target_include_directories(dserver_system_config_test PRIVATE ${root}/duct-tape/include)
+-# only the headers the host lacks (sys/csr.h, sys/appleapiopts.h) come from XNU
+-target_compile_options(dserver_system_config_test PRIVATE -idirafter ${root}/duct-tape/xnu/bsd)
++# Expose only the XNU headers this test uses. A whole BSD include tree also
++# changes libc++'s __has_include probes and selects Darwin's mbstate_t on Bionic.
++foreach(header csr.h appleapiopts.h)
++	configure_file(${root}/duct-tape/xnu/bsd/sys/${header}
++		${gen}/system-config-include/sys/${header} COPYONLY)
++endforeach()
++target_include_directories(dserver_system_config_test PRIVATE ${gen}/system-config-include)
+ 
+ dserver_host_test(platform_identity TEMP_DIR SOURCES ${host}/platform_identity_test.cpp ${root}/src/platform-identity.cpp)
+ if (NOT OPENSSL_INCLUDE_DIR STREQUAL "/usr/include")

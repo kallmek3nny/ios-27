@@ -252,6 +252,11 @@ def main():
         # and compilers; changing the toolchain still requires a fresh build.
         previous.pop("source_patches_sha256", None)
         toolchain = {key: value for key, value in config.items() if key != "source_patches_sha256"}
+        # Reconfiguring an install location is handled by CMake's normal
+        # dependency rebuilds. Other phases must use the configured prefix.
+        if args.phase == "configure":
+            previous.pop("prefix", None)
+            toolchain.pop("prefix", None)
         require(previous == toolchain,
                 "build directory belongs to another configuration")
     build.mkdir(parents=True, exist_ok=True)

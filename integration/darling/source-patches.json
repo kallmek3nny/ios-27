@@ -4,7 +4,11 @@
     {"directory": ".", "path": "patches/0001-cross-compiler-version.patch"},
     {"directory": "src/external/bootstrap_cmds", "path": "patches/0002-mig-host-resource-headers.patch"},
     {"directory": ".", "path": "patches/0003-guest-resource-header-scope.patch"},
-    {"directory": ".", "path": "patches/0004-android-posix-shared-objects.patch"}
+    {"directory": ".", "path": "patches/0004-android-posix-shared-objects.patch"},
+    {"directory": "src/external/darlingserver", "path": "patches/0005-system-config-test-headers.patch"},
+    {"directory": "src/external/darlingserver", "path": "patches/0006-ptrace-request-type.patch"},
+    {"directory": ".", "path": "patches/0007-bsdln-portable-strrchr.patch"},
+    {"directory": ".", "path": "patches/0008-nonroot-namespace-identities.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -14,6 +18,14 @@
     "src/startup/mldr/elfcalls/elfcalls.c": "1218473f6cd6e3d88ad52872bd1377425e50cbceab3e0d6dd33d68b698a408f0",
     "src/startup/mldr/elfcalls/posix_shm.c": "4250623eeb6e929175977664c1bb37455c11076a120d33759637cc4d8739a48d",
     "src/startup/mldr/elfcalls/posix_shm.h": "44f399e52c5ef11e3e7fa7afdfc74df05aabf1dead47b62a04e2f24d9ae64cb3",
-    "tests/mldr/posix_shm.c": "5a53855baad2e91bfc0a0997524f94a1cb9819ccc040aa55eaf8e8059019b851"
+    "tests/mldr/posix_shm.c": "5a53855baad2e91bfc0a0997524f94a1cb9819ccc040aa55eaf8e8059019b851",
+    "src/external/darlingserver/tests/CMakeLists.txt": "0c8523d03dd32a2b3881a75fbef2914e4282b9c2a3ebc3878e8cf13828ca3d0b",
+    "src/external/darlingserver/tests/host/thread_discovery_test.cpp": "1dad2edcd41b582c1450a2754165768853f46979364343c44dabbc6d01da3e9e",
+    "src/bsdln/ln.c": "ddfa2ec951e6895d6903948e1a5dcaf94b6a80950aa2cd816ab58b91ba0f6611",
+    "src/startup/launcher-server.c": "d28286e393803b3014ddfe262dc8cf83fb9986d8a7ad0245ac5533d6ae328cf0",
+    "src/startup/launcher-server.h": "90323855d6cac406e719dc06a6cbcd4d7363c4a52d3ec1358ad05dafc724fa54",
+    "src/startup/darling.c": "4cc24a706e1469320d36a67f6c4d864721e9feee279d0e3edade47e85e6a830d",
+    "tests/launcher/server.c": "36c370be1499bebfa216ba82c944743a9df146841ce52efc27a02bbaa52d725c",
+    "tests/launcher/test-missing-init.py": "1d32cbec91d14989649fe076de54b1e1665b8e1f3ea3f98faa6de5b29ea8f44e"
   }
 }
