@@ -1,0 +1,69 @@
+{
+  "target": "native ARM64 Android, no CPU translation",
+  "darling": {
+    "repository": "https://github.com/darlinghq/darling.git",
+    "revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+    "local_source_patches": "source-patches.json",
+    "license": "GPL-3.0; submodules retain their individual licenses",
+    "mode": "DARLING_NONROOT=1 (namespace-free; not setuid or rootless-userns mode)"
+  },
+  "x86sim_reference": {
+    "repository": "https://github.com/x86sim/x86sim.git",
+    "revision": "48c35bf8ee031dec6ca552dce56cd6bf525ef835",
+    "purpose": "reference for simulator host services and graphics protocols",
+    "runtime_used": false,
+    "reason": "the supplied runtime uses x86-64 CPU translation; native Android was explicitly retained"
+  },
+  "android_abi_observation": {
+    "model": "SM-S936U1",
+    "page_size": 4096,
+    "sigrtmin": 42,
+    "sigrtmax": 64,
+    "uid": 2000,
+    "named_semaphore_symbol_found": true,
+    "named_semaphore_semantics_verified": false
+  },
+  "cross_toolchain_checks": {
+    "host_tools": "ELF64 x86_64",
+    "native_android": "ELF64 AArch64",
+    "darwin_guest": "Mach-O64 ARM64",
+    "android_c_link_passed": true,
+    "android_cxx_link_passed": true,
+    "target_binaries_executed": false
+  },
+  "compiler_version_patch_checks": {
+    "passed": 10,
+    "includes_sdk_free_android_cross_compilers": true,
+    "target_programs_linked_or_executed": false
+  },
+  "native_android_elf_argument_checks": {
+    "model": "SM-S936U1",
+    "programs_passed": ["darling", "mldr", "darlingserver"],
+    "expected_exit_status": 1,
+    "scope": "ELF loading and no-argument diagnostics; no Darwin guest",
+    "temporary_files_removed": true,
+    "sha256": {
+      "darling": "d592d31de4e8c0c171549b06b08ce34a4511f05690fdbc6b16bb8ac9815d0790",
+      "mldr": "35e6ae41fae3a119ac65dc797166993045dbfc808e6fb265d219e525aa06c0c9",
+      "darlingserver": "0b6f59ab4cbdd17adbad07b2d293bc9a71cbe5b6b3ea80e565e7dacf9b225a73"
+    }
+  },
+  "posix_shared_object_test": {
+    "linux_asan_ubsan_passed": true,
+    "s25_full_test_passed": false,
+    "s25_result": "cross-process and unlink checks reached; final mkfifo fixture denied with EACCES",
+    "temporary_files_removed": true
+  },
+  "configured_named_semaphore_test": {
+    "s25_passed": true,
+    "library_sha256": "752c7669c74f4ccb6386bbcd1aa4ff7b62bf2cd6f79f3bded43d526c5dc61c00",
+    "test_sha256": "3eed5249916a78add3864cf5b70ff67e58e03a77f6ebdc372e6e62527c9c7f17",
+    "sem_open_provider_verified": "libandroid-posix-semaphore.so",
+    "cross_process_and_unlink_lifetime_passed": true,
+    "temporary_files_removed": true
+  },
+  "runtime_installed": false,
+  "native_darling_boot_verified": false,
+  "springboard_entered": false,
+  "rendered_ios_frame": false
+}

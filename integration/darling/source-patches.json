@@ -1,0 +1,19 @@
+{
+  "base_revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+  "patches": [
+    {"directory": ".", "path": "patches/0001-cross-compiler-version.patch"},
+    {"directory": "src/external/bootstrap_cmds", "path": "patches/0002-mig-host-resource-headers.patch"},
+    {"directory": ".", "path": "patches/0003-guest-resource-header-scope.patch"},
+    {"directory": ".", "path": "patches/0004-android-posix-shared-objects.patch"}
+  ],
+  "files": {
+    "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
+    "src/external/bootstrap_cmds/CMakeLists.txt": "012db57f098c718d77ae199c40d59b7e169a6133a7bce2686f4137e9bfbf4f53",
+    "src/CMakeLists.txt": "78d4e356f4723c910dcd0fa4d9a5307e1152d92acf201061d73bd579977972a5",
+    "src/startup/mldr/CMakeLists.txt": "4146823735844d7e3cc93da4061c0e1599a4b0502b090f4f747e5d5a8c68eacf",
+    "src/startup/mldr/elfcalls/elfcalls.c": "1218473f6cd6e3d88ad52872bd1377425e50cbceab3e0d6dd33d68b698a408f0",
+    "src/startup/mldr/elfcalls/posix_shm.c": "4250623eeb6e929175977664c1bb37455c11076a120d33759637cc4d8739a48d",
+    "src/startup/mldr/elfcalls/posix_shm.h": "44f399e52c5ef11e3e7fa7afdfc74df05aabf1dead47b62a04e2f24d9ae64cb3",
+    "tests/mldr/posix_shm.c": "5a53855baad2e91bfc0a0997524f94a1cb9819ccc040aa55eaf8e8059019b851"
+  }
+}
