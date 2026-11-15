@@ -8,13 +8,13 @@ candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `5c7d6acaf66d` · ci: **passing_checks** · unmerged, not credited.
+head: `68a4fcbe07b9` · ci: **passing_checks** · unmerged, not credited.
 
 - **dyld / image graph**: 3 source files, 0 test/fixture files, +105/-0 lines
   - candidate declarations: `ios27_chained_static_plan`, `ios27_images_run_contained`
 - **libSystem guest model (not dylib)**: 1 source files, 0 test/fixture files, +4/-2 lines
 - **mach-o parser and native loader**: 2 source files, 0 test/fixture files, +8/-1 lines
-- **unclassified**: 8 source files, 0 test/fixture files, +808/-0 lines
+- **unclassified**: 6 source files, 0 test/fixture files, +275/-0 lines
   - candidate declarations: `ios27_codesign_parse`, `ios27_initializers_inspect`, `ios27_service_binding_inspect`
 
 ### [agent/phase27a-objc-integrated-startup-20261105](https://github.com/kallmek3nny/ios-27/pull/128)
