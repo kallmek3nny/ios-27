@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "61fe060a8040d8c3c899a57a0b6c67a735a8d1d8",
+      "sha": "224cd7076f6650bd5f663a807d257cdb052481bc",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 100,
       "possibly_truncated": true,
@@ -49,34 +49,29 @@
         },
         {
           "group_id": "mach-o",
-          "source_files": 3,
+          "source_files": 2,
           "fixture_files": 0,
-          "additions": 22,
-          "deletions": 8,
+          "additions": 8,
+          "deletions": 1,
           "symbols_preview": [],
           "example_paths": [
             "include/ios27/inventory.h",
-            "include/ios27/macho.h",
-            "src/macho.c"
+            "include/ios27/macho.h"
           ]
         },
         {
           "group_id": "unclassified",
-          "source_files": 17,
+          "source_files": 10,
           "fixture_files": 0,
-          "additions": 1364,
-          "deletions": 28,
+          "additions": 882,
+          "deletions": 0,
           "symbols_preview": [
             "ios27_codesign_parse",
             "ios27_guest_stack_prepare",
             "ios27_guest_stack_program_vars",
             "ios27_guest_stack_release",
-            "ios27_images_load_with_page_size",
-            "ios27_images_prepare_startup",
             "ios27_initializers_inspect",
-            "ios27_native_handoff_extension",
-            "ios27_service_binding_inspect",
-            "ios27_service_bridge_initialize"
+            "ios27_service_binding_inspect"
           ],
           "example_paths": [
             "include/ios27/codesign.h",
@@ -1154,7 +1149,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 4,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase24b-native-lifecycle-20261029",
@@ -1207,7 +1202,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 1,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -1267,9 +1262,9 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 3,
+        "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1359,9 +1354,9 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 17,
+        "source_files": 10,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase27a-objc-integrated-startup-20261105",
@@ -2211,5 +2206,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-15T21:44:13Z"
+  "observed_at": "2026-11-15T22:13:22Z"
 }
