@@ -1,0 +1,55 @@
+diff --git a/src/dyld2.cpp b/src/dyld2.cpp
+--- a/src/dyld2.cpp
++++ b/src/dyld2.cpp
+@@ -113,6 +113,11 @@
+ extern "C" int __fork();
+ #ifdef DARLING
+ extern "C" int _dyld_func_lookup(const char* name, void** address);
++#if __arm64__
++#include "../../../startup/mldr/tsd_rewrite.h"
++#include <libkern/OSCacheControl.h>
++extern "C" unsigned long sys_thread_get_native_tsd_slot_offset(void);
++#endif
+ #endif
+ 
+ #include <array>
+@@ -5928,6 +5933,39 @@
+ 						return "dyld_sim mmap() of segment failed";
+ 					if ( ((uintptr_t)segAddress < loadAddress) || ((uintptr_t)segAddress+seg->filesize > loadAddress+mappingSize) )
+ 						return "dyld_sim mmap() to wrong location";
++#if defined(DARLING) && __arm64__
++					// dyld_sim is mapped here rather than by mldr, so apply the same
++					// native TSD-read adaptation before any of its code can execute.
++					if (seg->initprot & VM_PROT_EXECUTE) {
++						if (seg->cmdsize < sizeof(*seg) || seg->nsects > (seg->cmdsize - sizeof(*seg)) / sizeof(section_64))
++							return "dyld_sim invalid instruction-section table";
++						const section_64* sections = (const section_64*)(seg + 1);
++						for (uint32_t sectionIndex = 0; sectionIndex < seg->nsects; ++sectionIndex) {
++							const section_64& section = sections[sectionIndex];
++							if (!(section.flags & (S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS)) || section.size == 0)
++								continue;
++							if (section.addr < seg->vmaddr || section.addr - seg->vmaddr > seg->filesize ||
++								section.size > seg->filesize - (section.addr - seg->vmaddr) || (section.addr & 3) || (section.size & 3))
++								return "dyld_sim invalid instruction-section bounds";
++							uint32_t* instructions = (uint32_t*)(requestedLoadAddress + section.addr - seg->vmaddr);
++							size_t count = section.size / sizeof(uint32_t);
++							if (mldr_tsd_count_reads(instructions, count) == 0)
++								continue;
++							uintptr_t slot = sys_thread_get_native_tsd_slot_offset();
++							if (!mldr_tsd_slot_offset_valid(slot))
++								return "dyld_sim native TSD slot unavailable";
++							uintptr_t pageMask = vm_page_size - 1;
++							uintptr_t firstPage = (uintptr_t)instructions & ~pageMask;
++							uintptr_t lastPage = ((uintptr_t)instructions + section.size + pageMask) & ~pageMask;
++							if (::mprotect((void*)firstPage, lastPage - firstPage, PROT_READ | PROT_WRITE) != 0)
++								return "dyld_sim cannot adapt native TSD reads";
++							mldr_tsd_rewrite_reads(instructions, count, slot);
++							sys_icache_invalidate(instructions, section.size);
++							if (::mprotect((void*)firstPage, lastPage - firstPage, seg->initprot) != 0)
++								return "dyld_sim cannot restore instruction protection";
++						}
++					}
++#endif
+ 				}
+ 				break;
+ 			case LC_SOURCE_VERSION:

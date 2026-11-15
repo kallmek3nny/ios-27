@@ -36,6 +36,8 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/libsystem apply /path/to/ios-27/integration/darling/patches/0012-libsystem-callback-tag.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0013-simulator-host-lookup.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0014-executable-boot-hash.patch
+git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0015-tsd-user-address-mask.patch
+git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0016-simulator-thread-registers.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -155,6 +157,23 @@ Android denies creating the hardlink rejection fixture (covered by the host
 run). The native Darwin guest still exits zero. Apple's allocator now returns
 from initialization; the next captured fault is `dyld_sim` reading its thread
 pointer from Darwin's `TPIDRRO_EL0`, which Linux leaves zero.
+
+Patches fifteen and sixteen extend the existing native TSD adapter for the
+newer 48-bit pointer mask and run it when the host maps `dyld_sim`. Only
+bounded instruction sections are scanned, before entering the simulator
+loader. Matching instruction pairs become native loads from the loader's
+Darwin-TSD TLS slot; page protections are restored to RX after instruction
+cache invalidation. The upstream TSD-rewrite host suite, including the new
+mask cases, passes under ASan/UBSan. A static copy of the pinned `dyld_sim`
+contains two matching pairs, including the captured fault site; both are
+adapted by the helper. Device execution of these two patches remains pending.
+
+```sh
+clang -std=gnu11 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all \
+  -I/path/to/pinned/darling/src/startup/mldr \
+  /path/to/pinned/darling/tests/mldr/tsd_rewrite.c -o /path/to/tsd-rewrite-test
+/path/to/tsd-rewrite-test
+```
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

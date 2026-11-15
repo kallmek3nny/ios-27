@@ -223,6 +223,18 @@
     "next_device_test": "ADB disconnected during log collection; reconnect and verify scoped cleanup before retry",
     "foreground_used": false
   },
+  "simulator_thread_registers": {
+    "patches_reapplied_from_pinned_originals": 16,
+    "resulting_source_hashes_matched": 32,
+    "core_rebuild_and_package_completed": true,
+    "upstream_tsd_rewrite_asan_ubsan_passed": true,
+    "new_48bit_mask_cases_passed": true,
+    "pinned_dyld_sim_static_copy_pairs_adapted": 2,
+    "captured_fault_pair_adapted_in_static_copy": true,
+    "apple_instructions_executed_by_static_check": false,
+    "device_deployed": false,
+    "device_execution_verified": false
+  },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
   "rendered_ios_frame": false
