@@ -10,7 +10,10 @@
     {"directory": ".", "path": "patches/0007-bsdln-portable-strrchr.patch"},
     {"directory": ".", "path": "patches/0008-nonroot-namespace-identities.patch"},
     {"directory": "src/external/dyld", "path": "patches/0009-simulator-signature-registration.patch"},
-    {"directory": "src/external/darlingserver", "path": "patches/0010-shared-cache-signatures.patch"}
+    {"directory": "src/external/darlingserver", "path": "patches/0010-shared-cache-signatures.patch"},
+    {"directory": "src/external/xnu", "path": "patches/0011-simulator-kernel-callbacks.patch"},
+    {"directory": "src/external/libsystem", "path": "patches/0012-libsystem-callback-tag.patch"},
+    {"directory": "src/external/dyld", "path": "patches/0013-simulator-host-lookup.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -29,9 +32,14 @@
     "src/startup/darling.c": "4cc24a706e1469320d36a67f6c4d864721e9feee279d0e3edade47e85e6a830d",
     "tests/launcher/server.c": "36c370be1499bebfa216ba82c944743a9df146841ce52efc27a02bbaa52d725c",
     "tests/launcher/test-missing-init.py": "1d32cbec91d14989649fe076de54b1e1665b8e1f3ea3f98faa6de5b29ea8f44e",
-    "src/external/dyld/src/dyld2.cpp": "a896d2d8950fa75adcce5d6b3f3751e43a908d769d20f2024f100520215b00f2",
+    "src/external/dyld/src/dyld2.cpp": "dfbe2e7362e4c3e26bb1f5274653efa51ed8652d3a2fb8c8b2f274957735247b",
     "src/external/darlingserver/src/code-signing.cpp": "59b8b99c3273d1eabb7d933cd11ca3549f61871e209868b2e1276e4a6e2449aa",
     "src/external/darlingserver/src/codesign/dc_codesign.c": "9e283d2e4a9f56c5d39905c57cc71523b956dd856549b7188f8bf7ccc51f709c",
-    "src/external/darlingserver/include/darlingserver/dc_codesign.h": "fb904905d1be846a557b03ac44c09d0a093917fde729322bc34c226c800f03e8"
+    "src/external/darlingserver/include/darlingserver/dc_codesign.h": "fb904905d1be846a557b03ac44c09d0a093917fde729322bc34c226c800f03e8",
+    "src/external/xnu/libsyscall/wrappers/_libkernel_init.h": "4b9d3d5d3d3d5f0baa5e7875c185faf02d903e44f748f89657d64393dc49305e",
+    "src/external/xnu/libsyscall/wrappers/_libkernel_init.c": "2bcd1ad3b200d2a3ed54015bd49b7c13be398036f3589b4a7a8517279e7cce02",
+    "src/external/xnu/libsyscall/wrappers/darling_kernel_callbacks.h": "435cfe03aee3f046ed89acebebec9e6a25a402d7c38de065ca81ac963eb62481",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c": "2e3b56329d3df7a0a9e4a52d711805292bad4ff10fcccbcc28f565d32c917826",
+    "src/external/libsystem/init.c": "7ca5b303261dc5573cfc11b084e6aedefdfaa9f56319c753d37e4fe1b9940730"
   }
 }

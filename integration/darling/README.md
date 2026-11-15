@@ -32,6 +32,9 @@ git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0008-nonroot-namespace-identities.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0009-simulator-signature-registration.patch
 git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0010-shared-cache-signatures.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0011-simulator-kernel-callbacks.patch
+git -C /path/to/pinned/darling/src/external/libsystem apply /path/to/ios-27/integration/darling/patches/0012-libsystem-callback-tag.patch
+git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0013-simulator-host-lookup.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -99,6 +102,36 @@ python3 integration/darling/tests/shared-cache.py \
   --source /path/to/pinned/darling/src/external/darlingserver
 # Optional: --host-prefix /path/to/private/usr --cache /path/to/shared-cache
 ```
+
+With patch ten deployed, Apple's loader maps both cache parts and reaches
+the real simulator `libSystem` initializer on the S25+. A native ptrace trace
+then identified a callback ABI collision: Apple's v5 allocator callback was
+being read as Darling's private `dyld_func_lookup` callback, entering malloc
+before allocator initialization. Patches eleven through thirteen tag
+Darling-owned tables, normalize only the public versioned prefix for Apple
+tables, and pass the host lookup separately through the loader's `apple[]`
+parameters. An external table without Darling's fork hooks returns `ENOSYS`
+for forking `posix_spawn`; that bridge remains to be integrated.
+The handoff retains a complete contiguous `KernelArgs` vector: modern
+`dyld_sim` reconstructs it from `argv[-2]` rather than using the separately
+passed `apple` pointer. Pointer formatting uses no early libc locale state.
+
+```sh
+python3 integration/darling/tests/kernel-callbacks.py \
+  --source /path/to/pinned/darling/src/external/xnu
+python3 integration/darling/tests/simulator-args.py \
+  --source /path/to/pinned/darling/src/external/dyld
+```
+
+The original callback contracts pass under ASan/UBSan, including truncated
+older tables, the observed v5 collision, and malformed/duplicate handoffs.
+The actual argument-construction block also passes a host ASan/UBSan harness
+that reconstructs `KernelArgs` from `argv[-2]` and checks the copied vectors.
+The corrected handoff now passes the simulator's kernel, platform, pthread
+and C-library initialization calls on the S25+. The next observed stop is
+Apple's allocator requiring the missing `executable_boothash` metadata.
+`tests/native-trace.c` is the optional native ARM64 Linux fault tracer used
+headlessly for register and stack evidence; it does not emulate instructions.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

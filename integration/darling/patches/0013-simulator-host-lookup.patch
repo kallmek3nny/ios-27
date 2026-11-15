@@ -1,0 +1,79 @@
+diff --git a/src/dyld2.cpp b/src/dyld2.cpp
+--- a/src/dyld2.cpp
++++ b/src/dyld2.cpp
+@@ -111,6 +111,9 @@
+ #endif
+ 
+ extern "C" int __fork();
++#ifdef DARLING
++extern "C" int _dyld_func_lookup(const char* name, void** address);
++#endif
+ 
+ #include <array>
+ #include <algorithm>
+@@ -5972,7 +5975,50 @@
+ 	fsid.val[0] = sb.st_dev;
+ 	dyld3::kdebug_trace_dyld_image(DBG_DYLD_UUID_MAP_A, dyldPath, (const uuid_t *)&uuidCmd->uuid[0], fsobj, fsid, (const mach_header *)loadAddress);
+ 
++	const char** argvParams = argv;
++	const char** envParams = envp;
+ 	const char** appleParams = apple;
++#ifdef DARLING
++	// The public v5 libkernel table has no Darling-private callbacks. Supply
++	// the host loader lookup independently of Apple's versioned table.
++	size_t appleCount = 0;
++	while (apple[appleCount] != nullptr) {
++		if (++appleCount >= 512)
++			return "too many simulator apple parameters";
++	}
++	if (argc < 0 || argc > 65536 || argv[argc] != nullptr)
++		return "invalid simulator argument vector";
++	size_t envCount = 0;
++	while (envp[envCount] != nullptr) {
++		if (++envCount >= 4096)
++			return "too many simulator environment parameters";
++	}
++	// Modern dyld_sim recovers KernelArgs from argv[-2], ignoring the
++	// explicit apple pointer. Retain one complete, contiguous vector for
++	// both initial startup and later dlopen initializers.
++	size_t wordCount = 2 + (argc + 1) + (envCount + 1) + (appleCount + 2);
++	uintptr_t* simulatorArgs = (uintptr_t*)malloc(wordCount * sizeof(uintptr_t) + 80);
++	if (simulatorArgs == nullptr)
++		return "cannot allocate simulator apple parameters";
++	simulatorArgs[0] = (uintptr_t)mainExecutableMH;
++	simulatorArgs[1] = (uintptr_t)argc;
++	argvParams = (const char**)(simulatorArgs + 2);
++	memcpy(argvParams, argv, (argc + 1) * sizeof(char*));
++	envParams = argvParams + argc + 1;
++	memcpy(envParams, envp, (envCount + 1) * sizeof(char*));
++	const char** simulatorApple = envParams + envCount + 1;
++	memcpy(simulatorApple, apple, appleCount * sizeof(char*));
++	char* lookupParam = (char*)(simulatorArgs + wordCount);
++	static const char lookupKey[] = "darling_dyld_lookup=0x";
++	memcpy(lookupParam, lookupKey, sizeof(lookupKey) - 1);
++	uintptr_t lookupAddress = (uintptr_t)&_dyld_func_lookup;
++	for (size_t n = 0; n < 2 * sizeof(uintptr_t); ++n)
++		lookupParam[sizeof(lookupKey) - 1 + n] = "0123456789abcdef"[(lookupAddress >> ((2 * sizeof(uintptr_t) - 1 - n) * 4)) & 15];
++	lookupParam[sizeof(lookupKey) - 1 + 2 * sizeof(uintptr_t)] = '\0';
++	simulatorApple[appleCount] = lookupParam;
++	simulatorApple[appleCount + 1] = nullptr;
++	appleParams = simulatorApple;
++#endif
+ 
+ 	// <rdar://problem/5077374> have host dyld detach macOS shared cache from process before jumping into dyld_sim
+ 	dyld3::deallocateExistingSharedCache();
+@@ -5982,7 +6028,7 @@
+ 								const macho_header* mainExecutableMH, const macho_header* dyldMH, uintptr_t dyldSlide,
+ 								const dyld::SyscallHelpers* vtable, uintptr_t* startGlue);
+ 	sim_entry_proc_t newDyld = (sim_entry_proc_t)entry;
+-	*mainAddr = (*newDyld)(argc, argv, envp, appleParams, mainExecutableMH, (macho_header*)loadAddress,
++	*mainAddr = (*newDyld)(argc, argvParams, envParams, appleParams, mainExecutableMH, (macho_header*)loadAddress,
+ 					 loadAddress - preferredLoadAddress, 
+ 					 &sSysCalls, startGlue);
+ 	return NULL;
+@@ -7651,5 +7697,3 @@
+ 
+ 
+ } // namespace
+-
+-

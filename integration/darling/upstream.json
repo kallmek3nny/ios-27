@@ -162,8 +162,11 @@
     "real_cache_parts_metadata_parsed": 2,
     "real_cache_coverage": [2039300096, 1782530048],
     "enforcement_size_limit_retained": true,
-    "device_deployed": false,
-    "next_device_test": "headless server update and simulator boot; ADB device unavailable"
+    "device_deployed": true,
+    "device_server_sha256": "60c6e4b6559c901ae1316643a212f70f582fff8a73dd3af7d940f0e36ed508a7",
+    "native_guest_regression_exit_code": 0,
+    "foreground_used": false,
+    "next_device_test": "headless simulator bootstrap after shared-cache signature support"
   },
   "native_frame_preview": {
     "snapshot_decoder_jvm_passed": true,
@@ -172,6 +175,38 @@
     "debug_apk_build_passed": true,
     "debug_lint_passed": true,
     "foreground_tested": false
+  },
+  "simulator_cache_boot": {
+    "both_cache_parts_mapped": true,
+    "apple_libsystem_initializer_entered": true,
+    "host_support_libraries_loaded": ["libsystem_kernel.dylib", "libsystem_platform.dylib", "libsystem_pthread.dylib"],
+    "service_port_handshake_completed": false,
+    "first_fault": "Darling private dyld_func_lookup field overlaps Apple's public v5 allocator callback",
+    "native_fault_pc": "0x1c00e7b78",
+    "native_fault_address": "0xdeaddeaddeaddead",
+    "fault_trace_context": "Apple malloc called by Darling mach_driver_init before malloc initialization",
+    "foreground_used": false
+  },
+  "kernel_callback_abi": {
+    "patches_reapplied_from_pinned_originals": 13,
+    "resulting_source_hashes_matched": 25,
+    "asan_ubsan_contract_checks_passed": 38,
+    "simulator_argument_asan_ubsan_checks_passed": 23,
+    "simulator_arguments_contiguous_kernel_layout": true,
+    "public_callback_prefix_bounded_by_version": true,
+    "private_callback_table_explicitly_tagged": true,
+    "loader_lookup_handoff_process_lifetime": true,
+    "tagged_table_native_guest_regression_exit_code": 0,
+    "device_deployed": true,
+    "device_sha256": {
+      "libsystem_kernel.dylib": "edf337a148ad0bef55d95a0b4b38750eee135a1bdac493585e106c7616251eec",
+      "libSystem.B.dylib": "f79fa5947179e0feb87cfab81313c5352bab06d573b7b935df4bc81654251dde",
+      "dyld": "0f6cb104df7ce38258443b86f7b1263f9ea0bb34015d733db60f7e6b9d445485"
+    },
+    "simulator_kernel_platform_pthread_libc_init_returned": true,
+    "next_failure": "Apple allocator initialization requires executable_boothash",
+    "next_failure_pc": "0x1c00f4a68",
+    "foreground_used": false
   },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
