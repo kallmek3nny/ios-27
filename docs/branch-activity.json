@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "68a4fcbe07b9276730808e8ba85e7758eeaef4a3",
+      "sha": "8308f25d5d03a73d43dca4bd34005ba70118f5c4",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -19,9 +19,9 @@
       "groups": [
         {
           "group_id": "dyld-engine",
-          "source_files": 3,
+          "source_files": 2,
           "fixture_files": 0,
-          "additions": 105,
+          "additions": 30,
           "deletions": 0,
           "symbols_preview": [
             "ios27_chained_static_plan",
@@ -29,8 +29,7 @@
           ],
           "example_paths": [
             "include/ios27/chained.h",
-            "include/ios27/images.h",
-            "src/chained.c"
+            "include/ios27/images.h"
           ]
         },
         {
@@ -1141,7 +1140,7 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 3,
+        "source_files": 2,
         "fixture_files": 0,
         "ci": "passing_checks"
       },
@@ -2200,5 +2199,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-15T22:27:34Z"
+  "observed_at": "2026-11-15T23:24:52Z"
 }
