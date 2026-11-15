@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "224cd7076f6650bd5f663a807d257cdb052481bc",
+      "sha": "5c7d6acaf66d2279b9ec7cadafa5d0932e251174",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -19,21 +19,18 @@
       "groups": [
         {
           "group_id": "dyld-engine",
-          "source_files": 4,
+          "source_files": 3,
           "fixture_files": 0,
-          "additions": 232,
-          "deletions": 12,
+          "additions": 105,
+          "deletions": 0,
           "symbols_preview": [
             "ios27_chained_static_plan",
-            "ios27_images_load_with_page_size",
-            "ios27_images_prepare_startup",
             "ios27_images_run_contained"
           ],
           "example_paths": [
             "include/ios27/chained.h",
             "include/ios27/images.h",
-            "src/chained.c",
-            "src/images.c"
+            "src/chained.c"
           ]
         },
         {
@@ -61,15 +58,12 @@
         },
         {
           "group_id": "unclassified",
-          "source_files": 10,
+          "source_files": 8,
           "fixture_files": 0,
-          "additions": 882,
+          "additions": 808,
           "deletions": 0,
           "symbols_preview": [
             "ios27_codesign_parse",
-            "ios27_guest_stack_prepare",
-            "ios27_guest_stack_program_vars",
-            "ios27_guest_stack_release",
             "ios27_initializers_inspect",
             "ios27_service_binding_inspect"
           ],
@@ -1147,7 +1141,7 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 4,
+        "source_files": 3,
         "fixture_files": 0,
         "ci": "passing_checks"
       },
@@ -1354,7 +1348,7 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 10,
+        "source_files": 8,
         "fixture_files": 0,
         "ci": "passing_checks"
       },
@@ -2206,5 +2200,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-15T22:13:47Z"
+  "observed_at": "2026-11-15T22:22:50Z"
 }
