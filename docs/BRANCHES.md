@@ -8,14 +8,14 @@ candidate branches with mapped changes: **32** · audited base: `2674b2b42c0b`
 
 ### [codex/cpu-limit-expiry](https://github.com/kallmek3nny/ios-27/pull/126)
 
-head: `36beb73ef53c` · ci: **passing_checks** · unmerged, not credited.
+head: `7e936803f5df` · ci: **passing_checks** · unmerged, not credited.
 
-- **dyld / image graph**: 4 source files, 1 test/fixture files, +601/-12 lines
+- **dyld / image graph**: 4 source files, 0 test/fixture files, +232/-12 lines
   - candidate declarations: `ios27_chained_static_plan`, `ios27_images_load_with_page_size`, `ios27_images_prepare_startup`, `ios27_images_run_contained`
 - **libSystem guest model (not dylib)**: 1 source files, 0 test/fixture files, +4/-2 lines
 - **mach-o parser and native loader**: 4 source files, 0 test/fixture files, +261/-53 lines
   - candidate declarations: `ios27_guest_stack_prepare`, `ios27_guest_stack_program_vars`, `ios27_guest_stack_release`, `ios27_images_run_contained`, `ios27_native_handoff_extension`
-- **unclassified**: 20 source files, 19 test/fixture files, +6707/-28 lines
+- **unclassified**: 20 source files, 12 test/fixture files, +4484/-28 lines
   - candidate declarations: `ios27_codesign_parse`, `ios27_guest_stack_prepare`, `ios27_guest_stack_program_vars`, `ios27_guest_stack_release`, `ios27_images_load_with_page_size`, `ios27_images_prepare_startup`, `ios27_initializers_inspect`, `ios27_native_handoff_extension`, `ios27_service_binding_inspect`, `ios27_service_bridge_initialize`
 
 ### [agent/phase27a-objc-integrated-startup-20261105](https://github.com/kallmek3nny/ios-27/pull/128)
