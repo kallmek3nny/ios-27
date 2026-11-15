@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "7e936803f5df9b70555eb1a139fbf100d5430ce3",
+      "sha": "61fe060a8040d8c3c899a57a0b6c67a735a8d1d8",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -49,29 +49,22 @@
         },
         {
           "group_id": "mach-o",
-          "source_files": 4,
+          "source_files": 3,
           "fixture_files": 0,
-          "additions": 261,
-          "deletions": 53,
-          "symbols_preview": [
-            "ios27_guest_stack_prepare",
-            "ios27_guest_stack_program_vars",
-            "ios27_guest_stack_release",
-            "ios27_images_run_contained",
-            "ios27_native_handoff_extension"
-          ],
+          "additions": 22,
+          "deletions": 8,
+          "symbols_preview": [],
           "example_paths": [
             "include/ios27/inventory.h",
             "include/ios27/macho.h",
-            "src/macho.c",
-            "src/runner.c"
+            "src/macho.c"
           ]
         },
         {
           "group_id": "unclassified",
-          "source_files": 20,
-          "fixture_files": 12,
-          "additions": 4484,
+          "source_files": 17,
+          "fixture_files": 0,
+          "additions": 1364,
           "deletions": 28,
           "symbols_preview": [
             "ios27_codesign_parse",
@@ -1274,7 +1267,7 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 4,
+        "source_files": 3,
         "fixture_files": 0,
         "ci": "passing_checks"
       },
@@ -1366,8 +1359,8 @@
       {
         "branch": "codex/cpu-limit-expiry",
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-        "source_files": 20,
-        "fixture_files": 12,
+        "source_files": 17,
+        "fixture_files": 0,
         "ci": "passing_checks"
       },
       {
@@ -2218,5 +2211,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-15T20:32:23Z"
+  "observed_at": "2026-11-15T21:44:13Z"
 }
