@@ -40,6 +40,8 @@ jobs:
         run: python3 integration/darling/tests/workloops.py --fetch-pinned
       - name: Verify simulator spawn lifecycle
         run: python3 integration/darling/tests/spawn-lifecycle.py --fetch-pinned
+      - name: Verify spawn policy handoff
+        run: python3 integration/darling/tests/spawn-policy.py --fetch-pinned
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

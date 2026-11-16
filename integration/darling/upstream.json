@@ -490,6 +490,23 @@
     "observed_missing_symbol": "_posix_spawnattr_setdataless_iopolicy_np",
     "foreground_used": false
   },
+  "spawn_dataless_policy": {
+    "patches_reapplied_from_pinned_originals": 29,
+    "resulting_source_hashes_matched": 58,
+    "host_asan_ubsan_checks_passed": 441,
+    "native_checks_per_mode": 37,
+    "native_children_per_mode": 4,
+    "darling_library_probe_exit_code": 0,
+    "apple_library_probe_exit_code": 0,
+    "exec_inheritance_verified": true,
+    "failed_setexec_restoration_verified": true,
+    "parent_policy_isolation_verified": true,
+    "device_dyld_sha256": "b95b940ccc8b507fa61fd6cc44215425858bf292bfca8807ebb1a5df9e750a4b",
+    "device_kernel_sha256": "0db1ddea2607295352d33ece3cec46fcab762197c7ce11786e317c9201be23e7",
+    "xpcproxy_imports_resolved": 103,
+    "next_failure": "Apple libdispatch calls missing mach_msg2_internal during job startup",
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

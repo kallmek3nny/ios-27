@@ -50,6 +50,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0026-simulator-spawn-lifecycle.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0027-simulator-cache-thread-registers.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0028-abort-reason-diagnostics.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0029-spawn-dataless-policy.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -379,6 +380,24 @@ Patch twenty-eight also records `abort_with_payload` reasons in the private
 server log, covering children that abort before connecting standard streams.
 The native `xpcproxy_sim` failure now identifies the missing
 `posix_spawnattr_setdataless_iopolicy_np` export precisely.
+
+Patch twenty-nine adds that attribute using the existing ARM64 object's padding,
+preserving its extension-pointer offsets. The spawn path validates the policy,
+applies it in the child, and carries it through exec into the existing I/O-policy
+state. Failed `POSIX_SPAWN_SETEXEC` restores the caller's policy. The filesystem
+backend still operates on local files; this change supplies policy state, not
+remote-file materialization.
+
+```sh
+python3 integration/darling/tests/spawn-policy.py --fetch-pinned
+```
+
+The bounded attribute/environment parser passes 441 ASan/UBSan checks.
+`tests/guest-spawn-policy.c` checks the observable child policy, inheritance,
+parent isolation, invalid attributes and restoration after a failed exec.
+Both native library modes pass all 37 checks with four children each. The
+`xpcproxy_sim` loader now resolves all 103 imports; startup next reaches a
+missing `mach_msg2_internal` call from Apple's dispatch library.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
