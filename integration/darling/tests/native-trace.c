@@ -12,10 +12,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ptrace.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+static volatile sig_atomic_t snapshot_due;
+static struct { pid_t pid; int snapshot; } tasks[2048];
+static void snapshot_alarm(int signal) { (void)signal; snapshot_due = 1; }
+
+static int task_index(pid_t pid, int create) {
+    int empty = -1;
+    for (unsigned i = 0; i < sizeof(tasks) / sizeof(tasks[0]); ++i) {
+        if (tasks[i].pid == pid) return (int)i;
+        if (!tasks[i].pid && empty < 0) empty = (int)i;
+    }
+    if (create && empty >= 0) { tasks[empty].pid = pid; tasks[empty].snapshot = 0; return empty; }
+    return -1;
+}
 
 static int word(pid_t pid, uintptr_t address, unsigned long *value) {
     errno = 0;
@@ -25,12 +40,12 @@ static int word(pid_t pid, uintptr_t address, unsigned long *value) {
     return 0;
 }
 
-static void dump(pid_t pid, int signal) {
+static void dump(pid_t pid, int signal, const char *kind) {
     struct user_pt_regs regs = {0};
     struct iovec io = {&regs, sizeof(regs)};
     siginfo_t info = {0};
     ptrace(PTRACE_GETSIGINFO, pid, NULL, &info);
-    dprintf(2, "NATIVE_FAULT pid=%d signal=%d code=%d address=%p\n", pid, signal, info.si_code, info.si_addr);
+    dprintf(2, "%s pid=%d signal=%d code=%d address=%p\n", kind, pid, signal, info.si_code, info.si_addr);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)(uintptr_t)NT_PRSTATUS, &io) == 0) {
         dprintf(2, "pc=%016" PRIx64 " sp=%016" PRIx64 " pstate=%016" PRIx64 "\n",
                 (uint64_t)regs.pc, (uint64_t)regs.sp, (uint64_t)regs.pstate);
@@ -69,11 +84,19 @@ static void dump(pid_t pid, int signal) {
         }
         close(fd);
     }
-    dprintf(2, "NATIVE_FAULT_END pid=%d\n", pid);
+    dprintf(2, "%s_END pid=%d\n", kind, pid);
 }
 
 int main(int argc, char **argv) {
     if (argc < 2) { fputs("usage: native-trace <program> [args...]\n", stderr); return 2; }
+    unsigned snapshot_seconds = 0;
+    const char *snapshot = getenv("IOS27_TRACE_SNAPSHOT_SECONDS");
+    if (snapshot) {
+        char *end;
+        unsigned long value = strtoul(snapshot, &end, 10);
+        if (snapshot == end || *end || value < 1 || value > 600) return 2;
+        snapshot_seconds = (unsigned)value;
+    }
     pid_t child = fork();
     if (child < 0) { perror("fork"); return 2; }
     if (!child) {
@@ -92,19 +115,47 @@ int main(int argc, char **argv) {
         perror("ptrace SETOPTIONS"); kill(child, SIGKILL); return 2;
     }
     if (ptrace(PTRACE_CONT, child, NULL, NULL)) { perror("ptrace CONT"); kill(child, SIGKILL); return 2; }
+    task_index(child, 1);
+    if (snapshot_seconds) {
+        struct sigaction action = {0};
+        action.sa_handler = snapshot_alarm;
+        sigemptyset(&action.sa_mask);
+        if (sigaction(SIGALRM, &action, NULL)) { perror("snapshot sigaction"); kill(child, SIGKILL); return 2; }
+        alarm(snapshot_seconds);
+    }
     for (;;) {
+        if (snapshot_due) {
+            snapshot_due = 0;
+            for (unsigned i = 0; i < sizeof(tasks) / sizeof(tasks[0]); ++i) {
+                if (tasks[i].pid) {
+                    tasks[i].snapshot = 1;
+                    syscall(SYS_tkill, tasks[i].pid, SIGSTOP);
+                }
+            }
+        }
         pid_t pid = waitpid(-1, &status, __WALL);
         if (pid < 0 && errno == EINTR) continue;
         if (pid < 0) { if (errno != ECHILD) perror("waitpid"); break; }
         if (WIFEXITED(status) || WIFSIGNALED(status)) {
             if (pid == child) result = WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status);
+            int index = task_index(pid, 0);
+            if (index >= 0) tasks[index].pid = 0;
             continue;
         }
         if (!WIFSTOPPED(status)) continue;
         int signal = WSTOPSIG(status);
         unsigned event = (unsigned)status >> 16;
+        int index = task_index(pid, 1);
+        if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK || event == PTRACE_EVENT_CLONE) {
+            unsigned long created;
+            if (ptrace(PTRACE_GETEVENTMSG, pid, NULL, &created) == 0) task_index((pid_t)created, 1);
+        }
         if (!event && (signal == SIGSEGV || signal == SIGBUS || signal == SIGILL || signal == SIGABRT || signal == SIGTRAP))
-            dump(pid, signal);
+            dump(pid, signal, "NATIVE_FAULT");
+        if (!event && signal == SIGSTOP && index >= 0 && tasks[index].snapshot) {
+            tasks[index].snapshot = 0;
+            dump(pid, signal, "NATIVE_SNAPSHOT");
+        }
         if (event || signal == SIGSTOP) signal = 0;
         if (ptrace(PTRACE_CONT, pid, NULL, (void *)(uintptr_t)signal) && errno != ESRCH)
             dprintf(2, "continue pid=%d errno=%d\n", pid, errno);
