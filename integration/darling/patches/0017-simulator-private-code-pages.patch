@@ -1,0 +1,33 @@
+diff --git a/src/dyld2.cpp b/src/dyld2.cpp
+--- a/src/dyld2.cpp
++++ b/src/dyld2.cpp
+@@ -5957,11 +5957,25 @@
+ 							uintptr_t pageMask = vm_page_size - 1;
+ 							uintptr_t firstPage = (uintptr_t)instructions & ~pageMask;
+ 							uintptr_t lastPage = ((uintptr_t)instructions + section.size + pageMask) & ~pageMask;
+-							if (::mprotect((void*)firstPage, lastPage - firstPage, PROT_READ | PROT_WRITE) != 0)
+-								return "dyld_sim cannot adapt native TSD reads";
+-							mldr_tsd_rewrite_reads(instructions, count, slot);
++							size_t pageBytes = lastPage - firstPage;
++							// Android may prohibit execmod of file-backed private pages.
++							// Build anonymous backing before any dyld_sim code executes.
++							void* copy = ::mmap(nullptr, pageBytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
++							if (copy == MAP_FAILED)
++								return "dyld_sim cannot allocate instruction copy";
++							memcpy(copy, (void*)firstPage, pageBytes);
++							uint32_t* copyInstructions = (uint32_t*)((char*)copy + ((uintptr_t)instructions - firstPage));
++							mldr_tsd_rewrite_reads(copyInstructions, count, slot);
++							void* replacement = ::mmap((void*)firstPage, pageBytes, PROT_READ | PROT_WRITE,
++								MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0);
++							if (replacement != (void*)firstPage) {
++								::munmap(copy, pageBytes);
++								return "dyld_sim cannot replace instruction backing";
++							}
++							memcpy(replacement, copy, pageBytes);
++							::munmap(copy, pageBytes);
+ 							sys_icache_invalidate(instructions, section.size);
+-							if (::mprotect((void*)firstPage, lastPage - firstPage, seg->initprot) != 0)
++							if (::mprotect((void*)firstPage, pageBytes, seg->initprot) != 0)
+ 								return "dyld_sim cannot restore instruction protection";
+ 						}
+ 					}

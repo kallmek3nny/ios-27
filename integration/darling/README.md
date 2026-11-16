@@ -38,6 +38,7 @@ git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integrati
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0014-executable-boot-hash.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0015-tsd-user-address-mask.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0016-simulator-thread-registers.patch
+git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0017-simulator-private-code-pages.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -166,7 +167,21 @@ Darwin-TSD TLS slot; page protections are restored to RX after instruction
 cache invalidation. The upstream TSD-rewrite host suite, including the new
 mask cases, passes under ASan/UBSan. A static copy of the pinned `dyld_sim`
 contains two matching pairs, including the captured fault site; both are
-adapted by the helper. Device execution of these two patches remains pending.
+adapted by the helper. The native Darwin guest regression passes with both
+patches deployed.
+The first device run reached the adapter but Android refused the transition
+back to executable permission on modified file-backed pages (`EACCES`).
+Patch seventeen prepares anonymous copies of those owned pages, preserves
+their virtual addresses and original file contents, and enables execute
+permission after copying and instruction-cache invalidation. The standalone
+`tests/android-code-pages.c` probe verifies that distinction on the S25+:
+file-backed restoration is denied, while original probe code executes from
+anonymous and fixed-address replacement pages, returning 42 and 43.
+With patch seventeen deployed, the native Darwin guest still exits zero and
+simulator startup passes the earlier TSD fault. The next captured stop is
+dispatch initialization calling the missing host export
+`pthread_install_workgroup_functions_np` through dyld's `0xbad4007` marker.
+The simulator service-port handshake has not yet completed.
 
 ```sh
 clang -std=gnu11 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all \
@@ -191,6 +206,10 @@ python3 integration/darling/tests/simulator-thread-registers.py --source /path/t
 applies the maintained patches in order and checks the resulting hashes against
 `source-patches.json` before compiling the tests. It needs neither runtime
 assets nor a phone.
+The mapped-page harness also models Android's observed `execmod` refusal,
+checks temporary-copy cleanup on mapping failures, and verifies that adapting
+two sections sharing a page preserves both edits. The old in-place path fails
+this regression contract.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
