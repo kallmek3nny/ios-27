@@ -1,0 +1,191 @@
+diff --git a/src/dyld2.cpp b/src/dyld2.cpp
+--- a/src/dyld2.cpp
++++ b/src/dyld2.cpp
+@@ -115,6 +115,7 @@
+ extern "C" int _dyld_func_lookup(const char* name, void** address);
+ #if __arm64__
+ #include "../../../startup/mldr/tsd_rewrite.h"
++#include "simulator_cache_tsd.h"
+ #include <libkern/OSCacheControl.h>
+ extern "C" unsigned long sys_thread_get_native_tsd_slot_offset(void);
+ #endif
+@@ -5687,6 +5688,25 @@
+ static int             kdebug_trace(uint32_t code, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4) { return 0;}
+ static uint64_t        kdebug_trace_string(uint32_t debugid, uint64_t str_id, const char *str) { return 0; }
+ //int             (*amfi_check_dyld_policy_self)(uint64_t input_flags, uint64_t* output_flags);
++#endif
++
++#if defined(DARLING) && __arm64__
++static void notifySimulatorImages(bool unloading, unsigned imageCount, const struct mach_header* loadAddresses[],
++		const char* imagePaths[])
++{
++	if (!unloading) {
++		if (imageCount > 65536 || (imageCount && !loadAddresses)) halt("invalid simulator image notification");
++		for (unsigned i = 0; i < imageCount; ++i) {
++			size_t rewritten;
++			const char* error = darling_simulator_cache_tsd((const mach_header_64*)loadAddresses[i],
++				vm_page_size, sys_thread_get_native_tsd_slot_offset(), &rewritten);
++			if (error) halt(error);
++			if (rewritten) log("dyld: adapted %lu native TSD reads in %s\n", (unsigned long)rewritten,
++				imagePaths && imagePaths[i] ? imagePaths[i] : "<cache image>");
++		}
++	}
++	notifyMonitoringDyld(unloading, imageCount, loadAddresses, imagePaths);
++}
+ #endif
+ 
+ static const SyscallHelpers sSysCalls = {
+@@ -5756,7 +5776,11 @@
+ 		&amfi_check_dyld_policy_self,
+ 		// Added in version 11
+ 		&notifyMonitoringDyldMain,
++#if defined(DARLING) && __arm64__
++		&notifySimulatorImages,
++#else
+ 		&notifyMonitoringDyld,
++#endif
+ 		// Add in version 12
+ 		&mach_msg_destroy,
+ 		&mach_port_construct,
+diff --git a/src/simulator_cache_tsd.h b/src/simulator_cache_tsd.h
+new file mode 100644
+--- /dev/null
++++ b/src/simulator_cache_tsd.h
+@@ -0,0 +1,137 @@
++/* Native TSD adaptation for cache images reported by dyld_sim before their
++ * initializers. Only declared instruction sections are scanned. Changed pages
++ * get private anonymous backing so Android can restore executable protection.
++ */
++#ifndef DARLING_SIMULATOR_CACHE_TSD_H
++#define DARLING_SIMULATOR_CACHE_TSD_H
++#include <mach-o/loader.h>
++#include <libkern/OSCacheControl.h>
++#include <sys/mman.h>
++#include <stdint.h>
++#include <stddef.h>
++#include <string.h>
++#include "../../../startup/mldr/tsd_rewrite.h"
++
++static inline const char* darling_simulator_tsd_pair(uint32_t* words, size_t pageSize, uintptr_t slot)
++{
++	uintptr_t mask = pageSize - 1;
++	uintptr_t first = (uintptr_t)words & ~mask;
++	uintptr_t end = ((uintptr_t)words + 2 * sizeof(uint32_t) + mask) & ~mask;
++	size_t bytes = end - first;
++	void* copy = ::mmap(nullptr, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
++	if (copy == MAP_FAILED) return "simulator cache cannot copy TSD instructions";
++	memcpy(copy, (void*)first, bytes);
++	uint32_t* pair = (uint32_t*)((char*)copy + ((uintptr_t)words - first));
++	mldr_tsd_rewrite_reads(pair, 2, slot);
++	void* replacement = ::mmap((void*)first, bytes, PROT_READ | PROT_WRITE,
++		MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0);
++	if (replacement != (void*)first) {
++		::munmap(copy, bytes);
++		return "simulator cache cannot replace TSD instruction pages";
++	}
++	memcpy(replacement, copy, bytes);
++	::munmap(copy, bytes);
++	sys_icache_invalidate(replacement, bytes);
++	if (::mprotect(replacement, bytes, PROT_READ | PROT_EXEC) != 0)
++		return "simulator cache cannot restore instruction protection";
++	return nullptr;
++}
++
++static inline const char* darling_simulator_cache_tsd(const struct mach_header_64* image,
++		size_t pageSize, uintptr_t slot, size_t* rewritten)
++{
++	*rewritten = 0;
++	if (!image) return "simulator cache missing image header";
++	if (!(image->flags & MH_DYLIB_IN_CACHE)) return nullptr;
++	if (image->magic != MH_MAGIC_64 || image->cputype != CPU_TYPE_ARM64 || image->filetype != MH_DYLIB)
++		return "simulator cache invalid Mach-O header";
++	if (pageSize < 4096 || pageSize > 65536 || (pageSize & (pageSize - 1)) || !mldr_tsd_slot_offset_valid(slot))
++		return "simulator cache invalid native TSD configuration";
++	if (!image->ncmds || image->sizeofcmds > 1024 * 1024 || image->ncmds > image->sizeofcmds / sizeof(load_command) ||
++			(uintptr_t)image > UINTPTR_MAX - sizeof(*image) - image->sizeofcmds)
++		return "simulator cache invalid load-command extent";
++	const uint8_t* commands = (const uint8_t*)(image + 1);
++	const uint8_t* end = commands + image->sizeofcmds;
++	const uint8_t* cursor = commands;
++	uint64_t preferred = 0;
++	bool haveText = false;
++	static const char textName[16] = "__TEXT";
++	// Validate the complete metadata before changing any instruction page.
++	for (uint32_t i = 0; i < image->ncmds; ++i) {
++		if ((size_t)(end - cursor) < sizeof(load_command)) return "simulator cache truncated load command";
++		const load_command* command = (const load_command*)cursor;
++		if (command->cmdsize < sizeof(*command) || (command->cmdsize & 7) || command->cmdsize > (size_t)(end - cursor))
++			return "simulator cache invalid load command";
++		if (command->cmd == LC_SEGMENT_64) {
++			if (command->cmdsize < sizeof(segment_command_64)) return "simulator cache truncated segment";
++			const segment_command_64* segment = (const segment_command_64*)command;
++			if (segment->nsects != (command->cmdsize - sizeof(*segment)) / sizeof(section_64) ||
++					(command->cmdsize - sizeof(*segment)) % sizeof(section_64))
++				return "simulator cache invalid section table";
++			if (memcmp(segment->segname, textName, sizeof(textName)) == 0) {
++				if (haveText || segment->filesize < sizeof(*image) + image->sizeofcmds)
++					return "simulator cache invalid text segment";
++				preferred = segment->vmaddr;
++				haveText = true;
++			}
++			if (segment->initprot & PROT_EXEC) {
++				if (segment->initprot != (PROT_READ | PROT_EXEC) || segment->filesize > segment->vmsize ||
++						segment->vmaddr > UINTPTR_MAX - segment->vmsize)
++					return "simulator cache invalid executable segment";
++				const section_64* sections = (const section_64*)(segment + 1);
++				for (uint32_t j = 0; j < segment->nsects; ++j) {
++					const section_64& section = sections[j];
++					if (!(section.flags & (S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS)) || !section.size) continue;
++					if ((section.addr & 3) || (section.size & 3) || section.addr < segment->vmaddr ||
++							section.addr - segment->vmaddr > segment->filesize ||
++							section.size > segment->filesize - (section.addr - segment->vmaddr))
++						return "simulator cache invalid instruction-section bounds";
++				}
++			}
++		}
++		cursor += command->cmdsize;
++	}
++	if (cursor != end || !haveText) return "simulator cache incomplete load commands";
++	cursor = commands;
++	for (uint32_t i = 0; i < image->ncmds; ++i) {
++		const load_command* command = (const load_command*)cursor;
++		if (command->cmd == LC_SEGMENT_64) {
++			const segment_command_64* segment = (const segment_command_64*)command;
++			if (segment->initprot & PROT_EXEC) {
++				if (segment->vmaddr < preferred || segment->vmaddr - preferred > UINTPTR_MAX - (uintptr_t)image)
++					return "simulator cache invalid instruction mapping";
++				uintptr_t address = (uintptr_t)image + (segment->vmaddr - preferred);
++				if ((address & (pageSize - 1)) || address > UINTPTR_MAX - (pageSize - 1) ||
++						segment->vmsize > UINTPTR_MAX - address - (pageSize - 1))
++					return "simulator cache overflowing instruction mapping";
++			}
++		}
++		cursor += command->cmdsize;
++	}
++	cursor = commands;
++	for (uint32_t i = 0; i < image->ncmds; ++i) {
++		const load_command* command = (const load_command*)cursor;
++		if (command->cmd == LC_SEGMENT_64) {
++			const segment_command_64* segment = (const segment_command_64*)command;
++			if (segment->initprot & PROT_EXEC) {
++				const section_64* sections = (const section_64*)(segment + 1);
++				for (uint32_t j = 0; j < segment->nsects; ++j) {
++					const section_64& section = sections[j];
++					if (!(section.flags & (S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS)) || !section.size) continue;
++					uint32_t* words = (uint32_t*)((uintptr_t)image + (section.addr - preferred));
++					size_t count = section.size / sizeof(uint32_t);
++					for (size_t n = 0; n + 1 < count; ++n) {
++						if (!mldr_tsd_count_reads(words + n, 2)) continue;
++						const char* error = darling_simulator_tsd_pair(words + n, pageSize, slot);
++						if (error) return error;
++						++*rewritten;
++						++n;
++					}
++				}
++			}
++		}
++		cursor += command->cmdsize;
++	}
++	return nullptr;
++}
++#endif

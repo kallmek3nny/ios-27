@@ -18,7 +18,7 @@ from urllib.request import urlopen
 HERE = Path(__file__).resolve().parent
 
 
-def fetch_pinned(root):
+def fetch_pinned(root, additional_files=()):
     inputs = json.loads((HERE / 'thread-register-inputs.json').read_text())
     patches = json.loads((HERE.parent / 'source-patches.json').read_text())
     if inputs['darling_revision'] != patches['base_revision']:
@@ -35,6 +35,8 @@ def fetch_pinned(root):
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(data)
         groups[entry['directory']].append(entry['path'])
+    for directory, path in additional_files:
+        groups[directory].append(path)
     for entry in patches['patches']:
         paths = groups.get(entry['directory'])
         if not paths:
@@ -45,12 +47,13 @@ def fetch_pinned(root):
             continue
         subprocess.run(['git', '-C', str(root / entry['directory']), 'apply',
                         *['--include=' + path for path in paths], str(patch)], check=True, timeout=15)
-    for entry in inputs['files']:
-        relative = Path(entry['directory']) / entry['path']
+    all_files = [(entry['directory'], entry['path']) for entry in inputs['files']] + list(additional_files)
+    for directory, path in all_files:
+        relative = Path(directory) / path
         expected = patches['files'][relative.as_posix()]
         if sha256((root / relative).read_bytes()).hexdigest() != expected:
             raise ValueError('patched source hash mismatch: ' + str(relative))
-    print('Pinned TSD inputs: all three original and patched source hashes match', flush=True)
+    print(f'Pinned TSD inputs: original inputs and {len(all_files)} patched source hashes match', flush=True)
 
 
 def main():

@@ -48,6 +48,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0024-prefix-private-state-directories.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0025-restricted-interface-addresses.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0026-simulator-spawn-lifecycle.patch
+git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0027-simulator-cache-thread-registers.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -353,6 +354,25 @@ child statuses, file actions, signal state and suppressed user atfork hooks.
 With the plist staged as mode 0600 and the simulator using the app's matching
 UID/GID 10033, real `launchd_sim` starts `xpcproxy_sim`. The next observed fault
 is Apple's cached libdyld TLS resolver reading Linux's zero `TPIDRRO_EL0`.
+
+Patch twenty-seven extends the native thread-register adaptation to cache
+images delivered through dyld's image-list callback, before their initializers.
+It validates instruction-section bounds and copies only affected pages to
+private anonymous backing before restoring executable protection.
+
+```sh
+python3 integration/darling/tests/simulator-cache-tsd.py --fetch-pinned
+```
+
+The actual adapter passes 462 host ASan/UBSan checks, including pairs crossing
+page boundaries, multiple sections on a page, partial final pages, invalid
+metadata, mapping failures and repeated notifications. `tests/guest-tlv.c`
+provides the native compiler-TLS probe: eight threads check initialized data,
+zero fill, address isolation and initialization after thread reuse.
+The Apple-library probe now exits zero on the S25+ with 48 checks, while the
+unchanged binary faults before deployment. The ordinary startup guest still
+passes. Launchd's earlier event-thread fault is gone; `xpcproxy_sim` now stops
+with a loader abort before its main entry.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
