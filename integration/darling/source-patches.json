@@ -19,7 +19,8 @@
     {"directory": "src/external/dyld", "path": "patches/0016-simulator-thread-registers.patch"},
     {"directory": "src/external/dyld", "path": "patches/0017-simulator-private-code-pages.patch"},
     {"directory": "src/external/libpthread", "path": "patches/0018-pthread-workgroup-callbacks.patch"},
-    {"directory": "src/external/xnu", "path": "patches/0019-kernel-bootargs.patch"}
+    {"directory": "src/external/xnu", "path": "patches/0019-kernel-bootargs.patch"},
+    {"directory": "src/external/xnu", "path": "patches/0020-native-kevent-workqueue.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -56,6 +57,12 @@
     "tests/mldr/tsd_rewrite.c": "49cdcf8e4d3937ff2b6486b15be5744015e044d4a681f056e508ef6acc9e66b5",
     "src/external/libpthread/src/pthread.c": "89f5be3deb915d36492eb138dc31c1a2c521807c8b0c8723ebfcbdeb30d2f1fc",
     "src/external/libpthread/private/pthread/workgroup_private.h": "5f3cc5912fb637f27938888a1f0d1790e9ebc22ae3467ebdc44943365f42b235",
-    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c": "10e53865a41366d5b7951a7e112a75335b28dbb7b0b639a3cbac99b57454fe93"
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c": "10e53865a41366d5b7951a7e112a75335b28dbb7b0b639a3cbac99b57454fe93",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/CMakeLists.txt": "80277980236650238249a8ad8fbfd84a73fe1213a5a3efcd5c32c3907ebfd795",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h": "8a6c855fb7e7ca1bab83b47e0a50e9edea783ebc3581cb63c21dc30bec5805bf",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h": "8b85309f3da6e33addc54b23479008feeb66e1278be720113baaebd45fc3f552",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c": "8663cbde6e07027677315d0f1ddb49e947d325279d403c07cfe973cee071c939",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c": "db8c36973aa3fc41c283bb467bcd9089704e4c20b4dc62c2ec1ffd80edf0d932",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c": "7b8a36b9b2249a5010e2dcc542f49ec6083d743e0b15b1c11d47e047e1169179"
   }
 }

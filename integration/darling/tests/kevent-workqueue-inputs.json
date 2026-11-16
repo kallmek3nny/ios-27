@@ -1,0 +1,18 @@
+{
+  "darling_revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+  "source": {
+    "repository": "darlinghq/darling-xnu",
+    "revision": "2ed122dc6c9c7774d74c41fd10ef8970543a6e13",
+    "path": "darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h",
+    "sha256": "22d404a60523453542ef53b041578ca02ed9621dcfa8e7e89e3fb037bcbae48c"
+  },
+  "patched_files": [
+    "darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h",
+    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c"
+  ],
+  "protocol_reference": {
+    "repository": "x86sim/darling-xnu",
+    "revision": "84b524f393341a2c10e4a537e670d7a0f13c2148",
+    "path": "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c"
+  }
+}

@@ -41,6 +41,7 @@ git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integrati
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0017-simulator-private-code-pages.patch
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0018-pthread-workgroup-callbacks.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0019-kernel-bootargs.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0020-native-kevent-workqueue.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -246,6 +247,27 @@ All 11 checks pass on the S25+ (the same binary fails with `ENOENT` before
 deployment), and the native startup guest still exits zero. `launchd_sim`
 passes its boot-argument query; normal startup logging now reaches the
 remaining dispatch workqueue capability failure.
+
+Patch twenty adds asynchronous process-workqueue event delivery. Registration
+applies changes immediately; a native pthread polls the kqueue and hands
+events to the existing native worker pool. Forty-eight owned delivery slots
+keep callback storage alive, with up to 64 returned changes per callback and
+1,024 tracked registrations. Event-manager callbacks are serialized while
+ordinary events can continue on other workers.
+
+```sh
+python3 integration/darling/tests/kevent-workqueue.py --fetch-pinned
+# Or: --source /path/to/pinned/darling/src/external/xnu
+```
+
+The actual adapter and delivery declaration pass 8,286 host ASan/UBSan checks
+for capacity, receipts, returned changes, buffer ownership and failures.
+The native `tests/guest-kevent-workqueue.c` workload passes on the S25+,
+including a callback blocked on another event, event-manager serialization,
+and callback-driven rearming. `tests/guest-workqueue.c` also completes 384
+callbacks across six QoS classes and both overcommit modes, reusing workers.
+Both tests and the original startup guest exit zero. The simulator capability
+mask has not yet been enabled; the service-port handshake remains pending.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
