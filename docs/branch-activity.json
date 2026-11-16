@@ -9,7 +9,7 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "695fbb932fa202e90caf2d1798f72581857c7e67",
+      "sha": "11115b61aac5eccda28b5959fd744bfa850164a9",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
       "ci": "passing_checks",
@@ -2199,5 +2199,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-16T01:24:04Z"
+  "observed_at": "2026-11-16T01:34:19Z"
 }
