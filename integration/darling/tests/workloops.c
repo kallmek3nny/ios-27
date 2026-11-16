@@ -131,6 +131,11 @@ int main(void) {
     finish(at + 1);
     request.flags = EV_DELETE;
     CHECK(change_loop(5000, &request, NULL) == 0);
+    wl_lock = 1;
+    darling_workloop_fork_child();
+    CHECK(wl_lock == 0);
+    for (unsigned i = 0; i < WL_COUNT; ++i) CHECK(!loops[i].used);
+    for (unsigned i = 0; i < WL_WAITERS; ++i) CHECK(!waiters[i].used);
     printf("WORKLOOPS_OK checks=%u deliveries=%u\n", checks, requests);
     return 0;
 }

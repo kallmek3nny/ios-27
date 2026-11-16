@@ -43,6 +43,7 @@ static struct wq_kevent_data *delivery_log[2048];
 static struct kevent64_s last_change;
 static void *(*start_manager)(void *);
 #define CHECK(c) do { ++checks; if (!(c)) { fprintf(stderr, "line %d: %s\n", __LINE__, #c); exit(1); } } while (0)
+static void libsimple_lock_init(int *value) { *value = 0; }
 static void libsimple_lock_lock(int *value) { CHECK(*value == 0); *value = 1; }
 static void libsimple_lock_unlock(int *value) { CHECK(*value == 1); *value = 0; }
 static void __simple_printf(const char *format, ...) { (void)format; ++logs; }
@@ -149,6 +150,12 @@ int main(void) {
     CHECK(start_manager(NULL) == NULL);
     CHECK(darling_kevent_workq(NULL, 0, NULL, 0, 0) == -EIO);
     CHECK(logs == 0);
+    init_lock = note_lock = slot_lock = 1;
+    darling_kevent_workq_fork_child();
+    CHECK(init_lock == 0 && note_lock == 0 && slot_lock == 0);
+    CHECK(queue == -1 && failed == 0 && free_slots == WORKQ_SLOTS);
+    for (unsigned i = 0; i < WORKQ_NOTES; ++i) CHECK(!notes[i].used);
+    for (unsigned i = 0; i < WORKQ_SLOTS; ++i) CHECK(!slots[i].used);
     printf("KEVENT_WORKQUEUE_OK checks=%u\n", checks);
     return 0;
 }

@@ -1,0 +1,296 @@
+diff --git a/darling/src/libsystem_kernel/emulation/CMakeLists.txt b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+--- a/darling/src/libsystem_kernel/emulation/CMakeLists.txt
++++ b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+@@ -222,6 +222,7 @@
+ 	src/xnu_syscall/bsd/impl/process/fork.c
+ 	src/xnu_syscall/bsd/impl/process/getpriority.c
+ 	src/xnu_syscall/bsd/impl/process/posix_spawn.c
++	src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c
+ 	src/xnu_syscall/bsd/impl/process/setpriority.c
+ 	src/xnu_syscall/bsd/impl/process/task_inspect_for_pid.c
+ 	src/xnu_syscall/bsd/impl/process/task_read_for_pid.c
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/process/spawn_lifecycle.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/process/spawn_lifecycle.h
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/process/spawn_lifecycle.h
+@@ -0,0 +1,9 @@
++#ifndef DARLING_SPAWN_LIFECYCLE_H
++#define DARLING_SPAWN_LIFECYCLE_H
++struct darling_spawn_handlers {
++	void (*prepare)(void);
++	void (*parent)(void);
++	void (*child)(void);
++};
++int darling_spawn_get_handlers(struct darling_spawn_handlers* handlers);
++#endif
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c
+@@ -0,0 +1,68 @@
++#include <darling/emulation/xnu_syscall/bsd/impl/process/spawn_lifecycle.h>
++#include <_libkernel_init.h>
++#include <sys/errno.h>
++extern _libkernel_functions_t _libkernel_functions;
++
++#ifndef VARIANT_DYLD
++#include <libsimple/lock.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_workq.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_id.h>
++#include "spawn_hooks.h"
++
++extern int _mach_fork_parent(void);
++extern int _mach_fork_child(void);
++extern void kqueue_atfork(void);
++static struct darling_spawn_hooks external_hooks;
++static libsimple_lock_t hooks_lock = LIBSIMPLE_LOCK_INITIALIZER;
++static int hooks_ready;
++
++static void mach_parent(void) { _mach_fork_parent(); }
++static void mach_child(void) { _mach_fork_child(); }
++static void reset_async_state(void)
++{
++	darling_kevent_workq_fork_child();
++	darling_workloop_fork_child();
++}
++static void native_state_child(void)
++{
++	kqueue_atfork();
++	reset_async_state();
++}
++static void tagged_child(void)
++{
++	_libkernel_functions->posix_spawn_child();
++	reset_async_state();
++}
++static void external_prepare(void) { darling_spawn_hooks_prepare(&external_hooks); }
++static void external_parent(void) { darling_spawn_hooks_parent(&external_hooks, mach_parent); }
++static void external_child(void) { darling_spawn_hooks_child(&external_hooks, mach_child, native_state_child); }
++#endif
++
++int darling_spawn_get_handlers(struct darling_spawn_handlers* handlers)
++{
++	_libkernel_functions_t callbacks = _libkernel_functions;
++	if (!callbacks) return -ENOSYS;
++	if (callbacks->posix_spawn_prepare && callbacks->posix_spawn_parent && callbacks->posix_spawn_child) {
++		handlers->prepare = callbacks->posix_spawn_prepare;
++		handlers->parent = callbacks->posix_spawn_parent;
++#ifndef VARIANT_DYLD
++		handlers->child = tagged_child;
++#else
++		handlers->child = callbacks->posix_spawn_child;
++#endif
++		return 0;
++	}
++#ifndef VARIANT_DYLD
++	if (darling_uses_external_libsystem()) {
++		libsimple_lock_lock(&hooks_lock);
++		if (!hooks_ready) hooks_ready = darling_spawn_hooks_resolve(&external_hooks, callbacks->dlsym);
++		int ready = hooks_ready;
++		libsimple_lock_unlock(&hooks_lock);
++		if (ready) {
++			*handlers = (struct darling_spawn_handlers){external_prepare, external_parent, external_child};
++			return 0;
++		}
++	}
++#endif
++	return -ENOSYS;
++}
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h
+@@ -0,0 +1,80 @@
++/* Internal-library fork ordering from Apple Libsystem-1356 (c23b5118).
++ * posix_spawn uses the library handlers without pthread_atfork callbacks.
++ * Dispatch queues are not forked into a usable child: the child execs or exits.
++ */
++#ifndef DARLING_SPAWN_HOOKS_H
++#define DARLING_SPAWN_HOOKS_H
++#include <stddef.h>
++
++enum darling_spawn_hook_id {
++	DSH_DLOPEN_PREPARE, DSH_DLOPEN_PARENT, DSH_DLOPEN_CHILD,
++	DSH_CONFIG_PREPARE, DSH_CONFIG_PARENT, DSH_CONFIG_CHILD,
++	DSH_XPC_PREPARE, DSH_XPC_PARENT, DSH_XPC_CHILD,
++	DSH_DYLD_PREPARE, DSH_DYLD_PARENT, DSH_DYLD_CHILD,
++	DSH_MALLOC_PREPARE, DSH_MALLOC_PARENT, DSH_MALLOC_CHILD,
++	DSH_CRYPTO_PREPARE, DSH_CRYPTO_PARENT, DSH_CRYPTO_CHILD,
++	DSH_LIBC_PREPARE, DSH_LIBC_PARENT, DSH_LIBC_CHILD,
++	DSH_PTHREAD_PREPARE, DSH_PTHREAD_PARENT, DSH_PTHREAD_CHILD,
++	DSH_ASL_CHILD, DSH_NOTIFY_CHILD, DSH_TRACE_CHILD, DSH_COUNT
++};
++struct darling_spawn_hooks {
++	void (*hook[DSH_COUNT])(void);
++	void (*coreservices_child)(void);
++};
++
++static inline int darling_spawn_hooks_resolve(struct darling_spawn_hooks* output,
++		void* (*lookup)(void*, const char*))
++{
++	static const char* const names[DSH_COUNT] = {
++		"_dyld_dlopen_atfork_prepare", "_dyld_dlopen_atfork_parent", "_dyld_dlopen_atfork_child",
++		"_libSC_info_fork_prepare", "_libSC_info_fork_parent", "_libSC_info_fork_child",
++		"xpc_atfork_prepare", "xpc_atfork_parent", "xpc_atfork_child",
++		"_dyld_atfork_prepare", "_dyld_atfork_parent", "_dyld_fork_child",
++		"_malloc_fork_prepare", "_malloc_fork_parent", "_malloc_fork_child",
++		"cc_atfork_prepare", "cc_atfork_parent", "cc_atfork_child",
++		"_libc_fork_prepare", "_libc_fork_parent", "_libc_fork_child",
++		"_pthread_atfork_prepare", "_pthread_atfork_parent", "_pthread_atfork_child",
++		"_asl_fork_child", "_notify_fork_child", "_libtrace_fork_child"
++	};
++	struct darling_spawn_hooks complete = {0};
++	if (!lookup) return 0;
++	for (size_t i = 0; i < DSH_COUNT; i++) {
++		complete.hook[i] = (void (*)(void))lookup((void*)-2, names[i]);
++		if (!complete.hook[i]) return 0;
++	}
++	complete.coreservices_child = (void (*)(void))lookup((void*)-2, "_libcoreservices_fork_child");
++	*output = complete;
++	return 1;
++}
++
++static inline void darling_spawn_hooks_prepare(const struct darling_spawn_hooks* table)
++{
++	const unsigned char order[] = {DSH_DLOPEN_PREPARE, DSH_CONFIG_PREPARE, DSH_XPC_PREPARE,
++		DSH_DYLD_PREPARE, DSH_MALLOC_PREPARE, DSH_CRYPTO_PREPARE, DSH_LIBC_PREPARE, DSH_PTHREAD_PREPARE};
++	for (size_t i = 0; i < sizeof(order); i++) table->hook[order[i]]();
++}
++
++static inline void darling_spawn_hooks_parent(const struct darling_spawn_hooks* table,
++		void (*mach_parent)(void))
++{
++	const unsigned char order[] = {DSH_PTHREAD_PARENT, DSH_CRYPTO_PARENT, DSH_MALLOC_PARENT,
++		DSH_LIBC_PARENT, DSH_DYLD_PARENT, DSH_XPC_PARENT, DSH_CONFIG_PARENT, DSH_DLOPEN_PARENT};
++	for (size_t i = 0; i < sizeof(order); i++) table->hook[order[i]]();
++	mach_parent();
++}
++
++static inline void darling_spawn_hooks_child(const struct darling_spawn_hooks* table,
++		void (*mach_child)(void), void (*native_state_child)(void))
++{
++	mach_child();
++	const unsigned char early[] = {DSH_PTHREAD_CHILD, DSH_CRYPTO_CHILD, DSH_MALLOC_CHILD,
++		DSH_LIBC_CHILD, DSH_DYLD_CHILD};
++	for (size_t i = 0; i < sizeof(early); i++) table->hook[early[i]]();
++	// Pthread, allocator and loader state is usable before native kqueue teardown.
++	native_state_child();
++	if (table->coreservices_child) table->coreservices_child();
++	const unsigned char late[] = {DSH_ASL_CHILD, DSH_NOTIFY_CHILD, DSH_XPC_CHILD,
++		DSH_TRACE_CHILD, DSH_CONFIG_CHILD, DSH_DLOPEN_CHILD};
++	for (size_t i = 0; i < sizeof(late); i++) table->hook[late[i]]();
++}
++#endif
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+@@ -1,4 +1,5 @@
+ #include <darling/emulation/xnu_syscall/bsd/impl/process/posix_spawn.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/process/spawn_lifecycle.h>
+ 
+ #include <stddef.h>
+ #include <stdint.h>
+@@ -51,15 +52,14 @@
+ {
+ 	int ret, my_pid;
+ 	int pipe[2] = { -1, -1 };
++	struct darling_spawn_handlers lifecycle;
+ 
+ 	if (desc && desc->attrp && desc->attrp->psa_flags & POSIX_SPAWN_SETEXEC)
+ 		goto no_fork;
+ 
+-	// A public libkernel callback table has no Darling fork hooks. Do not
+-	// interpret Apple's newer allocator callbacks as those private hooks.
+-	if (!_libkernel_functions || !_libkernel_functions->posix_spawn_prepare ||
+-		!_libkernel_functions->posix_spawn_parent || !_libkernel_functions->posix_spawn_child)
+-		return -ENOSYS;
++	// Resolve the active libSystem's lifecycle before taking any fork locks.
++	ret = darling_spawn_get_handlers(&lifecycle);
++	if (ret < 0) return ret;
+ 
+ 	ret = LINUX_SYSCALL(__NR_pipe2, pipe, LINUX_O_CLOEXEC);
+ 	if (ret < 0)
+@@ -70,7 +70,7 @@
+ 	// to make for the setup (e.g. dup2() file actions take libkqueue's locks, which only
+ 	// the child callback resets)
+ 
+-	_libkernel_functions->posix_spawn_prepare();
++	lifecycle.prepare();
+ 
+ 	if ((my_pid = sys_fork()) == 0)
+ 	{
+@@ -78,7 +78,7 @@
+ 		// close the reading side
+ 		close_internal(pipe[0]);
+ 
+-		_libkernel_functions->posix_spawn_child();
++		lifecycle.child();
+ 
+ no_fork:
+ 		if (desc && desc->attrp)
+@@ -370,7 +370,7 @@
+ 		// close the writing side
+ 		close_internal(pipe[1]);
+ 
+-		_libkernel_functions->posix_spawn_parent();
++		lifecycle.parent();
+ 
+ 		if (my_pid < 0)
+ 		{
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+@@ -9,4 +9,5 @@
+ 		struct kevent_qos_s* receipt);
+ int darling_kevent_workq_has_notes(uint64_t workloop);
+ int darling_kevent_workq_event_live(uint64_t workloop, const struct kevent_qos_s* event, uint64_t serial);
++void darling_kevent_workq_fork_child(void);
+ #endif
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h
+@@ -5,4 +5,5 @@
+ long sys_kevent_id(uint64_t id, const struct kevent_qos_s* changes, int nchanges,
+ 		struct kevent_qos_s* events, int nevents, void* data_out, unsigned long* data_available, unsigned int flags);
+ long darling_workloop_post(uint64_t id, const struct kevent_qos_s* event, uint64_t serial);
++void darling_workloop_fork_child(void);
+ #endif
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+@@ -262,6 +262,19 @@
+ 	return error ? error : __atomic_load_n(&failed, __ATOMIC_ACQUIRE);
+ }
+ 
++void darling_kevent_workq_fork_child(void)
++{
++	libsimple_lock_init(&init_lock);
++	libsimple_lock_init(&note_lock);
++	libsimple_lock_init(&slot_lock);
++	queue = -1;
++	failed = 0;
++	free_slots = WORKQ_SLOTS;
++	note_serial = 0;
++	for (int i = 0; i < WORKQ_NOTES; i++) notes[i].used = false;
++	for (int i = 0; i < WORKQ_SLOTS; i++) slots[i].used = false;
++}
++
+ long darling_kevent_workq(const struct kevent_qos_s* changes, int nchanges,
+ 		struct kevent_qos_s* events, int nevents, unsigned int flags)
+ {
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
+@@ -298,6 +298,12 @@
+ 	libsimple_lock_unlock(&wl_lock);
+ 	if (schedule) wl_schedule(loop);
+ }
++void darling_workloop_fork_child(void)
++{
++	libsimple_lock_init(&wl_lock);
++	for (int i = 0; i < WL_COUNT; i++) loops[i].used = false;
++	for (int i = 0; i < WL_WAITERS; i++) waiters[i].used = false;
++}
+ #else
+ long sys_kevent_id(uint64_t id, const struct kevent_qos_s* changes, int nchanges,
+ 		struct kevent_qos_s* events, int nevents, void* data_out, unsigned long* data_available, unsigned int flags)

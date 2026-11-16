@@ -47,6 +47,7 @@ git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/int
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0023-native-workloops.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0024-prefix-private-state-directories.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0025-restricted-interface-addresses.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0026-simulator-spawn-lifecycle.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -122,8 +123,8 @@ being read as Darling's private `dyld_func_lookup` callback, entering malloc
 before allocator initialization. Patches eleven through thirteen tag
 Darling-owned tables, normalize only the public versioned prefix for Apple
 tables, and pass the host lookup separately through the loader's `apple[]`
-parameters. An external table without Darling's fork hooks returns `ENOSYS`
-for forking `posix_spawn`; that bridge remains to be integrated.
+parameters. External tables initially return `ENOSYS` for forking
+`posix_spawn`; patch twenty-six adds their separate lifecycle bridge.
 The handoff retains a complete contiguous `KernelArgs` vector: modern
 `dyld_sim` reconstructs it from `argv[-2]` rather than using the separately
 passed `apple` pointer. Pointer formatting uses no early libc locale state.
@@ -332,8 +333,26 @@ ownership and mode checks are the next integration step.
 `tests/guest-spawn.c` provides the separate spawn lifecycle contract: eight
 children, pipe file actions, signal attributes, an expected failed exec, and
 suppressed user atfork callbacks while another thread allocates. The native
-Darling-library control passes; the Apple-library baseline returns `ENOSYS`
-and identifies the remaining external lifecycle bridge.
+Darling-library control passes; the original Apple-library baseline returns
+`ENOSYS` and identifies the external lifecycle gap addressed below.
+
+Patch twenty-six resolves the active Apple libraries' internal fork hooks
+before spawning, follows their initialization/lock ordering, and resets
+native kqueue, event-manager and workloop state in the child. Tagged Darling
+callbacks retain their existing path. The host contract checks the actual
+resolver, callback selection, missing hooks and ordering:
+
+```sh
+python3 integration/darling/tests/spawn-lifecycle.py --fetch-pinned
+```
+
+All 698 lifecycle checks pass under ASan/UBSan, together with the updated
+event/workloop reset contracts. The same eight-child native spawn workload
+now passes under both Darling and Apple libraries: 152 checks each, actual
+child statuses, file actions, signal state and suppressed user atfork hooks.
+With the plist staged as mode 0600 and the simulator using the app's matching
+UID/GID 10033, real `launchd_sim` starts `xpcproxy_sim`. The next observed fault
+is Apple's cached libdyld TLS resolver reading Linux's zero `TPIDRRO_EL0`.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
