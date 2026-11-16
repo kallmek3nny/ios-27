@@ -42,6 +42,8 @@ git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integrati
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0018-pthread-workgroup-callbacks.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0019-kernel-bootargs.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0020-native-kevent-workqueue.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0021-simulator-workqueue-features.patch
+git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0022-pthread-workqueue-capabilities.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -266,8 +268,22 @@ The native `tests/guest-kevent-workqueue.c` workload passes on the S25+,
 including a callback blocked on another event, event-manager serialization,
 and callback-driven rearming. `tests/guest-workqueue.c` also completes 384
 callbacks across six QoS classes and both overcommit modes, reusing workers.
-Both tests and the original startup guest exit zero. The simulator capability
-mask has not yet been enabled; the service-port handshake remains pending.
+Both tests and the original startup guest exit zero. These contracts first
+passed with a zero advertised feature mask.
+
+Patches twenty-one and twenty-two recognize external libSystem initialization
+and advertise the tested workqueue subset (`0x40000053`), returning default
+main-thread QoS metadata. The host pthread initializer accepts workqueue
+capabilities independently of optional thread-control SPIs. The callback ABI
+contract now passes 44 checks.
+
+Both original workqueue probes were also built as platform-7 ARM64 executables
+and run through Apple's `dyld_sim` and iOS 27 libSystem on the S25+. They exit
+zero: 384 worker callbacks with the advertised mask, plus asynchronous event
+delivery, manager serialization and rearming. Their 19 and 18 imports were
+checked against the runtime before linking. `launchd_sim` now passes the
+earlier capability trap and stops on the separate, unimplemented `kevent_id`
+workloop API. The simulator service-port handshake remains pending.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

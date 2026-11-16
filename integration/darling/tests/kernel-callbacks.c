@@ -17,6 +17,7 @@ static void *find(void *handle, const char *name) { (void)handle; (void)name; re
 int main(void) {
     struct _libkernel_functions in = {0}, out;
     in.version = DARLING_LIBKERNEL_FUNCTIONS_VERSION;
+    CHECK(!darling_kernel_callbacks_are_external(&in));
     in.dlsym = find;
     in.dyld_func_lookup = lookup;
     in.posix_spawn_prepare = hook;
@@ -31,6 +32,7 @@ int main(void) {
      * No unmarked public table may confer any private callback. */
     for (unsigned version = 4; version <= 6; ++version) {
         in.version = version;
+        CHECK(darling_kernel_callbacks_are_external(&in));
         darling_kernel_callbacks_normalize(&out, &in, NULL);
         CHECK(out.version == 4 && out.dlsym == find);
         CHECK(!out.dyld_func_lookup && !out.posix_spawn_prepare && !out.posix_spawn_parent && !out.posix_spawn_child);
@@ -72,6 +74,9 @@ int main(void) {
     free(bounded);
     darling_kernel_callbacks_normalize(&out, NULL, NULL);
     CHECK(out.version == 0 && !out.dlsym && !out.dyld_func_lookup);
+    CHECK(!darling_kernel_callbacks_are_external(NULL));
+    in.version = 0;
+    CHECK(!darling_kernel_callbacks_are_external(&in));
     printf("KERNEL_CALLBACKS_OK checks=%u\n", checks);
     return 0;
 }
