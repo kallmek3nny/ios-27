@@ -9,10 +9,10 @@
   "candidates": [
     {
       "branch": "codex/cpu-limit-expiry",
-      "sha": "11115b61aac5eccda28b5959fd744bfa850164a9",
+      "sha": "7c9322592552bd07d64dca7137156cdd78988d3d",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
       "pr_number": 126,
-      "ci": "passing_checks",
+      "ci": "running",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 100,
       "possibly_truncated": true,
@@ -1142,7 +1142,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase24b-native-lifecycle-20261029",
@@ -1195,7 +1195,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 1,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       }
     ],
     "libsystem-pthread": [
@@ -1257,7 +1257,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 2,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "phase24e-native-application-startup",
@@ -1349,7 +1349,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/126",
         "source_files": 6,
         "fixture_files": 0,
-        "ci": "passing_checks"
+        "ci": "running"
       },
       {
         "branch": "agent/phase27a-objc-integrated-startup-20261105",
@@ -2199,5 +2199,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-16T01:34:19Z"
+  "observed_at": "2026-11-16T01:45:12Z"
 }
