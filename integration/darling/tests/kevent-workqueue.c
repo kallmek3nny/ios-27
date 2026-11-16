@@ -12,10 +12,15 @@
 
 #define EV_ADD 1
 #define EV_DELETE 2
+#define EV_ENABLE 4
+#define EV_DISABLE 8
+#define EV_CLEAR 0x20
 #define EV_ONESHOT 0x10
 #define EV_RECEIPT 0x40
 #define EV_UDATA_SPECIFIC 0x100
 #define EV_ERROR 0x4000
+#define EVFILT_TIMER (-7)
+#define EVFILT_USER (-10)
 struct kevent64_s {
     uint64_t ident; int16_t filter; uint16_t flags; uint32_t fflags;
     int64_t data; uint64_t udata, ext[2];
@@ -33,6 +38,9 @@ static unsigned checks, kernel_changes, creates, closes, logs;
 static int create_error, kernel_error, request_error;
 static struct wq_kevent_data *pending;
 static int pending_priority;
+static unsigned requests;
+static struct wq_kevent_data *delivery_log[2048];
+static struct kevent64_s last_change;
 static void *(*start_manager)(void *);
 #define CHECK(c) do { ++checks; if (!(c)) { fprintf(stderr, "line %d: %s\n", __LINE__, #c); exit(1); } } while (0)
 static void libsimple_lock_lock(int *value) { CHECK(*value == 0); *value = 1; }
@@ -51,12 +59,15 @@ static long sys_kevent64(int fd, const struct kevent64_s *input, int ninput,
     CHECK(ninput == 1 && noutput == 1 && input && output && timeout);
     CHECK((input->flags & EV_RECEIPT) && timeout->tv_sec == 0 && timeout->tv_nsec == 0);
     ++kernel_changes;
+    last_change = *input;
     *output = *input; output->flags = EV_ERROR; output->data = kernel_error;
     return 1;
 }
 long sys_workq_kernreturn(int operation, void *item, int count, int priority) {
     CHECK(operation == WQOPS_QUEUE_REQTHREAD_FOR_KEVENT && count == 1 && item);
     pending = item; pending_priority = priority;
+    CHECK(requests < sizeof(delivery_log) / sizeof(delivery_log[0]));
+    delivery_log[requests++] = item;
     return request_error;
 }
 int sem_down(int *value, int timeout) { CHECK(*value > 0 && timeout == -1); --*value; return 1; }
@@ -75,8 +86,16 @@ static void *lookup(void *handle, const char *name) {
     CHECK(0); return NULL;
 }
 void *(*_dlsym)(void *, const char *);
+long darling_workloop_post(uint64_t id, const struct kevent_qos_s *event, uint64_t serial);
+#ifndef WORKLOOPS_TEST
+long darling_workloop_post(uint64_t id, const struct kevent_qos_s *event, uint64_t serial) {
+    (void)id; (void)event; (void)serial;
+    CHECK(0); return -ENOTSUP;
+}
+#endif
 #include KEVENT_WORKQUEUE_BLOCK
 
+#ifndef WORKLOOPS_TEST
 int main(void) {
     CHECK(darling_kevent_workq(NULL, 1, NULL, 0, 0) == -EINVAL);
     CHECK(darling_kevent_workq(NULL, -1, NULL, 0, 0) == -EINVAL);
@@ -133,3 +152,4 @@ int main(void) {
     printf("KEVENT_WORKQUEUE_OK checks=%u\n", checks);
     return 0;
 }
+#endif

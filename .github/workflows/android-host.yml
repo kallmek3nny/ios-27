@@ -34,6 +34,8 @@ jobs:
         run: python3 integration/darling/tests/pthread-workgroup.py --fetch-pinned
       - name: Verify asynchronous kevent workqueue
         run: python3 integration/darling/tests/kevent-workqueue.py --fetch-pinned
+      - name: Verify native workloops
+        run: python3 integration/darling/tests/workloops.py --fetch-pinned
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

@@ -8,7 +8,8 @@
   },
   "patched_files": [
     "darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h",
-    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c"
+    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c",
+    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c"
   ],
   "protocol_reference": {
     "repository": "x86sim/darling-xnu",

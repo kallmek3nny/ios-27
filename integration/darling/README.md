@@ -44,6 +44,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0020-native-kevent-workqueue.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0021-simulator-workqueue-features.patch
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0022-pthread-workqueue-capabilities.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0023-native-workloops.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -284,6 +285,25 @@ delivery, manager serialization and rearming. Their 19 and 18 imports were
 checked against the runtime before linking. `launchd_sim` now passes the
 earlier capability trap and stops on the separate, unimplemented `kevent_id`
 workloop API. The simulator service-port handshake remains pending.
+
+Patch twenty-three implements the native `kevent_id` workloop path, including
+worker handoff, request consumption, debounce receipts, ownership, synchronous
+wait/wake and returned-change errors. Timer and user-event identifiers are
+isolated between workloops, with generation checks for canceled registrations.
+The bounded registry reuses quiescent entries.
+
+```sh
+python3 integration/darling/tests/workloops.py --fetch-pinned
+```
+
+The actual workloop code passes 8,042 ASan/UBSan checks with 282 synthetic
+deliveries; the revised event adapter passes 8,288. The native
+`tests/guest-workloops.c` contract passes 62 checks with five callbacks under
+both Darling's libraries and Apple's iOS simulator libraries, including
+same-ID timers on separate loops and a genuinely blocked sync waiter.
+The Apple-library probe reports feature mask `0x400000d3`. The event regression
+and startup guest still exit zero. `launchd_sim` now passes dispatch startup
+and reports an absent `/private/var/tmp` directory in its new prefix.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

@@ -1,0 +1,603 @@
+diff --git a/darling/src/libsystem_kernel/emulation/CMakeLists.txt b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+--- a/darling/src/libsystem_kernel/emulation/CMakeLists.txt
++++ b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+@@ -170,6 +170,7 @@
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent64.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
++	src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kqueue.c
+ 	src/xnu_syscall/bsd/impl/misc/abort_with_payload.c
+ 	src/xnu_syscall/bsd/impl/misc/mremap_encrypted.c
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+@@ -1,6 +1,12 @@
+ #ifndef DARLING_KEVENT_WORKQ_H
+ #define DARLING_KEVENT_WORKQ_H
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_qos.h>
++#include <stdint.h>
+ long darling_kevent_workq(const struct kevent_qos_s* changes, int nchanges,
+ 		struct kevent_qos_s* events, int nevents, unsigned int flags);
++long darling_kevent_workq_initialize(void);
++long darling_kevent_workq_apply(uint64_t workloop, const struct kevent_qos_s* change,
++		struct kevent_qos_s* receipt);
++int darling_kevent_workq_has_notes(uint64_t workloop);
++int darling_kevent_workq_event_live(uint64_t workloop, const struct kevent_qos_s* event, uint64_t serial);
+ #endif
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h
+@@ -0,0 +1,8 @@
++#ifndef DARLING_KEVENT_ID_H
++#define DARLING_KEVENT_ID_H
++#include <stdint.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_qos.h>
++long sys_kevent_id(uint64_t id, const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, void* data_out, unsigned long* data_available, unsigned int flags);
++long darling_workloop_post(uint64_t id, const struct kevent_qos_s* event, uint64_t serial);
++#endif
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
+@@ -19,6 +19,7 @@
+ 	int flags;
+ 	struct wq_kevent_data* next;
+ 	void (*returned)(struct wq_kevent_data*);
++	int workloop;
+ };
+ 
+ struct timespec;
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+@@ -4,6 +4,7 @@
+  * Protocol reference: x86sim/darling-xnu 84b524f3, kevent_qos.c.
+  */
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_workq.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_id.h>
+ #include <sys/errno.h>
+ 
+ #ifndef VARIANT_DYLD
+@@ -31,6 +32,7 @@
+ 
+ struct workq_note {
+ 	uint64_t ident, udata;
++	uint64_t workloop, kernel_ident, serial;
+ 	int16_t filter;
+ 	uint16_t flags;
+ 	int32_t qos;
+@@ -47,6 +49,7 @@
+ static libsimple_lock_t note_lock = LIBSIMPLE_LOCK_INITIALIZER;
+ static libsimple_lock_t slot_lock = LIBSIMPLE_LOCK_INITIALIZER;
+ static int queue = -1, failed, free_slots = WORKQ_SLOTS;
++static uint64_t note_serial;
+ 
+ static struct kevent64_s to_64(const struct kevent_qos_s* event)
+ {
+@@ -62,29 +65,42 @@
+ 		.udata = event->udata, .ext = {event->ext[0], event->ext[1], 0, 0} };
+ }
+ 
+-static int find_note(uint64_t ident, int16_t filter, uint64_t udata, bool exact)
++static int find_note(uint64_t workloop, uint64_t ident, int16_t filter, uint64_t udata, bool exact)
+ {
+ 	for (int i = 0; i < WORKQ_NOTES; i++) {
+-		if (notes[i].used && notes[i].ident == ident && notes[i].filter == filter &&
++		if (notes[i].used && notes[i].workloop == workloop && notes[i].ident == ident && notes[i].filter == filter &&
+ 				(!exact || notes[i].udata == udata))
+ 			return i;
+ 	}
+ 	return -1;
+ }
+ 
+-static long apply_change(const struct kevent_qos_s* change, struct kevent_qos_s* receipt)
++long darling_kevent_workq_apply(uint64_t workloop, const struct kevent_qos_s* change,
++		struct kevent_qos_s* receipt)
+ {
+ 	struct timespec zero = {0};
+ 	struct kevent64_s input = to_64(change), output = {0};
+ 	long error = 0;
+ 	libsimple_lock_lock(&note_lock);
+-	int index = find_note(change->ident, change->filter, change->udata,
++	int index = find_note(workloop, change->ident, change->filter, change->udata,
+ 			(change->flags & EV_UDATA_SPECIFIC) != 0);
++	bool existing = index >= 0;
++	uint64_t serial = 0;
++	if (workloop && !existing && !(change->flags & EV_ADD)) error = ENOENT;
+ 	if ((change->flags & EV_ADD) && index < 0) {
+ 		for (int i = 0; i < WORKQ_NOTES; i++) {
+ 			if (!notes[i].used) { index = i; break; }
+ 		}
+ 		if (index < 0) error = ENOMEM;
++	}
++	if (!error && (change->flags & EV_ADD)) {
++		if (note_serial == 0x0fffffffffffffffull) error = EOVERFLOW;
++		else serial = ++note_serial;
++	}
++	if (!error && workloop) {
++		if (existing) input.ident = notes[index].kernel_ident;
++		else if (change->filter == EVFILT_TIMER || change->filter == EVFILT_USER)
++			input.ident = 0x7000000000000000ull | serial;
+ 	}
+ 	if (!error) {
+ 		input.flags |= EV_RECEIPT;
+@@ -98,14 +114,43 @@
+ 		else if (change->flags & EV_ADD) {
+ 			notes[index] = (struct workq_note){ .ident = change->ident,
+ 				.udata = change->udata, .filter = change->filter,
+-				.flags = change->flags, .qos = change->qos, .used = true };
+-		} else if (change->qos) notes[index].qos = change->qos;
++				.flags = change->flags, .qos = change->qos, .used = true,
++				.workloop = workloop, .kernel_ident = input.ident, .serial = serial };
++		} else {
++			if (change->qos) notes[index].qos = change->qos;
++			if (change->flags & EV_DISABLE) notes[index].flags |= EV_DISABLE;
++			if (change->flags & EV_ENABLE) notes[index].flags &= ~EV_DISABLE;
++		}
+ 	}
+ 	libsimple_lock_unlock(&note_lock);
+ 	*receipt = *change;
+ 	receipt->flags = EV_ERROR;
+ 	receipt->data = error;
+ 	return -error;
++}
++
++static long apply_change(const struct kevent_qos_s* change, struct kevent_qos_s* receipt)
++{
++	return darling_kevent_workq_apply(0, change, receipt);
++}
++
++int darling_kevent_workq_has_notes(uint64_t workloop)
++{
++	int found = 0;
++	libsimple_lock_lock(&note_lock);
++	for (int i = 0; i < WORKQ_NOTES; i++)
++		if (notes[i].used && notes[i].workloop == workloop) { found = 1; break; }
++	libsimple_lock_unlock(&note_lock);
++	return found;
++}
++
++int darling_kevent_workq_event_live(uint64_t workloop, const struct kevent_qos_s* event, uint64_t serial)
++{
++	libsimple_lock_lock(&note_lock);
++	int index = find_note(workloop, event->ident, event->filter, event->udata, true);
++	int live = index >= 0 && notes[index].serial == serial && !(notes[index].flags & EV_DISABLE);
++	libsimple_lock_unlock(&note_lock);
++	return live;
+ }
+ 
+ static void returned(struct wq_kevent_data* delivery)
+@@ -164,18 +209,35 @@
+ 		for (int i = 0; i < count; i++) {
+ 			struct kevent_qos_s event = to_qos(&events[i]);
+ 			libsimple_lock_lock(&note_lock);
+-			int index = find_note(event.ident, event.filter, event.udata, true);
++			int index = -1;
++			for (int n = 0; n < WORKQ_NOTES; n++) {
++				if (notes[n].used && !(notes[n].flags & EV_DISABLE) && notes[n].kernel_ident == event.ident &&
++						notes[n].filter == event.filter && notes[n].udata == event.udata) { index = n; break; }
++			}
++			struct workq_note note = {0};
+ 			if (index >= 0) {
+-				event.qos = notes[index].qos;
+-				if (notes[index].flags & EV_ONESHOT) notes[index].used = false;
++				note = notes[index];
++				event.qos = note.qos;
++				event.ident = note.ident;
++				if (!note.workloop && (note.flags & EV_ONESHOT)) notes[index].used = false;
+ 			}
+ 			libsimple_lock_unlock(&note_lock);
+-			if (index >= 0) deliver(&event);
+-		}
+-	}
+-}
+-
+-static long initialize(void)
++			if (index >= 0) {
++				if (note.workloop) {
++					long error = darling_workloop_post(note.workloop, &event, note.serial);
++					if (error) __atomic_store_n(&failed, (int)error, __ATOMIC_RELEASE);
++					if (note.flags & EV_ONESHOT) {
++						libsimple_lock_lock(&note_lock);
++						if (notes[index].serial == note.serial) notes[index].used = false;
++						libsimple_lock_unlock(&note_lock);
++					}
++				} else deliver(&event);
++			}
++		}
++	}
++}
++
++long darling_kevent_workq_initialize(void)
+ {
+ 	long error = 0;
+ 	libsimple_lock_lock(&init_lock);
+@@ -206,7 +268,7 @@
+ 	(void)flags;
+ 	if (nchanges < 0 || nevents < 0 || (nchanges && !changes) || (nevents && !events))
+ 		return -EINVAL;
+-	long error = initialize();
++	long error = darling_kevent_workq_initialize();
+ 	if (error) return error;
+ 	int count = 0;
+ 	for (int i = 0; i < nchanges; i++) {
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
+@@ -80,6 +80,7 @@
+ #define WQOPS_THREAD_RETURN 4
+ #define WQOPS_THREAD_SETCONC  8
+ #define WQOPS_THREAD_KEVENT_RETURN 0x40
++#define WQOPS_THREAD_WORKLOOP_RETURN 0x100
+ #define WQOPS_QUEUE_NEWSPISUPP  0x10
+ #define WQOPS_QUEUE_REQTHREADS  0x20
+ #define WQOPS_QUEUE_REQTHREADS2    0x30
+@@ -367,6 +368,7 @@
+ 	if (ev != NULL)
+ 	{
+ 		ev->flags = flags | WQ_FLAG_THREAD_KEVENT;
++		if (ev->workloop) ev->flags |= WQ_FLAG_THREAD_WORKLOOP;
+ 		ev->next = NULL;
+ 		*wq_kevent_tail = ev;
+ 		wq_kevent_tail = &ev->next;
+@@ -520,6 +522,7 @@
+ 	// item is only used with WQOPS_QUEUE_ADD
+ 	switch (options)
+ 	{
++		case WQOPS_THREAD_WORKLOOP_RETURN:
+ 		case WQOPS_THREAD_KEVENT_RETURN:
+ 			complete_kevent((struct kevent_qos_s*) item, affinity);
+ 			// fall through
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
+@@ -24,6 +24,7 @@
+ #define PTHREAD_FEATURE_QOS_DEFAULT 0x40000000
+ #define WORKQ_FEATURE_FINEPRIO 0x02
+ #define WORKQ_FEATURE_KEVENT 0x40
++#define WORKQ_FEATURE_WORKLOOP 0x80
+ 
+ struct _pthread_registration_data {
+ 	uint64_t version;
+@@ -92,7 +93,7 @@
+ 
+ #ifndef VARIANT_DYLD
+ 	if (darling_uses_external_libsystem())
+-		return WORKQ_FEATURE_KEVENT | WORKQ_FEATURE_FINEPRIO |
++		return WORKQ_FEATURE_KEVENT | WORKQ_FEATURE_WORKLOOP | WORKQ_FEATURE_FINEPRIO |
+ 			PTHREAD_FEATURE_QOS_MAINTENANCE | PTHREAD_FEATURE_DISPATCHFUNC | PTHREAD_FEATURE_QOS_DEFAULT;
+ #endif
+ 	return /* WORKQ_FEATURE_KEVENT | WORKQ_FEATURE_FINEPRIO | PTHREAD_FEATURE_QOS_MAINTENANCE 
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c
+@@ -33,6 +33,7 @@
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent64.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_qos.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_id.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kqueue.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/misc/abort_with_payload.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/misc/mremap_encrypted.h>
+@@ -448,6 +449,7 @@
+ 	[369] = sys_kevent64,
+ 	[372] = sys_thread_selfid,
+ 	[374] = sys_kevent_qos,
++	[375] = sys_kevent_id,
+ 	[381] = sys___mac_syscall,
+ 	[394] = sys_pselect,
+ 	[395] = sys_pselect_nocancel,
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c
+@@ -0,0 +1,307 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later
++ * Native workloop service, following XNU's public kevent_id protocol and
++ * x86sim/darling-xnu 84b524f393341a2c10e4a537e670d7a0f13c2148.
++ * A loop owns its in-flight batch; pending events and sync waiters are bounded.
++ */
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_id.h>
++#include <sys/errno.h>
++
++#ifndef VARIANT_DYLD
++#include <stddef.h>
++#include <stdbool.h>
++#include <libsimple/lock.h>
++#include <pthread/tsd_private.h>
++#include <darling/emulation/common/tsd.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_workq.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h>
++
++#undef memmove
++extern void* memmove(void*, const void*, __SIZE_TYPE__);
++#define WL_COUNT 256
++#define WL_PENDING 64
++#define WL_WAITERS 64
++#define WL_DEFAULT_PRIORITY 0x8ff
++#define WL_MANAGER_PRIORITY 0x02000000
++
++struct wl_batch {
++	uint64_t id;
++	struct kevent_qos_s events[WL_PENDING + 1];
++};
++_Static_assert(offsetof(struct wl_batch, events) == sizeof(uint64_t), "workloop ID prefix");
++struct workloop {
++	uint64_t id;
++	bool used, servicing, has_request, request_active;
++	unsigned users;
++	uint32_t owner, priority;
++	int count, failed;
++	struct kevent_qos_s request, pending[WL_PENDING];
++	struct wq_kevent_data delivery;
++	struct wl_batch batch;
++};
++struct wl_waiter {
++	uint64_t loop, ident;
++	bool used, blocked, deleted;
++	int woken, sem;
++};
++static struct workloop loops[WL_COUNT];
++static struct wl_waiter waiters[WL_WAITERS];
++static libsimple_lock_t wl_lock = LIBSIMPLE_LOCK_INITIALIZER;
++
++static uint32_t wl_self(void)
++{
++	return (uint32_t)(uintptr_t)_pthread_getspecific_direct(_PTHREAD_TSD_SLOT_MACH_THREAD_SELF) & ~3u;
++}
++
++static bool wl_idle(const struct workloop* loop)
++{
++	if (loop->users || loop->servicing || loop->has_request || loop->count || loop->owner)
++		return false;
++	for (int i = 0; i < WL_WAITERS; i++)
++		if (waiters[i].used && waiters[i].loop == loop->id) return false;
++	return !darling_kevent_workq_has_notes(loop->id);
++}
++
++static struct workloop* wl_find(uint64_t id, bool create)
++{
++	struct workloop* available = NULL;
++	for (int i = 0; i < WL_COUNT; i++) {
++		if (loops[i].used && loops[i].id == id) return &loops[i];
++		if (!available && (!loops[i].used || wl_idle(&loops[i]))) available = &loops[i];
++	}
++	if (!create || !available) return NULL;
++	available->id = id;
++	available->used = true;
++	available->servicing = available->has_request = available->request_active = false;
++	available->users = available->owner = 0;
++	available->count = available->failed = 0;
++	return available;
++}
++
++static void wl_returned(struct wq_kevent_data* delivery);
++
++static bool wl_bind(struct workloop* loop)
++{
++	bool request = loop->has_request && loop->request_active;
++	if (loop->failed || loop->servicing || loop->owner || (!request && !loop->count)) return false;
++	int count = 0;
++	if (request) {
++		loop->request_active = false;
++		loop->batch.events[count] = loop->request;
++		loop->batch.events[count].flags &= ~(EV_ADD | EV_DELETE | EV_ERROR | EV_RECEIPT);
++		loop->batch.events[count++].data = 0;
++	}
++	memmove(&loop->batch.events[count], loop->pending, loop->count * sizeof(loop->pending[0]));
++	count += loop->count;
++	loop->count = 0;
++	loop->batch.id = loop->id;
++	loop->delivery = (struct wq_kevent_data){ .events = loop->batch.events, .nevents = count,
++		.capacity = WL_PENDING + 1, .returned = wl_returned, .workloop = 1 };
++	loop->priority = loop->has_request && loop->request.qos ? loop->request.qos : WL_DEFAULT_PRIORITY;
++	loop->priority &= ~WL_MANAGER_PRIORITY;
++	loop->servicing = true;
++	return true;
++}
++
++static void wl_schedule(struct workloop* loop)
++{
++	long result = sys_workq_kernreturn(WQOPS_QUEUE_REQTHREAD_FOR_KEVENT, &loop->delivery, 1, loop->priority);
++	if (result) {
++		libsimple_lock_lock(&wl_lock);
++		loop->failed = (int)-result;
++		loop->servicing = false;
++		libsimple_lock_unlock(&wl_lock);
++	}
++}
++
++static void wl_purge(struct workloop* loop, const struct kevent_qos_s* change)
++{
++	int count = 0;
++	for (int i = 0; i < loop->count; i++) {
++		const struct kevent_qos_s* event = &loop->pending[i];
++		if (event->ident == change->ident && event->filter == change->filter &&
++				(!(change->flags & EV_UDATA_SPECIFIC) || event->udata == change->udata)) continue;
++		loop->pending[count++] = *event;
++	}
++	loop->count = count;
++}
++
++long darling_workloop_post(uint64_t id, const struct kevent_qos_s* event, uint64_t serial)
++{
++	bool schedule = false;
++	long result = 0;
++	libsimple_lock_lock(&wl_lock);
++	struct workloop* loop = wl_find(id, false);
++	if (darling_kevent_workq_event_live(id, event, serial)) {
++		if (!loop) result = -ENOENT;
++		else if (loop->count == WL_PENDING) result = -(loop->failed = ENOBUFS);
++		else {
++			loop->pending[loop->count++] = *event;
++			schedule = wl_bind(loop);
++		}
++	}
++	libsimple_lock_unlock(&wl_lock);
++	if (schedule) wl_schedule(loop);
++	return result;
++}
++
++static int wl_debounce(struct workloop* loop, struct kevent_qos_s* change)
++{
++	const uint64_t* address = (const uint64_t*)(uintptr_t)change->ext[EV_EXTIDX_WL_ADDR];
++	bool stale = false;
++	uint32_t owner = loop->owner;
++	if (address) {
++		if ((uintptr_t)address & (sizeof(*address) - 1)) return EFAULT;
++		uint64_t value = __atomic_load_n(address, __ATOMIC_ACQUIRE);
++		stale = ((value ^ change->ext[EV_EXTIDX_WL_VALUE]) & change->ext[EV_EXTIDX_WL_MASK]) != 0;
++		change->ext[EV_EXTIDX_WL_VALUE] = value;
++		if (!stale && (change->fflags & NOTE_WL_DISCOVER_OWNER) && ((uint32_t)value & ~3u))
++			owner = (uint32_t)value & ~3u;
++	}
++	if ((change->fflags & NOTE_WL_END_OWNERSHIP) && owner == wl_self()) owner = 0;
++	loop->owner = owner;
++	return stale ? ESTALE : 0;
++}
++
++static int wl_change(struct workloop* loop, struct kevent_qos_s* change)
++{
++	uint32_t command = change->fflags & NOTE_WL_COMMANDS_MASK;
++	struct wl_waiter* waiter = NULL;
++	bool schedule;
++	int error = 0;
++	libsimple_lock_lock(&wl_lock);
++	if (command == NOTE_WL_SYNC_IPC) {
++		// Donation is an advisory scheduling hint; Mach IPC uses its own transport.
++	} else if ((error = wl_debounce(loop, change)) != 0) {
++		if (error == ESTALE && (change->fflags & NOTE_WL_IGNORE_ESTALE)) error = 0;
++	} else if (command == NOTE_WL_THREAD_REQUEST) {
++		if (change->flags & (EV_DELETE | EV_DISABLE)) {
++			loop->has_request = loop->request_active = false;
++		} else if ((change->flags & EV_ADD) || loop->has_request) {
++			int32_t qos = loop->request.qos;
++			bool preserve_qos = loop->has_request && !(change->flags & EV_ADD) && !(change->fflags & NOTE_WL_UPDATE_QOS);
++			loop->request = *change;
++			if (preserve_qos) loop->request.qos = qos;
++			loop->has_request = loop->request_active = true;
++		} else error = ENOENT;
++	} else if (command == NOTE_WL_SYNC_WAIT || command == NOTE_WL_SYNC_WAKE) {
++		struct wl_waiter* entry = NULL;
++		for (int i = 0; i < WL_WAITERS; i++) {
++			if (waiters[i].used && !waiters[i].deleted && waiters[i].loop == loop->id && waiters[i].ident == change->ident) {
++				entry = &waiters[i]; break;
++			}
++		}
++		if (!entry && (change->flags & EV_ADD) && !(change->flags & EV_DELETE)) {
++			for (int i = 0; i < WL_WAITERS; i++) {
++				if (!waiters[i].used) {
++					entry = &waiters[i];
++					*entry = (struct wl_waiter){ .loop = loop->id, .ident = change->ident, .used = true };
++					break;
++				}
++			}
++		}
++		if (!entry) error = (change->flags & EV_ADD) ? ENOMEM : ENOENT;
++		else if (change->flags & EV_DELETE) {
++			if (!__atomic_exchange_n(&entry->woken, 1, __ATOMIC_RELEASE)) sem_up(&entry->sem);
++			if (entry->blocked) entry->deleted = true;
++			else entry->used = false;
++		} else if (command == NOTE_WL_SYNC_WAKE) {
++			if (!__atomic_exchange_n(&entry->woken, 1, __ATOMIC_RELEASE)) sem_up(&entry->sem);
++		} else if (!__atomic_load_n(&entry->woken, __ATOMIC_RELAXED)) {
++			if (entry->blocked) error = EBUSY;
++			else { waiter = entry; entry->blocked = true; }
++		}
++	} else if (command) error = ENOTSUP;
++	schedule = wl_bind(loop);
++	libsimple_lock_unlock(&wl_lock);
++	if (schedule) wl_schedule(loop);
++	if (waiter) {
++		while (!__atomic_load_n(&waiter->woken, __ATOMIC_ACQUIRE)) sem_down(&waiter->sem, -1);
++		libsimple_lock_lock(&wl_lock);
++		waiter->blocked = false;
++		if (waiter->deleted) waiter->used = false;
++		libsimple_lock_unlock(&wl_lock);
++	}
++	return error;
++}
++
++long sys_kevent_id(uint64_t id, const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, void* data_out, unsigned long* data_available, unsigned int flags)
++{
++	(void)data_out; (void)data_available;
++	unsigned allowed = KEVENT_FLAG_WORKLOOP | KEVENT_FLAG_IMMEDIATE | KEVENT_FLAG_ERROR_EVENTS |
++		KEVENT_FLAG_STACK_DATA | KEVENT_FLAG_PARKING | KEVENT_FLAG_DYNAMIC_KQ_MUST_EXIST | KEVENT_FLAG_DYNAMIC_KQ_MUST_NOT_EXIST;
++	if (!id || !(flags & KEVENT_FLAG_WORKLOOP) || (flags & ~allowed) || nchanges < 0 || nevents < 0 ||
++			(nchanges && !changes) || (nevents && !events) ||
++			((flags & KEVENT_FLAG_DYNAMIC_KQ_MUST_EXIST) && (flags & KEVENT_FLAG_DYNAMIC_KQ_MUST_NOT_EXIST))) return -EINVAL;
++	long result = darling_kevent_workq_initialize();
++	if (result) return result;
++	libsimple_lock_lock(&wl_lock);
++	struct workloop* loop = wl_find(id, false);
++	bool exists = loop && !wl_idle(loop);
++	if ((flags & KEVENT_FLAG_DYNAMIC_KQ_MUST_EXIST) && !exists) result = -ENOENT;
++	else if ((flags & KEVENT_FLAG_DYNAMIC_KQ_MUST_NOT_EXIST) && exists) result = -EEXIST;
++	else if (!(loop = wl_find(id, true))) result = -ENOMEM;
++	else if (loop->failed) result = -loop->failed;
++	if (!result) loop->users++;
++	libsimple_lock_unlock(&wl_lock);
++	if (result) return result;
++	int count = 0;
++	for (int i = 0; i < nchanges; i++) {
++		struct kevent_qos_s change = changes[i], receipt;
++		int error;
++		if (change.filter == EVFILT_WORKLOOP) error = wl_change(loop, &change);
++		else {
++			error = (int)-darling_kevent_workq_apply(id, &change, &receipt);
++			if (!error && (change.flags & (EV_DELETE | EV_DISABLE))) {
++				libsimple_lock_lock(&wl_lock);
++				wl_purge(loop, &change);
++				libsimple_lock_unlock(&wl_lock);
++			}
++		}
++		if (error || (change.flags & EV_RECEIPT)) {
++			if (count == nevents) { result = error ? -error : -ENOBUFS; break; }
++			events[count] = change;
++			events[count].flags |= EV_ERROR;
++			events[count++].data = error;
++		}
++	}
++	libsimple_lock_lock(&wl_lock);
++	if (!result && !(flags & KEVENT_FLAG_ERROR_EVENTS) && count < nevents) {
++		int take = loop->count < nevents - count ? loop->count : nevents - count;
++		memmove(&events[count], loop->pending, take * sizeof(loop->pending[0]));
++		memmove(loop->pending, &loop->pending[take], (loop->count - take) * sizeof(loop->pending[0]));
++		loop->count -= take;
++		count += take;
++	}
++	loop->users--;
++	libsimple_lock_unlock(&wl_lock);
++	return result ? result : count;
++}
++
++static void wl_returned(struct wq_kevent_data* delivery)
++{
++	struct workloop* loop = (struct workloop*)((char*)delivery - offsetof(struct workloop, delivery));
++	struct kevent_qos_s errors[WL_PENDING + 1];
++	long count = delivery->nevents ? sys_kevent_id(loop->id, delivery->events, delivery->nevents,
++		errors, WL_PENDING + 1, NULL, NULL, KEVENT_FLAG_WORKLOOP | KEVENT_FLAG_ERROR_EVENTS) : 0;
++	libsimple_lock_lock(&wl_lock);
++	if (loop->owner == wl_self()) loop->owner = 0;
++	if (count < 0) loop->failed = (int)-count;
++	else if (count > WL_PENDING - loop->count) loop->failed = ENOBUFS;
++	else if (count) {
++		memmove(&loop->pending[count], loop->pending, loop->count * sizeof(loop->pending[0]));
++		memmove(loop->pending, errors, count * sizeof(errors[0]));
++		loop->count += (int)count;
++	}
++	loop->servicing = false;
++	bool schedule = wl_bind(loop);
++	libsimple_lock_unlock(&wl_lock);
++	if (schedule) wl_schedule(loop);
++}
++#else
++long sys_kevent_id(uint64_t id, const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, void* data_out, unsigned long* data_available, unsigned int flags)
++{
++	return -ENOSYS;
++}
++#endif

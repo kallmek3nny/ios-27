@@ -40,7 +40,7 @@ def fetch_pinned(root):
         expected = manifest['files']['src/external/xnu/' + relative]
         if sha256((root / relative).read_bytes()).hexdigest() != expected:
             raise ValueError('patched workqueue hash mismatch: ' + relative)
-    print('Pinned workqueue header and both patched hashes match', flush=True)
+    print(f'Pinned workqueue header and {len(paths)} patched hashes match', flush=True)
 
 
 def main():
