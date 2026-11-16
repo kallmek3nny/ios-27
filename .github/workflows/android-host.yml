@@ -30,6 +30,8 @@ jobs:
           java -cp "$RUNNER_TEMP/frame-tests" org.ios27.host.TouchStreamTest
       - name: Verify simulator thread-register adapter
         run: python3 integration/darling/tests/simulator-thread-registers.py --fetch-pinned
+      - name: Verify pthread workgroup callback bridge
+        run: python3 integration/darling/tests/pthread-workgroup.py --fetch-pinned
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

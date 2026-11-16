@@ -267,6 +267,25 @@
     "simulator_service_port_received": false,
     "foreground_used": false
   },
+  "simulator_pthread_workgroups": {
+    "api_reference": "apple-oss-distributions/libpthread@42d026df5b07825070f60134b980a1ec2552dfee",
+    "host_asan_ubsan_checks_passed": 74,
+    "patches_reapplied_from_pinned_originals": 18,
+    "resulting_source_hashes_matched": 34,
+    "device_deployed": true,
+    "device_pthread_sha256": "e788b0a102cbad39bff2d693f765580f524a0a3aaf0bf5ad3a17eb469fe70791",
+    "device_dyld_sha256": "c3ea4d3235aaea528a10afa49893e65763a8e0411429b6545d1707f601d8b498",
+    "native_guest_regression_exit_code": 0,
+    "simulator_registration_call_returned": true,
+    "simulator_system_and_swift_initializers_returned": true,
+    "launchd_sim_entry_verified": true,
+    "launchd_sim_entry_file_offset": "0xf898",
+    "launchd_sim_captured_caller_file_offset": "0xf990",
+    "next_failure": "launchd_sim cannot query kern.bootargs; reporting that failure traps because pthread advertises no QoS Maintenance support",
+    "next_failure_pc": "0x1e6452b58",
+    "simulator_service_port_received": false,
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
   "rendered_ios_frame": false

@@ -39,6 +39,7 @@ git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0015-tsd-user-address-mask.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0016-simulator-thread-registers.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0017-simulator-private-code-pages.patch
+git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0018-pthread-workgroup-callbacks.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -210,6 +211,31 @@ The mapped-page harness also models Android's observed `execmod` refusal,
 checks temporary-copy cleanup on mapping failures, and verifies that adapting
 two sections sharing a page preserves both edits. The old in-place path fails
 this regression contract.
+
+Patch eighteen backports the pthread workgroup callback ABI from Apple's
+open-source libpthread-539. Dispatch installs its process-lifetime callback
+table once; `pthread_create_with_workgroup_np` forwards every argument and the
+result to dispatch, which owns thread creation and workgroup membership.
+Registration rejects pre-v1 tables before reading a callback field and
+accepts the known prefix of newer tables. Repeated registration retains the
+upstream client-crash behavior.
+
+```sh
+python3 integration/darling/tests/pthread-workgroup.py --fetch-pinned
+# Or: --source /path/to/pinned/darling/src/external/libpthread
+```
+
+The host ASan/UBSan harness compiles the actual function bodies and table
+declaration. Its 74 checks cover forwarding, returned errors and thread
+handles, registration order, truncated older tables and a future-version
+prefix. The pinned source and API reference are recorded in
+`tests/pthread-workgroup-inputs.json`; this contract also runs in Android CI.
+On the S25+, registration now returns, system and Swift initializers finish,
+and execution reaches `launchd_sim`'s main entry. The native guest regression
+still exits zero. `launchd_sim` next fails its `kern.bootargs` query; its error
+report then traps because the host pthread backend advertises no maintenance
+QoS support. This is startup progress, with the service-port handshake and
+SpringBoard entry still unverified.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
