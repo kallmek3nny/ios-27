@@ -1,0 +1,43 @@
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_kern.c
+@@ -34,6 +34,7 @@
+ 	_KERN_MEMORYSTATUS_LEVEL,
+ 	_KERN_NUM_FILES,
+ 	_KERN_HV_VMM_PRESENT,
++	_KERN_BOOTARGS,
+ 
+ 	_KERN_SEMMNS = 1000,
+ };
+@@ -43,6 +44,7 @@
+ static sysctl_handler(handle_procargs32);
+ static sysctl_handler(handle_argmax);
+ static sysctl_handler(handle_boottime);
++static sysctl_handler(handle_bootargs);
+ static sysctl_handler(handle_ostype);
+ static sysctl_handler(handle_hostname);
+ static sysctl_handler(handle_domainname);
+@@ -87,6 +89,7 @@
+ 	{ .oid = KERN_NETBOOT, .type = CTLTYPE_INT, .exttype = "I", .name = "netboot", .handler = handle_netboot },
+ 	{ .oid = KERN_SAFEBOOT, .type = CTLTYPE_INT, .exttype = "I", .name = "safeboot", .handler = handle_safeboot },
+ 	{ .oid = KERN_BOOTTIME, .type = CTLTYPE_STRUCT, .exttype = "S,timeval", .name = "boottime", .handler = handle_boottime },
++	{ .oid = _KERN_BOOTARGS, .type = CTLTYPE_STRING, .exttype = "S", .name = "bootargs", .handler = handle_bootargs },
+ 	{ .oid = KERN_OSTYPE, .type = CTLTYPE_STRING, .exttype = "S", .name = "ostype", .handler = handle_ostype },
+ 	{ .oid = KERN_HOSTNAME, .type = CTLTYPE_STRING, .exttype = "S", .name = "hostname", .handler = handle_hostname },
+ 	{ .oid = KERN_DOMAINNAME, .type = CTLTYPE_STRING, .exttype = "S", .name = "domainname", .handler = handle_domainname },
+@@ -246,6 +249,15 @@
+ 	value->tv_usec = 0;
+ 	*oldlen = sizeof(*value);
+ 	return 0;
++}
++
++sysctl_handler(handle_bootargs)
++{
++	if (_new != NULL || newlen != 0)
++		return -EPERM;
++	// Darling has no configured Darwin kernel boot arguments. An empty,
++	// NUL-terminated value lets launchd parse its normal default options.
++	return copyout_string("", (char*) old, oldlen);
+ }
+ 
+ sysctl_handler(handle_ostype)

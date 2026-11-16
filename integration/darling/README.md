@@ -40,6 +40,7 @@ git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0016-simulator-thread-registers.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0017-simulator-private-code-pages.patch
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0018-pthread-workgroup-callbacks.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0019-kernel-bootargs.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -236,6 +237,15 @@ still exits zero. `launchd_sim` next fails its `kern.bootargs` query; its error
 report then traps because the host pthread backend advertises no maintenance
 QoS support. This is startup progress, with the service-port handshake and
 SpringBoard entry still unverified.
+
+Patch nineteen exposes `kern.bootargs` as a read-only, empty, NUL-terminated
+string: this runtime has no configured Darwin kernel boot arguments.
+`tests/guest-bootargs.c` exercises the complete guest sysctl path, including
+size queries, named/numeric lookups, short buffers, and rejected writes.
+All 11 checks pass on the S25+ (the same binary fails with `ENOENT` before
+deployment), and the native startup guest still exits zero. `launchd_sim`
+passes its boot-argument query; normal startup logging now reaches the
+remaining dispatch workqueue capability failure.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

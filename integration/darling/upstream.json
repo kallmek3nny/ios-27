@@ -286,6 +286,25 @@
     "simulator_service_port_received": false,
     "foreground_used": false
   },
+  "simulator_kernel_bootargs": {
+    "patches_reapplied_from_pinned_originals": 19,
+    "resulting_source_hashes_matched": 35,
+    "device_deployed": true,
+    "value": "",
+    "read_only": true,
+    "native_contract_checks_passed": 11,
+    "native_contract_exit_code": 0,
+    "baseline_query_errno": 2,
+    "test_sha256": "37bf61aaecdd7290eb82952928d0c84ae800e8df35d93a5e6ac1b74facc8d5b0",
+    "device_kernel_sha256": "34c0b8f9399d9cc7c52ee5a83e05d601dac2a23ad7793caaee7a574c3704591f",
+    "device_dyld_sha256": "a17f8476b3c088a3fed8d5b735ad1f6d821ea641349af757ae86413d8ffd0157",
+    "native_guest_regression_exit_code": 0,
+    "launchd_sim_bootargs_query_passed": true,
+    "next_failure": "normal launchd_sim startup logging requires dispatch workqueues; pthread feature mask is zero",
+    "next_failure_pc": "0x1e6452b58",
+    "simulator_service_port_received": false,
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "springboard_entered": false,
   "rendered_ios_frame": false
