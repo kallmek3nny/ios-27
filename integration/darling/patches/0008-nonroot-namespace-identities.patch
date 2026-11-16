@@ -1,0 +1,313 @@
+diff --git a/src/startup/darling.c b/src/startup/darling.c
+index b8c84fe9..5a7b98ba 100644
+--- a/src/startup/darling.c
++++ b/src/startup/darling.c
+@@ -442,7 +442,7 @@ int main(int argc, char ** argv)
+ 			g_serverPath, &liveServer);
+ 		if (scan < 0)
+ 		{
+-			fprintf(stderr, "Cannot inspect existing Darling servers; refusing to reinitialize %s.\n", prefix);
++			fprintf(stderr, "Cannot inspect existing Darling servers; refusing to reinitialize %s: %s\n", prefix, strerror(errno));
+ 			return 1;
+ 		}
+ 		if (scan > 0)
+@@ -568,8 +568,10 @@ static void refuseContainerOfAnotherMode(pid_t pid)
+ 	struct stat userNs, mntNs;
+ 	char procPath[64];
+ 	int procfd, matches;
++	enum launcher_mode mode = g_mode;
+ 
+-	if (stat("/proc/self/ns/user", &userNs) != 0 || stat("/proc/self/ns/mnt", &mntNs) != 0)
++	if (mode != LAUNCHER_MODE_NONROOT
++		&& (stat("/proc/self/ns/user", &userNs) != 0 || stat("/proc/self/ns/mnt", &mntNs) != 0))
+ 	{
+ 		fprintf(stderr, "Cannot examine this process's namespaces: %s\n", strerror(errno));
+ 		exit(1);
+@@ -582,8 +584,20 @@ static void refuseContainerOfAnotherMode(pid_t pid)
+ 		fprintf(stderr, "The Darling container (process %d) exited. Try again.\n", (int) pid);
+ 		exit(1);
+ 	}
+-	matches = launcherServerRunsInMode(procfd, g_mode, &userNs, &mntNs);
++	if (mode == LAUNCHER_MODE_NONROOT)
++	{
++		int selfProcfd = open("/proc/self", O_PATH | O_DIRECTORY | O_CLOEXEC);
++		matches = selfProcfd < 0 ? -1 : launcherNonRootNamespacesMatch(procfd, selfProcfd);
++		int error = errno;
++		if (selfProcfd >= 0)
++			close(selfProcfd);
++		errno = error;
++	}
++	else
++		matches = launcherServerRunsInMode(procfd, mode, &userNs, &mntNs);
++	int modeError = errno;
+ 	close(procfd);
++	errno = modeError;
+ 
+ 	if (matches < 0)
+ 	{
+diff --git a/src/startup/launcher-server.c b/src/startup/launcher-server.c
+index d504061e..fbd18332 100644
+--- a/src/startup/launcher-server.c
++++ b/src/startup/launcher-server.c
+@@ -110,6 +110,54 @@ enum launcher_server_check launcherOpenServerMountNs(int procfd, const struct st
+ 	return LAUNCHER_SERVER_OK;
+ }
+ 
++static int namespaceLink(int procfd, const char* path, const char* kind, char identity[64])
++{
++	ssize_t length = readlinkat(procfd, path, identity, 64);
++	if (length < 0)
++		return -1;
++	if (length >= 64)
++	{
++		errno = ENAMETOOLONG;
++		return -1;
++	}
++	size_t start = strlen(kind);
++	if ((size_t)length < start + 2 || memcmp(identity, kind, start) != 0 || identity[length - 1] != ']')
++	{
++		errno = EINVAL;
++		return -1;
++	}
++	for (size_t i = start; i + 1 < (size_t)length; i++)
++	{
++		if (identity[i] < '0' || identity[i] > '9')
++		{
++			errno = EINVAL;
++			return -1;
++		}
++	}
++	identity[length] = '\0';
++	return 0;
++}
++
++int launcherNonRootNamespacesMatch(int procfd, int selfProcfd)
++{
++	char server[64], self[64];
++	// proc_pid_ns(5): equal type/inode link identities denote the same namespace.
++	if (namespaceLink(procfd, "ns/mnt", "mnt:[", server) != 0
++		|| namespaceLink(selfProcfd, "ns/mnt", "mnt:[", self) != 0)
++		return -1;
++	if (strcmp(server, self) != 0)
++		return 0;
++	int serverResult = namespaceLink(procfd, "ns/user", "user:[", server);
++	if (serverResult < 0 && errno != ENOENT)
++		return -1;
++	int selfResult = namespaceLink(selfProcfd, "ns/user", "user:[", self);
++	if (selfResult < 0 && errno != ENOENT)
++		return -1;
++	if (serverResult < 0 || selfResult < 0)
++		return serverResult < 0 && selfResult < 0;
++	return strcmp(server, self) == 0;
++}
++
+ int launcherServerRunsInMode(int procfd, enum launcher_mode mode,
+ 	const struct stat* userNs, const struct stat* mntNs)
+ {
+@@ -308,15 +356,14 @@ static bool parsePid(const char* name, pid_t* pid)
+ int launcherFindPrefixServer(const char* procPath, const char* prefix, uid_t uid,
+ 	const char* serverPath, pid_t* serverPid)
+ {
+-	struct stat serverExe, userNs, mntNs;
++	struct stat serverExe;
+ 	int procfd = -1, scanfd = -1;
+ 	DIR* procDir = NULL;
+ 	struct dirent* entry;
+ 	int result = 0;
+ 
+ 	*serverPid = 0;
+-	if (stat(serverPath, &serverExe) != 0 || stat("/proc/self/ns/user", &userNs) != 0
+-		|| stat("/proc/self/ns/mnt", &mntNs) != 0)
++	if (stat(serverPath, &serverExe) != 0)
+ 		return -1;
+ 
+ 	procfd = open(procPath, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+@@ -342,13 +389,12 @@ int launcherFindPrefixServer(const char* procPath, const char* prefix, uid_t uid
+ 		}
+ 		pid_t candidate;
+ 		struct stat exe;
+-		int processfd, cmdfd, commfd, nsfd = -1;
++		int processfd, cmdfd, commfd;
+ 		char cmdline[1024];
+ 		char comm[64];
+ 		char status[4096];
+ 		ssize_t length;
+ 		uid_t realUid;
+-		enum launcher_server_check check;
+ 
+ 		if (!parsePid(entry->d_name, &candidate))
+ 			continue;
+@@ -461,14 +507,21 @@ int launcherFindPrefixServer(const char* procPath, const char* prefix, uid_t uid
+ 
+ 		// Recheck the pinned process after reading cmdline. A vanished process
+ 		// is not a live server; a changed executable cannot be trusted.
+-		check = launcherOpenServerMountNs(processfd, &serverExe, &userNs, &mntNs, &nsfd);
+-		if (nsfd >= 0)
+-			close(nsfd);
++		// Presence is independent of the server's namespace mode. Opening its
++		// namespace handles is needed only when joining one, not to refuse a
++		// duplicate server with the same uid, executable and prefix arguments.
++		if (fstatat(processfd, "exe", &exe, 0) != 0)
++		{
++			int saved = errno;
++			close(processfd);
++			errno = saved;
++			if (errno == ENOENT || errno == ESRCH)
++				continue;
++			goto error;
++		}
+ 		close(processfd);
+-		if (check == LAUNCHER_SERVER_GONE || check == LAUNCHER_SERVER_WRONG_EXE)
++		if (!sameFile(&exe, &serverExe))
+ 			continue;
+-		if (check == LAUNCHER_SERVER_ERROR)
+-			goto error;
+ 		*serverPid = candidate;
+ 		result = 1;
+ 		break;
+diff --git a/src/startup/launcher-server.h b/src/startup/launcher-server.h
+index 1bade1a4..7986ae17 100644
+--- a/src/startup/launcher-server.h
++++ b/src/startup/launcher-server.h
+@@ -70,6 +70,12 @@ enum launcher_server_check launcherOpenServerMountNs(int procfd, const struct st
+ int launcherServerRunsInMode(int procfd, enum launcher_mode mode,
+ 	const struct stat* userNs, const struct stat* mntNs);
+ 
++// Compare the kernel's namespace-link identities without opening namespace
++// handles. Both mount links must exist and match. An absent user namespace is
++// accepted only when absent from both processes (kernels without CONFIG_USER_NS).
++// Returns 1 for a match, 0 for different namespaces, -1 on inspection errors.
++int launcherNonRootNamespacesMatch(int procfd, int selfProcfd);
++
+ // The rootless counterpart of launcherOpenServerMountNs(): the container's namespaces are the user
+ // namespace the rootless launcher made (a child of the launcher's own, owned by the launcher's
+ // effective uid) and a mount namespace of it. On LAUNCHER_SERVER_OK, *userfd and *mntfd are open
+diff --git a/tests/launcher/server.c b/tests/launcher/server.c
+index 5b0702f1..ca343399 100644
+--- a/tests/launcher/server.c
++++ b/tests/launcher/server.c
+@@ -218,6 +218,12 @@ static void test_root_effective_prefix_server(void)
+ 		CHECK(chown(processPath, 0, 0) == 0);
+ 	}
+ 
++	CHECK(launcherFindPrefixServer(procRoot, prefix, invokingUid, "/proc/self/exe", &found) == 1);
++	CHECK(found == 4242);
++	// Server presence must not require opening its namespace handles.
++	snprintf(path, sizeof(path), "%s/ns/mnt", processPath);
++	CHECK(unlink(path) == 0);
++	found = 0;
+ 	CHECK(launcherFindPrefixServer(procRoot, prefix, invokingUid, "/proc/self/exe", &found) == 1);
+ 	CHECK(found == 4242);
+ 
+@@ -340,6 +346,80 @@ static void test_orphaned_init_scan(void)
+ 	rmdir(procRoot);
+ }
+ 
++static void setNamespaceLink(const char* root, const char* process, const char* kind, const char* value)
++{
++	char path[512];
++	snprintf(path, sizeof(path), "%s/%s/ns/%s", root, process, kind);
++	unlink(path);
++	if (value)
++		CHECK(symlink(value, path) == 0);
++}
++
++static void test_nonroot_namespace_links(void)
++{
++	char root[] = "/tmp/darling-ns-links-XXXXXX";
++	char path[512];
++	char* made = mkdtemp(root);
++	CHECK(made != NULL);
++	if (!made)
++		return;
++	const char* directories[] = {"self", "self/ns", "server", "server/ns"};
++	for (size_t i = 0; i < sizeof(directories) / sizeof(directories[0]); i++)
++	{
++		snprintf(path, sizeof(path), "%s/%s", root, directories[i]);
++		CHECK(mkdir(path, 0700) == 0);
++	}
++	snprintf(path, sizeof(path), "%s/self", root);
++	int self = open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	snprintf(path, sizeof(path), "%s/server", root);
++	int server = open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++	CHECK(self >= 0 && server >= 0);
++	setNamespaceLink(root, "self", "mnt", "mnt:[11]");
++	setNamespaceLink(root, "server", "mnt", "mnt:[11]");
++	setNamespaceLink(root, "self", "user", "user:[21]");
++	setNamespaceLink(root, "server", "user", "user:[21]");
++	CHECK(launcherNonRootNamespacesMatch(server, self) == 1);
++	setNamespaceLink(root, "server", "mnt", "mnt:[12]");
++	CHECK(launcherNonRootNamespacesMatch(server, self) == 0);
++	setNamespaceLink(root, "server", "mnt", "mnt:[11]");
++	setNamespaceLink(root, "server", "user", "user:[22]");
++	CHECK(launcherNonRootNamespacesMatch(server, self) == 0);
++	setNamespaceLink(root, "server", "user", NULL);
++	CHECK(launcherNonRootNamespacesMatch(server, self) == 0);
++	setNamespaceLink(root, "self", "user", NULL);
++	CHECK(launcherNonRootNamespacesMatch(server, self) == 1);
++	setNamespaceLink(root, "server", "mnt", NULL);
++	CHECK(launcherNonRootNamespacesMatch(server, self) == -1 && errno == ENOENT);
++	const char* invalid[] = {"mnt:[]", "mnt:[x]", "user:[11]", "mnt:[11]tail", "mnt:[-1]"};
++	for (size_t i = 0; i < sizeof(invalid) / sizeof(invalid[0]); i++)
++	{
++		setNamespaceLink(root, "server", "mnt", invalid[i]);
++		CHECK(launcherNonRootNamespacesMatch(server, self) == -1 && errno == EINVAL);
++	}
++	char longId[100];
++	memset(longId, '1', sizeof(longId));
++	memcpy(longId, "mnt:[", 5);
++	longId[sizeof(longId) - 2] = ']';
++	longId[sizeof(longId) - 1] = '\0';
++	setNamespaceLink(root, "server", "mnt", longId);
++	CHECK(launcherNonRootNamespacesMatch(server, self) == -1 && errno == ENAMETOOLONG);
++	setNamespaceLink(root, "server", "mnt", "mnt:[11]");
++	setNamespaceLink(root, "server", "user", "not-a-namespace");
++	CHECK(launcherNonRootNamespacesMatch(server, self) == -1 && errno == EINVAL);
++	CHECK(launcherNonRootNamespacesMatch(-1, self) == -1 && errno == EBADF);
++	close(self);
++	close(server);
++	setNamespaceLink(root, "self", "mnt", NULL);
++	setNamespaceLink(root, "server", "mnt", NULL);
++	setNamespaceLink(root, "server", "user", NULL);
++	for (size_t i = sizeof(directories) / sizeof(directories[0]); i > 0; i--)
++	{
++		snprintf(path, sizeof(path), "%s/%s", root, directories[i - 1]);
++		CHECK(rmdir(path) == 0);
++	}
++	CHECK(rmdir(root) == 0);
++}
++
+ int main(int argc, char** argv)
+ {
+ 	if (argc == 4 && !strcmp(argv[2], "--hold"))
+@@ -380,6 +460,7 @@ int main(int argc, char** argv)
+ 	test_foreign_namespace();
+ 	test_prefix_server_scan();
+ 	test_root_effective_prefix_server();
++	test_nonroot_namespace_links();
+ 	test_orphaned_init_parsers();
+ 	test_orphaned_init_scan();
+ 
+diff --git a/tests/launcher/test-missing-init.py b/tests/launcher/test-missing-init.py
+--- a/tests/launcher/test-missing-init.py
++++ b/tests/launcher/test-missing-init.py
+@@ -27,9 +27,11 @@
+ 
+ header = r"""
+ #define _GNU_SOURCE
++#include <errno.h>
+ #include <fcntl.h>
+ #include <stdbool.h>
+ #include <stdio.h>
++#include <string.h>
+ #include <sys/types.h>
+ #include <unistd.h>
+ #define INSTALL_PREFIX "/opt/darling"
+@@ -45,6 +47,7 @@
+     const char *exe, pid_t *server) {
+     (void)proc; (void)p; (void)uid; (void)exe;
+     *server = detected_server;
++    if (scan_result < 0) errno = EACCES;
+     return scan_result;
+ }
+ static int orphan_result;

@@ -710,7 +710,29 @@ static void loader_filter_checks(void) {
 #else
 #define ARG0_LOW offsetof(struct seccomp_data, args)
 #endif
+#define ARG1_LOW (ARG0_LOW + sizeof(uint64_t))
 #define ANY_ARGUMENT (-1L)
+
+/* GCC defines __SANITIZE_ADDRESS__ and Clang reports the address_sanitizer
+ * feature when the build uses -fsanitize=address. */
+#if defined(__SANITIZE_ADDRESS__)
+#define IOS27_TEST_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define IOS27_TEST_ASAN 1
+#endif
+#endif
+
+/* Byte offsets of the two 32-bit halves of arg2 in struct seccomp_data. The
+ * ASan-only arg2 test in inject_answer only asks whether both are zero, so
+ * byte order does not matter. ARG2_STEPS counts its instructions. */
+#define ARG2_WORD0 (offsetof(struct seccomp_data, args) + 2u * sizeof(uint64_t))
+#define ARG2_WORD1 (ARG2_WORD0 + 4u)
+#if defined(IOS27_TEST_ASAN)
+#define ARG2_STEPS 5u
+#else
+#define ARG2_STEPS 0u
+#endif
 
 typedef struct {
     long syscall_number; /* NO_INJECTION, or the syscall answered by seccomp */
@@ -792,8 +814,10 @@ static int ambient_capability_available(void) {
 #define LAUNCHER_PERSONA 2
 #define LAUNCHER_STACK_UNLIMITED 3
 #define LAUNCHER_STACK_LARGE 4
-/* A finite RLIMIT_STACK soft limit above IOS27_LOADER_STACK_LIMIT. */
+#define LAUNCHER_STACK_ASAN_LARGE 10
+/* Finite RLIMIT_STACK soft limits above IOS27_LOADER_STACK_LIMIT. */
 #define TEST_LARGE_STACK ((rlim_t)(2u * IOS27_LOADER_STACK_LIMIT))
+#define TEST_ASAN_LARGE_STACK ((rlim_t)(4u * IOS27_LOADER_STACK_LIMIT))
 /* A persona bit the supervisor's child must clear. Native 64-bit exec on
  * arm64 and x86_64 already clears READ_IMPLIES_EXEC, but an ordinary
  * execveat keeps ADDR_NO_RANDOMIZE. */
@@ -895,13 +919,14 @@ static int scheduling_policy_available(long policy) {
 #define TEST_LARGE_CPU ((rlim_t)(2u * IOS27_LOADER_CPU_LIMIT))
 #define TEST_SMALL_CPU ((rlim_t)(IOS27_LOADER_CPU_LIMIT / 2u))
 
-/* Set both RLIMIT_CPU limits of the calling process to limit and read them
- * back. Without privilege a hard limit can only be lowered (getrlimit(2)),
- * so a current hard limit below limit fails. The RLIMIT_STACK soft limit is
- * first lowered to IOS27_LOADER_STACK_LIMIT when it is above it, which also
- * needs no privilege, so the loader's earlier stack read-back cannot be the
- * check that fails a CPU-limit case. */
-static int hold_cpu_limit(rlim_t limit) {
+/* Set the RLIMIT_CPU soft and hard limits of the calling process to soft
+ * and hard and read them back. Without privilege a hard limit can only be
+ * lowered (getrlimit(2)), so a current hard limit below hard fails, and
+ * setrlimit refuses a soft limit above the hard limit. The RLIMIT_STACK soft
+ * limit is first lowered to IOS27_LOADER_STACK_LIMIT when it is above it,
+ * which also needs no privilege, so the loader's earlier stack read-back
+ * cannot be the check that fails a CPU-limit case. */
+static int hold_cpu_limits(rlim_t soft, rlim_t hard) {
     struct rlimit stack, cpu;
     if (getrlimit(RLIMIT_STACK, &stack)) return -1;
     if (stack.rlim_cur == RLIM_INFINITY ||
@@ -910,12 +935,18 @@ static int hold_cpu_limit(rlim_t limit) {
         if (setrlimit(RLIMIT_STACK, &stack)) return -1;
     }
     if (getrlimit(RLIMIT_CPU, &cpu) ||
-        (cpu.rlim_max != RLIM_INFINITY && cpu.rlim_max < limit))
+        (cpu.rlim_max != RLIM_INFINITY && cpu.rlim_max < hard))
         return -1;
-    cpu.rlim_cur = limit;
-    cpu.rlim_max = limit;
+    cpu.rlim_cur = soft;
+    cpu.rlim_max = hard;
     if (setrlimit(RLIMIT_CPU, &cpu) || getrlimit(RLIMIT_CPU, &cpu)) return -1;
-    return cpu.rlim_cur == limit && cpu.rlim_max == limit ? 0 : -1;
+    return cpu.rlim_cur == soft && cpu.rlim_max == hard ? 0 : -1;
+}
+
+/* Set both RLIMIT_CPU limits of the calling process to limit, as
+ * hold_cpu_limits does. */
+static int hold_cpu_limit(rlim_t limit) {
+    return hold_cpu_limits(limit, limit);
 }
 
 /* Try hold_cpu_limit in a throwaway child. Hosts whose RLIMIT_CPU hard
@@ -936,18 +967,51 @@ static int cpu_limit_available(rlim_t limit) {
  * unless ANY_ARGUMENT, arg0's low 32 bits (a prctl option or a prlimit64
  * PID) must match; a zero mask matches every arg0. The filter is inherited
  * across fork and execveat, so callers install it only in a separate
- * launcher process. NO_INJECTION installs nothing. */
-static void inject_answer(loader_case answer) {
+ * launcher process. NO_INJECTION installs nothing. prlimit64 answers also
+ * match the selected resource, so an unrelated CPU-limit failure cannot
+ * masquerade as a successful stack-limit rejection (or vice versa).
+ *
+ * ASan builds answer prlimit64 only when arg2, new_limit, is not NULL: the
+ * setrlimit calls are answered and the getrlimit calls run. The filter
+ * reaches the ASan ios27-loader through execveat, and the ASan runtime
+ * reads RLIMIT_STACK with getrlimit before main. A faked success leaves
+ * that struct unwritten, so the runtime can fail its AddrIsInStack CHECK
+ * and exit before the loader reports anything (I3b t-caa2a3). The
+ * supervisor's child still reads the raised limit and its clamp is still
+ * faked, so every case expects the same report. Other builds answer every
+ * matching prlimit64 call, which also covers a getrlimit that claims
+ * success without writing its buffer. */
+static void inject_answer(loader_case answer, int resource) {
     const uint32_t mask =
         answer.first_argument == ANY_ARGUMENT ? 0u : UINT32_MAX;
+    const uint32_t resource_mask =
+        answer.syscall_number == SYS_prlimit64 ? UINT32_MAX : 0u;
+#if defined(IOS27_TEST_ASAN)
+    /* OR-ed into arg2's first half: 0 keeps the NULL test, 1 skips it. */
+    const uint32_t any_new_limit =
+        answer.syscall_number == SYS_prlimit64 ? 0u : 1u;
+#endif
     struct sock_filter code[] = {
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                 (uint32_t)answer.syscall_number, 0, 4),
+                 (uint32_t)answer.syscall_number, 0, 7u + ARG2_STEPS),
         BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG0_LOW),
         BPF_STMT(BPF_ALU | BPF_AND | BPF_K, mask),
         BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
-                 (uint32_t)answer.first_argument & mask, 0, 1),
+                 (uint32_t)answer.first_argument & mask, 0, 4u + ARG2_STEPS),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG1_LOW),
+        BPF_STMT(BPF_ALU | BPF_AND | BPF_K, resource_mask),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,
+                 (uint32_t)resource & resource_mask, 0, 1u + ARG2_STEPS),
+#if defined(IOS27_TEST_ASAN)
+        /* Answer a nonzero first half, or any syscall but prlimit64. Else a
+         * zero second half means a NULL new_limit, and the call runs. */
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG2_WORD0),
+        BPF_STMT(BPF_ALU | BPF_OR | BPF_K, any_new_limit),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0u, 0, 2),
+        BPF_STMT(BPF_LD | BPF_W | BPF_ABS, ARG2_WORD1),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, 0u, 1, 0),
+#endif
         BPF_STMT(BPF_RET | BPF_K,
                  SECCOMP_RET_ERRNO | (uint32_t)answer.injected_errno),
         BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW)
@@ -983,7 +1047,7 @@ static void fork_cpu_limit_case(loader_case test, int launcher_mode) {
             assert(!hold_cpu_limit(TEST_LARGE_CPU));
         if (launcher_mode == LAUNCHER_CPU_SMALL)
             assert(!hold_cpu_limit(TEST_SMALL_CPU));
-        inject_answer(test);
+        inject_answer(test, RLIMIT_CPU);
         memset(&result, 0xff, sizeof(result));
         if (!test.setup_errno) {
             assert(!ios27_process_supervise(return_value, &value, &options,
@@ -1053,6 +1117,8 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
             assert(!hold_stack_limit(RLIM_INFINITY));
         if (launcher_mode == LAUNCHER_STACK_LARGE)
             assert(!hold_stack_limit(TEST_LARGE_STACK));
+        if (launcher_mode == LAUNCHER_STACK_ASAN_LARGE)
+            assert(!hold_stack_limit(TEST_ASAN_LARGE_STACK));
         if (launcher_mode == LAUNCHER_SCHED_BATCH)
             assert(!hold_scheduling_policy(IOS27_SCHED_BATCH));
         if (launcher_mode == LAUNCHER_SCHED_REALTIME)
@@ -1065,7 +1131,10 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
             assert(!hold_cpu_limit(TEST_SMALL_CPU));
         assert(!ios27_launch_payload_create(image, sizeof(image), &context,
                                             &payload, error, sizeof(error)));
-        inject_answer(test);
+        inject_answer(test,
+            launcher_mode == LAUNCHER_STACK_UNLIMITED ||
+            launcher_mode == LAUNCHER_STACK_LARGE ||
+            launcher_mode == LAUNCHER_STACK_ASAN_LARGE ? RLIMIT_STACK : RLIMIT_CPU);
         memset(&result, 0xff, sizeof(result));
         assert(ios27_process_supervise_exec(loader, payload, &options, &result,
                                             error, sizeof(error)) == -1);
@@ -1076,6 +1145,10 @@ static void loader_landlock_case(const char *loader_path, loader_case test,
                            test.setup_errno);
         else
             (void)snprintf(expected, sizeof(expected), "%s", LOADER_STAGE);
+        if (strcmp(error, expected))
+            fprintf(stderr, "loader case (setup errno %d, launcher mode %d): "
+                    "got \"%s\", expected \"%s\"\n",
+                    test.setup_errno, launcher_mode, error, expected);
         assert(!strcmp(error, expected));
         assert(!close(payload) && !close(loader));
         no_children();
@@ -1095,6 +1168,20 @@ int main(int argc, char **argv) {
     int no_new_privs = prctl(PR_GET_NO_NEW_PRIVS, 0ul, 0ul, 0ul, 0ul);
     int seccomp = prctl(PR_GET_SECCOMP, 0ul, 0ul, 0ul, 0ul);
     pid_t parent = getpid();
+#if defined(IOS27_TEST_ASAN)
+    /* The ASan runtime calls sigaltstack inside a forked guest before a
+     * noreturn call. The mandatory guest seccomp filter forbids that syscall
+     * and kills the guest, so the fork-runner RETURNED assertions cannot hold
+     * here. The filters stay as they are. The fork-runner cases, the launch
+     * payload checks and the stage-one filter checks are compiled but
+     * skipped, and the suite reports a CTest skip at the end. The exec-mode
+     * loader cases still run: the ASan ios27-loader leaves its noreturn paths
+     * uninstrumented (I3b t-caa2a3), so its setup and architecture reports
+     * still reach the supervisor once the loader filter is on. UBSan-only
+     * builds run the whole suite. */
+    assert(no_new_privs >= 0 && seccomp >= 0);
+    goto loader_exec_cases;
+#endif
     assert(no_new_privs >= 0 && seccomp >= 0);
     for (size_t i = 0u; i < sizeof(values) / sizeof(values[0]); ++i) {
         int value = values[i];
@@ -1216,6 +1303,9 @@ int main(int argc, char **argv) {
     }
     launch_payload_checks();
     loader_filter_checks();
+#if defined(IOS27_TEST_ASAN)
+loader_exec_cases:
+#endif
     {
         /* Host Landlock ABI, queried without side effects. restrict_self
          * answers only matter once the loader's version query succeeds. */
@@ -1300,11 +1390,34 @@ int main(int argc, char **argv) {
         for (size_t m = 0u; m < sizeof(modes) / sizeof(modes[0]); ++m) {
             if (!stack_limit_available(limits[m])) continue;
             ++exercised;
-            for (size_t i = 0u; i < sizeof(raised) / sizeof(raised[0]); ++i)
-                loader_landlock_case(argv[1], raised[i], modes[m]);
+            for (size_t i = 0u; i < sizeof(raised) / sizeof(raised[0]); ++i) {
+                int mode = modes[m];
+#if defined(IOS27_TEST_ASAN)
+                /* A real unlimited stack can make ASan's pre-main shadow
+                 * setup re-exec with ASLR disabled. The loader's exec fd
+                 * is deliberately CLOEXEC, so that runtime path can die
+                 * before any report. Keep the real unlimited clamp case;
+                 * only its faked-clamp rejection uses a finite 32 MiB
+                 * limit, distinct from the 16 MiB case below. Plain/UBSan
+                 * retain the real unlimited rejection. */
+                if (mode == LAUNCHER_STACK_UNLIMITED && raised[i].setup_errno) {
+                    if (!stack_limit_available(TEST_ASAN_LARGE_STACK)) {
+                        fputs("guest loader ASan finite stack substitute unavailable\n",
+                              stderr);
+                        continue;
+                    }
+                    mode = LAUNCHER_STACK_ASAN_LARGE;
+                }
+#endif
+                loader_landlock_case(argv[1], raised[i], mode);
+            }
         }
-        printf("guest loader stack limit: %u of %zu raised soft limits clamped and read back\n",
+        printf("guest loader stack limit: %u of %zu raised soft limits exercised\n",
                exercised, sizeof(modes) / sizeof(modes[0]));
+#if defined(IOS27_TEST_ASAN)
+        puts("guest loader ASan: faked unlimited clamp rejection uses a finite "
+             "32 MiB stack; real unlimited rejection remains plain/UBSan-only");
+#endif
     }
     {
         /* The launcher sets both RLIMIT_CPU limits to unlimited, to
@@ -1335,6 +1448,11 @@ int main(int argc, char **argv) {
         printf("guest loader CPU limit: %u of %zu inherited limits clamped or kept and read back\n",
                exercised, sizeof(modes) / sizeof(modes[0]));
     }
+#if defined(IOS27_TEST_ASAN)
+    /* The fork runner's guest is killed under ASan as described at the top
+     * of main, so this block is compiled but skipped. */
+    if (0)
+#endif
     {
         /* The fork runner applies the same RLIMIT_CPU clamp, and because no
          * exec separates it from the guest, its child reads both limits back
@@ -1439,6 +1557,15 @@ int main(int argc, char **argv) {
     assert(getpid() == parent && fd_count() == descriptors);
     assert(prctl(PR_GET_NO_NEW_PRIVS, 0ul, 0ul, 0ul, 0ul) == no_new_privs);
     assert(prctl(PR_GET_SECCOMP, 0ul, 0ul, 0ul, 0ul) == seccomp);
+#if defined(IOS27_TEST_ASAN)
+    /* Only the exec-mode loader cases ran, so report the CTest skip
+     * described at the top of main. */
+    fputs("contained-process-supervisor: exec-mode loader cases passed; "
+          "fork-runner cases skipped under AddressSanitizer because the "
+          "mandatory guest seccomp filter kills the ASan runtime at "
+          "sigaltstack (see docs/contained-native-process.md)\n", stderr);
+    return 77;
+#endif
     puts("contained process: full results, syscall denial, reset signals, setup refusal, EINTR deadline, private memory, reap/FD lifecycle and sealed launch payloads passed");
     return 0;
 }

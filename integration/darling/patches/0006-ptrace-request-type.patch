@@ -1,0 +1,14 @@
+diff --git a/tests/host/thread_discovery_test.cpp b/tests/host/thread_discovery_test.cpp
+index aadbd33..cafbaae 100644
+--- a/tests/host/thread_discovery_test.cpp
++++ b/tests/host/thread_discovery_test.cpp
+@@ -45,7 +45,8 @@ static long testPtrace(int request, pid_t pid, void* addr, void* data) {
+ 		errno = EIO;
+ 		return -1;
+ 	}
+-	return ptrace(static_cast<__ptrace_request>(request), pid, addr, data);
++	// glibc uses an enum request type; Bionic uses int.
++	return ptrace(static_cast<decltype(PTRACE_TRACEME)>(request), pid, addr, data);
+ }
+ 
+ static pid_t testWaitpid(pid_t pid, int* status, int options) {

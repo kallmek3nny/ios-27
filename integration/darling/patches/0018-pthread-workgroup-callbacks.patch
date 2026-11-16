@@ -1,0 +1,117 @@
+diff --git a/src/pthread.c b/src/pthread.c
+--- a/src/pthread.c
++++ b/src/pthread.c
+@@ -51,6 +51,9 @@
+ 
+ #include "internal.h"
+ 
++#define PTHREAD_WORKGROUP_SPI 1
++#include "pthread/workgroup_private.h"
++
+ #include <stdlib.h>
+ #include <errno.h>
+ #include <signal.h>
+@@ -1523,6 +1526,38 @@
+ 	unsigned int flags = _PTHREAD_CREATE_SUSPENDED;
+ 	return _pthread_create(thread, attr, start_routine, arg, flags);
+ }
++
++// DARLING_WORKGROUP_CALLBACKS_BEGIN
++// Backported from Apple libpthread-539. Dispatch provides the implementation;
++// registration must not be replaced by an inert success stub.
++static const struct pthread_workgroup_functions_s *_pthread_workgroup_functions;
++
++void
++pthread_install_workgroup_functions_np(
++		const struct pthread_workgroup_functions_s *pwgf)
++{
++	if (_pthread_workgroup_functions) {
++		PTHREAD_CLIENT_CRASH((uintptr_t)_pthread_workgroup_functions,
++				"workgroup functions already installed");
++	}
++	if (pwgf->pwgf_version < PTHREAD_WORKGROUP_FUNCTIONS_VERSION) {
++		PTHREAD_CLIENT_CRASH(pwgf->pwgf_version,
++				"unsupported workgroup functions version");
++	}
++	_pthread_workgroup_functions = pwgf;
++}
++
++int
++pthread_create_with_workgroup_np(pthread_t *thread, os_workgroup_t wg,
++		const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
++{
++	if (!_pthread_workgroup_functions) {
++		PTHREAD_CLIENT_CRASH(0, "workgroup functions not yet installed");
++	}
++	return _pthread_workgroup_functions->pwgf_create_with_workgroup(thread, wg,
++			attr, start_routine, arg);
++}
++// DARLING_WORKGROUP_CALLBACKS_END
+ 
+ int
+ pthread_detach(pthread_t thread)
+diff --git a/private/pthread/workgroup_private.h b/private/pthread/workgroup_private.h
+new file mode 100644
+--- /dev/null
++++ b/private/pthread/workgroup_private.h
+@@ -0,0 +1,60 @@
++/*
++ * Copyright (c) 2021 Apple Inc. All rights reserved.
++ *
++ * @APPLE_LICENSE_HEADER_START@
++ *
++ * This file contains Original Code and/or Modifications of Original Code
++ * as defined in and that are subject to the Apple Public Source License
++ * Version 2.0 (the 'License'). You may not use this file except in
++ * compliance with the License. Please obtain a copy of the License at
++ * http://www.opensource.apple.com/apsl/ and read it before using this
++ * file.
++ *
++ * The Original Code and all software distributed under the License are
++ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
++ * EXPRESS OR IMPLIED, AND APPLE HEREBY DISCLAIMS ALL SUCH WARRANTIES,
++ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
++ * Please see the License for the specific language governing rights and
++ * limitations under the License.
++ *
++ * @APPLE_LICENSE_HEADER_END@
++ */
++
++#ifndef __PTHREAD_WORKGROUP_PRIVATE_H__
++#define __PTHREAD_WORKGROUP_PRIVATE_H__
++
++#include <pthread/pthread.h>
++#include <os/workgroup.h>
++
++__BEGIN_DECLS
++
++/* The dispatch callback owns workgroup membership and thread creation. */
++SPI_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0), watchos(8.0))
++int
++pthread_create_with_workgroup_np(pthread_t _Nullable * _Nonnull thread,
++		os_workgroup_t _Nonnull wg, const pthread_attr_t * _Nullable attr,
++		void * _Nullable (* _Nonnull start_routine)(void * _Nullable),
++		void * _Nullable arg);
++
++#if defined(PTHREAD_WORKGROUP_SPI) && PTHREAD_WORKGROUP_SPI
++struct pthread_workgroup_functions_s {
++#define PTHREAD_WORKGROUP_FUNCTIONS_VERSION 1
++	int pwgf_version;
++	int (* _Nonnull pwgf_create_with_workgroup)(
++			pthread_t _Nullable * _Nonnull thread, os_workgroup_t _Nonnull wg,
++			const pthread_attr_t * _Nullable attr,
++			void * _Nullable (* _Nonnull start_routine)(void * _Nullable),
++			void * _Nullable arg);
++};
++
++/* Installed once during libSystem initialization; the table is immutable
++ * and remains alive for the lifetime of the process. */
++SPI_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0), watchos(8.0))
++void
++pthread_install_workgroup_functions_np(
++		const struct pthread_workgroup_functions_s * _Nonnull pwgf);
++#endif
++
++__END_DECLS
++#endif

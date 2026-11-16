@@ -1,5 +1,8 @@
 #define _GNU_SOURCE
 #include "process_internal.h"
+#if defined(IOS27_WITH_SERVICES)
+#include "service_bridge_internal.h"
+#endif
 
 #include <errno.h>
 #include <fcntl.h>
@@ -96,6 +99,29 @@ static int enter_landlock_domain(void) {
     return errno == EACCES ? 0 : -1;
 }
 
+/* Under AddressSanitizer, GCC and Clang put a __asan_handle_no_return call
+ * before every noreturn call, and that runtime hook invokes sigaltstack.
+ * The stage-one loader filter and the guest filter both forbid sigaltstack,
+ * and neither is widened for sanitizer builds. Instead, in ASan builds only,
+ * the functions that can make a noreturn call after a filter is installed
+ * are left uninstrumented, so their setup and return reports still reach
+ * the supervisor. GCC defines __SANITIZE_ADDRESS__ and Clang reports the
+ * address_sanitizer feature; in every other build the macro is empty.
+ * Crew card I3b t-caa2a3. */
+#if defined(__SANITIZE_ADDRESS__)
+#define IOS27_LOADER_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define IOS27_LOADER_ASAN 1
+#endif
+#endif
+#if defined(IOS27_LOADER_ASAN)
+#define IOS27_LOADER_NO_ASAN __attribute__((no_sanitize_address))
+#else
+#define IOS27_LOADER_NO_ASAN
+#endif
+
+IOS27_LOADER_NO_ASAN
 static _Noreturn void loader_exit(uint32_t kind, int value) {
     int sent = ios27_process_report(IOS27_LOADER_REPORT_FD, kind, value);
     _exit(!sent && kind == IOS27_REPORT_RETURN ? 0 : 125);
@@ -105,6 +131,7 @@ static _Noreturn void loader_exit(uint32_t kind, int value) {
 /* Runs once the image has its final W^X mappings and the guarded guest stack
  * holds private copies of argv/envp/apple, so the sealed payload is no
  * longer needed. Same containment order as the fork child, then LC_MAIN. */
+IOS27_LOADER_NO_ASAN
 static _Noreturn void enter_guest(int (*entry)(void *), void *call) {
     sigset_t empty;
     ios27_launch_payload_close(&payload);
@@ -338,6 +365,7 @@ static int require_bounded_cpu_limit(void) {
     return 0;
 }
 
+IOS27_LOADER_NO_ASAN
 int main(int argc, char **argv) {
     struct stat report;
     struct rlimit core = {0u, 0u};
@@ -387,9 +415,16 @@ int main(int argc, char **argv) {
                                           &info, (size_t)page, &layout,
                                           error, sizeof(error)))
             loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_IMAGE);
+#if defined(IOS27_WITH_SERVICES)
+        const ios27_service_api *services = ios27_service_bridge_initialize();
+        (void)ios27_native_handoff_extension(payload.image, payload.image_size,
+                                   &info, &payload.context, services, enter_guest,
+                                   error, sizeof(error));
+#else
         (void)ios27_native_handoff(payload.image, payload.image_size, &info,
                                    &payload.context, enter_guest,
                                    error, sizeof(error));
+#endif
         loader_exit(IOS27_REPORT_SETUP, IOS27_LOADER_E_PREPARE);
     }
 #endif

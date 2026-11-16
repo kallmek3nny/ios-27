@@ -1,0 +1,20 @@
+{
+  "darling_revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+  "source": {
+    "repository": "darlinghq/darling-xnu",
+    "revision": "2ed122dc6c9c7774d74c41fd10ef8970543a6e13",
+    "path": "libsyscall/wrappers/_libkernel_init.h",
+    "sha256": "ef45f10af1a9105459f69c6e2a0ddc1b7ad264c58ac626353ce294afa808cc48"
+  },
+  "patched_files": [
+    "libsyscall/wrappers/_libkernel_init.h",
+    "darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/process/spawn_lifecycle.h",
+    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c",
+    "darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h"
+  ],
+  "api_reference": {
+    "repository": "apple-oss-distributions/Libsystem",
+    "revision": "c23b51183e46e613375dc7639fb4bf11fbf59ba8",
+    "path": "init.c"
+  }
+}

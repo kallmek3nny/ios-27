@@ -1,0 +1,27 @@
+diff --git a/src/dyld2.cpp b/src/dyld2.cpp
+--- a/src/dyld2.cpp
++++ b/src/dyld2.cpp
+@@ -5891,9 +5891,16 @@
+ 	siginfo.fs_file_start=fileOffset;							// start of mach-o slice in fat file
+ 	siginfo.fs_blob_start=(void*)(long)(codeSigCmd->dataoff);	// start of code-signature in mach-o file
+ 	siginfo.fs_blob_size=codeSigCmd->datasize;					// size of code-signature
+-	int result = fcntl(fd, F_ADDFILESIGS_FOR_DYLD_SIM, &siginfo);
++	// Darling exposes validated signature coverage through F_ADDFILESIGS_RETURN.
++	// Its code-signing policy and the coverage check below still apply.
++#ifdef DARLING
++	const int signatureCommand = F_ADDFILESIGS_RETURN;
++#else
++	const int signatureCommand = F_ADDFILESIGS_FOR_DYLD_SIM;
++#endif
++	int result = fcntl(fd, signatureCommand, &siginfo);
+ 	if ( result == -1 ) {
+-		return mkstringf("dyld_sim fcntl(F_ADDFILESIGS_FOR_DYLD_SIM) failed with errno=%d", errno);
++		return mkstringf("dyld_sim signature registration (fcntl %d) failed with errno=%d", signatureCommand, errno);
+ 	}
+ 	// file range covered by code signature must extend up to code signature itself
+ 	if ( siginfo.fs_file_start < codeSigCmd->dataoff )
+@@ -7646,4 +7653,3 @@ reloadAllImages:
+ } // namespace
+ 
+ 
+-

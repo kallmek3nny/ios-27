@@ -1,0 +1,12 @@
+diff --git a/src/pthread.c b/src/pthread.c
+--- a/src/pthread.c
++++ b/src/pthread.c
+@@ -2280,6 +2280,8 @@
+ 				PTHREAD_FEATURE_QOS_MAINTENANCE |
+ 				PTHREAD_FEATURE_QOS_DEFAULT;
+ #ifdef DARLING
++		// Workqueue delivery is independent of the optional thread-control SPIs.
++		required_features &= ~(PTHREAD_FEATURE_BSDTHREADCTL | PTHREAD_FEATURE_SETSELF);
+ 		if ((rv & required_features) != required_features) {
+ 			PTHREAD_INTERNAL_CRASH(rv, "Missing required kernel support");
+ 		}

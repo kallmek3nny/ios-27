@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9506c0a..ff9fade 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -65,10 +65,11 @@ set(mig_sources
+ # DARLING_CROSS_BUILD when the target machine differs from the build machine.
+ if (DARLING_CROSS_BUILD)
+ 	# CMAKE_C_COMPILER builds for the target, but migcom has to run here.
+-	# Use CC_FOR_BUILD if set, otherwise the host clang (the include directories
+-	# inherited from the top-level build point at its resource headers).
++	# Use the same build-machine compiler as the other host tools.
+ 	if (DEFINED ENV{CC_FOR_BUILD} AND NOT "$ENV{CC_FOR_BUILD}" STREQUAL "")
+ 		set(HOST_C_COMPILER "$ENV{CC_FOR_BUILD}")
++	elseif (DEFINED HOST_CC)
++		set(HOST_C_COMPILER "${HOST_CC}")
+ 	else()
+ 		find_program(HOST_C_COMPILER NAMES clang cc)
+ 		if (NOT HOST_C_COMPILER)
+@@ -89,8 +90,15 @@ if (DARLING_CROSS_BUILD)
+ 	# the parent directories set up (basic-headers, src/include)
+ 	get_directory_property(mig_all_include_dirs INCLUDE_DIRECTORIES)
+ 	set(host_mig_includes)
++	get_filename_component(target_compiler_headers "${COMPILER_INC_PATH}" REALPATH)
+ 	foreach(dir IN LISTS mig_all_include_dirs)
+-		list(APPEND host_mig_includes -I "${dir}")
++		# A different target compiler can have its own resource headers. Keeping
++		# both copies makes stdint.h include the other copy instead of libc's;
++		# their shared include guard then suppresses the integer declarations.
++		get_filename_component(include_path "${dir}" REALPATH)
++		if (NOT include_path STREQUAL target_compiler_headers)
++			list(APPEND host_mig_includes -I "${dir}")
++		endif()
+ 	endforeach()
+ 
+ 	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+@@ -149,4 +157,3 @@ add_custom_target(migexe DEPENDS "${CMAKE_BINARY_DIR}/build-mig")
+ 
+ add_dependencies(migexe migcom)
+ 
+-

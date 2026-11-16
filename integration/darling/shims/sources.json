@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/x86sim/x86sim.git",
+  "revision": "48c35bf8ee031dec6ca552dce56cd6bf525ef835",
+  "license": "GPL-3.0",
+  "files": {
+    "host/simfb/simfb.c": "287eb08db3df81ef3925241c5007c77cb8aba7a78f3d56f5089826bc342556d7",
+    "host/simfb/SimFramebuffer.h": "2ff392c358f15cb9597135b4ee8eb47eaa5d998aa1c577a8d24b6c6567737d5c",
+    "host/simhid/simhid.m": "f6fea8e9bf9efe462ecc7f5cda1feedf11d5730235812afa0447d50fb0553c71",
+    "host/iosurfaced/iosurfaced.m": "a9b1e4efa0ddde340ee14a96227b549b0e15ff39c78a952f894a9c2c6f07046d",
+    "LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  },
+  "native_framebuffer_patch": "simfb-native.patch",
+  "native_linux_header": "linux-arm64.h",
+  "s25_native_syscall_test": {
+    "passed": true,
+    "test_sha256": "05fbedb24f6461133fdef091f7cdf98df9f8f946fc946d1e11da697cb0572498",
+    "cross_process_futex_wake_count": 1,
+    "madvise_remove_result": 0,
+    "removed_range_zero_filled": true,
+    "foreground_used": false,
+    "temporary_files_removed": true
+  },
+  "frame_output_verified": false
+}

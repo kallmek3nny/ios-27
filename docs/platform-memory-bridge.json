@@ -1,0 +1,45 @@
+{
+  "scope": "original platform memory/string implementation and real-input override planning",
+  "date": "2026-11-15",
+  "base_head": "a387567",
+  "delivery": "local/device evidence; published revision and exact-head CI are tracked in PR #126",
+  "host_ctest": {
+    "architecture": "x86_64",
+    "total": 58,
+    "passed": 50,
+    "skipped": 8,
+    "failed": 0
+  },
+  "native_device": {
+    "model": "SM-S936U1",
+    "api": 37,
+    "page_size": 4096,
+    "uid": 2000,
+    "source_contract_differential_cases": 16958,
+    "compiled_darwin_exports_called": 12,
+    "fresh_supervised_client_executions": 3,
+    "client_return": 42,
+    "device_hashes_verified": true,
+    "temporary_files_removed": true,
+    "sha256": {
+      "test_platform_memory": "15610bbc4195d7f7a8570c1e96eb0b2b63418b6d041dcb20d15f04e629a6f831",
+      "PlatformMemory.dylib": "3d6a81f4c02066f51201c9f043e616b61e16ac4064cd3d85a64b9794fc85017b",
+      "PlatformMemoryClient": "4872bcbad53e761dfac169fd28c937ac8b93a70ff8b2832696b53a676442d012"
+    }
+  },
+  "real_simulator_input": {
+    "build": "24A434",
+    "primary_sizes_and_sha256_verified": true,
+    "standalone_images_staged": 69,
+    "standalone_bindings_retargeted": 109,
+    "standalone_host_placeholders_remaining": 115,
+    "cache_pointer_overrides_planned": 44,
+    "cache_client_slots": 3,
+    "cache_got_slots": 41,
+    "real_cache_pointer_overrides_materialized": false
+  },
+  "initial_native_failure": "startup inspector rejected normal ARM64 symbol stubs; corrected with bounded 12-byte stub validation",
+  "apple_code_executed": false,
+  "springboard_entered": false,
+  "rendered_ios_frame": false
+}

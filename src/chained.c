@@ -280,6 +280,81 @@ int ios27_chained_parse(const uint8_t *file, size_t size,
     return 0;
 }
 
+int ios27_chained_static_plan(const uint8_t *file, size_t size,
+                               const ios27_macho_info *info,
+                               ios27_chained_plan *out, char *error, size_t cap) {
+    ios27_macho_info verified;
+    size_t cursor = 32u;
+    unsigned commands = 0u, actual = 0u;
+    if (!out) return fail(error, cap, "null static rebase plan");
+    memset(out, 0, sizeof(*out));
+    if (!file || !info || ios27_macho_parse(file, size, &verified, error, cap) ||
+        memcmp(info, &verified, sizeof(verified)))
+        return fail(error, cap, "invalid static rebase image/metadata");
+    for (uint32_t i = 0; i < rd32(file + 16u); ++i) {
+        const uint8_t *cmd = file + cursor;
+        if (rd32(cmd) == LC_DYLD_CHAINED_FIXUPS) {
+            uint32_t offset, length, starts, count;
+            if (commands++ || rd32(cmd + 4u) != 16u) goto invalid;
+            offset = rd32(cmd + 8u); length = rd32(cmd + 12u);
+            if (length < 28u ||
+                !fits(offset, length, size)) goto invalid;
+            const uint8_t *p = file + offset;
+            starts = rd32(p + 4u);
+            if (rd32(p) || rd32(p + 16u) || rd32(p + 20u) > 3u || rd32(p + 24u) ||
+                starts < 28u || starts > length ||
+                rd32(p + 8u) < 28u || rd32(p + 8u) > length ||
+                rd32(p + 12u) < 28u || rd32(p + 12u) > length) goto invalid;
+            if (starts == length) { cursor += rd32(cmd + 4u); continue; }
+            if (!fits(starts, 4u, length)) goto invalid;
+            count = rd32(p + starts);
+            if (count > IOS27_MAX_SEGMENTS || !fits(starts + 4u, (uint64_t)count * 4u, length)) goto invalid;
+            for (uint32_t j = 0; j < count; ++j)
+                actual |= rd32(p + starts + 4u + (size_t)j * 4u) != 0u;
+        }
+        cursor += rd32(cmd + 4u);
+    }
+    if (!actual) {
+        if (error && cap) error[0] = '\0';
+        return 0;
+    }
+    if (ios27_chained_parse(file, size, info, out, error, cap)) goto invalid;
+    if (out->import_count) goto invalid;
+    for (size_t i = 0; i < out->count; ++i) {
+        const ios27_chained_patch *p = &out->patches[i];
+        const ios27_segment *s = &info->segments[p->segment_index];
+        uint64_t address;
+        if (plus(s->vmaddr, p->segment_offset, &address) || address > UINT64_MAX - 8u) goto invalid;
+        if (p->is_bind || !(s->initprot & 2u)) goto invalid;
+        for (size_t j = 0; j < i; ++j) {
+            const ios27_chained_patch *q = &out->patches[j];
+            if (p->segment_index == q->segment_index &&
+                p->segment_offset < q->segment_offset + 8u &&
+                q->segment_offset < p->segment_offset + 8u) goto invalid;
+        }
+        cursor = 32u;
+        for (uint32_t j = 0; j < rd32(file + 16u); ++j) {
+            const uint8_t *cmd = file + cursor;
+            if (rd32(cmd) == 0x19u) {
+                if (rd32(cmd + 4u) < 72u || rd32(cmd + 64u) > (rd32(cmd + 4u) - 72u) / 80u) goto invalid;
+                for (uint32_t k = 0; k < rd32(cmd + 64u); ++k) {
+                    const uint8_t *section = cmd + 72u + (size_t)k * 80u;
+                    uint64_t start = rd64(section + 32u), length = rd64(section + 40u);
+                    if (start > UINT64_MAX - length) goto invalid;
+                    if ((rd32(section + 64u) & 255u) == 1u && length &&
+                        address < start + length && start < address + 8u) goto invalid;
+                }
+            }
+            cursor += rd32(cmd + 4u);
+        }
+    }
+    if (error && cap) error[0] = '\0';
+    return 0;
+invalid:
+    memset(out, 0, sizeof(*out));
+    return fail(error, cap, "unsupported or invalid static chained rebases");
+}
+
 int ios27_chained_apply(uint8_t *copy, size_t size,
                         const ios27_macho_info *info,
                         const ios27_chained_plan *plan,

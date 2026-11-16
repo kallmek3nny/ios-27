@@ -1,0 +1,74 @@
+diff --git a/src/thread.cpp b/src/thread.cpp
+--- a/src/thread.cpp
++++ b/src/thread.cpp
+@@ -23,6 +23,7 @@
+ #include <darlingserver/call.hpp>
+ #include <darlingserver/server.hpp>
+ #include <darlingserver/logging.hpp>
++#include <darlingserver/fiber-tls.hpp>
+ #include <filesystem>
+ #include <fstream>
+ 
+@@ -83,11 +84,11 @@
+ #define USE_THREAD_GUARD_PAGES 1
+ #define IDLE_THREAD_STACK_COUNT 8
+ 
+-static thread_local std::shared_ptr<DarlingServer::Thread> currentThreadVar = nullptr;
+-static thread_local bool returningToThreadTop = false;
+-static thread_local ucontext_t backToThreadTopContext;
+-static thread_local libsimple_lock_t* unlockMeWhenSuspending = nullptr;
+-static thread_local std::function<void()> currentContinuation = nullptr;
++#define currentThreadVar (DarlingServer::fiberWorkerLocal<std::shared_ptr<DarlingServer::Thread>, 0>())
++#define returningToThreadTop (DarlingServer::fiberWorkerLocal<bool, 1>())
++#define backToThreadTopContext (DarlingServer::fiberWorkerLocal<ucontext_t, 2>())
++#define unlockMeWhenSuspending (DarlingServer::fiberWorkerLocal<libsimple_lock_t*, 3>())
++#define currentContinuation (DarlingServer::fiberWorkerLocal<std::function<void()>, 4>())
+ 
+ /**
+  * Our microthreads use cooperative multitasking, so we don't really use interrupts per-se.
+@@ -97,12 +98,12 @@
+  *
+  * This is primarily of use for debugging duct-tape code and ensuring certain assumptions made in the duct-tape code hold true.
+  */
+-static thread_local uint64_t interruptDisableCount = 0;
++#define interruptDisableCount (DarlingServer::fiberWorkerLocal<uint64_t, 5>())
+ 
+ #if DSERVER_ASAN
+-	static thread_local void* asanOldFakeStack = nullptr;
+-	static thread_local const void* asanOldStackBottom = nullptr;
+-	static thread_local size_t asanOldStackSize = 0;
++#define asanOldFakeStack (DarlingServer::fiberWorkerLocal<void*, 6>())
++#define asanOldStackBottom (DarlingServer::fiberWorkerLocal<const void*, 7>())
++#define asanOldStackSize (DarlingServer::fiberWorkerLocal<size_t, 8>())
+ #endif
+ 
+ static DarlingServer::Log threadLog("thread");
+@@ -1686,7 +1687,7 @@
+ 	});
+ };
+ 
+-static thread_local std::function<void()> interruptedContinuation = nullptr;
++#define interruptedContinuation (DarlingServer::fiberWorkerLocal<std::function<void()>, 9>())
+ 
+ void DarlingServer::Thread::_handleInterruptEnterForCurrentThread() {
+ 	// FIXME: this currently does not work properly if the thread was suspended waiting for a lock
+diff --git a/include/darlingserver/fiber-tls.hpp b/include/darlingserver/fiber-tls.hpp
+new file mode 100644
+--- /dev/null
++++ b/include/darlingserver/fiber-tls.hpp
+@@ -0,0 +1,15 @@
++#ifndef DARLING_SERVER_FIBER_TLS_HPP
++#define DARLING_SERVER_FIBER_TLS_HPP
++#include <cstddef>
++
++namespace DarlingServer {
++// A suspended microthread may resume on another native worker. TLS addresses
++// therefore cannot remain cached across calls that switch the microthread.
++template<typename T, std::size_t Tag>
++__attribute__((noinline)) T& fiberWorkerLocal() {
++	__asm__ __volatile__("" ::: "memory");
++	static thread_local T value{};
++	return value;
++}
++}
++#endif

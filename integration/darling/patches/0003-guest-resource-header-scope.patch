@@ -1,0 +1,24 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 987bdd4c..e82b2b33 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -71,7 +71,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+ include(compiler_include)
+ GetCompilerInclude(COMPILER_INC_PATH)
+ message(STATUS "Compiler include path detected as ${COMPILER_INC_PATH}")
+-include_directories(SYSTEM ${COMPILER_INC_PATH})
+ 
+ find_package(BISON)
+ find_package(FLEX)
+@@ -250,6 +249,11 @@ include_directories(${CMAKE_SOURCE_DIR}/basic-headers)
+ 
+ add_subdirectory(external/bootstrap_cmds)
+ 
++# Native tools use their compiler's normal header search order. The guest
++# build below disables standard includes and needs the resource headers
++# explicitly; adding them to native C++ targets would precede libc++.
++include_directories(SYSTEM ${COMPILER_INC_PATH})
++
+ add_definitions(
+ 	-D__APPLE__
+ 	-D__DYNAMIC__

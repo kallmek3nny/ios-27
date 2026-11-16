@@ -5,13 +5,27 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c)
+add_library(ios27_core STATIC src/macho.c src/runner.c src/process.c src/service_bindings.c src/darwin_probe.c src/inventory.c src/dyld_paths.c src/exports.c src/binds.c src/chained.c src/images.c src/initializers.c src/mach_ipc.c src/mach_v2.c src/mach_guest.c src/darwin_mach_abi.c src/darwin_object.c src/darwin_branch26.c src/darwin_got.c src/codesign.c)
 target_include_directories(ios27_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_options(ios27_core PRIVATE -Wall -Wextra -Werror -Wpedantic)
 
 add_executable(ios27 src/main.c)
 target_link_libraries(ios27 PRIVATE ios27_core)
+
+add_executable(codesign-census tools/codesign-census.c)
+target_link_libraries(codesign-census PRIVATE ios27_core)
+target_compile_options(codesign-census PRIVATE -Wall -Wextra -Werror -Wpedantic)
 target_compile_options(ios27 PRIVATE -Wall -Wextra -Werror -Wpedantic)
+
+# Original-source bounded userspace model, exposed only by a separate helper.
+# The ordinary ios27-loader never links these services or supplies the table.
+add_library(ios27_service_bridge STATIC src/service_bridge.c src/libsystem20e_services.c)
+target_include_directories(ios27_service_bridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(ios27_service_bridge PRIVATE -Wall -Wextra -Werror -Wpedantic)
+
+add_library(ios27_platform_memory STATIC src/platform_memory.c)
+target_include_directories(ios27_platform_memory PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(ios27_platform_memory PRIVATE -Wall -Wextra -Werror -Wpedantic -fno-builtin)
 
 # Trusted helper that ios27_run_executable_exec execveat()s into a fresh
 # address space. Linux/Android only; it is never meant to be run directly.
@@ -19,11 +33,53 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
     add_executable(ios27-loader src/loader.c)
     target_link_libraries(ios27-loader PRIVATE ios27_core)
     target_compile_options(ios27-loader PRIVATE -Wall -Wextra -Werror -Wpedantic)
+
+    add_executable(ios27-services-loader src/loader.c)
+    target_compile_definitions(ios27-services-loader PRIVATE IOS27_WITH_SERVICES=1)
+    target_link_libraries(ios27-services-loader PRIVATE ios27_core ios27_service_bridge)
+    target_compile_options(ios27-services-loader PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    # Resolve libc memory/string helpers before seccomp, avoiding lazy ELF
+    # binding while the guest is restricted to the mandatory syscall filter.
+    target_link_options(ios27-services-loader PRIVATE "LINKER:-z,now")
 endif()
 
 option(IOS27_BUILD_TESTS "Build parser and runtime tests" ON)
 if(IOS27_BUILD_TESTS)
     enable_testing()
+    add_executable(test_platform_memory tests/test_platform_memory.c)
+    target_include_directories(test_platform_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_platform_memory PRIVATE ios27_platform_memory ios27_core)
+    target_compile_options(test_platform_memory PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME platform-memory-contracts COMMAND test_platform_memory)
+    set_tests_properties(platform-memory-contracts PROPERTIES TIMEOUT 30)
+    add_executable(test_service_bridge tests/test_service_bridge.c)
+    target_link_libraries(test_service_bridge PRIVATE ios27_service_bridge)
+    target_include_directories(test_service_bridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_compile_options(test_service_bridge PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-service-table COMMAND test_service_bridge)
+
+    add_executable(test_userspace_services tests/phase20e-standalone.c
+        tests/phase20e-darwin-fixture.c)
+    target_link_libraries(test_userspace_services PRIVATE ios27_service_bridge)
+    target_compile_options(test_userspace_services PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-userspace-services COMMAND test_userspace_services)
+
+    add_library(ios27_shim_host STATIC src/darwin_shim.c)
+    target_include_directories(ios27_shim_host PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_definitions(ios27_shim_host PUBLIC IOS27_SHIM_HOST_TEST=1)
+    target_compile_options(ios27_shim_host PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_executable(test_darwin_shim tests/test_darwin_shim.c)
+    target_include_directories(test_darwin_shim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_darwin_shim PRIVATE ios27_shim_host ios27_service_bridge)
+    target_compile_options(test_darwin_shim PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME bounded-named-service-shim COMMAND test_darwin_shim)
+    add_executable(test_guest_heap_property tests/test_guest_heap_property.c)
+    target_include_directories(test_guest_heap_property PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_guest_heap_property PRIVATE ios27_shim_host ios27_service_bridge)
+    target_compile_options(test_guest_heap_property PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME guest-heap-property COMMAND test_guest_heap_property)
+    set_tests_properties(guest-heap-property PROPERTIES TIMEOUT 60)
+
     add_executable(test_macho tests/test_macho.c)
     target_link_libraries(test_macho PRIVATE ios27_core)
     target_compile_options(test_macho PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -39,15 +95,38 @@ if(IOS27_BUILD_TESTS)
     target_compile_options(test_inventory PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME macho-inventory COMMAND test_inventory)
 
+    add_executable(test_inventory_census tests/test_inventory_census.c)
+    target_link_libraries(test_inventory_census PRIVATE ios27_core)
+    target_compile_options(test_inventory_census PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME macho-inventory-census COMMAND test_inventory_census)
+    set_tests_properties(macho-inventory-census PROPERTIES TIMEOUT 120)
+
+    add_executable(test_codesign tests/test_codesign.c)
+    target_link_libraries(test_codesign PRIVATE ios27_core)
+    target_compile_options(test_codesign PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME macho-codesign COMMAND test_codesign)
+    set_tests_properties(macho-codesign PROPERTIES TIMEOUT 120)
+
     add_executable(test_dyld_paths tests/test_dyld_paths.c)
     target_link_libraries(test_dyld_paths PRIVATE ios27_core)
     target_compile_options(test_dyld_paths PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-virtual-paths COMMAND test_dyld_paths)
 
+    add_executable(test_dyld_paths_adversarial tests/test_dyld_paths_adversarial.c)
+    target_link_libraries(test_dyld_paths_adversarial PRIVATE ios27_core)
+    target_compile_options(test_dyld_paths_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME dyld-virtual-paths-adversarial COMMAND test_dyld_paths_adversarial)
+
     add_executable(test_exports tests/test_exports.c)
     target_link_libraries(test_exports PRIVATE ios27_core)
     target_compile_options(test_exports PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME dyld-export-trie COMMAND test_exports)
+
+    add_executable(test_parser_mutation tests/test_parser_mutation.c)
+    target_link_libraries(test_parser_mutation PRIVATE ios27_core)
+    target_compile_options(test_parser_mutation PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME parser-mutations COMMAND test_parser_mutation)
+    set_tests_properties(parser-mutations PROPERTIES TIMEOUT 120)
 
     add_executable(test_binds tests/test_binds.c)
     target_link_libraries(test_binds PRIVATE ios27_core)
@@ -73,6 +152,12 @@ if(IOS27_BUILD_TESTS)
     target_link_libraries(test_mach_v2 PRIVATE ios27_core)
     target_compile_options(test_mach_v2 PRIVATE -Wall -Wextra -Werror -Wpedantic)
     add_test(NAME task-local-mach-names COMMAND test_mach_v2)
+
+    add_executable(test_mach_v2_props tests/test_mach_v2_props.c)
+    target_link_libraries(test_mach_v2_props PRIVATE ios27_core)
+    target_compile_options(test_mach_v2_props PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME mach-rights-properties COMMAND test_mach_v2_props)
+    set_tests_properties(mach-rights-properties PROPERTIES TIMEOUT 60)
 
     add_executable(test_mach_guest tests/test_mach_guest.c)
     target_link_libraries(test_mach_guest PRIVATE ios27_core)
@@ -157,6 +242,18 @@ if(IOS27_BUILD_TESTS)
     add_test(NAME compiled-darwin-got-load COMMAND test_compiled_darwin_got
              "${IOS27_DARWIN_DATA_CONSUMER}" "${IOS27_DARWIN_DATA_PROVIDER}")
 
+    # N t-ffb060: fixed-seed truncation and mutation sweep over the four
+    # Darwin MH_OBJECT inspectors, fed by the genuine fixtures built above.
+    add_executable(test_darwin_inspect_mutations tests/test_darwin_inspect_mutations.c)
+    target_link_libraries(test_darwin_inspect_mutations PRIVATE ios27_core)
+    target_compile_options(test_darwin_inspect_mutations PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_dependencies(test_darwin_inspect_mutations ios27_compiled_darwin_fixture
+        ios27_compiled_darwin_consumer ios27_compiled_darwin_got_objects)
+    add_test(NAME darwin-inspector-mutations COMMAND test_darwin_inspect_mutations
+             "${IOS27_DARWIN_FIXTURE}" "${IOS27_DARWIN_CONSUMER}"
+             "${IOS27_DARWIN_DATA_CONSUMER}" "${IOS27_DARWIN_DATA_PROVIDER}")
+    set_tests_properties(darwin-inspector-mutations PROPERTIES TIMEOUT 120)
+
     # Phase 15a: link original freestanding Darwin Clang MH_OBJECTs into a
     # real MH_EXECUTE via the open-source LLVM Mach-O linker, no Apple SDK.
     find_program(IOS27_DARWIN_LD64_LLD NAMES ld64.lld)
@@ -165,6 +262,23 @@ if(IOS27_BUILD_TESTS)
         set(IOS27_DARWIN_LD64_LLD "none")
     endif()
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME apple-runtime-source-validation
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_apple_runtime_source.py")
+    add_test(NAME apple-cache-audit
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_apple_cache_audit.py")
+    add_test(NAME springboard-load
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_springboard_load.py")
+    add_test(NAME platform-memory-overrides
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_platform_memory_override.py")
+    set_tests_properties(platform-memory-overrides PROPERTIES TIMEOUT 30)
+    add_test(NAME cache-platform-overrides
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cache_platform_overrides.py")
+    set_tests_properties(cache-platform-overrides PROPERTIES TIMEOUT 30)
+    set_tests_properties(apple-runtime-source-validation apple-cache-audit springboard-load
+        PROPERTIES TIMEOUT 60)
+    add_test(NAME android-smoke-host
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_android_smoke.py")
+    set_tests_properties(android-smoke-host PROPERTIES TIMEOUT 30)
     set(IOS27_PHASE15A_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/phase15a-executable")
     add_custom_command(
         OUTPUT "${IOS27_PHASE15A_EXECUTABLE}"
@@ -222,6 +336,30 @@ if(IOS27_BUILD_TESTS)
             "${IOS27_PHASE15A_EXECUTABLE}" ${IOS27_STARTUP_FIXTURES})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+        add_executable(test_guest_stack tests/test_guest_stack.c)
+        target_include_directories(test_guest_stack PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(test_guest_stack PRIVATE ios27_core)
+        target_compile_options(test_guest_stack PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        # Test-only wrappers force misaligned reservations and mapping failures.
+        # Production builds keep the ordinary mmap/mprotect/munmap calls.
+        target_link_options(test_guest_stack PRIVATE "LINKER:--wrap=mmap"
+            "LINKER:--wrap=mprotect" "LINKER:--wrap=munmap")
+        add_test(NAME guest-stack-page-size COMMAND test_guest_stack)
+        set_tests_properties(guest-stack-page-size PROPERTIES TIMEOUT 30)
+
+        add_executable(test_images_page_size tests/test_images_page_size.c)
+        target_include_directories(test_images_page_size PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(test_images_page_size PRIVATE ios27_core)
+        target_compile_options(test_images_page_size PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_test(NAME image-graph-page-size COMMAND test_images_page_size)
+        set_tests_properties(image-graph-page-size PROPERTIES TIMEOUT 30)
+
+        add_executable(test_android_runner tests/test_android_runner.c)
+        target_include_directories(test_android_runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+        target_compile_options(test_android_runner PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_test(NAME android-runner-modes COMMAND test_android_runner)
+        set_tests_properties(android-runner-modes PROPERTIES TIMEOUT 10)
+
         add_executable(test_process tests/test_process.c)
         target_link_libraries(test_process PRIVATE ios27_core)
         target_include_directories(test_process PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -230,7 +368,22 @@ if(IOS27_BUILD_TESTS)
         # The Landlock cases exec the project's own trusted loader build output.
         add_test(NAME contained-process-supervisor COMMAND test_process
             "$<TARGET_FILE:ios27-loader>")
-        set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15)
+        set_tests_properties(contained-process-supervisor PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
+
+        add_executable(test_process_cpu tests/test_process_cpu.c)
+        target_link_libraries(test_process_cpu PRIVATE ios27_core)
+        target_include_directories(test_process_cpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_compile_options(test_process_cpu PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_test(NAME contained-process-cpu-expiry COMMAND test_process_cpu)
+        set_tests_properties(contained-process-cpu-expiry PROPERTIES
+            TIMEOUT 80 SKIP_RETURN_CODE 77 LABELS "cpu-expiry")
+        # Expiry of the default IOS27_LOADER_CPU_LIMIT clamp takes over a
+        # minute of guest CPU time per case, so the default-clamp tests skip
+        # with 77 unless ctest runs with IOS27_LONG_CPU_EXPIRY=1.
+        add_test(NAME contained-process-cpu-default-clamp COMMAND test_process_cpu
+            --default-clamp)
+        set_tests_properties(contained-process-cpu-default-clamp PROPERTIES
+            TIMEOUT 150 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;cpu-default-clamp")
 
         add_executable(test_contained_macho tests/test_contained_macho.c)
         target_link_libraries(test_contained_macho PRIVATE ios27_core)
@@ -252,10 +405,252 @@ if(IOS27_BUILD_TESTS)
         add_custom_target(ios27_contained_startup DEPENDS "${IOS27_CONTAINED_STARTUP}")
         add_dependencies(test_contained_macho ios27_phase15a_executable
             ios27_contained_startup ios27-loader)
+        add_dependencies(test_process_cpu ios27_contained_startup ios27-loader)
+        # The 16 KiB-granular phase19a fixture also works on 4 KiB hosts.
+        # x86_64 reports this separate native-execution test as skipped.
+        add_test(NAME contained-native-cpu-expiry COMMAND test_process_cpu
+            "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
+        set_tests_properties(contained-native-cpu-expiry PROPERTIES
+            TIMEOUT 155 SKIP_RETURN_CODE 77 LABELS "cpu-expiry;native-arm64")
+        # One opt-in fork case and one exec case, each over a minute of guest
+        # CPU time. x86_64 skips it like contained-native-cpu-expiry.
+        add_test(NAME contained-native-cpu-default-clamp COMMAND test_process_cpu
+            --default-clamp "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-loader>")
+        set_tests_properties(contained-native-cpu-default-clamp PROPERTIES
+            TIMEOUT 285 SKIP_RETURN_CODE 77
+            LABELS "cpu-expiry;cpu-default-clamp;native-arm64")
         # The exec-mode cases run the project's own trusted loader build output.
         add_test(NAME contained-native-macho COMMAND test_contained_macho
             "${IOS27_PHASE15A_EXECUTABLE}" "${IOS27_CONTAINED_STARTUP}"
             "$<TARGET_FILE:ios27-loader>")
         set_tests_properties(contained-native-macho PROPERTIES TIMEOUT 15)
+        set(IOS27_SERVICE_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-executable")
+        set(IOS27_SERVICE_FALLBACK_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-bridge-fallback")
+        # The service fixture accepts both supported compiler-linker outputs.
+        # Keep this discovery separate from older fixture profiles, whose
+        # tests intentionally expect their established load-command shapes.
+        find_program(IOS27_SERVICE_LD64_LLD NAMES ld64.lld ld64.lld-21 ld64.lld-20
+            ld64.lld-19 ld64.lld-18 ld64.lld-17)
+        if(NOT IOS27_SERVICE_LD64_LLD)
+            set(IOS27_SERVICE_LD64_LLD "none")
+        endif()
+
+        if(NOT IOS27_SERVICE_LD64_LLD STREQUAL "none")
+            set(IOS27_PLATFORM_MEMORY_DIR "${CMAKE_CURRENT_BINARY_DIR}/platform-memory")
+            add_custom_command(
+                OUTPUT "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.dylib"
+                    "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemoryClient"
+                    "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.json"
+                COMMAND timeout 100s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/platform-memory-build.py"
+                    --clang "${IOS27_DARWIN_CLANG}" --linker "${IOS27_SERVICE_LD64_LLD}"
+                    --output-dir "${IOS27_PLATFORM_MEMORY_DIR}"
+                DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/platform_memory.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/platform_memory.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/platform-memory-main.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/platform-memory-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/apple-fixup-stage.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/apple-cache-audit.py"
+                VERBATIM COMMENT "Link original twelve-function platform-memory replacement")
+            add_custom_target(ios27_platform_memory_fixture DEPENDS
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.dylib"
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemoryClient"
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.json")
+            add_dependencies(test_platform_memory ios27_platform_memory_fixture)
+            add_test(NAME compiled-platform-memory COMMAND test_platform_memory
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.dylib"
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemoryClient")
+            add_test(NAME contained-native-platform-memory COMMAND test_platform_memory
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemory.dylib"
+                "${IOS27_PLATFORM_MEMORY_DIR}/PlatformMemoryClient" --native)
+        else()
+            add_test(NAME compiled-platform-memory COMMAND test_platform_memory --no-linker)
+            add_test(NAME contained-native-platform-memory COMMAND test_platform_memory --no-linker)
+        endif()
+        set_tests_properties(compiled-platform-memory contained-native-platform-memory
+            PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
+        set_tests_properties(contained-native-platform-memory PROPERTIES LABELS "native-arm64;platform")
+
+        add_executable(test_initializers tests/test_initializers.c)
+        target_include_directories(test_initializers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(test_initializers PRIVATE ios27_core)
+        target_compile_options(test_initializers PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        if(NOT IOS27_SERVICE_LD64_LLD STREQUAL "none")
+            set(IOS27_INITIALIZER_DIR "${CMAKE_CURRENT_BINARY_DIR}/initializer-fixtures")
+            add_custom_command(
+                OUTPUT "${IOS27_INITIALIZER_DIR}/Provider.dylib" "${IOS27_INITIALIZER_DIR}/Main"
+                       "${IOS27_INITIALIZER_DIR}/manifest.json"
+                COMMAND timeout 100s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/initializer-build.py"
+                    --clang "${IOS27_DARWIN_CLANG}" --linker "${IOS27_SERVICE_LD64_LLD}"
+                    --output-dir "${IOS27_INITIALIZER_DIR}"
+                DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/initializer-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19b-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/initializer-provider.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/initializer-main.c"
+                VERBATIM COMMENT "Link original ARM64 Darwin constructor graph")
+            add_custom_target(ios27_initializer_fixtures DEPENDS
+                "${IOS27_INITIALIZER_DIR}/Provider.dylib" "${IOS27_INITIALIZER_DIR}/Main"
+                "${IOS27_INITIALIZER_DIR}/manifest.json")
+            add_dependencies(test_initializers ios27_initializer_fixtures)
+            add_test(NAME compiled-darwin-initializers COMMAND test_initializers
+                "${IOS27_INITIALIZER_DIR}/Provider.dylib" "${IOS27_INITIALIZER_DIR}/Main")
+            add_test(NAME contained-native-initializers COMMAND test_initializers
+                "${IOS27_INITIALIZER_DIR}/Provider.dylib" "${IOS27_INITIALIZER_DIR}/Main" --native)
+        else()
+            add_test(NAME compiled-darwin-initializers COMMAND test_initializers --no-linker)
+            add_test(NAME contained-native-initializers COMMAND test_initializers --no-linker)
+        endif()
+        set_tests_properties(compiled-darwin-initializers contained-native-initializers
+            PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
+        set_tests_properties(contained-native-initializers PROPERTIES LABELS "native-arm64;startup")
+
+        set(IOS27_SHIM_CLI_ARGUMENT)
+        if(NOT IOS27_SERVICE_LD64_LLD STREQUAL "none")
+            set(IOS27_SHIM_FIXTURE "${CMAKE_CURRENT_BINARY_DIR}/service-shim-executable")
+            set(IOS27_SHIM_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/service-shim-symbols.json")
+            set(IOS27_SHIM_CLI_ARGUMENT "${IOS27_SHIM_FIXTURE}")
+            add_custom_command(
+                OUTPUT "${IOS27_SHIM_FIXTURE}" "${IOS27_SHIM_MANIFEST}"
+                COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-shim-build.py"
+                    --clang "${IOS27_DARWIN_CLANG}"
+                    --linker "${IOS27_SERVICE_LD64_LLD}"
+                    --out "${IOS27_SHIM_FIXTURE}" --manifest "${IOS27_SHIM_MANIFEST}"
+                DEPENDS
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-shim-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/service-shim-client.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/darwin_shim.c"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/src/darwin_shim_internal.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/darwin_shim.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bindings.h"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bridge.h"
+                VERBATIM COMMENT "Audit and link original named-service Darwin client and shim")
+            add_custom_target(ios27_service_shim ALL
+                DEPENDS "${IOS27_SHIM_FIXTURE}" "${IOS27_SHIM_MANIFEST}")
+        endif()
+        add_test(NAME contained-process-cli
+            COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_process_cli.py"
+                "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>"
+                "${IOS27_CONTAINED_STARTUP}" "$<TARGET_FILE:ios27-services-loader>"
+                "${IOS27_SERVICE_FIXTURE}" ${IOS27_SHIM_CLI_ARGUMENT})
+        set_tests_properties(contained-process-cli PROPERTIES TIMEOUT 30)
+
+        add_custom_command(
+            OUTPUT "${IOS27_SERVICE_FIXTURE}" "${IOS27_SERVICE_FALLBACK_FIXTURE}"
+            COMMAND timeout 75s "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
+                --clang "${IOS27_DARWIN_CLANG}"
+                --linker "${IOS27_SERVICE_LD64_LLD}"
+                --out "${IOS27_SERVICE_FIXTURE}"
+                --fallback-out "${IOS27_SERVICE_FALLBACK_FIXTURE}"
+            DEPENDS
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/service-bridge-build.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-build.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tools/phase19a-link-fallback.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/include/ios27/service_bridge.h"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/service-bridge.c"
+            VERBATIM COMMENT "Link original SDK-free ARM64 service bridge fixture")
+        add_custom_target(ios27_service_fixture ALL DEPENDS
+            "${IOS27_SERVICE_FIXTURE}" "${IOS27_SERVICE_FALLBACK_FIXTURE}")
+
+        add_executable(test_service_exec tests/test_service_exec.c tests/fixtures/service-bridge.c)
+        set_source_files_properties(tests/fixtures/service-bridge.c PROPERTIES
+            COMPILE_DEFINITIONS IOS27_SERVICE_ENTRY=ios27_service_fixture_entry)
+        target_include_directories(test_service_exec PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_link_libraries(test_service_exec PRIVATE ios27_core ios27_service_bridge)
+        target_compile_options(test_service_exec PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        target_link_options(test_service_exec PRIVATE "LINKER:-z,now")
+        add_dependencies(test_service_exec ios27_service_fixture ios27-loader
+            ios27-services-loader ios27_contained_startup)
+        add_test(NAME contained-service-callbacks COMMAND test_service_exec)
+        add_test(NAME contained-native-services COMMAND test_service_exec
+            "${IOS27_SERVICE_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+            "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        add_test(NAME contained-native-services-fallback COMMAND test_service_exec
+            "${IOS27_SERVICE_FALLBACK_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+            "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        set_tests_properties(contained-service-callbacks PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
+        set_tests_properties(contained-native-services contained-native-services-fallback
+            PROPERTIES TIMEOUT 30
+            SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
+        if(TARGET ios27_service_shim)
+            add_dependencies(test_service_exec ios27_service_shim)
+            add_test(NAME contained-native-service-shim COMMAND test_service_exec
+                "${IOS27_SHIM_FIXTURE}" "$<TARGET_FILE:ios27-loader>"
+                "$<TARGET_FILE:ios27-services-loader>" "${IOS27_CONTAINED_STARTUP}")
+        else()
+            add_test(NAME contained-native-service-shim COMMAND test_service_exec --no-linker)
+        endif()
+        set_tests_properties(contained-native-service-shim PROPERTIES TIMEOUT 30
+            SKIP_RETURN_CODE 77 LABELS "native-arm64;services")
+
+        add_executable(test_service_bindings tests/test_service_bindings.c)
+        target_link_libraries(test_service_bindings PRIVATE ios27_core)
+        target_compile_options(test_service_bindings PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        add_dependencies(test_service_bindings ios27_service_fixture ios27-services-loader)
+        if(TARGET ios27_service_shim)
+            add_dependencies(test_service_bindings ios27_service_shim)
+            add_test(NAME service-binding-metadata COMMAND test_service_bindings
+                "${IOS27_SHIM_FIXTURE}" "${IOS27_SERVICE_FIXTURE}"
+                "$<TARGET_FILE:ios27-services-loader>")
+        else()
+            add_test(NAME service-binding-metadata COMMAND test_service_bindings --no-linker)
+        endif()
+        set_tests_properties(service-binding-metadata PROPERTIES TIMEOUT 15 SKIP_RETURN_CODE 77)
+        add_executable(test_static_rebases tests/test_static_rebases.c)
+        target_link_libraries(test_static_rebases PRIVATE ios27_core)
+        target_compile_options(test_static_rebases PRIVATE -Wall -Wextra -Werror -Wpedantic)
+        if(TARGET ios27_service_shim)
+            add_dependencies(test_static_rebases ios27_service_shim ios27-services-loader)
+            add_test(NAME static-executable-rebases COMMAND test_static_rebases
+                "${IOS27_SHIM_FIXTURE}" "$<TARGET_FILE:ios27-services-loader>")
+        else()
+            add_test(NAME static-executable-rebases COMMAND test_static_rebases --no-linker)
+        endif()
+        set_tests_properties(static-executable-rebases PROPERTIES TIMEOUT 30 SKIP_RETURN_CODE 77)
+        add_test(NAME exec-cli-adversarial COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_exec_cli_adversarial.py" "$<TARGET_FILE:ios27>" "$<TARGET_FILE:ios27-loader>" "${IOS27_CONTAINED_STARTUP}")
+        set_tests_properties(exec-cli-adversarial PROPERTIES TIMEOUT 120 SKIP_RETURN_CODE 77)
     endif()
+
+    # Z1 t-8da2da: host-side adversarial tests for the phase 20 ObjC substrate.
+    # ios27_core does not build the objc20 sources, so link them directly.
+    add_executable(test_objc20_adversarial tests/test_objc20_adversarial.c
+        src/objc20a_reader.c src/objc20a_registry.c src/objc20b_dispatch.c
+        src/objc20c_lifetime.c)
+    target_include_directories(test_objc20_adversarial PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_objc20_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME objc20-adversarial COMMAND test_objc20_adversarial)
+    set_tests_properties(objc20-adversarial PROPERTIES TIMEOUT 60)
+
+    # X t-2cfb43: host-side adversarial tests for the phase 19e libSystem BSD
+    # trap dispatch. ios27_core does not build src/libsystem_user.c, so link it
+    # directly.
+    add_executable(test_libsystem_user_adversarial tests/test_libsystem_user_adversarial.c
+        src/libsystem_user.c)
+    target_include_directories(test_libsystem_user_adversarial PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_libsystem_user_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME libsystem-user-adversarial COMMAND test_libsystem_user_adversarial)
+    set_tests_properties(libsystem-user-adversarial PROPERTIES TIMEOUT 60)
+
+    # Z2 t-a6687b: host-side adversarial tests for libSystem21g condition
+    # handles. Every case is single-threaded and deterministic.
+    find_package(Threads REQUIRED)
+    add_executable(test_libsystem21_adversarial tests/test_libsystem21_adversarial.c
+        src/libsystem21g_cond.c)
+    target_link_libraries(test_libsystem21_adversarial PRIVATE Threads::Threads)
+    target_include_directories(test_libsystem21_adversarial PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_options(test_libsystem21_adversarial PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME libsystem21-adversarial COMMAND test_libsystem21_adversarial)
+    set_tests_properties(libsystem21-adversarial PROPERTIES TIMEOUT 60)
+
+    # Y t-ce4d0f: deterministic mutation tests for the bounded guest-memory
+    # Mach boundary in src/mach_guest.c, driven host-side with no native exec.
+    add_executable(test_mach_guest_mutation tests/test_mach_guest_mutation.c)
+    target_link_libraries(test_mach_guest_mutation PRIVATE ios27_core)
+    target_compile_options(test_mach_guest_mutation PRIVATE -Wall -Wextra -Werror -Wpedantic)
+    add_test(NAME mach-guest-mutations COMMAND test_mach_guest_mutation)
+    set_tests_properties(mach-guest-mutations PROPERTIES TIMEOUT 120)
 endif()

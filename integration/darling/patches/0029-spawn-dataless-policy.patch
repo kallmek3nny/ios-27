@@ -1,0 +1,272 @@
+diff --git a/libsyscall/wrappers/darling_spawn_policy.h b/libsyscall/wrappers/darling_spawn_policy.h
+new file mode 100644
+--- /dev/null
++++ b/libsyscall/wrappers/darling_spawn_policy.h
+@@ -0,0 +1,42 @@
++/* The native host's opaque spawn object has four padding bytes after options.
++ * Preserve every existing pointer offset while backporting dataless policy. */
++#ifndef DARLING_SPAWN_POLICY_H
++#define DARLING_SPAWN_POLICY_H
++#include <stddef.h>
++#include <stdint.h>
++#include <string.h>
++#include <errno.h>
++#define DARLING_SPAWN_OPTIONS_OFFSET 128
++#define DARLING_SPAWN_DATALESS_OFFSET 132
++#define DARLING_SPAWN_DATALESS_OPTION 4u
++#define DARLING_DATALESS_ENV "__darling_dataless_policy"
++
++static inline int darling_spawn_read_policy(const void* attr, size_t size, int* policy)
++{
++	*policy = -1;
++	if (!attr || size < DARLING_SPAWN_OPTIONS_OFFSET + sizeof(uint32_t)) return 0;
++	uint32_t options;
++	memcpy(&options, (const char*)attr + DARLING_SPAWN_OPTIONS_OFFSET, sizeof(options));
++	if (!(options & DARLING_SPAWN_DATALESS_OPTION)) return 0;
++	if (size < DARLING_SPAWN_DATALESS_OFFSET + sizeof(int32_t)) return -EINVAL;
++	int32_t value;
++	memcpy(&value, (const char*)attr + DARLING_SPAWN_DATALESS_OFFSET, sizeof(value));
++	if (value < 0 || value > 2) return -EINVAL;
++	*policy = value;
++	return 0;
++}
++
++static inline int darling_dataless_env_policy(const char* const envp[])
++{
++	if (!envp) return -1;
++	static const char prefix[] = DARLING_DATALESS_ENV "=";
++	for (size_t i = 0; envp[i]; i++) {
++		const char* text = envp[i];
++		size_t n = 0;
++		while (n < sizeof(prefix) - 1 && text[n] && text[n] == prefix[n]) n++;
++		if (n == sizeof(prefix) - 1 && text[n] >= '0' && text[n] <= '2' && text[n + 1] == '\0')
++			return text[n] - '0';
++	}
++	return -1;
++}
++#endif
+diff --git a/bsd/sys/spawn_internal.h b/bsd/sys/spawn_internal.h
+--- a/bsd/sys/spawn_internal.h
++++ b/bsd/sys/spawn_internal.h
+@@ -239,6 +239,9 @@
+ 
+ 	cpu_subtype_t      psa_subcpuprefs[NBINPREFS];   /* subcpu affinity prefs*/
+ 	uint32_t        psa_options;             /* More options to be passed to posix_spawn */
++#ifdef DARLING
++	int32_t         psa_dataless_iopolicy;    /* uses the existing 64-bit alignment padding */
++#endif
+ 	/*
+ 	 * NOTE: Extensions array pointers must stay at the end so that
+ 	 * everything above this point stays the same size on different bitnesses
+diff --git a/libsyscall/wrappers/spawn/posix_spawn.c b/libsyscall/wrappers/spawn/posix_spawn.c
+--- a/libsyscall/wrappers/spawn/posix_spawn.c
++++ b/libsyscall/wrappers/spawn/posix_spawn.c
+@@ -41,6 +41,23 @@
+ #include <mach/exception_types.h>
+ #include <mach/coalition.h> /* for COALITION_TYPE_MAX */
+ #include <sys/kern_memorystatus.h>
++#ifdef DARLING
++#include "../darling_spawn_policy.h"
++_Static_assert(offsetof(struct _posix_spawnattr, psa_options) == DARLING_SPAWN_OPTIONS_OFFSET, "spawn options ABI");
++_Static_assert(offsetof(struct _posix_spawnattr, psa_dataless_iopolicy) == DARLING_SPAWN_DATALESS_OFFSET, "spawn policy ABI");
++#if __LP64__
++_Static_assert(offsetof(struct _posix_spawnattr, psa_ports) == 136, "preserve spawn extension ABI");
++#endif
++
++int posix_spawnattr_setdataless_iopolicy_np(posix_spawnattr_t* attr, int policy)
++{
++	if (!attr || !*attr) return EINVAL;
++	_posix_spawnattr_t attributes = *(_posix_spawnattr_t*)attr;
++	attributes->psa_options |= DARLING_SPAWN_DATALESS_OPTION;
++	attributes->psa_dataless_iopolicy = policy;
++	return 0;
++}
++#endif
+ 
+ /*
+  * posix_spawnattr_init
+@@ -171,6 +188,9 @@
+ 
+ 		/* Default is no option */
+ 		(*psattrp)->psa_options = PSA_OPTION_NONE;
++#ifdef DARLING
++		(*psattrp)->psa_dataless_iopolicy = 0;
++#endif
+ 	}
+ 
+ 	return err;
+diff --git a/libsyscall/wrappers/spawn/spawn_private.h b/libsyscall/wrappers/spawn/spawn_private.h
+--- a/libsyscall/wrappers/spawn/spawn_private.h
++++ b/libsyscall/wrappers/spawn/spawn_private.h
+@@ -37,6 +37,7 @@
+ 
+ int     posix_spawnattr_getprocesstype_np(const posix_spawnattr_t * __restrict, int * __restrict) __API_AVAILABLE(macos(10.8), ios(6.0));
+ int     posix_spawnattr_setprocesstype_np(posix_spawnattr_t *, const int) __API_AVAILABLE(macos(10.8), ios(6.0));
++int     posix_spawnattr_setdataless_iopolicy_np(posix_spawnattr_t *, int);
+ 
+ int     posix_spawnattr_setcpumonitor(posix_spawnattr_t * __restrict, uint64_t, uint64_t) __API_AVAILABLE(macos(10.8), ios(6.0));
+ int     posix_spawnattr_getcpumonitor(posix_spawnattr_t * __restrict, uint64_t *, uint64_t *) __API_AVAILABLE(macos(10.8), ios(6.0));
+diff --git a/libsyscall/wrappers/_libkernel_init.c b/libsyscall/wrappers/_libkernel_init.c
+--- a/libsyscall/wrappers/_libkernel_init.c
++++ b/libsyscall/wrappers/_libkernel_init.c
+@@ -40,6 +40,7 @@
+ int darling_uses_external_libsystem(void) { return darling_external_libsystem; }
+ extern int mach_init(const char** applep);
+ extern void sigexc_setup(void);
++extern void darling_dataless_policy_init(const char* const envp[]);
+ #else
+ extern int mach_init(void);
+ #endif
+@@ -98,6 +99,7 @@
+ 
+ #ifdef DARLING
+ 	mach_init(apple);
++	darling_dataless_policy_init(envp);
+ 	sigexc_setup();
+ #else
+ 	mach_init();
+diff --git a/darling/src/libsystem_kernel/emulation/CMakeLists.txt b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+--- a/darling/src/libsystem_kernel/emulation/CMakeLists.txt
++++ b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ project(emulation)
++include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../../../../libsyscall/wrappers")
+ 
+ cmake_policy(SET CMP0005 NEW)
+ enable_language(ASM)
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/misc/iopolicysys.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/misc/iopolicysys.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/misc/iopolicysys.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/misc/iopolicysys.h
+@@ -2,5 +2,8 @@
+ #define LINUX_IOPOLICYSYS_H
+ 
+ long sys_iopolicysys(int cmd, void* arg);
++int darling_dataless_policy_get(void);
++void darling_dataless_policy_set(int policy);
++void darling_dataless_policy_init(const char* const envp[]);
+ 
+ #endif // LINUX_IOPOLICYSYS_H
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c
+@@ -3,6 +3,7 @@
+ #include <sys/errno.h>
+ #include <stddef.h>
+ #include <stdint.h>
++#include <darling_spawn_policy.h>
+ 
+ #include <darling/emulation/common/base.h>
+ #include <darling/emulation/common/tsd.h>
+@@ -18,7 +19,7 @@
+ // - Darling has no entitlements. macOS lets root set case sensitivity, statfs and content protection policies only
+ //   with root or an entitlement, and permissions and mtime ones only with an entitlement; here root may set all of
+ //   them and everybody else gets EPERM (the answer observed for a non-root process).
+-// - An exec resets the process scoped state (this image is reloaded).
++// - An exec resets process scoped state except the materialization policy.
+ // - The disk type does not model the interaction with QoS (EIDRM).
+ // - Types above IOPOL_TYPE_VFS_SKIP_MTIME_UPDATE are EINVAL.
+ 
+@@ -66,6 +67,25 @@
+ static volatile uint32_t process_flags;
+ static volatile int process_disk = DISK_DEFAULT;
+ static volatile int process_background_disk = DISK_UTILITY; // xnu: the background scope reads UTILITY unless set
++
++int darling_dataless_policy_get(void)
++{
++	return (__atomic_load_n(&process_flags, __ATOMIC_RELAXED) & PROCESS_MATERIALIZE_OFF) ? MATERIALIZE_OFF : MATERIALIZE_ON;
++}
++
++void darling_dataless_policy_set(int policy)
++{
++	if (policy == MATERIALIZE_ON)
++		__atomic_and_fetch(&process_flags, ~PROCESS_MATERIALIZE_OFF, __ATOMIC_RELAXED);
++	else
++		__atomic_or_fetch(&process_flags, PROCESS_MATERIALIZE_OFF, __ATOMIC_RELAXED);
++}
++
++void darling_dataless_policy_init(const char* const envp[])
++{
++	int policy = darling_dataless_env_policy(envp);
++	if (policy >= 0) darling_dataless_policy_set(policy);
++}
+ 
+ // Thread scoped state, packed into one thread specific word (0 in every field is the default).
+ #define THREAD_DISK_SHIFT 0 // 3 bits, 0 means "not set by this thread"
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c
+@@ -22,6 +22,8 @@
+ #include <darling/emulation/common/bsdthread/per_thread_wd.h>
+ #include <darling/emulation/common/simple.h>
+ #include <darling/emulation/linux_premigration/elfcalls_wrapper.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/misc/iopolicysys.h>
++#include <darling_spawn_policy.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/unistd/write.h>
+ #include <darling/emulation/xnu_syscall/bsd/helper/misc/nofile_limit.h>
+ #include <darling/emulation/xnu_syscall/bsd/helper/misc/host_platform.h>
+@@ -333,7 +335,7 @@
+ 			while (envp[len]) len++;
+ 		}
+ 
+-		const int new_env_count = (have_nofile_env ? 3 : 2) + add_android_ld;
++		const int new_env_count = (have_nofile_env ? 3 : 2) + add_android_ld + 1;
+ 
+ 		// allocate a new envp and env0, env1 (+1 for trailing NULL)
+ 		modenvp = (const char**)__builtin_alloca(sizeof(void*) * (len + new_env_count + 1));
+@@ -345,6 +347,7 @@
+ 		int env_idx = 0;
+ 		modenvp[env_idx++] = buf;
+ 		modenvp[env_idx++] = mldr_lifetime_pipe_env;
++		modenvp[env_idx++] = darling_dataless_policy_get() == 1 ? DARLING_DATALESS_ENV "=1" : DARLING_DATALESS_ENV "=2";
+ 		if (add_android_ld)
+ 			modenvp[env_idx++] = android_ld_env;
+ 		if (have_nofile_env)
+@@ -357,6 +360,8 @@
+ 				// replaced by the entry that android_ld_library_path built from it
+ 				if (add_android_ld && env_has_name(envp[i], "LD_LIBRARY_PATH"))
+ 					continue;
++				if (env_has_name(envp[i], DARLING_DATALESS_ENV))
++					continue;
+ 				modenvp[env_idx++] = envp[i];
+ 			}
+ 		}
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+@@ -1,5 +1,7 @@
+ #include <darling/emulation/xnu_syscall/bsd/impl/process/posix_spawn.h>
+ #include <darling/emulation/xnu_syscall/bsd/impl/process/spawn_lifecycle.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/misc/iopolicysys.h>
++#include <darling_spawn_policy.h>
+ 
+ #include <stddef.h>
+ #include <stdint.h>
+@@ -53,6 +55,9 @@
+ 	int ret, my_pid;
+ 	int pipe[2] = { -1, -1 };
+ 	struct darling_spawn_handlers lifecycle;
++	int policy, saved_policy = -1;
++	ret = darling_spawn_read_policy(desc ? desc->attrp : NULL, desc ? desc->attr_size : 0, &policy);
++	if (ret < 0) return ret;
+ 
+ 	if (desc && desc->attrp && desc->attrp->psa_flags & POSIX_SPAWN_SETEXEC)
+ 		goto no_fork;
+@@ -81,6 +86,10 @@
+ 		lifecycle.child();
+ 
+ no_fork:
++		if (policy >= 0) {
++			saved_policy = darling_dataless_policy_get();
++			darling_dataless_policy_set(policy);
++		}
+ 		if (desc && desc->attrp)
+ 		{
+ 			if (desc->attrp->psa_flags & POSIX_SPAWN_RESETIDS)
+@@ -349,6 +358,7 @@
+ 
+ 		ret = sys_execve((char*) path, argvp, envp);
+ fail:
++		if (saved_policy >= 0) darling_dataless_policy_set(saved_policy);
+ 		if (desc && desc->attrp && desc->attrp->psa_flags & POSIX_SPAWN_SETEXEC)
+ 		{
+ 			// no_fork case

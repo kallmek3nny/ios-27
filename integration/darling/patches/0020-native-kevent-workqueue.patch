@@ -1,0 +1,393 @@
+diff --git a/darling/src/libsystem_kernel/emulation/CMakeLists.txt b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+--- a/darling/src/libsystem_kernel/emulation/CMakeLists.txt
++++ b/darling/src/libsystem_kernel/emulation/CMakeLists.txt
+@@ -169,6 +169,7 @@
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent64.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c
++	src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+ 	src/xnu_syscall/bsd/impl/kqueue/kqueue.c
+ 	src/xnu_syscall/bsd/impl/misc/abort_with_payload.c
+ 	src/xnu_syscall/bsd/impl/misc/mremap_encrypted.c
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
+--- a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h
+@@ -7,8 +7,8 @@
+ // Darling specific
+ #define WQOPS_QUEUE_REQTHREAD_FOR_KEVENT  0x100020
+ 
+-// A kevent delivery handed to a workqueue thread. It lives on the stack of
+-// the thread in kevent_qos() that waits on `sem` until the worker returns.
++// A kevent delivery handed to a workqueue thread. A synchronous caller waits
++// on `sem`; an asynchronous owner supplies `returned` to release its storage.
+ struct wq_kevent_data
+ {
+ 	struct kevent_qos_s* events; // events in; returned events out
+@@ -18,6 +18,7 @@
+ 	// owned by the workqueue code while the request is queued:
+ 	int flags;
+ 	struct wq_kevent_data* next;
++	void (*returned)(struct wq_kevent_data*);
+ };
+ 
+ struct timespec;
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.c
+@@ -139,6 +139,7 @@
+ 
+ static int wq_running = 0;
+ static int wq_running_constrained = 0;
++static int wq_running_event_manager = 0;
+ 
+ static int priority_to_class(int prio);
+ 
+@@ -168,6 +169,9 @@
+ 	if (priority & _PTHREAD_PRIORITY_OVERCOMMIT_FLAG) {
+ 		flags |= WQ_FLAG_THREAD_OVERCOMMIT;
+ 	}
++	if (priority & _PTHREAD_PRIORITY_EVENT_MANAGER_FLAG) {
++		flags |= WQ_FLAG_THREAD_EVENT_MANAGER;
++	}
+ 
+ 	return flags;
+ };
+@@ -207,18 +211,24 @@
+ 	if (wq_running >= WQ_MAX_THREADS)
+ 		return false;
+ 
+-	if (wq_kevent_head != NULL)
++	struct wq_kevent_data** link = &wq_kevent_head;
++	while (*link != NULL && wq_running_event_manager &&
++			((*link)->flags & WQ_FLAG_THREAD_EVENT_MANAGER))
++		link = &(*link)->next;
++	if (*link != NULL)
+ 	{
+-		struct wq_kevent_data* ev = wq_kevent_head;
++		struct wq_kevent_data* ev = *link;
+ 
+-		wq_kevent_head = ev->next;
+-		if (wq_kevent_head == NULL)
+-			wq_kevent_tail = &wq_kevent_head;
++		*link = ev->next;
++		if (ev->next == NULL)
++			wq_kevent_tail = link;
+ 		ev->next = NULL;
+ 
+ 		out->flags = ev->flags;
+ 		out->kevent = ev;
+ 		wq_running++;
++		if (ev->flags & WQ_FLAG_THREAD_EVENT_MANAGER)
++			wq_running_event_manager++;
+ 		return true;
+ 	}
+ 
+@@ -250,6 +260,8 @@
+ static void untake_request_locked(const struct wq_assignment* a)
+ {
+ 	wq_running--;
++	if (a->flags & WQ_FLAG_THREAD_EVENT_MANAGER)
++		wq_running_event_manager--;
+ 	if (is_constrained(a->flags))
+ 		wq_running_constrained--;
+ 
+@@ -345,6 +357,7 @@
+ 	// return it there.
+ 	wq_running = (flags != 0) ? 1 : 0;
+ 	wq_running_constrained = (flags != 0 && is_constrained(flags)) ? 1 : 0;
++	wq_running_event_manager = (flags & WQ_FLAG_THREAD_EVENT_MANAGER) ? 1 : 0;
+ }
+ 
+ static long queue_requests(int flags, int count, struct wq_kevent_data* ev)
+@@ -392,7 +405,10 @@
+ 
+ 	// The requester returns (and `ev` goes away with its stack) once this
+ 	// is posted; nothing may touch `ev` afterwards.
+-	sem_up(&ev->sem);
++	if (ev->returned != NULL)
++		ev->returned(ev);
++	else
++		sem_up(&ev->sem);
+ }
+ 
+ // Re-enters the workqueue entry point on this thread's own stack.
+@@ -440,6 +456,8 @@
+ 	wq_running--;
+ 	if (is_constrained(my_flags))
+ 		wq_running_constrained--;
++	if (my_flags & WQ_FLAG_THREAD_EVENT_MANAGER)
++		wq_running_event_manager--;
+ 
+ 	// Our slot is free. If a request was waiting for one, this thread
+ 	// services it without parking; the others can only be waiting for the
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_qos.c
+@@ -1,4 +1,5 @@
+ #include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_qos.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_workq.h>
+ 
+ #include <stddef.h>
+ #include <sys/errno.h>
+@@ -55,7 +56,7 @@
+ 	int rv;
+ 	struct kevent64_s* changelist64 = NULL;
+ 	struct kevent64_s* eventlist64 = NULL;
+-	struct wq_kevent_data wq_kevent;
++	struct wq_kevent_data wq_kevent = {0};
+ 	struct timespec polling_timeout = {};
+ 	struct kevent64_s small_changes[KEVENT_STACK_BATCH], small_events[KEVENT_STACK_BATCH];
+ 	struct kevent_qos_s workq_event;
+@@ -68,6 +69,8 @@
+ 
+ 	if ((kq == -1) != !!(flags & KEVENT_FLAG_WORKQ))
+ 		return -EINVAL;
++	if (flags & KEVENT_FLAG_WORKQ)
++		return darling_kevent_workq(changelist, nchanges, eventlist, nevents, flags);
+ 
+ 	if (__atomic_load_n(&default_kq, __ATOMIC_ACQUIRE) == -1)
+ 	{
+diff --git a/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_workq.h
+@@ -0,0 +1,6 @@
++#ifndef DARLING_KEVENT_WORKQ_H
++#define DARLING_KEVENT_WORKQ_H
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_qos.h>
++long darling_kevent_workq(const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, unsigned int flags);
++#endif
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+new file mode 100644
+--- /dev/null
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_workq.c
+@@ -0,0 +1,228 @@
++/* Native asynchronous delivery for the process workqueue kqueue.
++ * Registration only applies changes; a process-lifetime pthread polls events.
++ * Each in-flight delivery owns a bounded slot until its worker returns.
++ * Protocol reference: x86sim/darling-xnu 84b524f3, kevent_qos.c.
++ */
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent_workq.h>
++#include <sys/errno.h>
++
++#ifndef VARIANT_DYLD
++#include <stddef.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <sys/fcntl.h>
++#include <time.h>
++#include <libsimple/lock.h>
++#include <darling/emulation/common/simple.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kqueue.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/kqueue/kevent64.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/bsdthread/workq_kernreturn.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/fcntl/fcntl.h>
++#include <darling/emulation/xnu_syscall/bsd/impl/unistd/close.h>
++
++#define WORKQ_NOTES 1024
++#define WORKQ_SLOTS 48
++#define WORKQ_EVENTS 16
++#define WORKQ_RETURNED 64
++#define WORKQ_DEFAULT_PRIORITY 0x8ff
++
++extern void* (*_dlsym)(void*, const char*);
++extern void sigexc_setup2(void);
++
++struct workq_note {
++	uint64_t ident, udata;
++	int16_t filter;
++	uint16_t flags;
++	int32_t qos;
++	bool used;
++};
++struct workq_slot {
++	struct wq_kevent_data delivery;
++	struct kevent_qos_s events[WORKQ_RETURNED];
++	bool used;
++};
++static struct workq_note notes[WORKQ_NOTES];
++static struct workq_slot slots[WORKQ_SLOTS];
++static libsimple_lock_t init_lock = LIBSIMPLE_LOCK_INITIALIZER;
++static libsimple_lock_t note_lock = LIBSIMPLE_LOCK_INITIALIZER;
++static libsimple_lock_t slot_lock = LIBSIMPLE_LOCK_INITIALIZER;
++static int queue = -1, failed, free_slots = WORKQ_SLOTS;
++
++static struct kevent64_s to_64(const struct kevent_qos_s* event)
++{
++	return (struct kevent64_s){ .ident = event->ident, .filter = event->filter,
++		.flags = event->flags, .fflags = event->fflags, .data = event->data,
++		.udata = event->udata, .ext = {event->ext[0], event->ext[1]} };
++}
++
++static struct kevent_qos_s to_qos(const struct kevent64_s* event)
++{
++	return (struct kevent_qos_s){ .ident = event->ident, .filter = event->filter,
++		.flags = event->flags, .fflags = event->fflags, .data = event->data,
++		.udata = event->udata, .ext = {event->ext[0], event->ext[1], 0, 0} };
++}
++
++static int find_note(uint64_t ident, int16_t filter, uint64_t udata, bool exact)
++{
++	for (int i = 0; i < WORKQ_NOTES; i++) {
++		if (notes[i].used && notes[i].ident == ident && notes[i].filter == filter &&
++				(!exact || notes[i].udata == udata))
++			return i;
++	}
++	return -1;
++}
++
++static long apply_change(const struct kevent_qos_s* change, struct kevent_qos_s* receipt)
++{
++	struct timespec zero = {0};
++	struct kevent64_s input = to_64(change), output = {0};
++	long error = 0;
++	libsimple_lock_lock(&note_lock);
++	int index = find_note(change->ident, change->filter, change->udata,
++			(change->flags & EV_UDATA_SPECIFIC) != 0);
++	if ((change->flags & EV_ADD) && index < 0) {
++		for (int i = 0; i < WORKQ_NOTES; i++) {
++			if (!notes[i].used) { index = i; break; }
++		}
++		if (index < 0) error = ENOMEM;
++	}
++	if (!error) {
++		input.flags |= EV_RECEIPT;
++		long result = sys_kevent64(queue, &input, 1, &output, 1, 0, &zero);
++		if (result < 0) error = -result;
++		else if (result != 1 || !(output.flags & EV_ERROR)) error = EIO;
++		else error = output.data;
++	}
++	if (!error && index >= 0) {
++		if (change->flags & EV_DELETE) notes[index].used = false;
++		else if (change->flags & EV_ADD) {
++			notes[index] = (struct workq_note){ .ident = change->ident,
++				.udata = change->udata, .filter = change->filter,
++				.flags = change->flags, .qos = change->qos, .used = true };
++		} else if (change->qos) notes[index].qos = change->qos;
++	}
++	libsimple_lock_unlock(&note_lock);
++	*receipt = *change;
++	receipt->flags = EV_ERROR;
++	receipt->data = error;
++	return -error;
++}
++
++static void returned(struct wq_kevent_data* delivery)
++{
++	struct workq_slot* slot = (struct workq_slot*)((char*)delivery - offsetof(struct workq_slot, delivery));
++	for (int i = 0; i < delivery->nevents; i++) {
++		struct kevent_qos_s receipt;
++		long error = apply_change(&delivery->events[i], &receipt);
++		if (error) {
++			__simple_printf("kevent workqueue returned change failed: %ld\n", error);
++			__atomic_store_n(&failed, (int)error, __ATOMIC_RELEASE);
++		}
++	}
++	libsimple_lock_lock(&slot_lock);
++	slot->used = false;
++	libsimple_lock_unlock(&slot_lock);
++	sem_up(&free_slots);
++}
++
++static void deliver(const struct kevent_qos_s* event)
++{
++	sem_down(&free_slots, -1);
++	struct workq_slot* slot = NULL;
++	libsimple_lock_lock(&slot_lock);
++	for (int i = 0; i < WORKQ_SLOTS; i++) {
++		if (!slots[i].used) { slot = &slots[i]; slot->used = true; break; }
++	}
++	libsimple_lock_unlock(&slot_lock);
++	if (!slot) __simple_abort();
++	slot->events[0] = *event;
++	slot->delivery = (struct wq_kevent_data){ .events = slot->events,
++		.nevents = 1, .capacity = WORKQ_RETURNED, .returned = returned };
++	int priority = event->qos ? event->qos : WORKQ_DEFAULT_PRIORITY;
++	long error = sys_workq_kernreturn(WQOPS_QUEUE_REQTHREAD_FOR_KEVENT, &slot->delivery, 1, priority);
++	if (error) {
++		slot->delivery.nevents = 0;
++		returned(&slot->delivery);
++		__atomic_store_n(&failed, (int)error, __ATOMIC_RELEASE);
++	}
++}
++
++static void* manager(void* unused)
++{
++	(void)unused;
++	// A syscall-created pthread inherits the syscall's blocked signal mask.
++	// Server-to-client RPC signals must be unblocked before receiving messages.
++	sigexc_setup2();
++	struct kevent64_s events[WORKQ_EVENTS];
++	for (;;) {
++		long count = sys_kevent64(queue, NULL, 0, events, WORKQ_EVENTS, 0, NULL);
++		if (count == -EINTR) continue;
++		if (count < 0) {
++			__atomic_store_n(&failed, (int)count, __ATOMIC_RELEASE);
++			return NULL;
++		}
++		for (int i = 0; i < count; i++) {
++			struct kevent_qos_s event = to_qos(&events[i]);
++			libsimple_lock_lock(&note_lock);
++			int index = find_note(event.ident, event.filter, event.udata, true);
++			if (index >= 0) {
++				event.qos = notes[index].qos;
++				if (notes[index].flags & EV_ONESHOT) notes[index].used = false;
++			}
++			libsimple_lock_unlock(&note_lock);
++			if (index >= 0) deliver(&event);
++		}
++	}
++}
++
++static long initialize(void)
++{
++	long error = 0;
++	libsimple_lock_lock(&init_lock);
++	if (queue < 0) {
++		int (*create)(void**, const void*, void* (*)(void*), void*) =
++			_dlsym ? _dlsym((void*)-2, "pthread_create") : NULL;
++		int (*detach)(void*) = _dlsym ? _dlsym((void*)-2, "pthread_detach") : NULL;
++		if (!create || !detach) error = -ENOSYS;
++		else {
++			queue = sys_kqueue();
++			if (queue < 0) error = queue;
++			else {
++				error = sys_fcntl_nocancel(queue, F_SETFD, FD_CLOEXEC);
++				void* thread = NULL;
++				if (!error) error = -create(&thread, NULL, manager, NULL);
++				if (error) { sys_close_nocancel(queue); queue = -1; }
++				else if (detach(thread)) __simple_printf("kevent workqueue manager detach failed\n");
++			}
++		}
++	}
++	libsimple_lock_unlock(&init_lock);
++	return error ? error : __atomic_load_n(&failed, __ATOMIC_ACQUIRE);
++}
++
++long darling_kevent_workq(const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, unsigned int flags)
++{
++	(void)flags;
++	if (nchanges < 0 || nevents < 0 || (nchanges && !changes) || (nevents && !events))
++		return -EINVAL;
++	long error = initialize();
++	if (error) return error;
++	int count = 0;
++	for (int i = 0; i < nchanges; i++) {
++		struct kevent_qos_s receipt;
++		error = apply_change(&changes[i], &receipt);
++		if (error || (changes[i].flags & EV_RECEIPT)) {
++			if (count == nevents) return error ? error : -ENOBUFS;
++			events[count++] = receipt;
++		}
++	}
++	return count;
++}
++#else
++long darling_kevent_workq(const struct kevent_qos_s* changes, int nchanges,
++		struct kevent_qos_s* events, int nevents, unsigned int flags)
++{
++	return -ENOSYS;
++}
++#endif

@@ -87,6 +87,10 @@ int ios27_macho_entry_vm(const ios27_macho_info *info, uint64_t *address);
  * The apple vector is explicit: host platform/secret values are not leaked.
  * These calls execute trusted freestanding code, NOT a Darwin process sandbox.
  */
+#define IOS27_STARTUP_MAX_VECTOR 128u
+#define IOS27_STARTUP_MAX_STRING 4096u /* including the terminator */
+#define IOS27_STARTUP_MAX_STRINGS (64u * 1024u)
+
 typedef struct {
     int argc;
     const char *const *argv;
