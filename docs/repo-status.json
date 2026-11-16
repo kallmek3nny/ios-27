@@ -11,10 +11,10 @@
     {
       "number": 126,
       "branch": "codex/cpu-limit-expiry",
-      "sha": "7c9322592552bd07d64dca7137156cdd78988d3d",
+      "sha": "c1151409a049c5acb606a43e01eba62f840951a7",
       "title": "feat(runtime): native Android startup, platform bridge, and Darling integration",
       "url": "https://github.com/kallmek3nny/ios-27/pull/126",
-      "updated_at": "2026-11-16T01:43:11Z",
+      "updated_at": "2026-11-16T01:49:25Z",
       "status": "unmerged: not counted"
     },
     {
@@ -502,5 +502,5 @@
     "open_pr_page": 50,
     "merged_pr_page": 70
   },
-  "observed_at": "2026-11-16T01:45:07Z"
+  "observed_at": "2026-11-16T01:52:30Z"
 }
