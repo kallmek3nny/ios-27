@@ -1,0 +1,14 @@
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/abort_with_payload.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/abort_with_payload.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/abort_with_payload.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/abort_with_payload.c
+@@ -11,6 +11,10 @@
+ {
+ 	__simple_printf("abort_with_payload: reason: %s; code: %lu\n",
+ 	                reason_string ? reason_string : "(null)", reason_code);
++	// A launchd child can abort before xpcproxy connects its standard streams.
++	// Preserve that startup diagnostic in the per-prefix server log as well.
++	__simple_kprintf("abort_with_payload: namespace=%u code=%llu flags=%llu reason=%s\n",
++	                 reason_namespace, reason_code, reason_flags, reason_string ? reason_string : "(null)");
+ 	// First raise SIGABRT for the current thread so a coredump / signal
+ 	// handler can run. Then ensure the process actually terminates — caller
+ 	// (dyld's abort_with_payload_wrapper) treats this as __noreturn__ and

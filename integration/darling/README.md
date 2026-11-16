@@ -49,6 +49,7 @@ git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0025-restricted-interface-addresses.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0026-simulator-spawn-lifecycle.patch
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0027-simulator-cache-thread-registers.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0028-abort-reason-diagnostics.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -373,6 +374,11 @@ The Apple-library probe now exits zero on the S25+ with 48 checks, while the
 unchanged binary faults before deployment. The ordinary startup guest still
 passes. Launchd's earlier event-thread fault is gone; `xpcproxy_sim` now stops
 with a loader abort before its main entry.
+
+Patch twenty-eight also records `abort_with_payload` reasons in the private
+server log, covering children that abort before connecting standard streams.
+The native `xpcproxy_sim` failure now identifies the missing
+`posix_spawnattr_setdataless_iopolicy_np` export precisely.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

@@ -478,6 +478,18 @@
     "probe_job_completed": false,
     "foreground_used": false
   },
+  "native_abort_diagnostics": {
+    "patches_reapplied_from_pinned_originals": 28,
+    "resulting_source_hashes_matched": 51,
+    "device_deployed": true,
+    "device_dyld_sha256": "ac91b39e3701d5eeca5fcde46dc9fd7328357273306856554a9801730ce51d19",
+    "device_kernel_sha256": "b62b4b6d1fcc0ddce83ea1d2d3fcacf9b85c7cb90cd5a679c0607d56a92a6ef7",
+    "xpcproxy_abort_reason_logged": true,
+    "observed_namespace": 6,
+    "observed_code": 4,
+    "observed_missing_symbol": "_posix_spawnattr_setdataless_iopolicy_np",
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

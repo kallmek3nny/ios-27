@@ -27,7 +27,8 @@
     {"directory": ".", "path": "patches/0024-prefix-private-state-directories.patch"},
     {"directory": "src/external/xnu", "path": "patches/0025-restricted-interface-addresses.patch"},
     {"directory": "src/external/xnu", "path": "patches/0026-simulator-spawn-lifecycle.patch"},
-    {"directory": "src/external/dyld", "path": "patches/0027-simulator-cache-thread-registers.patch"}
+    {"directory": "src/external/dyld", "path": "patches/0027-simulator-cache-thread-registers.patch"},
+    {"directory": "src/external/xnu", "path": "patches/0028-abort-reason-diagnostics.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -79,6 +80,7 @@
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c": "b3d37434ed17b398a70e7a6aea7120968357508f34100fee85b6c770644afee8",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/process/spawn_lifecycle.h": "0286abef371d18d742c49064683f23cefef4d797287b0d25f583be06710cd9cd",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_lifecycle.c": "15bff82908d0bbd399e79daea680a840437368e4546f65f10dd523cb8a455f27",
-    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h": "163232acc74e6cfd4cbcbe6cdb1a31d74d2b28d16c8afff737ad148e9d074b00"
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/spawn_hooks.h": "163232acc74e6cfd4cbcbe6cdb1a31d74d2b28d16c8afff737ad148e9d074b00",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/abort_with_payload.c": "dd0794e69a24d7315b708775de6df80681b5b3bf62afda8fd85f55c602003cd7"
   }
 }
