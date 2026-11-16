@@ -522,6 +522,20 @@
     "nonempty_auxiliary_payloads_supported": false,
     "foreground_used": false
   },
+  "migrating_server_fiber_tls": {
+    "patches_reapplied_from_pinned_originals": 31,
+    "resulting_source_hashes_matched": 62,
+    "optimized_host_fiber_visits": 100,
+    "host_fiber_errors": 0,
+    "device_deployed": true,
+    "device_server_sha256": "2080d8de83cd137a93cd03203cc340bcaa8e3fc9db81d3c78fc6fc2d0a00846a",
+    "native_guest_regression_exit_code": 0,
+    "ui_processes_spawned": ["SpringBoard", "backboardd", "runningboardd", "iosurfaced"],
+    "springboard_framework_initialization_reached": true,
+    "next_failure": "XPC rejects a task audit token with zero PID generation",
+    "next_failure_pc": "0x1c0129fe4",
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

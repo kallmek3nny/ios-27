@@ -52,6 +52,7 @@ git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integrati
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0028-abort-reason-diagnostics.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0029-spawn-dataless-policy.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0030-mach-msg2-bridge.patch
+git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0031-migrating-server-fiber-tls.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -409,6 +410,18 @@ now run the original worker test job to exit zero, completing 384 callbacks.
 
 ```sh
 python3 integration/darling/tests/mach-msg2.py --fetch-pinned
+```
+
+Patch thirty-one fixes a native server crash exposed by concurrent UI-service
+startup. A microthread can resume on another worker, so its worker-local TLS
+addresses must be reloaded after a suspension. The accessor prevents compiler
+caching across those calls. The optimized contract migrates a real fiber
+between two threads 100 times; native startup still passes. SpringBoard,
+backboardd, runningboardd and iosurfaced now load, and stop at XPC's rejection
+of the current zero-generation task audit token.
+
+```sh
+python3 integration/darling/tests/fiber-tls.py --fetch-pinned
 ```
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,

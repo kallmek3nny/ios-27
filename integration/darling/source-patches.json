@@ -30,7 +30,8 @@
     {"directory": "src/external/dyld", "path": "patches/0027-simulator-cache-thread-registers.patch"},
     {"directory": "src/external/xnu", "path": "patches/0028-abort-reason-diagnostics.patch"},
     {"directory": "src/external/xnu", "path": "patches/0029-spawn-dataless-policy.patch"},
-    {"directory": "src/external/xnu", "path": "patches/0030-mach-msg2-bridge.patch"}
+    {"directory": "src/external/xnu", "path": "patches/0030-mach-msg2-bridge.patch"},
+    {"directory": "src/external/darlingserver", "path": "patches/0031-migrating-server-fiber-tls.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -92,6 +93,8 @@
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c": "fd521e2ff01ec06d75205ef9d9723ffad24562947b0e595530084cc8567cb8aa",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c": "4cb76e265dda974af3d28c2f9f260c2343ec50fc1893d5515bf4a452bd99d983",
     "src/external/xnu/libsyscall/mach/mach_msg.c": "a0545a9de7eeed13f53bc1167513e7b8372d8c09cac3626ea2f52b372dcc3d80",
-    "src/external/xnu/libsyscall/mach/darling_mach_msg2.h": "4cb8a03a11f382ec42c5e257a7f0aa6328e7a3581270e47cd4348041fb8a61e2"
+    "src/external/xnu/libsyscall/mach/darling_mach_msg2.h": "4cb8a03a11f382ec42c5e257a7f0aa6328e7a3581270e47cd4348041fb8a61e2",
+    "src/external/darlingserver/src/thread.cpp": "d5403c500ed18a6e5d19dd2c4cae6ffc7c11e40ea50a924ee92de9f30bbd5ce0",
+    "src/external/darlingserver/include/darlingserver/fiber-tls.hpp": "5248dac745cc5abeb6caef98f58cbe5a5c9a340f7e46aa7f960f6aa6d71afdfb"
   }
 }
