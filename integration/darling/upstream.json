@@ -183,7 +183,8 @@
     "both_cache_parts_mapped": true,
     "apple_libsystem_initializer_entered": true,
     "host_support_libraries_loaded": ["libsystem_kernel.dylib", "libsystem_platform.dylib", "libsystem_pthread.dylib"],
-    "service_port_handshake_completed": false,
+    "service_port_handshake_completed": true,
+    "service_port_handshake_verified_with_patch_count": 24,
     "first_fault": "Darling private dyld_func_lookup field overlaps Apple's public v5 allocator callback",
     "native_fault_pc": "0x1c00e7b78",
     "native_fault_address": "0xdeaddeaddeaddead",
@@ -382,7 +383,22 @@
     "simulator_service_port_received": false,
     "foreground_used": false
   },
+  "minimal_simulator_boot": {
+    "patches_reapplied_from_pinned_originals": 24,
+    "resulting_source_hashes_matched": 45,
+    "private_state_directories_verified": true,
+    "device_launcher_sha256": "1c7d48b16dd1e0cab610bf65d30566e0d846a5d45ca88f5c594daecfbe6b87a6",
+    "service_port_handshake_completed": true,
+    "service_port_reply_marker": "simhost: sent service port 0x1303: 0",
+    "controller_deadline_seconds": 30,
+    "native_faults_recorded": 0,
+    "early_guest_exit_reported": false,
+    "configured_jobs": 0,
+    "foreground_used": false,
+    "evidence_log": "pfx-sim-fd23e6bd.log"
+  },
   "native_darling_boot_verified": false,
+  "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,
   "rendered_ios_frame": false
 }

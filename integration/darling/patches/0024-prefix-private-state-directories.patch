@@ -1,0 +1,12 @@
+diff --git a/src/startup/darling.c b/src/startup/darling.c
+--- a/src/startup/darling.c
++++ b/src/startup/darling.c
+@@ -1795,6 +1795,8 @@
+ 		"/private/var",
+ 		"/private/var/log",
+ 		"/private/var/db",
++		"/private/var/run",
++		"/private/var/tmp",
+ 		"/private/etc",
+ 		"/var",
+ 		"/var/run",

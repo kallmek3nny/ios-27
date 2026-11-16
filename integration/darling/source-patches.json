@@ -23,7 +23,8 @@
     {"directory": "src/external/xnu", "path": "patches/0020-native-kevent-workqueue.patch"},
     {"directory": "src/external/xnu", "path": "patches/0021-simulator-workqueue-features.patch"},
     {"directory": "src/external/libpthread", "path": "patches/0022-pthread-workqueue-capabilities.patch"},
-    {"directory": "src/external/xnu", "path": "patches/0023-native-workloops.patch"}
+    {"directory": "src/external/xnu", "path": "patches/0023-native-workloops.patch"},
+    {"directory": ".", "path": "patches/0024-prefix-private-state-directories.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -39,7 +40,7 @@
     "src/bsdln/ln.c": "ddfa2ec951e6895d6903948e1a5dcaf94b6a80950aa2cd816ab58b91ba0f6611",
     "src/startup/launcher-server.c": "d28286e393803b3014ddfe262dc8cf83fb9986d8a7ad0245ac5533d6ae328cf0",
     "src/startup/launcher-server.h": "90323855d6cac406e719dc06a6cbcd4d7363c4a52d3ec1358ad05dafc724fa54",
-    "src/startup/darling.c": "4cc24a706e1469320d36a67f6c4d864721e9feee279d0e3edade47e85e6a830d",
+    "src/startup/darling.c": "24c0c91fbbdc1ebfb38d1488a0844458982559610c4b5c93b7d4e36e26a81d36",
     "tests/launcher/server.c": "36c370be1499bebfa216ba82c944743a9df146841ce52efc27a02bbaa52d725c",
     "tests/launcher/test-missing-init.py": "1d32cbec91d14989649fe076de54b1e1665b8e1f3ea3f98faa6de5b29ea8f44e",
     "src/external/dyld/src/dyld2.cpp": "cb835d30044bc348527b417f08e9215216b2312609aa60fe9d3f22965211e4a4",

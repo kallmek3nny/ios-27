@@ -45,6 +45,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0021-simulator-workqueue-features.patch
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0022-pthread-workqueue-capabilities.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0023-native-workloops.patch
+git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0024-prefix-private-state-directories.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -305,6 +306,13 @@ The Apple-library probe reports feature mask `0x400000d3`. The event regression
 and startup guest still exit zero. `launchd_sim` now passes dispatch startup
 and reports an absent `/private/var/tmp` directory in its new prefix.
 
+Patch twenty-four creates `/private/var/run` and `/private/var/tmp` in new
+prefixes. The next headless S25+ run completes the real simulator service-port
+handshake: `simhost: sent service port 0x1303: 0`. The 30-second bounded run
+records no native fault or early child exit, with both new directories verified.
+This minimal boot has an empty job list; SpringBoard startup and rendered
+output remain to be integrated.
+
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
 depends on x86-64 CPU translation and is **not** the native Android backend.
@@ -450,7 +458,7 @@ adapter are described in [shims/README.md](shims/README.md).
 
 ## Remaining integration
 
-1. Integrate the simulator-specific host services and matching dyld startup.
+1. Start simulator host services and SpringBoard jobs through native `launchd_sim`.
 2. Resolve the default launchd/shellspawn startup failure.
 3. Connect native graphics presentation and input to the Android host.
 4. Verify actual SpringBoard startup and an Apple-rendered frame.
