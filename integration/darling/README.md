@@ -51,6 +51,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/dyld apply /path/to/ios-27/integration/darling/patches/0027-simulator-cache-thread-registers.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0028-abort-reason-diagnostics.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0029-spawn-dataless-policy.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0030-mach-msg2-bridge.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -398,6 +399,17 @@ parent isolation, invalid attributes and restoration after a failed exec.
 Both native library modes pass all 37 checks with four children each. The
 `xpcproxy_sim` loader now resolves all 103 imports; startup next reaches a
 missing `mach_msg2_internal` call from Apple's dispatch library.
+
+Patch thirty connects scalar and vector `mach_msg2_internal` operations to
+the existing native Mach transport, including separate receive buffers,
+timeouts and empty auxiliary EOF headers. Non-empty auxiliary payloads remain
+unsupported. The host contract passes 25 sanitizer checks; both native library
+modes pass the ten-check message probe. Real `launchd_sim` and `xpcproxy_sim`
+now run the original worker test job to exit zero, completing 384 callbacks.
+
+```sh
+python3 integration/darling/tests/mach-msg2.py --fetch-pinned
+```
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime

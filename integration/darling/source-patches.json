@@ -29,7 +29,8 @@
     {"directory": "src/external/xnu", "path": "patches/0026-simulator-spawn-lifecycle.patch"},
     {"directory": "src/external/dyld", "path": "patches/0027-simulator-cache-thread-registers.patch"},
     {"directory": "src/external/xnu", "path": "patches/0028-abort-reason-diagnostics.patch"},
-    {"directory": "src/external/xnu", "path": "patches/0029-spawn-dataless-policy.patch"}
+    {"directory": "src/external/xnu", "path": "patches/0029-spawn-dataless-policy.patch"},
+    {"directory": "src/external/xnu", "path": "patches/0030-mach-msg2-bridge.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -89,6 +90,8 @@
     "src/external/xnu/libsyscall/wrappers/spawn/spawn_private.h": "df82adbd0cfd61ae47988a2d953546c6fda4642a4ddda35957bebac2742000be",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/misc/iopolicysys.h": "6fcd549f9bdde8c2ae4bb25d232a32e39972f7f91abe61184a95ea7d0857d25c",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/misc/iopolicysys.c": "fd521e2ff01ec06d75205ef9d9723ffad24562947b0e595530084cc8567cb8aa",
-    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c": "4cb76e265dda974af3d28c2f9f260c2343ec50fc1893d5515bf4a452bd99d983"
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/execve.c": "4cb76e265dda974af3d28c2f9f260c2343ec50fc1893d5515bf4a452bd99d983",
+    "src/external/xnu/libsyscall/mach/mach_msg.c": "a0545a9de7eeed13f53bc1167513e7b8372d8c09cac3626ea2f52b372dcc3d80",
+    "src/external/xnu/libsyscall/mach/darling_mach_msg2.h": "4cb8a03a11f382ec42c5e257a7f0aa6328e7a3581270e47cd4348041fb8a61e2"
   }
 }

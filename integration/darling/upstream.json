@@ -507,6 +507,21 @@
     "next_failure": "Apple libdispatch calls missing mach_msg2_internal during job startup",
     "foreground_used": false
   },
+  "native_mach_msg2": {
+    "patches_reapplied_from_pinned_originals": 30,
+    "resulting_source_hashes_matched": 60,
+    "host_asan_ubsan_checks_passed": 25,
+    "native_checks_per_mode": 10,
+    "darling_library_probe_exit_code": 0,
+    "apple_library_probe_exit_code": 0,
+    "device_dyld_sha256": "d3bb5b5b5c7098d5db7531f6b638fc22036d1a69f440f2d34a90175c5daf63da",
+    "device_kernel_sha256": "f082dd65e990f8105d5ef8df709ac3db36901e0d39199977520ca864d4441020",
+    "launchd_test_job_exit_code": 0,
+    "launchd_test_job_worker_callbacks": 384,
+    "launchd_test_job_log": "pfx-sim-d0aa8115-launchd.log",
+    "nonempty_auxiliary_payloads_supported": false,
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

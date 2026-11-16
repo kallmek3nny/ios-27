@@ -42,6 +42,8 @@ jobs:
         run: python3 integration/darling/tests/spawn-lifecycle.py --fetch-pinned
       - name: Verify spawn policy handoff
         run: python3 integration/darling/tests/spawn-policy.py --fetch-pinned
+      - name: Verify native Mach message adapter
+        run: python3 integration/darling/tests/mach-msg2.py --fetch-pinned
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
