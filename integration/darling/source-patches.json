@@ -24,7 +24,8 @@
     {"directory": "src/external/xnu", "path": "patches/0021-simulator-workqueue-features.patch"},
     {"directory": "src/external/libpthread", "path": "patches/0022-pthread-workqueue-capabilities.patch"},
     {"directory": "src/external/xnu", "path": "patches/0023-native-workloops.patch"},
-    {"directory": ".", "path": "patches/0024-prefix-private-state-directories.patch"}
+    {"directory": ".", "path": "patches/0024-prefix-private-state-directories.patch"},
+    {"directory": "src/external/xnu", "path": "patches/0025-restricted-interface-addresses.patch"}
   ],
   "files": {
     "cmake/clang_version_check.cmake": "0de39308a22897431c9dc635276cafacb2aecb0c4b8accdb145f38de97c4738b",
@@ -71,6 +72,7 @@
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c": "0b47f326ed80c3915400a8b1825fa4bd4d0108254365758691e6a7b424425de7",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/include/xnu_syscall/bsd/impl/kqueue/kevent_id.h": "52a24f8b26f684e98cc90cc3edcaf6fc491e13d12cff171ad9503230d22ab096",
     "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/kqueue/kevent_id.c": "a1c989901de73319baea43e676bf67b2a3394bc2521124909d11f0ed95bf7b42",
-    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c": "b59389664403d99c1cf22e52f9621f53bc27aec9ea91e0e9af737dbc0f5194ed"
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/bsd_syscall_table.c": "b59389664403d99c1cf22e52f9621f53bc27aec9ea91e0e9af737dbc0f5194ed",
+    "src/external/xnu/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c": "b3d37434ed17b398a70e7a6aea7120968357508f34100fee85b6c770644afee8"
   }
 }

@@ -397,6 +397,43 @@
     "foreground_used": false,
     "evidence_log": "pfx-sim-fd23e6bd.log"
   },
+  "native_snapshot_diagnostics": {
+    "tracer_sha256": "609046ae175be6bb20e75733cbd521f7368d5398296941d8eb1da2104c978ea0",
+    "normal_exit_verified": true,
+    "fault_register_dump_verified": true,
+    "one_shot_snapshot_and_resume_verified": true,
+    "network_warmup_loop_identified": true,
+    "foreground_used": false
+  },
+  "restricted_interface_addresses": {
+    "patches_reapplied_from_pinned_originals": 25,
+    "resulting_source_hashes_matched": 46,
+    "native_ioctl_probe_sha256": "7bfbceaa7aeb768f054cc9c4dac188491179f42a805015f1f6c862bc818b9ff0",
+    "interfaces_observed": 3,
+    "hardware_address_query_errno": 13,
+    "other_observed_interface_queries_succeeded": true,
+    "unavailable_link_address_length": 0,
+    "device_kernel_sha256": "f078889b98f28e3b96405449ee479c48e167b562d20662cdbbd8e3c170a56def",
+    "device_dyld_sha256": "934275373b6902b4a699360af92cf08fe49478c2691dd9a668ce873b36493181",
+    "darling_library_probe_exit_code": 0,
+    "apple_library_probe_exit_code": 0,
+    "interface_stream_bytes": 608,
+    "interface_stream_messages": 6,
+    "resolver_warmup_returned": true,
+    "launchd_reached_job_enumeration": true,
+    "job_execution_verified": false,
+    "foreground_used": false
+  },
+  "spawn_lifecycle_baseline": {
+    "darling_library_probe_exit_code": 0,
+    "children_verified": 8,
+    "file_actions_and_signal_attributes_verified": true,
+    "user_atfork_handlers_called": 0,
+    "failed_exec_errno": 2,
+    "apple_library_spawn_errno": 78,
+    "external_bridge_implemented": false,
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

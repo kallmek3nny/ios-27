@@ -46,6 +46,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/libpthread apply /path/to/ios-27/integration/darling/patches/0022-pthread-workqueue-capabilities.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0023-native-workloops.patch
 git -C /path/to/pinned/darling apply /path/to/ios-27/integration/darling/patches/0024-prefix-private-state-directories.patch
+git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0025-restricted-interface-addresses.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -143,6 +144,9 @@ and C-library initialization calls on the S25+. The next observed stop is
 Apple's allocator requiring the missing `executable_boothash` metadata.
 `tests/native-trace.c` is the optional native ARM64 Linux fault tracer used
 headlessly for register and stack evidence; it does not emulate instructions.
+Setting `IOS27_TRACE_SNAPSHOT_SECONDS` to a positive deadline records a one-shot
+`NATIVE_SNAPSHOT` of the traced tasks and resumes them. Snapshot, normal-exit
+and fault-dump behavior are verified natively on the phone.
 
 Patch fourteen supplies the allocator's opaque `executable_boothash` metadata.
 The native loader combines a random, prefix-private key, the Linux boot UUID
@@ -312,6 +316,24 @@ handshake: `simhost: sent service port 0x1303: 0`. The 30-second bounded run
 records no native fault or early child exit, with both new directories verified.
 This minimal boot has an empty job list; SpringBoard startup and rendered
 output remain to be integrated.
+
+A subsequent startup snapshot identifies a network-interface query loop in
+launchd's resolver warmup. `tests/android-interface-access.c` independently
+confirms that Android permits interface indices, flags, MTU, netmask and
+broadcast queries but denies hardware-address reads with `EACCES`.
+Patch twenty-five retains the available IP metadata and reports a zero-length
+link address for that permission-restricted field. `tests/guest-iflist.c`
+checks the route-message stream and the same resolver warmup in bounded runs.
+Both Darling-library and Apple-library runs now exit zero: the first 608-byte
+fill succeeds, all six route messages parse, and `getaddrinfo` returns.
+`launchd_sim` consequently reaches job enumeration; the staged probe job's
+ownership and mode checks are the next integration step.
+
+`tests/guest-spawn.c` provides the separate spawn lifecycle contract: eight
+children, pipe file actions, signal attributes, an expected failed exec, and
+suppressed user atfork callbacks while another thread allocates. The native
+Darling-library control passes; the Apple-library baseline returns `ENOSYS`
+and identifies the remaining external lifecycle bridge.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
