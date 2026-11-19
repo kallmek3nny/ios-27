@@ -124,7 +124,7 @@ head: `872607e045f9` · ci: **passing_checks** · unmerged, not credited.
 
 ### [phase23c-objc-native-bridge](https://github.com/kallmek3nny/ios-27/pull/94)
 
-head: `f6c0ee963e39` · ci: **passing_checks** · unmerged, not credited.
+head: `f6c0ee963e39` · ci: **not_checked** · unmerged, not credited.
 
 - **ObjC host prototype (not Apple libobjc)**: 2 source files, 6 test/fixture files, +771/-0 lines
 

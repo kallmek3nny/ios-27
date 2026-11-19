@@ -569,7 +569,7 @@
       "sha": "f6c0ee963e3978ddf47bb071056ab59067cc04ff",
       "url": "https://github.com/kallmek3nny/ios-27/pull/94",
       "pr_number": 94,
-      "ci": "passing_checks",
+      "ci": "not_checked",
       "status": "candidate changes, NOT verified API support",
       "files_checked": 11,
       "possibly_truncated": false,
@@ -1331,7 +1331,7 @@
         "url": "https://github.com/kallmek3nny/ios-27/pull/94",
         "source_files": 2,
         "fixture_files": 6,
-        "ci": "passing_checks"
+        "ci": "not_checked"
       }
     ],
     "sandbox": [
@@ -2199,5 +2199,5 @@
       }
     ]
   },
-  "observed_at": "2026-11-16T01:56:07Z"
+  "observed_at": "2026-11-19T20:26:13Z"
 }
