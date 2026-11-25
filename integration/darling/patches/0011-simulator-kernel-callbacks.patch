@@ -1,0 +1,118 @@
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/process/posix_spawn.c
+@@ -4,6 +4,7 @@
+ #include <stdint.h>
+ #include <sys/spawn.h>
+ #include <sys/fcntl.h>
++#include <sys/errno.h>
+ #include <_libkernel_init.h>
+ 
+ #include <darling/emulation/xnu_syscall/bsd/impl/process/execve.h>
+@@ -54,6 +55,12 @@ long sys_posix_spawn(int* pid, const char* path, const struct _posix_spawn_args_
+ 	if (desc && desc->attrp && desc->attrp->psa_flags & POSIX_SPAWN_SETEXEC)
+ 		goto no_fork;
+ 
++	// A public libkernel callback table has no Darling fork hooks. Do not
++	// interpret Apple's newer allocator callbacks as those private hooks.
++	if (!_libkernel_functions || !_libkernel_functions->posix_spawn_prepare ||
++		!_libkernel_functions->posix_spawn_parent || !_libkernel_functions->posix_spawn_child)
++		return -ENOSYS;
++
+ 	ret = LINUX_SYSCALL(__NR_pipe2, pipe, LINUX_O_CLOEXEC);
+ 	if (ret < 0)
+ 		return ret;
+diff --git a/libsyscall/wrappers/_libkernel_init.c b/libsyscall/wrappers/_libkernel_init.c
+--- a/libsyscall/wrappers/_libkernel_init.c
++++ b/libsyscall/wrappers/_libkernel_init.c
+@@ -34,6 +34,8 @@
+ #include "_libkernel_init.h"
+ 
+ #ifdef DARLING
++#include "darling_kernel_callbacks.h"
++static struct _libkernel_functions darling_kernel_callbacks;
+ extern int mach_init(const char** applep);
+ extern void sigexc_setup(void);
+ #else
+@@ -82,6 +84,10 @@ __libkernel_init(_libkernel_functions_t fns,
+     const char *apple[] __attribute__((unused)),
+     const struct ProgramVars *vars __attribute__((unused)))
+ {
++#ifdef DARLING
++	darling_kernel_callbacks_normalize(&darling_kernel_callbacks, fns, apple);
++	fns = &darling_kernel_callbacks;
++#endif
+ 	_libkernel_functions = fns;
+ 	if (fns->dlsym) {
+ 		_dlsym = fns->dlsym;
+diff --git a/libsyscall/wrappers/_libkernel_init.h b/libsyscall/wrappers/_libkernel_init.h
+--- a/libsyscall/wrappers/_libkernel_init.h
++++ b/libsyscall/wrappers/_libkernel_init.h
+@@ -46,6 +46,11 @@ struct voucher_s;
+ typedef struct voucher_s *voucher_t;
+ #endif
+ 
++#ifdef DARLING
++/* Distinguish Darling's private tail from Apple's later public extensions. */
++#define DARLING_LIBKERNEL_FUNCTIONS_VERSION 0x44410004UL
++#endif
++
+ typedef const struct _libkernel_functions {
+ 	/* The following functions are included in version 1 of this structure */
+ 	unsigned long version;
+diff --git a/libsyscall/wrappers/darling_kernel_callbacks.h b/libsyscall/wrappers/darling_kernel_callbacks.h
+new file mode 100644
+--- /dev/null
++++ b/libsyscall/wrappers/darling_kernel_callbacks.h
+@@ -0,0 +1,51 @@
++/* Normalize the public libkernel callback prefix before using Darling's tail.
++ * Apple version 5 places allocator callbacks where the old private tail began.
++ * The simulator host explicitly supplies its loader lookup through apple[]. */
++#ifndef DARLING_KERNEL_CALLBACKS_H
++#define DARLING_KERNEL_CALLBACKS_H
++#include <stddef.h>
++#include <stdint.h>
++
++static inline void darling_kernel_callbacks_normalize(struct _libkernel_functions* out,
++        _libkernel_functions_t in, const char* apple[]) {
++    *out = (struct _libkernel_functions){0};
++    if (!in) return;
++    if (in->version == DARLING_LIBKERNEL_FUNCTIONS_VERSION) {
++        *out = *in;
++        out->version = 4;
++        return;
++    }
++    size_t length = sizeof(in->version);
++    if (in->version >= 1) length = offsetof(struct _libkernel_functions, reserved1);
++    if (in->version >= 2) length = offsetof(struct _libkernel_functions, pthread_clear_qos_tsd);
++    if (in->version >= 3) length = offsetof(struct _libkernel_functions, pthread_current_stack_contains_np);
++    if (in->version >= 4) length = offsetof(struct _libkernel_functions, dyld_func_lookup);
++    for (size_t i = 0; i < length; ++i) ((unsigned char*)out)[i] = ((const unsigned char*)in)[i];
++    if (out->version > 4) out->version = 4;
++
++    static const char key[] = "darling_dyld_lookup=0x";
++    uintptr_t lookup = 0;
++    unsigned found = 0;
++    if (apple) for (size_t i = 0; i < 512 && apple[i]; ++i) {
++        const char* value = apple[i];
++        size_t k = 0;
++        while (k < sizeof(key) - 1 && value[k] == key[k]) ++k;
++        if (k != sizeof(key) - 1) continue;
++        if (++found > 1) { lookup = 0; break; }
++        value += k;
++        uintptr_t parsed = 0;
++        size_t digits = 0;
++        for (; *value; ++value) {
++            unsigned digit;
++            if (*value >= '0' && *value <= '9') digit = (unsigned)(*value - '0');
++            else if (*value >= 'a' && *value <= 'f') digit = (unsigned)(*value - 'a' + 10);
++            else if (*value >= 'A' && *value <= 'F') digit = (unsigned)(*value - 'A' + 10);
++            else break;
++            if (++digits > sizeof(uintptr_t) * 2) break;
++            parsed = (parsed << 4) | digit;
++        }
++        if (*value == '\0' && digits) lookup = parsed;
++    }
++    out->dyld_func_lookup = (int (*)(const char*, void**))lookup;
++}
++#endif

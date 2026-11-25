@@ -1,4 +1,5 @@
 #include "ios27/macho.h"
+#include "ios27/chained.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -163,8 +164,8 @@ int ios27_macho_parse(const uint8_t *data, size_t size,
 
 /*
  * A linked executable may declare /usr/lib/dyld and carry empty chained
- * fixup metadata even though its original-source code has no imports or
- * rebases. Treat those commands as inert only after inspecting their payloads.
+ * fixup metadata even when no fixups are needed. Inspect empty payloads and
+ * validate actual internal data rebases separately; imports remain forbidden.
  * No dynamic linker, import resolver, or relocation engine is invoked.
  */
 static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
@@ -248,7 +249,7 @@ static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
             if (length < 28u || !within(offset, length, size))
                 return bad(error, capacity, "truncated chained fixup payload");
             /* dyld_chained_fixups_header: version, three offsets, count,
-             * imports format, symbols format. Reject all actual fixup starts. */
+             * imports format, symbols format. No imported symbols here. */
             starts = u32(data + offset + 4u);
             imports = u32(data + offset + 8u);
             symbols = u32(data + offset + 12u);
@@ -274,9 +275,15 @@ static int freestanding_linkedit_safe(const uint8_t *data, size_t size,
                 if (count > IOS27_MAX_SEGMENTS ||
                     (uint64_t)count * 4u > length - starts - 4u)
                     return bad(error, capacity, "invalid chained starts count");
-                for (uint32_t j = 0u; j < count; ++j) {
-                    if (u32(data + offset + starts + 4u + (size_t)j * 4u))
-                        return bad(error, capacity, "chained rebases require dyld");
+                unsigned actual = 0u;
+                for (uint32_t j = 0u; j < count; ++j)
+                    actual |= u32(data + offset + starts + 4u + (size_t)j * 4u) != 0u;
+                if (actual) {
+                    ios27_macho_info image;
+                    ios27_chained_plan plan;
+                    if (ios27_macho_parse(data, size, &image, error, capacity) ||
+                        ios27_chained_static_plan(data, size, &image, &plan, error, capacity))
+                        return -1;
                 }
             }
         } else if (cmd == LC_DYLD_INFO || cmd == LC_DYLD_INFO_ONLY) {
@@ -373,7 +380,7 @@ static int main_is_code_section(const uint8_t *data, uint64_t entry) {
  * Preflight a freestanding executable against the *actual mapping granule*.
  * The same check runs on x86_64, without ever making guest pages executable.
  * LC_MAIN.entryoff is a file offset relative to __TEXT's fileoff.
- * No syscall/dyld/ObjC execution is supported by this path.
+ * No syscall/general dyld/ObjC execution is supported by this path.
  */
 int ios27_macho_executable_layout(const uint8_t *data, size_t size,
                                   const ios27_macho_info *info,

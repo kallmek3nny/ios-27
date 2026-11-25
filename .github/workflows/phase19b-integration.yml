@@ -27,3 +27,22 @@ jobs:
         run: timeout 300s cmake --build build --parallel 2
       - name: genuine compiler-linked four-image graph
         run: timeout 180s python3 tools/phase19b-build.py --output-dir build/phase19b --core build/libios27_core.a
+      - name: native services, initialized graphs and CPU expiry with LLVM
+        run: |
+          set -o pipefail
+          timeout 360s ctest --test-dir build -R '^(contained-native-services(-fallback)?|contained-native-service-shim|contained-native-initializers|compiled-darwin-initializers|platform-memory-contracts|compiled-platform-memory|contained-native-platform-memory|platform-memory-overrides|cache-platform-overrides|contained-native-cpu-expiry|service-binding-metadata|static-executable-rebases)$' --no-tests=error --timeout 30 --output-on-failure 2>&1 | tee "$RUNNER_TEMP/phase19b-native-ctest.log"
+      - name: fail ARM64 job if any native suite skipped
+        if: runner.arch == 'ARM64'
+        run: |
+          log="$RUNNER_TEMP/phase19b-native-ctest.log"
+          if grep -Eq '\*\*\*(Skipped|Not Run)|\((Skipped|Not Run)\)' "$log"; then
+            echo "::error::a native suite skipped or did not run on ARM64, so native execution stays unproven"
+            grep -E '\*\*\*(Skipped|Not Run)|\((Skipped|Not Run)\)' "$log"
+            exit 1
+          fi
+          for t in contained-native-services contained-native-services-fallback contained-native-service-shim contained-native-initializers compiled-darwin-initializers platform-memory-contracts compiled-platform-memory contained-native-platform-memory platform-memory-overrides cache-platform-overrides contained-native-cpu-expiry service-binding-metadata static-executable-rebases; do
+            if ! grep -Eq "Test +#[0-9]+: ${t} [.]* *Passed" "$log"; then
+              echo "::error::${t} did not report Passed on ARM64"
+              exit 1
+            fi
+          done

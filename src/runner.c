@@ -1,11 +1,15 @@
 #include "ios27/macho.h"
+#include "ios27/service_bindings.h"
+#include "ios27/chained.h"
+#include "guest_stack_internal.h"
+#include "images_internal.h"
 #include "process_internal.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
-#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+#if defined(__linux__) || defined(__ANDROID__)
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
@@ -77,6 +81,7 @@ __asm__(".text\n"
         "mov x1, x3\n"
         "mov x2, x4\n"
         "mov x3, x5\n"
+        "mov x4, x6\n"
         "mov sp, x10\n"
         "blr x9\n"
         "mov sp, x19\n"
@@ -87,57 +92,50 @@ __asm__(".text\n"
 
 extern int ios27_arm64_enter_main(uintptr_t entry, uintptr_t guest_sp,
                                   int argc, char **argv, char **envp,
-                                  char **apple);
+                                  char **apple, const void *extension);
+#endif
 
-#define IOS27_GUEST_MAX_ARGS 128u
-#define IOS27_GUEST_MAX_STRING 4096u
-#define IOS27_GUEST_MAX_BYTES (64u * 1024u)
+#if defined(__linux__) || defined(__ANDROID__)
+#define IOS27_GUEST_MAX_ARGS IOS27_STARTUP_MAX_VECTOR
+#define IOS27_GUEST_MAX_STRING IOS27_STARTUP_MAX_STRING
+#define IOS27_GUEST_MAX_BYTES IOS27_STARTUP_MAX_STRINGS
 #define IOS27_GUEST_DEFAULT_STACK (1024u * 1024u)
 #define IOS27_GUEST_MAX_STACK (8u * 1024u * 1024u)
 
-typedef struct {
-    uint8_t *reservation;
-    size_t size;
-    uintptr_t sp;
-    char **argv;
-    char **envp;
-    char **apple;
-} ios27_guest_stack;
-
-static void release_guest_stack(ios27_guest_stack *stack) {
+void ios27_guest_stack_release(ios27_guest_stack *stack) {
+    if (!stack) return;
     if (stack->reservation)
         (void)munmap(stack->reservation, stack->size);
     memset(stack, 0, sizeof(*stack));
 }
 
-typedef struct {
-    uintptr_t entry;
-    ios27_guest_stack *stack;
-    int argc;
-} prepared_entry;
-
-static int enter_prepared(void *opaque) {
-    const prepared_entry *call = opaque;
-    return ios27_arm64_enter_main(call->entry, call->stack->sp, call->argc,
-                                  call->stack->argv, call->stack->envp,
-                                  call->stack->apple);
-}
-
 /* All argument checks precede stack allocation and executable mappings. No
  * host environment is automatically passed to the Darwin image. */
 /* Validate every vector and size before making any guest mappings. */
-static int prepare_guest_stack(const ios27_startup_context *context,
+int ios27_guest_stack_prepare(const ios27_startup_context *context,
                                uint64_t requested, size_t page_size,
                                ios27_guest_stack *stack,
                                char *error, size_t error_size) {
+    long os_page = sysconf(_SC_PAGESIZE);
     size_t env_count = 0u, apple_count = 0u, payload = 0u, capacity;
-    size_t count, vector_bytes;
+    size_t count, vector_bytes, overhead, offset;
     char *args[IOS27_GUEST_MAX_ARGS];
     char *env[IOS27_GUEST_MAX_ARGS];
     char *apple[IOS27_GUEST_MAX_ARGS];
     uintptr_t cursor, base;
     uint8_t *mapped;
+    if (!stack)
+        return fail(error, error_size, "null guest stack output");
     memset(stack, 0, sizeof(*stack));
+    if (os_page < 4096 || os_page > 65536 ||
+        (((unsigned long)os_page & ((unsigned long)os_page - 1u)) != 0u))
+        return fail(error, error_size, "unsupported host page size");
+    if (page_size &&
+        (page_size < 4096u || page_size > 65536u ||
+         (page_size & (page_size - 1u)) != 0u ||
+         page_size % (size_t)os_page != 0u))
+        return fail(error, error_size, "unsupported guest stack page size");
+    if (!page_size) page_size = (size_t)os_page;
     if (!context || context->argc < 0 ||
         context->argc > (int)IOS27_GUEST_MAX_ARGS ||
         (context->argc != 0 && !context->argv))
@@ -183,10 +181,14 @@ static int prepare_guest_stack(const ios27_startup_context *context,
     if (capacity > SIZE_MAX - (page_size - 1u))
         return fail(error, error_size, "guest stack capacity overflow");
     capacity = (capacity + page_size - 1u) & ~(page_size - 1u);
+    /* mmap guarantees only real-host-page alignment. Keep enough inaccessible
+     * slack to align both guards and the usable stack to a coarser test page,
+     * and retain the whole reservation for rollback and final teardown. */
+    overhead = 2u * page_size + page_size - (size_t)os_page;
     if (capacity < payload + vector_bytes + 16384u ||
-        capacity > SIZE_MAX - 2u * page_size)
+        capacity > SIZE_MAX - overhead)
         return fail(error, error_size, "guest stack insufficient for arguments");
-    stack->size = capacity + 2u * page_size;
+    stack->size = capacity + overhead;
     mapped = mmap(NULL, stack->size, PROT_NONE,
                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (mapped == MAP_FAILED) {
@@ -194,9 +196,13 @@ static int prepare_guest_stack(const ios27_startup_context *context,
         return fail(error, error_size, "guest stack reservation failed");
     }
     stack->reservation = mapped;
-    if (mprotect(mapped + page_size, capacity, PROT_READ | PROT_WRITE))
+    offset = (page_size - (uintptr_t)mapped % page_size) % page_size;
+    base = (uintptr_t)(mapped + offset + page_size);
+    if (mprotect((void *)base, capacity, PROT_READ | PROT_WRITE))
         goto failed;
-    base = (uintptr_t)(mapped + page_size);
+    stack->base = (uint8_t *)base;
+    stack->capacity = capacity;
+    stack->page_size = page_size;
     cursor = base + capacity;
     for (size_t i = count; i > 0u; --i) {
         size_t n = strlen(context->argv[i - 1u]) + 1u;
@@ -234,12 +240,136 @@ static int prepare_guest_stack(const ios27_startup_context *context,
     for (size_t i = 0u; i < apple_count; ++i)
         stack->apple[i] = apple[i];
     stack->apple[apple_count] = NULL;
+    stack->argc = context->argc;
+    if (error && error_size) error[0] = '\0';
     return 0;
 failed:
-    release_guest_stack(stack);
+    ios27_guest_stack_release(stack);
     return fail(error, error_size, "guest stack protection/setup failed");
 }
+
+int ios27_guest_stack_program_vars(ios27_guest_stack *stack, uintptr_t header,
+                                   char *error, size_t error_size) {
+    typedef struct {
+        ios27_program_vars vars;
+        int argc;
+        char **argv;
+        char **environ;
+        char *progname;
+        char empty_name;
+    } storage;
+    const size_t bytes = (sizeof(storage) + 15u) & ~(size_t)15u;
+    uintptr_t base, reservation, sp;
+    storage *values;
+    char *name;
+    _Static_assert(sizeof(ios27_program_vars) == 5u * sizeof(void *), "Darwin ProgramVars layout");
+    if (!stack || !stack->reservation || !stack->base || stack->program_vars ||
+        !header || (header & 7u) || stack->argc < 0 ||
+        stack->argc > (int)IOS27_GUEST_MAX_ARGS || !stack->argv || !stack->envp)
+        return fail(error, error_size, "invalid ProgramVars attachment");
+    base = (uintptr_t)stack->base;
+    reservation = (uintptr_t)stack->reservation;
+    if (base < reservation || base - reservation > stack->size ||
+        stack->capacity > stack->size - (base - reservation) || stack->sp < base ||
+        stack->sp - base >= stack->capacity || (stack->sp & 15u) ||
+        stack->sp - base < 16384u + bytes)
+        return fail(error, error_size, "insufficient guest stack for ProgramVars");
+    sp = stack->sp - bytes;
+    values = (storage *)sp;
+    /* argc/argv came from the bounded copy above. No host environment or
+     * program-name pointer is borrowed by the new cells. */
+    name = stack->argc ? stack->argv[0] : NULL;
+    if (name) {
+        char *last = strrchr(name, '/');
+        if (last) name = last + 1u;
+    }
+    memset(values, 0, sizeof(*values));
+    values->argc = stack->argc;
+    values->argv = stack->argv;
+    values->environ = stack->envp;
+    values->progname = name ? name : &values->empty_name;
+    values->vars.mh = (const void *)header;
+    values->vars.argc = &values->argc;
+    values->vars.argv = &values->argv;
+    values->vars.environ = &values->environ;
+    values->vars.progname = &values->progname;
+    stack->sp = sp;
+    stack->program_vars = &values->vars;
+    if (error && error_size) error[0] = '\0';
+    return 0;
+}
 #endif
+
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+typedef struct {
+    uintptr_t entry;
+    ios27_guest_stack *stack;
+    int argc;
+    const void *extension;
+} prepared_entry;
+
+static int enter_prepared(void *opaque) {
+    const prepared_entry *call = opaque;
+    return ios27_arm64_enter_main(call->entry, call->stack->sp, call->argc,
+                                  call->stack->argv, call->stack->envp,
+                                  call->stack->apple, call->extension);
+}
+#endif
+
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+typedef struct {
+    const ios27_image_startup *startup;
+    ios27_guest_stack *stack;
+    int argc;
+} initialized_entry;
+
+static int enter_initialized(void *opaque) {
+    const initialized_entry *call = opaque;
+    const ios27_guest_stack *stack = call->stack;
+    /* The trampoline restores host SP between calls. Initializers get
+     * Darwin's ProgramVars in x4; ordinary main retains its four-argument ABI. */
+    for (size_t i = 0u; i < call->startup->count; ++i)
+        (void)ios27_arm64_enter_main(call->startup->initializers[i], stack->sp,
+                                     call->argc, stack->argv, stack->envp, stack->apple, stack->program_vars);
+    return ios27_arm64_enter_main(call->startup->entry, stack->sp, call->argc,
+                                  stack->argv, stack->envp, stack->apple, NULL);
+}
+#endif
+
+int ios27_images_run_contained(const ios27_images *images, const char *root,
+                               const ios27_startup_context *context,
+                               const ios27_process_options *options,
+                               ios27_process_result *result,
+                               char *error, size_t capacity) {
+    if (!result) return fail(error, capacity, "null graph process result");
+    memset(result, 0, sizeof(*result));
+    if (!context || !options || !options->timeout_ms ||
+        options->timeout_ms > IOS27_PROCESS_MAX_TIMEOUT_MS)
+        return fail(error, capacity, "invalid graph startup context or deadline");
+#if defined(__aarch64__) && (defined(__linux__) || defined(__ANDROID__))
+    ios27_image_startup startup;
+    ios27_guest_stack stack;
+    ios27_process_result completed = {0};
+    int status;
+    if (ios27_images_prepare_startup(images, root, &startup, error, capacity) ||
+        ios27_guest_stack_prepare(context, startup.stack_size, 0u, &stack, error, capacity))
+        return -1;
+    if (ios27_guest_stack_program_vars(&stack, startup.main_header, error, capacity)) {
+        ios27_guest_stack_release(&stack);
+        return -1;
+    }
+    initialized_entry call = {&startup, &stack, context->argc};
+    status = ios27_process_supervise(enter_initialized, &call, options, &completed, error, capacity);
+    if (munmap(stack.reservation, stack.size))
+        return fail(error, capacity, "graph guest stack cleanup failed");
+    if (status) return -1;
+    *result = completed;
+    return 0;
+#else
+    (void)images; (void)root;
+    return fail(error, capacity, "initialized graph execution requires ARM64 Linux/Android");
+#endif
+}
 
 typedef void (*guest_handoff)(int (*entry)(void *), void *call);
 
@@ -248,7 +378,8 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size);
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size);
 
 static int run_executable_context(const uint8_t *data, size_t size,
                                  const ios27_macho_info *info,
@@ -258,7 +389,7 @@ static int run_executable_context(const uint8_t *data, size_t size,
                                  ios27_process_result *process_result, char *error,
                                  size_t error_size) {
     return run_image(data, size, info, context, exit_code, options,
-                     process_result, NULL, error, error_size);
+                     process_result, NULL, NULL, error, error_size);
 }
 
 /* Loader mode: identical preflight, guarded guest stack and final W^X
@@ -269,7 +400,22 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                          void (*handoff)(int (*entry)(void *), void *call),
                          char *error, size_t error_size) {
     if (!handoff) return fail(error, error_size, "null guest loader handoff");
-    return run_image(data, size, info, context, NULL, NULL, NULL, handoff,
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, NULL,
+                     error, error_size);
+}
+
+/* Opt-in services loader: bind the approved private shim record when present,
+ * otherwise retain the earlier x4 callback interface. Ordinary public C-main
+ * entrypoints neither bind a record nor supply an extension register. */
+int ios27_native_handoff_extension(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const void *extension,
+                                    void (*handoff)(int (*entry)(void *), void *call),
+                                    char *error, size_t error_size) {
+    if (!handoff || !extension)
+        return fail(error, error_size, "null guest loader handoff or extension");
+    return run_image(data, size, info, context, NULL, NULL, NULL, handoff, extension,
                      error, error_size);
 }
 
@@ -278,16 +424,21 @@ static int run_image(const uint8_t *data, size_t size,
                      const ios27_startup_context *context, int *exit_code,
                      const ios27_process_options *options,
                      ios27_process_result *process_result,
-                     guest_handoff handoff, char *error, size_t error_size) {
+                     guest_handoff handoff, const void *extension,
+                     char *error, size_t error_size) {
 #if !defined(__aarch64__) || (!defined(__linux__) && !defined(__ANDROID__))
     (void)data; (void)size; (void)info; (void)exit_code;
-    (void)context; (void)options; (void)process_result; (void)handoff;
+    (void)context; (void)options; (void)process_result; (void)handoff; (void)extension;
     return fail(error, error_size, "execution requires ARM64 Linux/Android");
 #else
     ios27_exec_layout layout;
     long os_page = sysconf(_SC_PAGESIZE);
     uint8_t *mapping;
     ios27_guest_stack guest;
+    ios27_service_binding_plan binding = {0};
+    ios27_chained_plan rebases;
+    uint8_t *staged_file = NULL;
+    const uint8_t *segment_file = data;
     if (!data || !info || !context ||
         (!exit_code && !process_result && !handoff) || os_page <= 0)
         return fail(error, error_size, "invalid native runtime input");
@@ -296,14 +447,36 @@ static int run_image(const uint8_t *data, size_t size,
     if (ios27_macho_executable_layout(data, size, info, (size_t)os_page,
                                       &layout, error, error_size))
         return -1;
-    if (prepare_guest_stack(context, info->stacksize,
+    if (extension && ios27_service_binding_inspect(data, size, &binding,
+                                                  error, error_size))
+        return -1;
+    if (ios27_chained_static_plan(data, size, info, &rebases, error, error_size))
+        return -1;
+    if (binding.present) for (size_t i = 0; i < rebases.count; ++i) {
+        const ios27_chained_patch *p = &rebases.patches[i];
+        uint64_t address = info->segments[p->segment_index].vmaddr + p->segment_offset;
+        if (address < binding.vmaddr + IOS27_SERVICE_BINDING_BYTES && binding.vmaddr < address + 8u)
+            return fail(error, error_size, "rebase overlaps service binding record");
+    }
+    if (ios27_guest_stack_prepare(context, info->stacksize,
                             layout.page_size, &guest, error, error_size))
         return -1;
     mapping = mmap(NULL, layout.span, PROT_NONE,
                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (mapping == MAP_FAILED) {
-        release_guest_stack(&guest);
+        ios27_guest_stack_release(&guest);
         return fail(error, error_size, "native VM reservation failed");
+    }
+    if (rebases.count) {
+        staged_file = mmap(NULL, size, PROT_NONE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (staged_file == MAP_FAILED) { staged_file = NULL; goto mapping_failed; }
+        if (mprotect(staged_file, size, PROT_READ | PROT_WRITE)) goto mapping_failed;
+        memcpy(staged_file, data, size);
+        if (ios27_chained_apply(staged_file, size, info, &rebases,
+                                 (uint64_t)(uintptr_t)mapping, NULL, NULL, error, error_size))
+            goto mapping_failed;
+        segment_file = staged_file;
     }
 
     for (size_t i = 0u; i < info->segment_count; ++i) {
@@ -325,12 +498,29 @@ static int run_image(const uint8_t *data, size_t size,
         if (mprotect(staging, bytes, PROT_READ | PROT_WRITE) != 0)
             goto mapping_failed;
         if (s->filesize != 0u)
-            memcpy(target, data + (size_t)s->fileoff, (size_t)s->filesize);
+            memcpy(target, segment_file + (size_t)s->fileoff, (size_t)s->filesize);
         if (s->initprot & 4u)
             __builtin___clear_cache((char *)target,
                                     (char *)(target + (size_t)s->filesize));
     }
     initialize_zerofill(data, &layout, mapping);
+    if (staged_file) {
+        if (munmap(staged_file, size)) goto mapping_failed;
+        staged_file = NULL;
+    }
+    if (binding.present) {
+        /* Preflight approved this exact RW/non-executable slot. Only the
+         * private staged image receives the pointer; file bytes stay intact. */
+        uintptr_t pointer = (uintptr_t)extension;
+        _Static_assert(sizeof(pointer) == 8u, "ARM64 binding pointer width");
+        if (binding.vmaddr < layout.min_vmaddr ||
+            binding.vmaddr - layout.min_vmaddr > layout.span ||
+            IOS27_SERVICE_BINDING_BYTES >
+                layout.span - (size_t)(binding.vmaddr - layout.min_vmaddr))
+            goto mapping_failed;
+        memcpy(mapping + (size_t)(binding.vmaddr - layout.min_vmaddr) + 8u,
+               &pointer, sizeof(pointer));
+    }
     /*
      * Commit the complete image only after every segment has been populated.
      * No guest code is executable during staging, and all pages get their
@@ -353,7 +543,10 @@ static int run_image(const uint8_t *data, size_t size,
     {
         uintptr_t entry = (uintptr_t)(mapping +
                             (size_t)(layout.entry_vmaddr - layout.min_vmaddr));
-        prepared_entry call = {entry, &guest, context->argc};
+        /* Bound named shims use their private slot and a normal four-argument
+         * entry. Keep x4 only for the earlier explicit callback-table client. */
+        prepared_entry call = {entry, &guest, context->argc,
+                              binding.present ? NULL : extension};
         ios27_process_result completed = {0};
         int result = 0, status = 0;
         if (handoff) {
@@ -381,8 +574,9 @@ static int run_image(const uint8_t *data, size_t size,
     return 0;
 
 mapping_failed:
+    if (staged_file) (void)munmap(staged_file, size);
     (void)munmap(mapping, layout.span); /* unwind the entire reservation */
-    release_guest_stack(&guest);
+    ios27_guest_stack_release(&guest);
     return fail(error, error_size, "native segment mapping/protection failed");
 #endif
 }

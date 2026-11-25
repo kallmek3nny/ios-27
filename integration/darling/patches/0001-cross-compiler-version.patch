@@ -1,0 +1,50 @@
+diff --git a/cmake/clang_version_check.cmake b/cmake/clang_version_check.cmake
+index 31395a19..0f0d3dc9 100644
+--- a/cmake/clang_version_check.cmake
++++ b/cmake/clang_version_check.cmake
+@@ -9,30 +9,23 @@ macro(clang_version_check compiler source_type clang_minimum_version)
+         message(FATAL_ERROR "Unable to find a compatible compiler")
+     endif (compiler STREQUAL "")
+ 
+-    file(WRITE "${CMAKE_BINARY_DIR}/clang_major.${source_type}"  "#include <stdio.h>\n" 
+-    "#if !__clang__\n" "#error \"Not running on a clang compiler!\"\n" "#endif\n" "int main() { printf(\"%d\", __clang_major__); }")
+-    execute_process(COMMAND "${compiler}" "${CMAKE_BINARY_DIR}/clang_major.${source_type}" "-o" "${CMAKE_BINARY_DIR}/clang_${source_type}_major"
+-    	RESULT_VARIABLE BUILD_CLANG_TEST_RESULT
+-    	OUTPUT_VARIABLE BUILD_CLANG_TEST_OUTPUT
+-		COMMAND_ECHO NONE
++    # Query the compiler without linking or running a target executable. A
++    # cross compiler's output need not be executable on the build machine.
++    file(WRITE "${CMAKE_BINARY_DIR}/clang_major.${source_type}"
++        "#ifndef __clang__\n#error Not a Clang compiler\n#endif\n__clang_major__\n")
++    execute_process(COMMAND "${compiler}" -E -P "${CMAKE_BINARY_DIR}/clang_major.${source_type}"
++        RESULT_VARIABLE CLANG_MAJOR_VERSION_RESULT
++        OUTPUT_VARIABLE CLANG_MAJOR_VERSION_OUTPUT
++        ERROR_VARIABLE CLANG_MAJOR_VERSION_ERROR
++        TIMEOUT 30
+     )
+ 
+-    if (BUILD_CLANG_TEST_RESULT)
+-    	message(FATAL_ERROR
+-			"Failed to build ${CMAKE_BINARY_DIR}/clang_major.${source_type}\n"
+-			"This could indicate that `${compiler}` is either not a clang compiler, "
+-			"or the path does not exist. ${MANUALLY_SET_COMPILER_ERROR_MESSAGE}")
+-    endif (BUILD_CLANG_TEST_RESULT)
+-
+-    execute_process(COMMAND "${CMAKE_BINARY_DIR}/clang_${source_type}_major"
+-    	RESULT_VARIABLE CLANG_MAJOR_VERSION_RESULT
+-    	OUTPUT_VARIABLE CLANG_MAJOR_VERSION_OUTPUT
+-    )
+-
+-    if (CLANG_MAJOR_VERSION_RESULT)
+-        # This should normally never fail...
+-    	message(FATAL_ERROR "Failed to check clang major version")
+-    endif (CLANG_MAJOR_VERSION_RESULT)
++    string(STRIP "${CLANG_MAJOR_VERSION_OUTPUT}" CLANG_MAJOR_VERSION_OUTPUT)
++    if (CLANG_MAJOR_VERSION_RESULT OR NOT CLANG_MAJOR_VERSION_OUTPUT MATCHES "^[0-9]+$")
++        message(FATAL_ERROR
++            "Failed to check clang major version with `${compiler}`: ${CLANG_MAJOR_VERSION_ERROR}\n"
++            "${MANUALLY_SET_COMPILER_ERROR_MESSAGE}")
++    endif ()
+ 
+     if ("${CLANG_MAJOR_VERSION_OUTPUT}" LESS ${clang_minimum_version})
+     	message(FATAL_ERROR

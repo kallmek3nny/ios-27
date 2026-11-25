@@ -1,0 +1,8 @@
+{
+  "url": "https://raw.githubusercontent.com/termux/termux-packages/aa51ee318658b1bfcca4c23eed5db04856b14d38/packages/libandroid-posix-semaphore/semaphore.c",
+  "sha256": "333e0027667d8a82568fbe5617b1ef381a8c6a920d1a44a07570fb695a302253",
+  "size": 8036,
+  "license": "MIT",
+  "copyright": "Copyright 2005-2020 Rich Felker, et al.; Termux port retains the notice in the source",
+  "configuration": "Build with an explicit DT_SONAME and _PATH_TMP under the selected runtime prefix"
+}

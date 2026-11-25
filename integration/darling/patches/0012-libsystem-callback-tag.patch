@@ -1,0 +1,15 @@
+diff --git a/init.c b/init.c
+--- a/init.c
++++ b/init.c
+@@ -190,7 +190,11 @@ libSystem_initializer(int argc,
+ 		      const struct ProgramVars* vars)
+ {
+ 	static const struct _libkernel_functions libkernel_funcs = {
++	#ifdef DARLING
++		.version = DARLING_LIBKERNEL_FUNCTIONS_VERSION,
++	#else
+ 		.version = 4,
++	#endif
+ 		// V1 functions
+ #if !TARGET_OS_DRIVERKIT
+ 		.dlsym = dlsym,

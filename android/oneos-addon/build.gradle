@@ -1,0 +1,52 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'org.ios27.oneosaddon'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'org.ios27.oneosaddon'
+        minSdk 30
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/catalog')
+}
+
+def compatibilityApk = project(':app').layout.buildDirectory.file('outputs/apk/debug/app-debug.apk')
+def inventory = rootProject.layout.projectDirectory.file('../docs/apple-runtime-inventory-27.0.json')
+def kitUrl = providers.gradleProperty('ios27KitUrl').orElse('http://127.0.0.1:8277/ios27-runtime-compat.apk')
+def kitDir = layout.buildDirectory.dir('outputs/kit')
+def catalogDir = layout.buildDirectory.dir('generated/catalog')
+
+tasks.register('prepareAddonCatalog') {
+    dependsOn ':app:assembleDebug'
+    inputs.files(compatibilityApk, inventory)
+    inputs.property('kitUrl', kitUrl)
+    outputs.dirs(kitDir, catalogDir)
+    doLast {
+        def apple = new groovy.json.JsonSlurper().parse(inventory.asFile).source
+        def url = new URI(kitUrl.get())
+        if (!(url.scheme == 'https' && url.host) &&
+            !(url.scheme == 'http' && url.host == '127.0.0.1' && url.port == 8277)) {
+            throw new GradleException('The kit URL must use HTTPS or the local development server')
+        }
+        if (url.userInfo || url.fragment) throw new GradleException('Invalid kit URL')
+        def original = compatibilityApk.get().asFile
+        def kit = new File(kitDir.get().asFile, 'ios27-runtime-compat.apk')
+        kit.parentFile.mkdirs()
+        java.nio.file.Files.copy(original.toPath(), kit.toPath(),
+                                 java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        def digest = java.security.MessageDigest.getInstance('SHA-256').digest(kit.bytes).encodeHex().toString()
+        def catalog = [
+            archive: [url: apple.archive_url, size: apple.download_size,
+                      sha256: apple.expected_sha256, file: 'iOS-27.0-24A434-arm64.aar'],
+            kit: [url: kitUrl.get(), size: kit.length(), sha256: digest, file: kit.name]
+        ]
+        def output = new File(catalogDir.get().asFile, 'catalog.json')
+        output.parentFile.mkdirs()
+        output.text = groovy.json.JsonOutput.toJson(catalog)
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'prepareAddonCatalog' }

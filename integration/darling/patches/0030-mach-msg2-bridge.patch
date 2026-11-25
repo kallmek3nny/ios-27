@@ -1,0 +1,92 @@
+diff --git a/libsyscall/mach/mach_msg.c b/libsyscall/mach/mach_msg.c
+--- a/libsyscall/mach/mach_msg.c
++++ b/libsyscall/mach/mach_msg.c
+@@ -67,6 +67,10 @@
+ 	 mach_msg_trap((msg), (opt), (ssize), (rsize), (rname), (to), (not))
+ 
+ #define LIBMACH_OPTIONS (MACH_SEND_INTERRUPT|MACH_RCV_INTERRUPT)
++
++#ifdef DARLING
++#include "darling_mach_msg2.h"
++#endif
+ 
+ /*
+  *	Routine:	mach_msg
+diff --git a/libsyscall/mach/darling_mach_msg2.h b/libsyscall/mach/darling_mach_msg2.h
+new file mode 100644
+--- /dev/null
++++ b/libsyscall/mach/darling_mach_msg2.h
+@@ -0,0 +1,73 @@
++/* Native scalar/vector mach_msg2 transport through the existing Mach server.
++ * ABI: Apple xnu-12377.1.9, mach/message.h and libsyscall/mach/mach_msg.c.
++ * Empty auxiliary receives use XNU's zero-sized EOF header. */
++#ifndef DARLING_MACH_MSG2_H
++#define DARLING_MACH_MSG2_H
++#include <stdint.h>
++#include <stddef.h>
++#include <string.h>
++
++struct darling_msg_vector {
++	uint64_t data, receive;
++	uint32_t send_size, receive_size;
++};
++struct darling_msg_aux { uint32_t size, reserved; };
++#define DARLING_MACH64_VECTOR UINT64_C(0x100000000)
++#define DARLING_MACH64_CLASSIFICATION UINT64_C(0x1e00000000)
++#define DARLING_MACH_SEND_INVALID_OPTIONS 0x10000013
++
++mach_msg_return_t mach_msg2_internal(void* data, uint64_t options, uint64_t bits_size,
++		uint64_t ports, uint64_t voucher_id, uint64_t descriptors_receive,
++		uint64_t receive_priority, uint64_t timeout)
++{
++	if (options & ~(UINT64_C(0xffffffff) | DARLING_MACH64_VECTOR | DARLING_MACH64_CLASSIFICATION))
++		return DARLING_MACH_SEND_INVALID_OPTIONS;
++	uint32_t send_size = (uint32_t)(bits_size >> 32);
++	uint32_t receive_size = (uint32_t)receive_priority;
++	mach_msg_header_t* send = data;
++	mach_msg_header_t* receive = data;
++	struct darling_msg_aux* aux = NULL;
++	if (options & DARLING_MACH64_VECTOR) {
++		unsigned sends = options & MACH_SEND_MSG ? send_size : 0;
++		unsigned receives = options & MACH_RCV_MSG ? receive_size : 0;
++		if ((options & MACH_SEND_MSG) && (!sends || sends > 2)) return MACH_SEND_INVALID_DATA;
++		if ((options & MACH_RCV_MSG) && (!receives || receives > 2)) return MACH_RCV_INVALID_DATA;
++		if (!data) return sends ? MACH_SEND_INVALID_DATA : MACH_RCV_INVALID_DATA;
++		struct darling_msg_vector vectors[2] = {{0}};
++		memcpy(vectors, data, (sends > receives ? sends : receives) * sizeof(vectors[0]));
++		send = (mach_msg_header_t*)(uintptr_t)vectors[0].data;
++		receive = (mach_msg_header_t*)(uintptr_t)(vectors[0].receive ? vectors[0].receive : vectors[0].data);
++		send_size = sends ? vectors[0].send_size : 0;
++		receive_size = receives ? vectors[0].receive_size : 0;
++		if (sends == 2 && vectors[1].send_size) {
++			// Non-empty auxiliary payloads require a server-side transport extension.
++			if (!vectors[1].data || vectors[1].send_size != sizeof(struct darling_msg_aux)) return MACH_SEND_INVALID_DATA;
++		}
++		if (receives == 2 && vectors[1].receive_size) {
++			aux = (struct darling_msg_aux*)(uintptr_t)(vectors[1].receive ? vectors[1].receive : vectors[1].data);
++			if (!aux || vectors[1].receive_size < sizeof(*aux)) return MACH_RCV_INVALID_DATA;
++		}
++	}
++	if (options & MACH_SEND_MSG) {
++		if (!send || send_size < sizeof(*send)) return MACH_SEND_MSG_TOO_SMALL;
++		if (send->msgh_bits != (uint32_t)bits_size || send->msgh_remote_port != (uint32_t)ports ||
++				send->msgh_local_port != (uint32_t)(ports >> 32) || send->msgh_voucher_port != (uint32_t)voucher_id ||
++				(uint32_t)send->msgh_id != (uint32_t)(voucher_id >> 32)) return MACH_SEND_INVALID_HEADER;
++		if (send->msgh_bits & MACH_MSGH_BITS_COMPLEX) {
++			uint32_t count;
++			if (send_size < sizeof(*send) + sizeof(count)) return MACH_SEND_MSG_TOO_SMALL;
++			memcpy(&count, send + 1, sizeof(count));
++			if (count != (uint32_t)descriptors_receive) return MACH_SEND_INVALID_DATA;
++		}
++	}
++	if ((options & MACH_RCV_MSG) && !receive && receive_size) return MACH_RCV_INVALID_DATA;
++	mach_msg_return_t result = mach_msg_overwrite(send, (mach_msg_option_t)options,
++		send_size, receive_size, (mach_port_t)(descriptors_receive >> 32),
++		(mach_msg_timeout_t)timeout, MACH_PORT_NULL, receive, 0);
++	if (result == MACH_MSG_SUCCESS && (options & MACH_RCV_MSG) && aux) {
++		const struct darling_msg_aux eof = {0};
++		memcpy(aux, &eof, sizeof(eof));
++	}
++	return result;
++}
++#endif

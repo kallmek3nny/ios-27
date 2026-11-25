@@ -1,0 +1,84 @@
+diff --git a/libsyscall/wrappers/_libkernel_init.h b/libsyscall/wrappers/_libkernel_init.h
+--- a/libsyscall/wrappers/_libkernel_init.h
++++ b/libsyscall/wrappers/_libkernel_init.h
+@@ -49,6 +49,7 @@
+ #ifdef DARLING
+ /* Distinguish Darling's private tail from Apple's later public extensions. */
+ #define DARLING_LIBKERNEL_FUNCTIONS_VERSION 0x44410004UL
++int darling_uses_external_libsystem(void) __attribute__((visibility("hidden")));
+ #endif
+ 
+ typedef const struct _libkernel_functions {
+diff --git a/libsyscall/wrappers/_libkernel_init.c b/libsyscall/wrappers/_libkernel_init.c
+--- a/libsyscall/wrappers/_libkernel_init.c
++++ b/libsyscall/wrappers/_libkernel_init.c
+@@ -36,6 +36,8 @@
+ #ifdef DARLING
+ #include "darling_kernel_callbacks.h"
+ static struct _libkernel_functions darling_kernel_callbacks;
++static int darling_external_libsystem;
++int darling_uses_external_libsystem(void) { return darling_external_libsystem; }
+ extern int mach_init(const char** applep);
+ extern void sigexc_setup(void);
+ #else
+@@ -85,6 +87,7 @@
+     const struct ProgramVars *vars __attribute__((unused)))
+ {
+ #ifdef DARLING
++	darling_external_libsystem = darling_kernel_callbacks_are_external(fns);
+ 	darling_kernel_callbacks_normalize(&darling_kernel_callbacks, fns, apple);
+ 	fns = &darling_kernel_callbacks;
+ #endif
+diff --git a/libsyscall/wrappers/darling_kernel_callbacks.h b/libsyscall/wrappers/darling_kernel_callbacks.h
+--- a/libsyscall/wrappers/darling_kernel_callbacks.h
++++ b/libsyscall/wrappers/darling_kernel_callbacks.h
+@@ -5,6 +5,10 @@
+ #define DARLING_KERNEL_CALLBACKS_H
+ #include <stddef.h>
+ #include <stdint.h>
++
++static inline int darling_kernel_callbacks_are_external(_libkernel_functions_t in) {
++    return in && in->version >= 1 && in->version != DARLING_LIBKERNEL_FUNCTIONS_VERSION;
++}
+ 
+ static inline void darling_kernel_callbacks_normalize(struct _libkernel_functions* out,
+         _libkernel_functions_t in, const char* apple[]) {
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/impl/bsdthread/bsdthread_register.c
+@@ -2,6 +2,8 @@
+ 
+ #include <sys/errno.h>
+ #include <stdint.h>
++#include <stddef.h>
++#include <_libkernel_init.h>
+ #include <pthread/tsd_private.h>
+ 
+ #include <darling/emulation/common/base.h>
+@@ -73,11 +75,26 @@
+ 	wqueue_entry_point = (bsdwqthread_entry_t) wqthread;
+ 	g_pth_regdata = *pth_regdata;
+ 
++#ifndef VARIANT_DYLD
++	if (darling_uses_external_libsystem() &&
++			pth_regdata_len >= offsetof(struct _pthread_registration_data, main_qos) + sizeof(uint64_t)) {
++		// XNU copies the main thread's requested QoS back during registration.
++		// Our native worker pool uses the default class when none was requested.
++		g_pth_regdata.main_qos = (1ull << (8 + 4 - 1)) | 0xff;
++		((struct _pthread_registration_data*)pth_regdata)->main_qos = g_pth_regdata.main_qos;
++	}
++#endif
++
+ 	set_thread_handles(_pthread_getspecific_direct(_PTHREAD_TSD_SLOT_PTHREAD_SELF));
+ 
+ 	// libpthread has set up the TSD of this thread, and it does so for every thread it creates later
+ 	g_registered = true;
+ 
++#ifndef VARIANT_DYLD
++	if (darling_uses_external_libsystem())
++		return WORKQ_FEATURE_KEVENT | WORKQ_FEATURE_FINEPRIO |
++			PTHREAD_FEATURE_QOS_MAINTENANCE | PTHREAD_FEATURE_DISPATCHFUNC | PTHREAD_FEATURE_QOS_DEFAULT;
++#endif
+ 	return /* WORKQ_FEATURE_KEVENT | WORKQ_FEATURE_FINEPRIO | PTHREAD_FEATURE_QOS_MAINTENANCE 
+ 		| PTHREAD_FEATURE_DISPATCHFUNC | PTHREAD_FEATURE_QOS_DEFAULT */ 0;
+ }

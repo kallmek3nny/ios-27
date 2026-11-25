@@ -1,0 +1,36 @@
+diff --git a/host/simfb/simfb.c b/host/simfb/simfb.c
+--- a/host/simfb/simfb.c
++++ b/host/simfb/simfb.c
+@@ -406,20 +406,14 @@
+ static uint64_t file_last_ns;
+ static dispatch_source_t file_timer;
+ 
+-// x86Sim: a Linux system call (Darling processes are Linux processes): under libarm64jit, "svc #0xfffe" is one, with
+-// x8 = the x86_64 syscall number
+-static long linux_syscall3(long n, long a, long b, long c) {
+-	register long x0 __asm__("x0") = a, x1 __asm__("x1") = b, x2 __asm__("x2") = c;
+-	register long x8 __asm__("x8") = n;
+-	__asm__ volatile("svc #0xfffe" : "+r"(x0) : "r"(x1), "r"(x2), "r"(x8) : "memory");
+-	return x0;
+-}
++// ios-27: this shim runs natively; use Linux AArch64's syscall ABI.
++#include "linux-arm64.h"
+ 
+ // x86Sim: readers on Linux (simview, fbring.wait) sleep in FUTEX_WAIT on the low 32 bits of the header's
+ // seq instead of polling; every publish wakes them. This is Linux's futex(2) (shared, not FUTEX_PRIVATE: the page
+ // is a /dev/shm file mapped by other processes).
+ static void ring_wake(void* addr) {
+-	linux_syscall3(202 /* futex */, (long)addr, 1 /* FUTEX_WAKE */, 0x7fffffffL);
++	ios27_linux_futex_wake_shared(addr, 0x7fffffff);
+ }
+ static uint64_t now_ns(void) { static mach_timebase_info_data_t tb; if (!tb.denom) mach_timebase_info(&tb); return mach_absolute_time() * tb.numer / tb.denom; }
+ static uint64_t wall_ns(void) { struct timespec ts; clock_gettime(CLOCK_REALTIME, &ts); return (uint64_t)ts.tv_sec * 1000000000ull + ts.tv_nsec; }
+@@ -431,7 +425,7 @@
+ // zeroed pages): idle cost one frame per display. SIMFB_RING_IDLE_MS (default 1500; 0 = never trim).
+ #define RING_IDLE_MS_DEFAULT 1500
+ static long ring_madvise_remove(void* addr, size_t len) {
+-	return linux_syscall3(28 /* madvise */, (long)addr, (long)len, 9 /* MADV_REMOVE */);
++	return ios27_linux_madvise_remove(addr, len);
+ }
+ static uint64_t ring_idle_ns;
+ static dispatch_source_t ring_trim_timer;

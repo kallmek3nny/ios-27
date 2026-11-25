@@ -85,9 +85,9 @@ int ios27_process_install_loader_filter(int report_fd);
  * applec NUL-terminated startup strings in argv, envp, apple order. */
 #define IOS27_LAUNCH_MAGIC UINT32_C(0x4c373249)
 #define IOS27_LAUNCH_VERSION 1u
-#define IOS27_LAUNCH_MAX_VECTOR 128u
-#define IOS27_LAUNCH_MAX_STRING 4096u /* including the terminator */
-#define IOS27_LAUNCH_MAX_STRINGS (64u * 1024u)
+#define IOS27_LAUNCH_MAX_VECTOR IOS27_STARTUP_MAX_VECTOR
+#define IOS27_LAUNCH_MAX_STRING IOS27_STARTUP_MAX_STRING
+#define IOS27_LAUNCH_MAX_STRINGS IOS27_STARTUP_MAX_STRINGS
 #define IOS27_LAUNCH_MAX_IMAGE (64u * 1024u * 1024u)
 
 typedef struct {
@@ -140,5 +140,16 @@ int ios27_native_handoff(const uint8_t *data, size_t size,
                          const ios27_startup_context *context,
                          void (*handoff)(int (*entry)(void *), void *call),
                          char *error, size_t error_size);
+
+/* Same entry/containment contract with the services helper's explicit table.
+ * A validated named-shim record is bound before sealing and x4 is cleared;
+ * images without a record retain the earlier x4 callback interface. The
+ * ordinary loader and public runner APIs neither bind nor supply a table. */
+int ios27_native_handoff_extension(const uint8_t *data, size_t size,
+                                    const ios27_macho_info *info,
+                                    const ios27_startup_context *context,
+                                    const void *extension,
+                                    void (*handoff)(int (*entry)(void *), void *call),
+                                    char *error, size_t error_size);
 
 #endif

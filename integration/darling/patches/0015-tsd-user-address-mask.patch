@@ -1,0 +1,56 @@
+diff --git a/src/startup/mldr/tsd_rewrite.h b/src/startup/mldr/tsd_rewrite.h
+--- a/src/startup/mldr/tsd_rewrite.h
++++ b/src/startup/mldr/tsd_rewrite.h
+@@ -55,6 +55,7 @@
+ #define MLDR_A64_MRS_TPIDR_EL0       0xD53BD040u
+ #define MLDR_A64_MRS_MASK            0xFFFFFFE0u // all but Rt
+ #define MLDR_A64_AND_X_CLEAR_LOW3    0x927DF000u // AND Xd, Xn, #~7
++#define MLDR_A64_AND_X_USER_TSD      0x927DB000u // AND Xd, Xn, #0x0000fffffffffff8
+ #define MLDR_A64_AND_X_MASK          0xFFFFFC00u // all but Rn and Rd
+ #define MLDR_A64_LDR_X_UOFFSET       0xF9400000u // LDR Xt, [Xn, #imm]
+ 
+@@ -77,7 +78,10 @@ static inline bool mldr_tsd_read_pair(uint32_t first, uint32_t second, uint32_t*
+ 	uint32_t rt = first & 0x1F;
+ 	if (rt == 31)
+ 		return false;
+-	if ((second & MLDR_A64_AND_X_MASK) != MLDR_A64_AND_X_CLEAR_LOW3)
++	// Newer runtimes also clear the upper address bits. The native slot
++	// already holds a canonical, eight-byte-aligned Darwin TSD pointer.
++	uint32_t mask = second & MLDR_A64_AND_X_MASK;
++	if (mask != MLDR_A64_AND_X_CLEAR_LOW3 && mask != MLDR_A64_AND_X_USER_TSD)
+ 		return false;
+ 	if ((second & 0x1F) != rt || ((second >> 5) & 0x1F) != rt)
+ 		return false;
+diff --git a/tests/mldr/tsd_rewrite.c b/tests/mldr/tsd_rewrite.c
+--- a/tests/mldr/tsd_rewrite.c
++++ b/tests/mldr/tsd_rewrite.c
+@@ -240,6 +240,7 @@ static void test_encodings(void)
+ 	// the reference decoder itself: well-known logical immediates
+ 	uint64_t v;
+ 	check(decode_bitmask(1, 60, 61, &v) && v == ~7ull, "reference decoder: N=1 immr=61 imms=60 is ~7");
++	check(decode_bitmask(1, 44, 61, &v) && v == 0x0000fffffffffff8ull, "reference decoder: newer 48-bit TSD address mask");
+ 	check(decode_bitmask(1, 2, 0, &v) && v == 7, "reference decoder: N=1 immr=0 imms=2 is 7");
+ 	check(decode_bitmask(0, 0x3C, 0, &v) && v == 0x5555555555555555ull, "reference decoder: N=0 imms=0x3c repeats 0b01");
+ 	check(!decode_bitmask(1, 63, 0, &v), "reference decoder: an all-ones run is not encodable");
+@@ -265,6 +266,21 @@ static void test_pair_detection(void)
+ 	for (uint32_t r = 0; r < 31; r++)
+ 		ok &= mldr_tsd_read_pair(MLDR_A64_MRS_TPIDRRO_EL0 | r, encode_and_not7(r, r), &reg) && reg == r;
+ 	check(ok, "pair: matches for x0..x30");
++	ok = 1;
++	for (uint32_t r = 0; r < 31; ++r) {
++		uint32_t pair[] = {0xd53bd060u | r, 0x927db000u | (r << 5) | r};
++		struct and_imm a = decode_and_x(pair[1]);
++		ok &= a.ok && a.imm == 0x0000fffffffffff8ull;
++		ok &= mldr_tsd_count_reads(pair, 2) == 1;
++		ok &= mldr_tsd_rewrite_reads(pair, 2, 64) == 1;
++		struct mrs m = decode_mrs(pair[0]);
++		struct ldr_imm l = decode_ldr_x(pair[1]);
++		ok &= m.ok && m.op2 == 2 && m.rt == r && l.ok && l.rt == r && l.rn == r && l.offset == 64;
++	}
++	check(ok, "newer user-address mask: all registers retain native TSD load semantics");
++	check(!mldr_tsd_read_pair(mrs8, 0x927db000u | (8 << 5) | 9, &reg), "newer mask: different destination rejected");
++	check(!mldr_tsd_read_pair(mrs8, 0x927db000u | (9 << 5) | 8, &reg), "newer mask: different source rejected");
++	check(!mldr_tsd_read_pair(mrs8, 0x927da000u | (8 << 5) | 8, &reg), "newer mask: another bitmask rejected");
+ }
+ 
+ static void test_slot_offset(void)

@@ -1,0 +1,15 @@
+{
+  "darling_revision": "e41ffd0d9799d740d85e0e90812d6ed25df51200",
+  "source": {
+    "repository": "darlinghq/darling-libpthread",
+    "revision": "12f07b0b45735f7d41823481a5424ed5753ce2f5",
+    "path": "src/pthread.c",
+    "sha256": "7be15f4d0909bf47ee92b901c2af4afce29f53392a60bc2f69459e74e5c121c3"
+  },
+  "api_reference": {
+    "repository": "apple-oss-distributions/libpthread",
+    "revision": "42d026df5b07825070f60134b980a1ec2552dfee",
+    "paths": ["src/pthread.c", "private/pthread/workgroup_private.h"],
+    "license": "APSL-2.0"
+  }
+}

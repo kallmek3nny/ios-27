@@ -1,0 +1,13 @@
+diff --git a/src/bsdln/ln.c b/src/bsdln/ln.c
+index e110762c..b8e793d5 100644
+--- a/src/bsdln/ln.c
++++ b/src/bsdln/ln.c
+@@ -84,7 +84,7 @@ main(int argc, char *argv[])
+ 	 * "link", for which the functionality provided is greatly
+ 	 * simplified.
+ 	 */
+-	if ((p = rindex(argv[0], '/')) == NULL)
++	if ((p = strrchr(argv[0], '/')) == NULL)
+ 		p = argv[0];
+ 	else
+ 		++p;

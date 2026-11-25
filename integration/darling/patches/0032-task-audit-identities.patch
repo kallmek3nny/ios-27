@@ -1,0 +1,37 @@
+diff --git a/duct-tape/src/task.c b/duct-tape/src/task.c
+--- a/duct-tape/src/task.c
++++ b/duct-tape/src/task.c
+@@ -20,6 +20,7 @@
+ #include <ipc/ipc_hash.h>
+ 
+ #include <stdlib.h>
++#include <stdint.h>
+ 
+ task_t kernel_task = NULL;
+ 
+@@ -116,6 +117,11 @@
+ 	}
+ 
+ 	task->xnu_task.audit_token.val[5] = task->saved_pid;
++	// Audit tokens identify a task incarnation, not just its reusable PID.
++	static uint64_t next_pidversion;
++	uint64_t pidversion = __atomic_add_fetch(&next_pidversion, 1, __ATOMIC_RELAXED);
++	if (pidversion > UINT32_MAX) panic("Audit PID generation exhausted");
++	task->xnu_task.audit_token.val[7] = (uint32_t)pidversion;
+ 
+ 	if (architecture == dserver_rpc_architecture_x86_64 || architecture == dserver_rpc_architecture_arm64) {
+ 		task_set_64Bit_addr(&task->xnu_task);
+@@ -181,9 +187,13 @@
+ 	// -1 leaves an id unchanged. other negative values are real ids (e.g. -2 is `nobody`), since uid_t and gid_t are unsigned.
+ 	if (new_uid != -1) {
+ 		task->xnu_task.audit_token.val[1] = new_uid;
++		task->xnu_task.audit_token.val[3] = new_uid;
++		task->xnu_task.sec_token.val[0] = new_uid;
+ 	}
+ 	if (new_gid != -1) {
+ 		task->xnu_task.audit_token.val[2] = new_gid;
++		task->xnu_task.audit_token.val[4] = new_gid;
++		task->xnu_task.sec_token.val[1] = new_gid;
+ 	}
+ 	task_unlock(&task->xnu_task);
+ };

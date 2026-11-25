@@ -1,0 +1,38 @@
+diff --git a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c
+--- a/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c
++++ b/darling/src/libsystem_kernel/emulation/src/xnu_syscall/bsd/helper/misc/sysctl_net.c
+@@ -320,16 +320,24 @@
+ 
+ 			// grab the MAC
+ 			memcpy(tmp.lifr_name, curr->lifr_name, sizeof(curr->lifr_name));
+-			if ((status = __real_ioctl(tmp_sock, LINUX_SIOCGIFHWADDR, &tmp)) < 0)
+-				goto out;
+-            // Linux returns an ARPHRD_* type with the link-layer address.
+-            if (tmp.lifr_hwaddr.sa_family == 1) // ARPHRD_ETHER
+-                dl->sdl_type = IFT_ETHER;
+-            else if (tmp.lifr_hwaddr.sa_family == 772) // ARPHRD_LOOPBACK
+-                dl->sdl_type = IFT_LOOP;
+-            else if (tmp.lifr_hwaddr.sa_family == 512) // ARPHRD_PPP
+-                dl->sdl_type = IFT_PPP;
+-			memcpy(LLADDR(dl), tmp.lifr_hwaddr.sa_data, MAC_LENGTH);
++			status = __real_ioctl(tmp_sock, LINUX_SIOCGIFHWADDR, &tmp);
++			if (status < 0) {
++				if (status != -EACCES && status != -EPERM) goto out;
++				// Android can restrict link-layer addresses while allowing IP
++				// interface metadata. Zero address length denotes unavailable data.
++				dl->sdl_alen = 0;
++				if (ifm->ifm_flags & IFF_LOOPBACK) dl->sdl_type = IFT_LOOP;
++				status = 0;
++			} else {
++				// Linux returns an ARPHRD_* type with the link-layer address.
++				if (tmp.lifr_hwaddr.sa_family == 1) // ARPHRD_ETHER
++					dl->sdl_type = IFT_ETHER;
++				else if (tmp.lifr_hwaddr.sa_family == 772) // ARPHRD_LOOPBACK
++					dl->sdl_type = IFT_LOOP;
++				else if (tmp.lifr_hwaddr.sa_family == 512) // ARPHRD_PPP
++					dl->sdl_type = IFT_PPP;
++				memcpy(LLADDR(dl), tmp.lifr_hwaddr.sa_data, MAC_LENGTH);
++			}
+ 
+             struct linux_ifreq mtu_request = {0};
+             memcpy(mtu_request.lifr_name, curr->lifr_name, LINUX_IFNAMSIZ);

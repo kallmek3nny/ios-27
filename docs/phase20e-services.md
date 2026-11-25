@@ -60,10 +60,13 @@ allocation exhaustion/reuse (5000 deterministic iterations), zeroing,
 realloc preservation, mmap allocation and exhaustion, page protection,
 atomic failed unmaps, virtual time, and environment buffers.
 
-The repository's standard PR CI runs its existing x86_64/ARM64 CMake tests,
-**but it does not include phase20e**, because integrating new sources into
-CMake or workflows would violate concurrent file ownership. The standalone
-suite is the evidence for phase20e until a separate integration owner adds it.
+The standard CMake build now includes the original regression suite as
+`bounded-userspace-services`. A separate [native service bridge](native-service-bridge.md)
+also executes a compiler-produced ARM64 `MH_EXECUTE` client against this
+model in the supervised exec helper. That bridge uses an explicit original
+callback table; it does not turn the model into Apple libSystem exports or
+translate Darwin SVC instructions. The older standalone Darwin object above
+remains a compile-only check, distinct from the new linked executable.
 
 ## Known compatibility gaps
 
