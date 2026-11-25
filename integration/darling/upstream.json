@@ -536,6 +536,20 @@
     "next_failure_pc": "0x1c0129fe4",
     "foreground_used": false
   },
+  "native_task_audit_identity": {
+    "patches_reapplied_from_pinned_originals": 32,
+    "resulting_source_hashes_matched": 63,
+    "device_server_sha256": "37e7f3850933342c9b7539d49a12270918c22f0da3d2ee41b9e24a2931f161be",
+    "native_checks_per_mode": 12,
+    "darling_library_probe_exit_code": 0,
+    "apple_library_probe_exit_code": 0,
+    "audit_token_matches_mach_trailer": true,
+    "audit_token_matches_virtual_ids": true,
+    "generation_scope": "monotonic per server instance",
+    "iosurfaced_service_loop_reached": true,
+    "next_failure": "Mach trap 70: host_create_mach_voucher",
+    "foreground_used": false
+  },
   "native_darling_boot_verified": false,
   "native_simulator_minimal_boot_verified": true,
   "springboard_entered": false,

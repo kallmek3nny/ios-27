@@ -53,6 +53,7 @@ git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integratio
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0029-spawn-dataless-policy.patch
 git -C /path/to/pinned/darling/src/external/xnu apply /path/to/ios-27/integration/darling/patches/0030-mach-msg2-bridge.patch
 git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0031-migrating-server-fiber-tls.patch
+git -C /path/to/pinned/darling/src/external/darlingserver apply /path/to/ios-27/integration/darling/patches/0032-task-audit-identities.patch
 ```
 
 The first patch fixes a configure-time Clang version probe that linked and
@@ -423,6 +424,12 @@ of the current zero-generation task audit token.
 ```sh
 python3 integration/darling/tests/fiber-tls.py --fetch-pinned
 ```
+
+Patch thirty-two assigns nonzero, server-scoped task generations and keeps
+audit/security UID and GID fields consistent with the virtual identity model.
+Both native library modes pass the 12-check task-token and Mach-trailer probe.
+The UI jobs pass the earlier XPC token trap; iosurfaced reaches its real service
+loop. SpringBoard and backboardd next require native Mach voucher creation.
 
 x86Sim is a useful reference for `launchd_sim` startup, SimFramebuffer,
 SimulatorHID, IOSurface and Metal host-service protocols. Its current runtime
