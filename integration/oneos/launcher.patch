@@ -1,0 +1,54 @@
+diff --git a/app-android/app/src/full/AndroidManifest.xml b/app-android/app/src/full/AndroidManifest.xml
+index 7713847..7b1bc5a 100644
+--- a/app-android/app/src/full/AndroidManifest.xml
++++ b/app-android/app/src/full/AndroidManifest.xml
+@@ -17,6 +17,10 @@
+     <!-- Once OneOS installed itself this way, Android lets its later updates skip the prompt. -->
+     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+ 
++    <queries>
++        <package android:name="org.ios27.oneosaddon" />
++    </queries>
++
+     <application android:name=".ui.OneOsApplication">
+         <service
+             android:name=".session.PrepareService"
+diff --git a/app-android/app/src/full/kotlin/com/fahadali/oneos/ui/LauncherActivity.kt b/app-android/app/src/full/kotlin/com/fahadali/oneos/ui/LauncherActivity.kt
+index 88909fa..693beea 100644
+--- a/app-android/app/src/full/kotlin/com/fahadali/oneos/ui/LauncherActivity.kt
++++ b/app-android/app/src/full/kotlin/com/fahadali/oneos/ui/LauncherActivity.kt
+@@ -1,5 +1,6 @@
+ package com.fahadali.oneos.ui
+ 
++import android.content.ActivityNotFoundException
+ import android.content.Intent
+ import android.view.Menu
+ import android.view.MenuItem
+@@ -26,6 +27,17 @@ class LauncherActivity : SystemsActivity() {
+             setIcon(OuiIcons.drawable.ic_oui_settings_outline)
+             setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+         }
++        val addon = Intent("org.ios27.oneosaddon.OPEN").setPackage("org.ios27.oneosaddon")
++        if (addon.resolveActivity(packageManager) != null) {
++            menu.add(R.string.ios27_addon).setOnMenuItemClickListener {
++                try {
++                    startActivity(addon)
++                } catch (_: ActivityNotFoundException) {
++                    invalidateOptionsMenu()
++                }
++                true
++            }
++        }
+         return true
+     }
+     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+diff --git a/app-android/app/src/full/res/values/strings.xml b/app-android/app/src/full/res/values/strings.xml
+index 5dca425..ff171ff 100644
+--- a/app-android/app/src/full/res/values/strings.xml
++++ b/app-android/app/src/full/res/values/strings.xml
+@@ -127,4 +127,5 @@
+     <string name="fix_no_app">No app found to open this</string>
+     <!-- 0.4.43 (UX audit): the pre-boot button when a check stops the switch and has nothing to tap. -->
+     <string name="environment_what_stops">What stops the switch</string>
++    <string name="ios27_addon">iOS 27 Add-on</string>
+ </resources>
